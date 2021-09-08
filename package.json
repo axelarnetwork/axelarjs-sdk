@@ -1,0 +1,27 @@
+{
+	"name": "@axelar-network/axelarjs-sdk",
+	"version": "1.0.0",
+	"description": "The JavaScript SDK for Axelar Network",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsc",
+		"prepare": "npm run build"
+	},
+	"keywords": [
+		"axelar",
+		"blockchain",
+		"sdk",
+		"cryptocurrency",
+		"interoperability",
+		"smart-contracts"
+	],
+	"author": "Axelar Network",
+	"license": "ISC",
+	"dependencies": {
+		"typescript": "^4.4.2"
+	}
+}
