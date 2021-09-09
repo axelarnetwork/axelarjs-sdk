@@ -23,7 +23,7 @@ export class ClientConnect {
 		});
 
 		this.socket.on('connect', (data: any) => {
-			console.log('ClientConnect connected');
+			console.log('ClientConnect connected',this.socket?.id);
 		});
 	}
 
@@ -33,6 +33,12 @@ export class ClientConnect {
 
 	public disconnect() {
 		this.socket.disconnect();
+	}
+
+	public awaitResponse(topic: string): Promise<string> {
+		return new Promise((res, rej) => {
+			this.socket.once(topic, (data: any) => res(data));
+		});
 	}
 
 }

@@ -1,6 +1,6 @@
 import {ClientConnect} from "./ClientConnect";
 import {IAssetTransferObject} from "../interface/IAssetTransferObject";
-import {TransferAssetTypes} from "../interface";
+import {TRANSFER_RESULT, TransferAssetTypes} from "../interface";
 
 export class AxelarBridgeFacade {
 
@@ -11,8 +11,9 @@ export class AxelarBridgeFacade {
         this.clientConnection = new ClientConnect(resourceUrl);
     }
 
-    public transferAssets(topic: TransferAssetTypes, message: IAssetTransferObject): void {
+    public async transferAssets(topic: TransferAssetTypes, message: IAssetTransferObject): Promise<string> {
         this.clientConnection.emitMessage(topic, { message });
+        return await this.clientConnection.awaitResponse(TRANSFER_RESULT);
     }
 
     public closeConnection() {
