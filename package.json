@@ -9,7 +9,10 @@
 	],
 	"scripts": {
 		"build": "tsc",
-		"prepare": "npm run build"
+		"prepare": "npm run build",
+		"dev:tsc": "tsc --watch -p .",
+		"dev:serve": "nodemon -e js -w dist dist/index.js",
+		"dev": "run-p dev:*"
 	},
 	"keywords": [
 		"axelar",
@@ -22,6 +25,11 @@
 	"author": "Axelar Network",
 	"license": "ISC",
 	"dependencies": {
+		"socket.io-client": "^4.2.0",
 		"typescript": "^4.4.2"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.12",
+		"npm-run-all": "^4.1.5"
 	}
 }
