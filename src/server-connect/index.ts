@@ -1,23 +1,36 @@
-import {ClientConnect} from "./ClientConnect";
+import {ClientSocketConnect} from "./ClientSocketConnect";
 import {IAssetTransferObject} from "../interface/IAssetTransferObject";
-import {TRANSFER_RESULT, TransferAssetTypes} from "../interface";
+import {CLIENT_API_POST_TRANSFER_ASSET, TRANSFER_RESULT, TransferAssetTypes} from "../interface";
+import {ClientRest} from "./ClientRest";
 
-export class AxelarBridgeFacade {
+export class TransferAssetBridge {
 
-    private clientConnection: ClientConnect;
+    private clientSocketConnect: ClientSocketConnect;
+    private clientRest: ClientRest;
 
     constructor(resourceUrl: string) {
-        console.log("AxelarBridgeFacade establishing a new connection");
-        this.clientConnection = new ClientConnect(resourceUrl);
+        console.log("TransferAssetBridge establishing a new connection");
+        this.clientSocketConnect = new ClientSocketConnect(resourceUrl);
+        this.clientRest = new ClientRest(resourceUrl);
     }
 
-    public async transferAssets(topic: TransferAssetTypes, message: IAssetTransferObject): Promise<string> {
-        this.clientConnection.emitMessage(topic, { message });
-        return await this.clientConnection.awaitResponse(TRANSFER_RESULT);
+    public async transferAssets(message: IAssetTransferObject): Promise<string> {
+
+        return this.getDepositAddress(message);
+    }
+
+    public async getDepositAddress(message: IAssetTransferObject): Promise<string> {
+        this.listenForTransactionStatus(TransferAssetTypes.BTC_TO_EVM, message);
+        return await this.clientRest.post(CLIENT_API_POST_TRANSFER_ASSET, message);
+    }
+
+    public listenForTransactionStatus(topic: TransferAssetTypes, message: IAssetTransferObject): void {
+        this.clientSocketConnect.emitMessage(topic, { message });
+        this.clientSocketConnect.awaitResponse(TRANSFER_RESULT);
     }
 
     public closeConnection() {
-        this.clientConnection.disconnect();
+        this.clientSocketConnect.disconnect();
     }
 
 }
