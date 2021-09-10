@@ -9,28 +9,22 @@ export class TransferAssetBridge {
     private clientRest: ClientRest;
 
     constructor(resourceUrl: string) {
-        console.log("TransferAssetBridge establishing a new connection");
+        console.log("TransferAssetBridge initiated");
         this.clientSocketConnect = new ClientSocketConnect(resourceUrl);
         this.clientRest = new ClientRest(resourceUrl);
     }
 
-    public async transferAssets(message: IAssetTransferObject): Promise<string> {
-
+    public async transferAssets(message: IAssetTransferObject, waitCb: any): Promise<string> {
+        this.listenForTransactionStatus(TransferAssetTypes.BTC_TO_EVM, message, waitCb);
         return this.getDepositAddress(message);
     }
 
-    public async getDepositAddress(message: IAssetTransferObject): Promise<string> {
-        this.listenForTransactionStatus(TransferAssetTypes.BTC_TO_EVM, message);
+    private async getDepositAddress(message: IAssetTransferObject): Promise<string> {
         return await this.clientRest.post(CLIENT_API_POST_TRANSFER_ASSET, message);
     }
 
-    public listenForTransactionStatus(topic: TransferAssetTypes, message: IAssetTransferObject): void {
-        this.clientSocketConnect.emitMessage(topic, { message });
-        this.clientSocketConnect.awaitResponse(TRANSFER_RESULT);
-    }
-
-    public closeConnection() {
-        this.clientSocketConnect.disconnect();
+    private listenForTransactionStatus(topic: TransferAssetTypes, message: IAssetTransferObject, waitCb: any): void {
+        this.clientSocketConnect.emitMessageAndWaitForReply(topic, { message }, TRANSFER_RESULT, waitCb)
     }
 
 }
