@@ -1,5 +1,5 @@
 export interface IAssetTransferObject {
-	token1: string;
-	token2: string;
+	sourceTokenSymbol: string;
+	destinationTokenSymbol: string;
 	destinationAddress: string;
 }
