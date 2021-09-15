@@ -1,6 +1,6 @@
-import { io } from "socket.io-client";
+import {io}                    from "socket.io-client";
 import {IEmittedMessageObject} from "../interface/IEmittedMessageObject";
-import {TransferAssetTypes} from "../interface";
+import {TransferAssetTypes}    from "../interface";
 
 export class ClientSocketConnect {
 

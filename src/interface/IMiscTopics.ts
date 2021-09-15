@@ -4,6 +4,7 @@ export const TRANSFER_RESULT: string = "socket-transfer-result";
 
 // POST REQUEST CONSTS
 export const CLIENT_API_POST_TRANSFER_ASSET: string = "/transferAssets";
+
 export interface IDepositAddressResponse {
 	sourceTokenDepositAddress: string;
 	sourceTokenSymbol: string;
