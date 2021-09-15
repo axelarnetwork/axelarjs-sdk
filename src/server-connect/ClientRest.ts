@@ -11,7 +11,7 @@ export class ClientRest {
 	public post(endpoint: string, payload: any, headers?: any): Promise<any> {
 		return new Promise((resolve, reject) => {
 			axios.post(this.host + endpoint, payload)
-			.then(resolve)
+			.then((res) => resolve(res.data))
 			.catch(reject);
 		});
 	}
