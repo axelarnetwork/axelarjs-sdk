@@ -1,7 +1,11 @@
+//TODO: I think this won't be needed so we can delete?
 import {io}                    from "socket.io-client";
 import {IEmittedMessageObject} from "../interface/IEmittedMessageObject";
 import {TransferAssetTypes}    from "../interface";
 
+/**
+ * ClientSocketConnect establishes socket connection between webapp and rest server
+ */
 export class ClientSocketConnect {
 
 	private socket: any;

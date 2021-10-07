@@ -1,5 +1,6 @@
+import {ITokenAddress} from "./IMiscTopics";
+
 export interface IAssetTransferObject {
-	sourceTokenSymbol: string;
-	destinationTokenSymbol: string;
-	destinationAddress: string;
+	sourceTokenInfo: ITokenAddress;
+	destinationTokenInfo: ITokenAddress;
 }
