@@ -5,6 +5,7 @@ export interface IAssetTransferObject {
 	sourceTokenInfo: ITokenAddress;
 	sourceAsset: IAsset;
 	destinationTokenInfo: ITokenAddress;
+	recaptchaToken?: any;
 }
 
 export enum LinkType {
