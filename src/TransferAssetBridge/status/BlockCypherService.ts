@@ -6,7 +6,7 @@ import {StatusResponse}                     from "../index";
 export default class BlockCypherService extends WaitingService {
 
 	private maxPollingAttempts: number = 2;
-	private pollingInterval: number = 5000;
+	private pollingInterval: number = 300000;
 
 	constructor(depositAddress: string) {
 		super(6, depositAddress);
@@ -14,8 +14,7 @@ export default class BlockCypherService extends WaitingService {
 
 	public async wait(depositAddress: ITokenAddress, interimStatusCb?: StatusResponse) {
 		console.log("block cypher service is polling", depositAddress.tokenAddress);
-		const canhsBTCTestAddress: string = 'moHY7VwRYhoNK5QwU4WpePWR8mhLb3DtpL';
-		const url = `https://api.blockcypher.com/v1/btc/test3/addrs/${canhsBTCTestAddress}`; //TODO: use a real deposit address in devnet, i.e. depositAddress.sourceTokenDepositAddress
+		const url = `https://api.blockcypher.com/v1/btc/test3/addrs/${depositAddress.tokenAddress}`; //TODO: use a real deposit address in devnet, i.e. depositAddress.sourceTokenDepositAddress
 		const asyncRequest = (attempts: number) => new Promise((res, rej) => {
 			fetch(url, {
 				headers: {'Accept': "*/*"}
@@ -41,6 +40,6 @@ export default class BlockCypherService extends WaitingService {
 	}
 
 	private validate(res: BlockCypherResponse): boolean {
-		return !res.unconfirmed_txrefs && (res.txrefs[0].confirmations >= this.numConfirmations);
+		return !res.unconfirmed_txrefs && (res.txrefs?.length < 0 && res.txrefs[0].confirmations >= this.numConfirmations);
 	}
 }
