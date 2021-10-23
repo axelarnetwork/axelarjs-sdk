@@ -1,6 +1,6 @@
 {
 	"name": "@axelar-network/axelarjs-sdk",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "The JavaScript SDK for Axelar Network",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -23,16 +23,15 @@
 		"smart-contracts"
 	],
 	"author": "Axelar Network",
-	"license": "ISC",
+	"license": "MIT",
 	"dependencies": {
 		"axios": "^0.21.4",
-		"socket.io-client": "^4.2.0",
-		"typescript": "^4.4.2",
+		"bitcoin-address-validation": "^2.1.0",
 		"blockcypher": "^0.3.0",
 		"ethers": "^5.4.7",
 		"nodemon": "^2.0.12",
-		"npm-run-all": "^4.1.5"
-	},
-	"devDependencies": {
+		"npm-run-all": "^4.1.5",
+		"socket.io-client": "^4.2.0",
+		"typescript": "^4.4.2"
 	}
 }

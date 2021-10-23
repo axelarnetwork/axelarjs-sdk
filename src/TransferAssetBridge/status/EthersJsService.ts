@@ -1,7 +1,8 @@
-import {ethers}              from "ethers";
-import {WaitingService}      from "./WaitingService";
-import {getEthersJsProvider} from "./utils/ethersjsProvider";
-import {formatEther}         from "ethers/lib/utils";
+import {ethers}                          from "ethers";
+import {IWaitingService, WaitingService} from "./WaitingService";
+import {getEthersJsProvider}             from "./utils/ethersjsProvider";
+import {formatEther}                     from "ethers/lib/utils";
+import {IAsset, ISupportedChainType}     from "../../constants";
 
 declare const window: any;
 
@@ -18,8 +19,13 @@ declare const window: any;
 //TODO: move address and abi to config folder once ready
 
 //TODO: find a way to extract this from a repository instead of hard-coding
-// taken from https://axelardocs.vercel.app/testnet-releases
-const axelarBTCTokenAddr: string = '0x361bBA6b22b66024CDa9F86aACDb9a4e03e64946';
+const axelarBTCTokenAddr: string = '0xEA3f4398DA7Ec007683b46AF7961feD202c92c6F';
+const uphotonTokenAddr: string = "0xb1bfDBcd65292792f8fB4036a718e1b5C01fec0C";
+const uaxlTokenAddr: string = "0xa27cf99806Cc295fA90f2b6E8b46830BeDd3Be24";
+const tokenAddressMap: { [key: string]: string } = {};
+tokenAddressMap.btc = axelarBTCTokenAddr;
+tokenAddressMap.uphoton = uphotonTokenAddr;
+tokenAddressMap.uaxl = uaxlTokenAddr;
 
 // taken from https://github.com/axelarnetwork/ethereum-bridge
 const abi: string[] = [
@@ -29,26 +35,31 @@ const abi: string[] = [
 	"event Transfer(address indexed from, address indexed to, uint amount)" 	// An event triggered whenever anyone transfers to someone else, IERC20.sol
 ];
 
-export default class EthersJsService extends WaitingService {
+export default class EthersJsService extends WaitingService implements IWaitingService {
 
 	private provider;
-	private axelarBTCContract;
+	private tokenContract;
 	private filter: any;
 
-	constructor(depositAddress: string) {
+	constructor(chainInfo: ISupportedChainType, assetInfo: IAsset) {
+		console.log("chain info and asset info", chainInfo, assetInfo);
+		const tokenContract: string = tokenAddressMap[assetInfo.assetSymbol?.toLowerCase() as string] || "";
+		const depositAddress: string = assetInfo.assetAddress as string;
 		super(30, depositAddress);
 		this.provider = getEthersJsProvider("infura");
-		this.axelarBTCContract = new ethers.Contract(axelarBTCTokenAddr, abi, this.provider);
-		this.filter = this.axelarBTCContract.filters.Transfer(null, depositAddress); //filter all transfers TO my address
+		this.tokenContract = new ethers.Contract(tokenContract, abi, this.provider);
+		this.filter = this.tokenContract.filters.Transfer(null, depositAddress); //filter all transfers TO my address
 	}
 
-	public wait(address: string, cb: any) {
+	public async wait(address: string, cb: any): Promise<any> {
 
 		console.log("waiting on ethers", address);
 
 		return new Promise((resolve, reject) => {
-			this.axelarBTCContract.once(this.filter, (from, to, amount, event) => {
-				console.log(`Incoming amount of: ${formatEther(amount)}, from: ${from}.`);
+			this.tokenContract.once(this.filter, (from, to, amount, event) => {
+				console.log(`Incoming amount of: ${formatEther(amount)}, from: ${from}.`, event);
+				event.axelarRequiredNumConfirmations = this.numConfirmations;
+				cb(event);
 				resolve(event);
 			});
 		});

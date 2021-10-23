@@ -3,7 +3,12 @@
  *
  * @class WaitingService
  */
-export class WaitingService {
+
+export interface IWaitingService {
+	wait(...args: any[]): Promise<void>;
+}
+
+export class WaitingService implements IWaitingService {
 
 	public numConfirmations: number = 0;
 	public depositAddress: string = "";
@@ -19,7 +24,7 @@ export class WaitingService {
 
 	}
 
-	public wait(...args: any[]) {
+	public async wait(...args: any[]) {
 		throw new Error("Method 'wait()' should be implemented.");
 	}
 

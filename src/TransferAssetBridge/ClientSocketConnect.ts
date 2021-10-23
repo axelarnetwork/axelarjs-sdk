@@ -1,11 +1,13 @@
-//TODO: I think this won't be needed so we can delete?
-import {io}                    from "socket.io-client";
-import {IEmittedMessageObject} from "../interface/IEmittedMessageObject";
-import {TransferAssetTypes}    from "../interface";
+import {io}                                   from "socket.io-client";
+import {ISocketListenerTypes, ISocketOptions} from "../interface";
+import {GREPTCHA_SITE_KEY}                    from "../constants";
 
 /**
  * ClientSocketConnect establishes socket connection between webapp and rest server
  */
+
+declare const grecaptcha: any;
+
 export class ClientSocketConnect {
 
 	private socket: any;
@@ -15,19 +17,31 @@ export class ClientSocketConnect {
 		this.resourceUrl = resourceUrl;
 	}
 
-	public connect(cb?: any) {
+	public async connect(cb?: any) {
 
-		console.log("ClientSocketConnect connecting to socket");
+		if (!grecaptcha) {
+			console.log("need valid captcha first");
+			return;
+		}
+
+		let token;
+
+		try {
+			token = await grecaptcha.execute(GREPTCHA_SITE_KEY);
+		} catch (e: any) {
+			console.log("cannot get captcha", e);
+			return;
+		}
+
+		console.log("ClientSocketConnect connecting to socket", this.resourceUrl, token);
 
 		this.socket = io(this.resourceUrl, {
 			reconnectionDelayMax: 10000,
-			auth: {
-				token: "123"
-			},
+			auth: {token},
 			query: {
 				"my-key": "my-value"
 			}
-		});
+		} as ISocketOptions);
 
 		this.socket.once('connect', (data: any) => {
 			console.log('ClientSocketConnect connected');
@@ -39,30 +53,27 @@ export class ClientSocketConnect {
 		});
 	}
 
-	public emitMessageAndWaitForReply(triggerTopic: TransferAssetTypes, message: IEmittedMessageObject, waitTopic: string, waitCb: any) {
-		this.connect(() => {
-			this.emitMessage(triggerTopic, message);
-			this.awaitResponse(waitTopic, waitCb);
-		})
+	public emitMessageAndWaitForReply(triggerTopic: ISocketListenerTypes, message: any, waitTopic: ISocketListenerTypes, waitCb: any) {
+		return new Promise((resolve, reject) => {
+			this.connect(() => {
+				this.emitMessage(triggerTopic, message);
+				this.awaitResponse(waitTopic, (data: any) => {
+					waitCb(data)
+					resolve(data);
+				});
+			})
+		});
 	}
 
-	public emitMessage(topic: TransferAssetTypes, message: IEmittedMessageObject): void {
+	public emitMessage(topic: ISocketListenerTypes, message: any): void {
 		this.socket?.emit(topic, message);
 	}
 
-	public awaitResponse(topic: string, waitCb: any): void {
-
+	public awaitResponse(topic: ISocketListenerTypes, waitCb: any): void {
 		this.socket?.on(topic, (data: any) => {
-
 			waitCb && waitCb(data);
-
-			// TODO: find better way to indicate done
-			if (data === "Done!") {
-				this.disconnect();
-			}
-
+			this.disconnect();
 		});
-
 	}
 
 	public disconnect() {
