@@ -1,24 +1,21 @@
-import {IAsset}                         from "../constants";
-import {isAddress as isValidEVMAddress} from "ethers/lib/utils";
-import {validate as isValidBTCAddress}  from "bitcoin-address-validation";
+import ChainList            from "../chains/ChainList";
+import {IAssetInfo, IChain} from "../interface";
 
-/*
-TODO: this dict should eventually be migrated into a centralized const in the consts directory
- along with other data definitions for easier configuration
-* */
-const validatorsDict: { [destTokenSymbol: string]: (destTokenAddr: string) => boolean } = {};
-validatorsDict["btc"] = (destTokenAddr: string) => isValidBTCAddress(destTokenAddr);
-validatorsDict["eth"] = (destTokenAddr: string) => isValidEVMAddress(destTokenAddr);
+const validatorsDict: { [chainSymbol: string]: (asset: IAssetInfo) => boolean } = {};
+ChainList.forEach((chain: IChain) => {
+	const key = chain.chainInfo.chainSymbol.toLowerCase();
+	validatorsDict[key] = chain.validateAddress as (asset: IAssetInfo) => boolean
+})
 
-export const validateDestinationAddress = (destTokenInfo: IAsset): boolean => {
+export const validateDestinationAddress = (destTokenInfo: IAssetInfo): boolean => {
 
 	const destTokenSymbol: string = destTokenInfo?.assetSymbol as string;
-	const destTokenAddr: string = destTokenInfo?.assetAddress as string;
-	const validator: (destTokenSymbol: string) => boolean = validatorsDict[destTokenSymbol?.toLowerCase()];
+	const validator: (assetInfo: IAssetInfo) => boolean = validatorsDict[destTokenSymbol?.toLowerCase()];
 
+	// TODO: what should we do if we don't have a validator for supported chain?
 	if (!validator)
-		return true; // TODO: what should we do if we don't have a validator for supported chain?
+		return true;
 
-	return validator(destTokenAddr);
+	return validator(destTokenInfo);
 
 }

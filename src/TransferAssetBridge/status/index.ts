@@ -1,16 +1,16 @@
-import BlockCypherService            from "./BlockCypherService";
-import EthersJsService               from "./EthersJsService";
-import TendermintService             from "./TendermintService";
-import {IAsset, ISupportedChainType} from "../../constants";
+import ChainList                                                   from "../../chains/ChainList";
+import {IAssetInfo, IBlockchainWaitingService, IChain, IChainInfo} from "../../interface";
 
-const waitingService: { [chainSymbol: string]: any } = {
-	"btc": BlockCypherService,
-	"eth": EthersJsService,
-	"cos": TendermintService
-};
+const waitingServiceMap: { [chainKey: string]: (chainInfo: IChainInfo, assetInfo: IAssetInfo) => IBlockchainWaitingService } = {};
 
-const getWaitingService = (type: string, chainInfo: ISupportedChainType, tokenInfo: IAsset) => {
-	return new waitingService[type.toLowerCase()](chainInfo, tokenInfo);
+ChainList.forEach((chainInfo: IChain) => {
+	const chainKey: string = chainInfo.chainInfo.chainSymbol.toLowerCase();
+	waitingServiceMap[chainKey] = chainInfo.waitingService as (
+		chainInfo: IChainInfo, assetInfo: IAssetInfo) => IBlockchainWaitingService
+});
+
+const getWaitingService = (type: string, chainInfo: IChainInfo, tokenInfo: IAssetInfo) => {
+	return waitingServiceMap[type.toLowerCase()](chainInfo, tokenInfo);
 };
 
 export default getWaitingService;

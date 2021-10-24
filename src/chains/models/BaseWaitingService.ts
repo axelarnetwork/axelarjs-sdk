@@ -1,14 +1,6 @@
-/**
- * Abstract Class WaitingService.
- *
- * @class WaitingService
- */
+import {IBlockchainWaitingService} from "../../interface";
 
-export interface IWaitingService {
-	wait(...args: any[]): Promise<void>;
-}
-
-export class WaitingService implements IWaitingService {
+export class BaseWaitingService implements IBlockchainWaitingService {
 
 	public numConfirmations: number = 0;
 	public depositAddress: string = "";
@@ -18,7 +10,9 @@ export class WaitingService implements IWaitingService {
 		this.setNumConfirmations(numConfirmations);
 		this.setDepositAddress(depositAddress);
 
-		if (this.constructor == WaitingService) {
+		console.log("BaseWaitingService");
+
+		if (this.constructor == BaseWaitingService) {
 			throw new Error("abstract class only.");
 		}
 

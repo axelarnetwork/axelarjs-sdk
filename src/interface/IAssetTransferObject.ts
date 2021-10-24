@@ -1,10 +1,10 @@
-import {IAsset, ISupportedChainType} from "../constants";
+import {IAssetInfo, IChainInfo} from "./index";
 
 export interface IAssetTransferObject {
-	sourceChainInfo: ISupportedChainType;
-	selectedSourceAsset: IAsset;
-	destinationChainInfo: ISupportedChainType;
-	selectedDestinationAsset: IAsset;
+	sourceChainInfo: IChainInfo;
+	destinationChainInfo: IChainInfo;
+	selectedSourceAsset: IAssetInfo;
+	selectedDestinationAsset: IAssetInfo;
 	recaptchaToken?: any;
 }
 

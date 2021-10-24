@@ -1,6 +1,6 @@
 // TODO: all miscellaneous topics go here for now
 
-import {IBlockCypherResponse} from "./btc";
+import {IBlockCypherResponse} from "../chains/Bitcoin/WaitingService";
 
 export const TRANSFER_RESULT: string = "socket-transfer-result";
 
