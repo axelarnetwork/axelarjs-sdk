@@ -1,5 +1,5 @@
-import ChainList                                                   from "../../chains/ChainList";
 import {IAssetInfo, IBlockchainWaitingService, IChain, IChainInfo} from "../../interface";
+import {ChainList}                                                 from "../../chains";
 
 const waitingServiceMap: { [chainKey: string]: (chainInfo: IChainInfo, assetInfo: IAssetInfo) => IBlockchainWaitingService } = {};
 

@@ -1,5 +1,5 @@
-import ChainList            from "../chains/ChainList";
 import {IAssetInfo, IChain} from "../interface";
+import {ChainList}          from "../chains";
 
 const validatorsDict: { [chainSymbol: string]: (asset: IAssetInfo) => boolean } = {};
 ChainList.forEach((chain: IChain) => {
