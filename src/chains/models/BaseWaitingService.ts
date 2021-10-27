@@ -10,8 +10,6 @@ export class BaseWaitingService implements IBlockchainWaitingService {
 		this.setNumConfirmations(numConfirmations);
 		this.setDepositAddress(depositAddress);
 
-		console.log("BaseWaitingService");
-
 		if (this.constructor == BaseWaitingService) {
 			throw new Error("abstract class only.");
 		}

@@ -20,3 +20,5 @@ export interface ICallbackStatus {
 
 export type StatusResponse = IBlockCypherResponse
 	| (() => void);
+
+export type SourceOrDestination = "source" | "destination";

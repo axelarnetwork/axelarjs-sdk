@@ -4,9 +4,9 @@ import {
 	IAssetInfo,
 	IBlockchainWaitingService,
 	ICallbackStatus,
-	IChainInfo,
+	IChainInfo, SourceOrDestination,
 	StatusResponse
-}                                   from "../interface";
+} from "../interface";
 import {ClientRest}                 from "./ClientRest";
 import getWaitingService            from "./status";
 import {ClientSocketConnect}        from "./ClientSocketConnect";
@@ -38,12 +38,14 @@ export class TransferAssetBridge {
 		this.listenForTransactionStatus(depositAddress,
 			message.sourceChainInfo,
 			sourceCbs.successCb,
-			sourceCbs.failCb
+			sourceCbs.failCb,
+			"source"
 		).then(() => {
 			this.listenForTransactionStatus(message.selectedDestinationAsset as IAssetInfo,
 				message.destinationChainInfo,
 				destCbs.successCb,
-				destCbs.failCb
+				destCbs.failCb,
+				"destination"
 			);
 		})
 
@@ -62,10 +64,11 @@ export class TransferAssetBridge {
 	private async listenForTransactionStatus(addressInformation: IAssetInfo,
 	                                         chainInfo: IChainInfo,
 	                                         waitCb: StatusResponse,
-	                                         errCb: any
+	                                         errCb: any,
+	                                         sOrDChain: SourceOrDestination
 	) {
 
-		const waitingService: IBlockchainWaitingService = getWaitingService(chainInfo.chainSymbol, chainInfo, addressInformation);
+		const waitingService: IBlockchainWaitingService = getWaitingService(chainInfo.chainSymbol, chainInfo, addressInformation, sOrDChain);
 
 		try {
 			await waitingService.wait(addressInformation, waitCb, this.clientSocketConnect);

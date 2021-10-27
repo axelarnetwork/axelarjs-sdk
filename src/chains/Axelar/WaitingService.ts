@@ -10,8 +10,6 @@ export default class WaitingService extends BaseWaitingService implements IBlock
 
 	public async wait(depositAddress: IAssetInfo, interimStatusCb: StatusResponse, clientSocketConnect: ClientSocketConnect) {
 
-		await clientSocketConnect.connect();
-
 		const data: any = await clientSocketConnect.emitMessageAndWaitForReply(
 			ISocketListenerTypes.WAIT_FOR_AXL_DEPOSIT,
 			depositAddress,

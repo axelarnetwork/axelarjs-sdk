@@ -24,7 +24,7 @@ export class ClientSocketConnect {
 			return;
 		}
 
-		let token;
+		let token: any;
 
 		try {
 			token = await grecaptcha.execute(GREPTCHA_SITE_KEY);
@@ -32,8 +32,6 @@ export class ClientSocketConnect {
 			console.log("cannot get captcha", e);
 			return;
 		}
-
-		console.log("ClientSocketConnect connecting to socket", this.resourceUrl, token);
 
 		this.socket = io(this.resourceUrl, {
 			reconnectionDelayMax: 10000,
@@ -44,12 +42,10 @@ export class ClientSocketConnect {
 		} as ISocketOptions);
 
 		this.socket.once('connect', (data: any) => {
-			console.log('ClientSocketConnect connected');
 			cb && cb();
 		});
 
 		this.socket.once('disconnect', (data: any) => {
-			console.log("ClientSocketConnect disconnected");
 		});
 	}
 
