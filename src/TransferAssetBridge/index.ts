@@ -30,7 +30,7 @@ export class TransferAssetBridge {
 	                            destCbs: ICallbackStatus
 	): Promise<IAssetInfo> {
 
-		if (!validateDestinationAddress(message?.selectedDestinationAsset))
+		if (!validateDestinationAddress(message?.destinationChainInfo?.chainSymbol, message?.selectedDestinationAsset))
 			throw new Error(`invalid destination address in ${message?.selectedDestinationAsset?.assetSymbol}`);
 
 		const depositAddress: IAssetInfo = await this.getDepositAddress(message);
@@ -51,7 +51,12 @@ export class TransferAssetBridge {
 	}
 
 	private async getDepositAddress(message: IAssetTransferObject): Promise<IAssetInfo> {
-		return await this.clientRest.post(CLIENT_API_POST_TRANSFER_ASSET, message);
+		try {
+			return await this.clientRest.post(CLIENT_API_POST_TRANSFER_ASSET, message);
+		} catch (e: any) {
+			alert("Rate limiting exceeded. Gotta protect our bridge servers...");
+			throw e;
+		}
 	}
 
 	private async listenForTransactionStatus(addressInformation: IAssetInfo,

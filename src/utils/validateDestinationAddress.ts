@@ -7,10 +7,9 @@ ChainList.forEach((chain: IChain) => {
 	validatorsDict[key] = chain.validateAddress as (asset: IAssetInfo) => boolean
 })
 
-export const validateDestinationAddress = (destTokenInfo: IAssetInfo): boolean => {
+export const validateDestinationAddress = (chainSymbol: string, destTokenInfo: IAssetInfo): boolean => {
 
-	const destTokenSymbol: string = destTokenInfo?.assetSymbol as string;
-	const validator: (assetInfo: IAssetInfo) => boolean = validatorsDict[destTokenSymbol?.toLowerCase()];
+	const validator: (assetInfo: IAssetInfo) => boolean = validatorsDict[chainSymbol?.toLowerCase()];
 
 	// TODO: what should we do if we don't have a validator for supported chain?
 	if (!validator)
