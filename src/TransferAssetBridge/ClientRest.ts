@@ -11,7 +11,7 @@ export class ClientRest {
 			const requestOptions = {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: payload
+				body: JSON.stringify(payload)
 			};
 			fetch(this.host + endpoint, requestOptions)
 				.then(response => response.json())
