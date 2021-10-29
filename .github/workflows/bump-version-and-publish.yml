@@ -1,14 +1,14 @@
-name: 'Bump Version'
+name: 'bump version and publish'
 
 on:
+  push:
+    branches:
+      - 'main'
   workflow_dispatch:
-#   push:
-#     branches:
-#       - 'test'
-
+  
 jobs:
   bump-version:
-    name: 'Bump Version on master'
+    name: 'Bump Version on main'
     runs-on: ubuntu-latest
 
     steps:
@@ -37,7 +37,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v2
         with:
           node-version: '12.x'
