@@ -4,9 +4,9 @@ import {BaseWaitingService}                                from "../models/BaseW
 import {getEthersJsProvider}                               from "../../TransferAssetBridge/status/utils/ethersjsProvider";
 import {IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
 
-const axelarBTCTokenAddr: string = '0xEA3f4398DA7Ec007683b46AF7961feD202c92c6F';
-const uphotonTokenAddr: string = "0xb1bfDBcd65292792f8fB4036a718e1b5C01fec0C";
-const uaxlTokenAddr: string = "0xa27cf99806Cc295fA90f2b6E8b46830BeDd3Be24";
+const axelarBTCTokenAddr: string = '';
+const uphotonTokenAddr: string = "0xa411e990FF558d66e1e9976468609EA9Ec05B54d";
+const uaxlTokenAddr: string = "0xc9393BadA664d9271bc41739A5625FadAa0AE21b";
 
 const tokenAddressMap: { [key: string]: string } = {};
 tokenAddressMap.btc = axelarBTCTokenAddr;
