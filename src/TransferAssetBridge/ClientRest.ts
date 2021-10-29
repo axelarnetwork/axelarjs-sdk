@@ -1,5 +1,3 @@
-import axios, { AxiosError } from "axios";
-
 export class ClientRest {
 
 	private host: string;

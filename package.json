@@ -25,7 +25,6 @@
 	"author": "Axelar Network",
 	"license": "MIT",
 	"dependencies": {
-		"axios": "^0.21.4",
 		"bitcoin-address-validation": "^2.1.0",
 		"blockcypher": "^0.3.0",
 		"ethers": "^5.4.7",
