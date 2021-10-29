@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 export class ClientRest {
 
@@ -10,9 +10,23 @@ export class ClientRest {
 
 	public post(endpoint: string, payload: any, headers?: any): Promise<any> {
 		return new Promise((resolve, reject) => {
-			axios.post(this.host + endpoint, payload)
-			.then((res) => resolve(res.data))
-			.catch(reject);
+			const requestOptions = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: payload
+			};
+			fetch(this.host + endpoint, requestOptions)
+				.then(response => response.json())
+				.then(data => {
+					if (data?.error) {
+						reject(data);
+					} else {
+						resolve(data);
+					}
+				})
+				.catch(err => {
+					reject(err);
+				})
 		});
 	}
 }
