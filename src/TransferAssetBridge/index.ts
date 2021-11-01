@@ -56,7 +56,9 @@ export class TransferAssetBridge {
 		try {
 			return await this.clientRest.post(CLIENT_API_POST_TRANSFER_ASSET, message);
 		} catch (e: any) {
-			alert(e?.message ? e.message + ". Gotta protect our bridge server." : "Unexpected error. Contact us if you see this, and we'll fix it.");
+			if (e?.message) {
+				alert(e + ". Gotta protect our bridge server.");
+			}
 			throw e;
 		}
 	}
