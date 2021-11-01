@@ -23,7 +23,7 @@ export class ClientRest {
 					}
 				})
 				.catch(err => {
-					reject(err);
+					reject("AxelarJS-SDK post error: " + JSON.stringify(err));
 				})
 		});
 	}
