@@ -5,8 +5,8 @@ import {getEthersJsProvider}                               from "../../TransferA
 import {IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
 
 const axelarBTCTokenAddr: string = '';
-const uphotonTokenAddr: string = "0xa411e990FF558d66e1e9976468609EA9Ec05B54d";
-const uaxlTokenAddr: string = "0xc9393BadA664d9271bc41739A5625FadAa0AE21b";
+const uphotonTokenAddr: string = "0x170f2D3B7994326504D5C31af15eADeA43842745";
+const uaxlTokenAddr: string = "";
 
 const tokenAddressMap: { [key: string]: string } = {};
 tokenAddressMap.btc = axelarBTCTokenAddr;
