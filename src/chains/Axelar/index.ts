@@ -8,7 +8,10 @@ export default class Axelar implements IChain {
 		chainName: "Axelar",
 		noteOnWaitTimes: "Confirmations on Axelar should only take a few minutes",
 		assets: [
+			{assetSymbol: "uaxl", assetName: "Axelar Token"},
 			{assetSymbol: "uphoton", assetName: "Photon"},
+			{assetSymbol: "uluna", assetName: "LUNA"},
+			{assetSymbol: "ust", assetName: "UST"},
 		]
 	};
 
