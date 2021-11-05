@@ -27,7 +27,7 @@ export class ClientSocketConnect {
 		let token: any;
 
 		try {
-			token = await grecaptcha.execute(GREPTCHA_SITE_KEY);
+			token = await grecaptcha.execute(GREPTCHA_SITE_KEY, { action: "submit_from_sdk" });
 		} catch (e: any) {
 			console.log("cannot get captcha", e);
 			return;
