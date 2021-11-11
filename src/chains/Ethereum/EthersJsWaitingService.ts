@@ -11,7 +11,7 @@ const uaxlTokenAddr: string = "0x7bcb73490E348bAeB238a0E76208fa881f7bd103";
 const tokenAddressMap: { [key: string]: string } = {};
 tokenAddressMap.btc = axelarBTCTokenAddr;
 tokenAddressMap.uphoton = uphotonTokenAddr;
-tokenAddressMap.uaxl = uaxlTokenAddr;
+tokenAddressMap.axl = uaxlTokenAddr;
 
 const abi: string[] = [
 	"function name() view returns (string)",
