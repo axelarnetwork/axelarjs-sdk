@@ -8,12 +8,7 @@ export default class Axelar implements IChain {
 		chainName: "Axelar",
 		estimatedWaitTime: 10,
 		fullySupported: true,
-		assets: [
-			// {assetSymbol: "uaxl", assetName: "Axelar Token"},
-			// {assetSymbol: "uphoton", assetName: "Photon"},
-			// {assetSymbol: "uluna", assetName: "LUNA"},
-			// {assetSymbol: "ust", assetName: "UST"},
-		]
+		assets: []
 	};
 
 	public validateAddress = (addressInfo: IAssetInfo) => true;
