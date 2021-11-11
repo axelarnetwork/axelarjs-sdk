@@ -6,10 +6,9 @@ export default class Cosmos extends Axelar implements IChain {
 	public chainInfo: IChainInfo = {
 		chainSymbol: "COS",
 		chainName: "Cosmos",
-		noteOnWaitTimes: "Confirmations on Cosmos should only take a few minutes",
-		assets: [
-			{assetSymbol: "uphoton", assetName: "Cosmos Hub"}
-		]
+		estimatedWaitTime: 5,
+		fullySupported: false,
+		assets: []
 	};
 
 	constructor() {

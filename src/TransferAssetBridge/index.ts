@@ -1,28 +1,30 @@
-import {IAssetTransferObject}       from "../interface/IAssetTransferObject";
+import {IAssetTransferObject}            from "../interface/IAssetTransferObject";
 import {
 	CLIENT_API_POST_TRANSFER_ASSET,
 	IAssetInfo,
 	IBlockchainWaitingService,
 	ICallbackStatus,
-	IChainInfo, SourceOrDestination,
+	IChainInfo,
+	SourceOrDestination,
 	StatusResponse
-} from "../interface";
-import {ClientRest}                 from "./ClientRest";
-import getWaitingService            from "./status";
-import {ClientSocketConnect}        from "./ClientSocketConnect";
-import {validateDestinationAddress} from "../utils";
+}                                        from "../interface";
+import {ClientRest}                      from "./ClientRest";
+import getWaitingService                 from "./status";
+import {ClientSocketConnect}             from "./ClientSocketConnect";
+import {validateDestinationAddress}      from "../utils";
+import {getConfigs, IEnvironmentConfigs} from "../constants";
 
 export class TransferAssetBridge {
 
 	private clientRest: ClientRest;
 	private clientSocketConnect: ClientSocketConnect;
 
-	constructor(resourceUrl: string) {
+	constructor(environment: string) {
 		console.log("TransferAssetBridge initiated");
+		const configs: IEnvironmentConfigs = getConfigs(environment);
+		const resourceUrl: string = configs.resourceUrl;
 		this.clientRest = new ClientRest(resourceUrl);
 		this.clientSocketConnect = new ClientSocketConnect(resourceUrl);
-		// this.clientSocketConnect.connect();
-
 	}
 
 	public async transferAssets(message: IAssetTransferObject,
