@@ -14,16 +14,19 @@ export interface IBlockchainWaitingService {
 }
 
 export interface IChainInfo {
+	assets?: IAssetInfo[];
 	chainSymbol: string;
 	chainName: string;
-	noteOnWaitTimes: string;
-	assets?: IAssetInfo[];
+	fullySupported: boolean;
+	estimatedWaitTime: number;
 }
 
 export interface IAssetInfo {
 	assetSymbol?: string;
 	assetName?: string;
 	assetAddress?: string;
+	common_key?: string;
+	native_chain?: string;
 }
 
 export type IBlockchainWaitingServiceFinder = (chainInfo: IChainInfo,

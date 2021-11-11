@@ -25,9 +25,11 @@
 	"author": "Axelar Network",
 	"license": "MIT",
 	"dependencies": {
+		"@types/lodash": "^4.14.176",
 		"bitcoin-address-validation": "^2.1.0",
 		"blockcypher": "^0.3.0",
 		"ethers": "^5.4.7",
+		"lodash": "^4.17.21",
 		"nodemon": "^2.0.12",
 		"npm-run-all": "^4.1.5",
 		"socket.io-client": "^4.2.0",
