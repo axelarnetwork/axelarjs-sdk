@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export class ClientRest {
 
 	private host: string;
@@ -10,7 +12,10 @@ export class ClientRest {
 		return new Promise((resolve, reject) => {
 			const requestOptions = {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+					'x-traceId': uuidv4()
+				},
 				body: JSON.stringify(payload)
 			};
 			fetch(this.host + endpoint, requestOptions)
@@ -19,11 +24,16 @@ export class ClientRest {
 					if (data?.error) {
 						reject(data);
 					} else {
+						console.log("ClientRest response data",data);
 						resolve(data);
 					}
 				})
 				.catch(err => {
-					reject("AxelarJS-SDK post error: " + JSON.stringify(err));
+					reject({
+						message: "AxelarJS-SDK uncaught post error",
+						uncaught: true,
+						fullMessage: err
+					});
 				})
 		});
 	}
