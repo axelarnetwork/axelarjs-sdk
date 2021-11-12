@@ -14,6 +14,7 @@ import {ClientSocketConnect}             from "./ClientSocketConnect";
 import {validateDestinationAddress}      from "../utils";
 import {getConfigs, IEnvironmentConfigs} from "../constants";
 
+interface IResponseForDepositAddress { traceId: string, assetInfo: IAssetInfo }
 export class TransferAssetBridge {
 
 	private clientRest: ClientRest;
@@ -35,7 +36,11 @@ export class TransferAssetBridge {
 		if (!validateDestinationAddress(message?.destinationChainInfo?.chainSymbol, message?.selectedDestinationAsset))
 			throw new Error(`invalid destination address in ${message?.selectedDestinationAsset?.assetSymbol}`);
 
-		const depositAddress: IAssetInfo = await this.getDepositAddress(message);
+		const postResponse: IResponseForDepositAddress = await this.getDepositAddress(message);
+		const traceId: string = postResponse.traceId;
+		const depositAddress: IAssetInfo = postResponse.assetInfo;
+
+		console.log("trace ID",traceId);
 
 		this.listenForTransactionStatus(depositAddress,
 			message.sourceChainInfo,
@@ -54,12 +59,12 @@ export class TransferAssetBridge {
 		return depositAddress;
 	}
 
-	private async getDepositAddress(message: IAssetTransferObject): Promise<IAssetInfo> {
+	private async getDepositAddress(message: IAssetTransferObject): Promise<IResponseForDepositAddress> {
 		try {
-			return await this.clientRest.post(CLIENT_API_POST_TRANSFER_ASSET, message);
+			return await this.clientRest.post(CLIENT_API_POST_TRANSFER_ASSET, message) as IResponseForDepositAddress;
 		} catch (e: any) {
-			if (e?.message) {
-				alert(e + ". Gotta protect our bridge server.");
+			if (e?.message && !e?.uncaught) {
+				alert("There was a problem in attempting to generate a deposit address. Details: " + JSON.stringify(e));
 			}
 			throw e;
 		}

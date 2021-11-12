@@ -6,7 +6,7 @@ import {IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface
 
 const axelarBTCTokenAddr: string = '';
 const uphotonTokenAddr: string = "";
-const uaxlTokenAddr: string = "0x7bcb73490E348bAeB238a0E76208fa881f7bd103";
+const uaxlTokenAddr: string = "0xc4d0fFe91DD4e50685B35D79cd547C698114E7A3";
 
 const tokenAddressMap: { [key: string]: string } = {};
 tokenAddressMap.btc = axelarBTCTokenAddr;

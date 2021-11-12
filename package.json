@@ -26,6 +26,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@types/lodash": "^4.14.176",
+		"@types/uuid": "^8.3.1",
 		"bitcoin-address-validation": "^2.1.0",
 		"blockcypher": "^0.3.0",
 		"ethers": "^5.4.7",
@@ -33,6 +34,7 @@
 		"nodemon": "^2.0.12",
 		"npm-run-all": "^4.1.5",
 		"socket.io-client": "^4.2.0",
-		"typescript": "^4.4.2"
+		"typescript": "^4.4.2",
+		"uuid": "^8.3.2"
 	}
 }
