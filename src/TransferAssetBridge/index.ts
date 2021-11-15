@@ -42,11 +42,13 @@ export class TransferAssetBridge {
 		const traceId: string = postResponse.traceId;
 		const sourceAssetInfoForWaitService: IAssetInfoSocketRequestBody = {
 			...postResponse.assetInfo,
-			traceId
+			traceId,
+			sourceOrDestChain: "source"
 		};
 		const destinationAssetInfoForWaitService: IAssetInfoSocketRequestBody = {
 			...message.selectedDestinationAsset,
-			traceId
+			traceId,
+			sourceOrDestChain: "destination"
 		};
 
 		this.listenForTransactionStatus(sourceAssetInfoForWaitService,

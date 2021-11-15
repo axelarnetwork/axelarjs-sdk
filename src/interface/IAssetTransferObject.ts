@@ -1,4 +1,4 @@
-import {IAssetInfo, IChainInfo} from "./index";
+import {IAssetInfo, IChainInfo, SourceOrDestination} from "./index";
 
 export interface IAssetTransferObject {
 	sourceChainInfo: IChainInfo;
@@ -10,6 +10,7 @@ export interface IAssetTransferObject {
 
 export interface IAssetInfoSocketRequestBody extends IAssetInfo {
 	traceId: string;
+	sourceOrDestChain: SourceOrDestination;
 }
 
 export enum LinkType {
