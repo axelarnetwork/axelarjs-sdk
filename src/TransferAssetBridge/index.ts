@@ -1,4 +1,4 @@
-import {IAssetTransferObject}            from "../interface/IAssetTransferObject";
+import {IAssetInfoSocketRequestBody, IAssetTransferObject} from "../interface/IAssetTransferObject";
 import {
 	CLIENT_API_POST_TRANSFER_ASSET,
 	IAssetInfo,
@@ -7,7 +7,7 @@ import {
 	IChainInfo,
 	SourceOrDestination,
 	StatusResponse
-}                                        from "../interface";
+}                                                          from "../interface";
 import {ClientRest}                      from "./ClientRest";
 import getWaitingService                 from "./status";
 import {ClientSocketConnect}             from "./ClientSocketConnect";
@@ -19,9 +19,11 @@ export class TransferAssetBridge {
 
 	private clientRest: ClientRest;
 	private clientSocketConnect: ClientSocketConnect;
+	private environment: string;
 
 	constructor(environment: string) {
 		console.log("TransferAssetBridge initiated");
+		this.environment = environment;
 		const configs: IEnvironmentConfigs = getConfigs(environment);
 		const resourceUrl: string = configs.resourceUrl;
 		this.clientRest = new ClientRest(resourceUrl);
@@ -38,17 +40,22 @@ export class TransferAssetBridge {
 
 		const postResponse: IResponseForDepositAddress = await this.getDepositAddress(message);
 		const traceId: string = postResponse.traceId;
-		const depositAddress: IAssetInfo = postResponse.assetInfo;
+		const sourceAssetInfoForWaitService: IAssetInfoSocketRequestBody = {
+			...postResponse.assetInfo,
+			traceId
+		};
+		const destinationAssetInfoForWaitService: IAssetInfoSocketRequestBody = {
+			...message.selectedDestinationAsset,
+			traceId
+		};
 
-		console.log("trace ID",traceId);
-
-		this.listenForTransactionStatus(depositAddress,
+		this.listenForTransactionStatus(sourceAssetInfoForWaitService,
 			message.sourceChainInfo,
 			sourceCbs.successCb,
 			sourceCbs.failCb,
 			"source"
 		).then(() => {
-			this.listenForTransactionStatus(message.selectedDestinationAsset as IAssetInfo,
+			this.listenForTransactionStatus(destinationAssetInfoForWaitService,
 				message.destinationChainInfo,
 				destCbs.successCb,
 				destCbs.failCb,
@@ -56,7 +63,7 @@ export class TransferAssetBridge {
 			);
 		})
 
-		return depositAddress;
+		return sourceAssetInfoForWaitService;
 	}
 
 	private async getDepositAddress(message: IAssetTransferObject): Promise<IResponseForDepositAddress> {
@@ -70,14 +77,20 @@ export class TransferAssetBridge {
 		}
 	}
 
-	private async listenForTransactionStatus(addressInformation: IAssetInfo,
+	private async listenForTransactionStatus(addressInformation: IAssetInfoSocketRequestBody,
 	                                         chainInfo: IChainInfo,
 	                                         waitCb: StatusResponse,
 	                                         errCb: any,
 	                                         sOrDChain: SourceOrDestination
 	) {
 
-		const waitingService: IBlockchainWaitingService = getWaitingService(chainInfo.chainSymbol, chainInfo, addressInformation, sOrDChain);
+		const waitingService: IBlockchainWaitingService = getWaitingService(
+			chainInfo.chainSymbol,
+			chainInfo,
+			addressInformation,
+			sOrDChain,
+			this.environment
+		);
 
 		try {
 			await waitingService.wait(addressInformation, waitCb, this.clientSocketConnect);
