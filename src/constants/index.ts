@@ -4,10 +4,8 @@ export const GREPTCHA_SITE_KEY = "6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR"; //t
 
 const configsMap: { [key: string]: IEnvironmentConfigs } = {};
 
-interface IEthersJsTokenMap {
-	axelarPHOT: string;
+export type IEthersJsTokenMap = {
 	AXL: string;
-	uLUNA: string;
 }
 interface IEthersJsConfigs {
 	tokenAddressMap: IEthersJsTokenMap;
@@ -19,22 +17,31 @@ export interface IEnvironmentConfigs {
 const devnetConfigs: IEnvironmentConfigs = {
 	ethersjsConfigs: {
 		tokenAddressMap: {
-			axelarPHOT: "",
-			AXL: "",
-			uLUNA: ""
+			AXL: "0xc4d0fFe91DD4e50685B35D79cd547C698114E7A3",
 		}
 	},
 	resourceUrl: `https://axelar-bridge-devnet.herokuapp.com`
 }
+
 const localConfigs: IEnvironmentConfigs = cloneDeep(devnetConfigs);
 localConfigs.resourceUrl = `http://localhost:4000`;
 
-configsMap["devnet"] = devnetConfigs;
+const testnetConfigs: IEnvironmentConfigs = {
+	ethersjsConfigs: {
+		tokenAddressMap: {
+			AXL: "",
+		}
+	},
+	resourceUrl: `https://axelar-bridge-testnet.herokuapp.com`
+}
+
 configsMap["local"] = localConfigs;
+configsMap["devnet"] = devnetConfigs;
+configsMap["testnet"] = testnetConfigs;
 
 let configToUse: IEnvironmentConfigs;
 
-export const getConfigs = (environment: string) => {
+export const getConfigs = (environment: string): IEnvironmentConfigs => {
 	if (!configToUse) {
 		if (!configsMap[environment])
 			throw new Error("config environment does not exist");

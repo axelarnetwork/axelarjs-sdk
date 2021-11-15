@@ -2,16 +2,8 @@ import {ethers}                                            from "ethers";
 import {formatEther}                                       from "ethers/lib/utils";
 import {BaseWaitingService}                                from "../models/BaseWaitingService";
 import {getEthersJsProvider}                               from "../../TransferAssetBridge/status/utils/ethersjsProvider";
-import {IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
-
-const axelarBTCTokenAddr: string = '';
-const uphotonTokenAddr: string = "";
-const uaxlTokenAddr: string = "0xc4d0fFe91DD4e50685B35D79cd547C698114E7A3";
-
-const tokenAddressMap: { [key: string]: string } = {};
-tokenAddressMap.btc = axelarBTCTokenAddr;
-tokenAddressMap.uphoton = uphotonTokenAddr;
-tokenAddressMap.axl = uaxlTokenAddr;
+import {IAssetInfo, IBlockchainWaitingService, IChainInfo}  from "../../interface";
+import {getConfigs, IEnvironmentConfigs, IEthersJsTokenMap} from "../../constants";
 
 const abi: string[] = [
 	"function name() view returns (string)",
@@ -26,13 +18,21 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 	private tokenContract;
 	private filter: any;
 
-	constructor(chainInfo: IChainInfo, assetInfo: IAssetInfo) {
-		const tokenContract: string = tokenAddressMap[assetInfo.assetSymbol?.toLowerCase() as string] || "";
+	constructor(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string) {
+
+		super(30, assetInfo.assetAddress as string);
+
+		const configs: IEnvironmentConfigs = getConfigs(environment);
+		const tokenAddressMap: IEthersJsTokenMap = configs?.ethersjsConfigs?.tokenAddressMap;
+		const tokenSymbol: keyof IEthersJsTokenMap = assetInfo.assetSymbol as keyof IEthersJsTokenMap;
+
+		const tokenContract: string = tokenAddressMap[tokenSymbol] || "";
 		const depositAddress: string = assetInfo.assetAddress as string;
-		super(30, depositAddress);
+
 		this.provider = getEthersJsProvider("infura");
 		this.tokenContract = new ethers.Contract(tokenContract, abi, this.provider);
 		this.filter = this.tokenContract.filters.Transfer(null, depositAddress); //filter all transfers TO my address
+
 	}
 
 	public async wait(address: string, cb: any): Promise<any> {

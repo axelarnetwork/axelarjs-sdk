@@ -8,6 +8,10 @@ export interface IAssetTransferObject {
 	recaptchaToken?: any;
 }
 
+export interface IAssetInfoSocketRequestBody extends IAssetInfo {
+	traceId: string;
+}
+
 export enum LinkType {
 	BITCOIN = "/bitcoin.v1beta1.LinkRequest",
 	EVM = "/evm.v1beta1.LinkRequest",

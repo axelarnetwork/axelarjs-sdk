@@ -31,5 +31,6 @@ export interface IAssetInfo {
 
 export type IBlockchainWaitingServiceFinder = (chainInfo: IChainInfo,
                                                assetInfo: IAssetInfo,
-                                               sOrDChain: SourceOrDestination
+                                               sOrDChain: SourceOrDestination,
+                                               environment: string
 ) => IBlockchainWaitingService;

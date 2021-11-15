@@ -4,6 +4,7 @@ export class BaseWaitingService implements IBlockchainWaitingService {
 
 	public numConfirmations: number = 0;
 	public depositAddress: string = "";
+	public environment: string = "";
 
 	public constructor(numConfirmations: number, depositAddress: string) {
 
