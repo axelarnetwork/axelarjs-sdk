@@ -6,9 +6,10 @@ export interface IAssetTransferObject {
 	selectedSourceAsset: IAssetInfo;
 	selectedDestinationAsset: IAssetInfo;
 	recaptchaToken?: any;
+	transactionTraceId?: string;
 }
 
-export interface IAssetInfoSocketRequestBody extends IAssetInfo {
+export interface IAssetInfoResponse extends IAssetInfo {
 	traceId: string;
 	sourceOrDestChain: SourceOrDestination;
 }
