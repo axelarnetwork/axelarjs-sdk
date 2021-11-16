@@ -3,12 +3,12 @@ import {ISocketListenerTypes, ISocketOptions} from "../interface";
 import {GREPTCHA_SITE_KEY}                    from "../constants";
 
 /**
- * ClientSocketConnect establishes socket connection between webapp and rest server
+ * SocketServices establishes socket connection between webapp and rest server
  */
 
 declare const grecaptcha: any;
 
-export class ClientSocketConnect {
+export class SocketServices {
 
 	private socket: any;
 	private resourceUrl: string;
@@ -27,7 +27,7 @@ export class ClientSocketConnect {
 		let token: any;
 
 		try {
-			token = await grecaptcha.execute(GREPTCHA_SITE_KEY, { action: "submit_from_sdk" });
+			token = await grecaptcha.execute(GREPTCHA_SITE_KEY, {action: "submit_from_sdk"});
 		} catch (e: any) {
 			console.log("cannot get captcha", e);
 			return;

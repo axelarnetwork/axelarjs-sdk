@@ -1,7 +1,7 @@
 import {SourceOrDestination} from "./IMiscTopics";
 
-export *                     from "./IAssetTransferObject";
-export *                     from "./IMiscTopics";
+export * from "./IAssetTransferObject";
+export * from "./IMiscTopics";
 
 export interface IChain {
 	chainInfo: IChainInfo;
@@ -33,4 +33,4 @@ export type IBlockchainWaitingServiceFinder = (chainInfo: IChainInfo,
                                                assetInfo: IAssetInfo,
                                                sOrDChain: SourceOrDestination,
                                                environment: string
-) => IBlockchainWaitingService;
+) => IBlockchainWaitingService | Promise<IBlockchainWaitingService>;
