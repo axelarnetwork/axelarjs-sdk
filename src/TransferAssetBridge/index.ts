@@ -1,4 +1,4 @@
-import {IAssetInfoSocketRequestBody, IAssetTransferObject} from "../interface/IAssetTransferObject";
+import {IAssetInfoResponse, IAssetTransferObject} from "../interface/IAssetTransferObject";
 import {
 	CLIENT_API_POST_TRANSFER_ASSET,
 	IAssetInfo,
@@ -7,7 +7,7 @@ import {
 	IChainInfo,
 	SourceOrDestination,
 	StatusResponse
-}                                                          from "../interface";
+}                                                              from "../interface";
 import {ClientRest}                      from "./ClientRest";
 import getWaitingService                 from "./status";
 import {ClientSocketConnect}             from "./ClientSocketConnect";
@@ -33,19 +33,19 @@ export class TransferAssetBridge {
 	public async transferAssets(message: IAssetTransferObject,
 	                            sourceCbs: ICallbackStatus,
 	                            destCbs: ICallbackStatus
-	): Promise<IAssetInfo> {
+	): Promise<IAssetInfoResponse> {
 
 		if (!validateDestinationAddress(message?.destinationChainInfo?.chainSymbol, message?.selectedDestinationAsset))
 			throw new Error(`invalid destination address in ${message?.selectedDestinationAsset?.assetSymbol}`);
 
 		const postResponse: IResponseForDepositAddress = await this.getDepositAddress(message);
 		const traceId: string = postResponse.traceId;
-		const sourceAssetInfoForWaitService: IAssetInfoSocketRequestBody = {
+		const sourceAssetInfoForWaitService: IAssetInfoResponse = {
 			...postResponse.assetInfo,
 			traceId,
 			sourceOrDestChain: "source"
 		};
-		const destinationAssetInfoForWaitService: IAssetInfoSocketRequestBody = {
+		const destinationAssetInfoForWaitService: IAssetInfoResponse = {
 			...message.selectedDestinationAsset,
 			traceId,
 			sourceOrDestChain: "destination"
@@ -79,7 +79,7 @@ export class TransferAssetBridge {
 		}
 	}
 
-	private async listenForTransactionStatus(addressInformation: IAssetInfoSocketRequestBody,
+	private async listenForTransactionStatus(addressInformation: IAssetInfoResponse,
 	                                         chainInfo: IChainInfo,
 	                                         waitCb: StatusResponse,
 	                                         errCb: any,

@@ -14,7 +14,7 @@ export class ClientRest {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'x-traceId': uuidv4()
+					'x-traceId': payload.transactionTraceId || uuidv4()
 				},
 				body: JSON.stringify(payload)
 			};
