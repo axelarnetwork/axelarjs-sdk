@@ -1,6 +1,6 @@
 import {IAssetInfo, IBlockchainWaitingService, IChainInfo, ISocketListenerTypes, StatusResponse} from "../../interface";
-import {BaseWaitingService}                                                                      from "../models/BaseWaitingService";
-import {ClientSocketConnect}                                                                     from "../../TransferAssetBridge/ClientSocketConnect";
+import {BaseWaitingService} from "../models/BaseWaitingService";
+import {SocketServices}     from "../../services/SocketServices";
 
 export default class WaitingService extends BaseWaitingService implements IBlockchainWaitingService {
 
@@ -8,7 +8,7 @@ export default class WaitingService extends BaseWaitingService implements IBlock
 		super(1, assetInfo.assetAddress as string);
 	}
 
-	public async wait(depositAddress: IAssetInfo, interimStatusCb: StatusResponse, clientSocketConnect: ClientSocketConnect) {
+	public async wait(depositAddress: IAssetInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
 
 		const data: any = await clientSocketConnect.emitMessageAndWaitForReply(
 			ISocketListenerTypes.WAIT_FOR_AXL_DEPOSIT,

@@ -3,12 +3,12 @@ import {ISocketListenerTypes, ISocketOptions} from "../interface";
 import {GREPTCHA_SITE_KEY}                    from "../constants";
 
 /**
- * ClientSocketConnect establishes socket connection between webapp and rest server
+ * SocketServices establishes socket connection between webapp and rest server
  */
 
 declare const grecaptcha: any;
 
-export class ClientSocketConnect {
+export class SocketServices {
 
 	private socket: any;
 	private resourceUrl: string;

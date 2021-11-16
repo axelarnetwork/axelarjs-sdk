@@ -9,9 +9,14 @@ export interface IAssetTransferObject {
 	transactionTraceId?: string;
 }
 
-export interface IAssetInfoResponse extends IAssetInfo {
+export interface IAssetInfoWithTrace extends IAssetInfo {
 	traceId: string;
+	assetInfo: IAssetInfo;
+}
+
+export interface IAssetInfoResponse extends IAssetInfo {
 	sourceOrDestChain: SourceOrDestination;
+	traceId: string;
 }
 
 export enum LinkType {

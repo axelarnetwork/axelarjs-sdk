@@ -19,7 +19,7 @@ type IGetWaitingService = (	chainKey: string,
 	chainInfo: IChainInfo,
 	assetInfo: IAssetInfo,
 	sOrDChain: SourceOrDestination,
-	environment: string) => IBlockchainWaitingService;
+	environment: string) => IBlockchainWaitingService | Promise<IBlockchainWaitingService>;
 const getWaitingService: IGetWaitingService = (
 	chainKey: string,
 	chainInfo: IChainInfo,

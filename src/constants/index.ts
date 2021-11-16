@@ -5,7 +5,7 @@ export const GREPTCHA_SITE_KEY = "6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR"; //t
 const configsMap: { [key: string]: IEnvironmentConfigs } = {};
 
 export type IEthersJsTokenMap = {
-	AXL: string;
+	AXL: string | null;
 }
 interface IEthersJsConfigs {
 	tokenAddressMap: IEthersJsTokenMap;
@@ -17,7 +17,7 @@ export interface IEnvironmentConfigs {
 const devnetConfigs: IEnvironmentConfigs = {
 	ethersjsConfigs: {
 		tokenAddressMap: {
-			AXL: "0xc4d0fFe91DD4e50685B35D79cd547C698114E7A3",
+			AXL: null,
 		}
 	},
 	resourceUrl: `https://axelar-bridge-devnet.herokuapp.com`

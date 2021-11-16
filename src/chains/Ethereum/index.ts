@@ -24,14 +24,14 @@ export default class Ethereum implements IChain {
 
 	public validateAddress = (addressInfo: IAssetInfo) => isValidEVMAddress(addressInfo.assetAddress as string);
 
-	public waitingService: IBlockchainWaitingServiceFinder = (
+	public waitingService: IBlockchainWaitingServiceFinder = async (
 		chainInfo: IChainInfo,
 		assetInfo: IAssetInfo,
 		sOrDChain: SourceOrDestination,
 		environment: string
 	) => {
-		return (sOrDChain === "source")
+		return (sOrDChain === 'source')
 			? new WaitingService(chainInfo, assetInfo)
-			: new EthersJsWaitingService(chainInfo, assetInfo, environment);
+			: await new EthersJsWaitingService(assetInfo).build(chainInfo, assetInfo, environment);
 	}
 }

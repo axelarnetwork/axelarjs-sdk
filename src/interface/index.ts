@@ -33,4 +33,4 @@ export type IBlockchainWaitingServiceFinder = (chainInfo: IChainInfo,
                                                assetInfo: IAssetInfo,
                                                sOrDChain: SourceOrDestination,
                                                environment: string
-) => IBlockchainWaitingService;
+) => IBlockchainWaitingService | Promise<IBlockchainWaitingService>;
