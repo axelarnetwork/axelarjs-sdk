@@ -1,18 +1,17 @@
 import {IAssetInfoResponse, IAssetInfoWithTrace, IAssetTransferObject} from "../interface/IAssetTransferObject";
 import {
 	CLIENT_API_POST_TRANSFER_ASSET,
-	IAssetInfo,
 	IBlockchainWaitingService,
 	ICallbackStatus,
 	IChainInfo,
 	SourceOrDestination,
 	StatusResponse
 }                                                                      from "../interface";
-import {RestServices}    from "../services/RestServices";
-import getWaitingService            from "./status";
-import {SocketServices}             from "../services/SocketServices";
-import {validateDestinationAddress} from "../utils";
-import {getConfigs, IEnvironmentConfigs} from "../constants";
+import {RestServices}                                                  from "../services/RestServices";
+import getWaitingService                                               from "./status";
+import {SocketServices}                                                from "../services/SocketServices";
+import {validateDestinationAddress}                                    from "../utils";
+import {getConfigs, IEnvironmentConfigs}                               from "../constants";
 
 export class TransferAssetBridge {
 

@@ -1,6 +1,6 @@
 import {IAssetInfo, IBlockchainWaitingService, IChainInfo, ISocketListenerTypes, StatusResponse} from "../../interface";
-import {BaseWaitingService} from "../models/BaseWaitingService";
-import {SocketServices}     from "../../services/SocketServices";
+import {BaseWaitingService}                                                                      from "../models/BaseWaitingService";
+import {SocketServices}                                                                          from "../../services/SocketServices";
 
 export default class WaitingService extends BaseWaitingService implements IBlockchainWaitingService {
 

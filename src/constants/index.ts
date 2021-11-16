@@ -7,13 +7,16 @@ const configsMap: { [key: string]: IEnvironmentConfigs } = {};
 export type IEthersJsTokenMap = {
 	AXL: string | null;
 }
+
 interface IEthersJsConfigs {
 	tokenAddressMap: IEthersJsTokenMap;
 }
+
 export interface IEnvironmentConfigs {
 	ethersjsConfigs: IEthersJsConfigs;
 	resourceUrl: string;
 }
+
 const devnetConfigs: IEnvironmentConfigs = {
 	ethersjsConfigs: {
 		tokenAddressMap: {

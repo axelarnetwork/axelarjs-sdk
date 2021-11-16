@@ -23,6 +23,24 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 		super(30, assetInfo.assetAddress as string);
 	}
 
+	public async build(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string): Promise<EthersJsWaitingService> {
+		const api: EthersJsWaitingService = new EthersJsWaitingService(assetInfo);
+		await api.init(chainInfo, assetInfo, environment);
+		debugger;
+		return api;
+	}
+
+	public async wait(address: string, cb: any): Promise<any> {
+		return new Promise((resolve, reject) => {
+			this.tokenContract.once(this.filter, (from: any, to: any, amount: any, event: any) => {
+				console.log(`Incoming amount of: ${formatEther(amount)}, from: ${from}.`, event);
+				event.axelarRequiredNumConfirmations = this.numConfirmations;
+				cb(event);
+				resolve(event);
+			});
+		});
+	}
+
 	private async init(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string) {
 
 		const configs: IEnvironmentConfigs = getConfigs(environment);
@@ -46,24 +64,6 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 		this.provider = getEthersJsProvider("infura");
 		this.tokenContract = new ethers.Contract(tokenContract, abi, this.provider);
 		this.filter = this.tokenContract.filters.Transfer(null, depositAddress); //filter all transfers TO my address
-	}
-
-	public async build(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string): Promise<EthersJsWaitingService> {
-		const api: EthersJsWaitingService = new EthersJsWaitingService(assetInfo);
-		await api.init(chainInfo, assetInfo, environment);
-		debugger;
-		return api;
-	}
-
-	public async wait(address: string, cb: any): Promise<any> {
-		return new Promise((resolve, reject) => {
-			this.tokenContract.once(this.filter, (from: any, to: any, amount: any, event: any) => {
-				console.log(`Incoming amount of: ${formatEther(amount)}, from: ${from}.`, event);
-				event.axelarRequiredNumConfirmations = this.numConfirmations;
-				cb(event);
-				resolve(event);
-			});
-		});
 	}
 
 }

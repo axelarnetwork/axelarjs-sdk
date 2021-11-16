@@ -1,13 +1,8 @@
-import WaitingService                                                                   from "./WaitingService";
-import {isAddress as isValidEVMAddress}                                                 from "ethers/lib/utils";
-import {
-	IAssetInfo,
-	IBlockchainWaitingService, IBlockchainWaitingServiceFinder,
-	IChain,
-	IChainInfo,
-	SourceOrDestination
-} from "../../interface";
-import EthersJsWaitingService                                                           from "./EthersJsWaitingService";
+import WaitingService                                                                         from "./WaitingService";
+import {isAddress as isValidEVMAddress}                                                       from "ethers/lib/utils";
+import {IAssetInfo, IBlockchainWaitingServiceFinder, IChain, IChainInfo, SourceOrDestination} from "../../interface";
+import EthersJsWaitingService
+                                                                                              from "./EthersJsWaitingService";
 
 export default class Ethereum implements IChain {
 

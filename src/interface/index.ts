@@ -1,7 +1,7 @@
 import {SourceOrDestination} from "./IMiscTopics";
 
-export *                     from "./IAssetTransferObject";
-export *                     from "./IMiscTopics";
+export * from "./IAssetTransferObject";
+export * from "./IMiscTopics";
 
 export interface IChain {
 	chainInfo: IChainInfo;

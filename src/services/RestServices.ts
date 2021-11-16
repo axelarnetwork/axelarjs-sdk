@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 
 export class RestServices {
 
@@ -20,8 +20,8 @@ export class RestServices {
 			};
 
 			this.execRest(endpoint, requestOptions)
-				.then((data) =>resolve(data))
-				.catch((error) => reject(error));
+			.then((data) => resolve(data))
+			.catch((error) => reject(error));
 		});
 	}
 
@@ -35,7 +35,7 @@ export class RestServices {
 				}
 			};
 			this.execRest(endpoint, requestOptions)
-			.then((data) =>resolve(data))
+			.then((data) => resolve(data))
 			.catch((error) => reject(error));
 		});
 	}
@@ -48,7 +48,7 @@ export class RestServices {
 				if (data?.error) {
 					reject(data);
 				} else {
-					console.log("RestServices response data",data);
+					console.log("RestServices response data", data);
 					resolve(data);
 				}
 			})
