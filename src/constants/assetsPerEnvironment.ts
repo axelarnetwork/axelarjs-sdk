@@ -7,7 +7,7 @@ export interface IAssetConfig {
 }
 
 const ust_terra: IAssetConfig = {
-	common_key: "ust",
+	common_key: "uusd",
 	native_chain: "terra",
 	chain_aliases: {
 		axelar: {assetSymbol: "UST", assetName: "Terra USD"},
