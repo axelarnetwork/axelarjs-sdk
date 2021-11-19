@@ -1,5 +1,6 @@
 import WaitingService                   from "./WaitingService";
 import {IAssetInfo, IChain, IChainInfo} from "../../interface";
+import {bech32}                         from "bech32";
 
 export default class Axelar implements IChain {
 
@@ -11,7 +12,18 @@ export default class Axelar implements IChain {
 		assets: []
 	};
 
-	public validateAddress = (addressInfo: IAssetInfo) => true;
+	public validateAddress = (addressInfo: IAssetInfo): boolean => {
+
+		if (!(addressInfo?.assetAddress))
+			return false;
+
+		try {
+			return bech32.decode(addressInfo.assetAddress).prefix === this.chainInfo.chainName.toLowerCase();
+		} catch (e) {
+			return false;
+		}
+
+	};
 
 	public waitingService = (chainInfo: IChainInfo, assetInfo: IAssetInfo) => new WaitingService(chainInfo, assetInfo)
 
