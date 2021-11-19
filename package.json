@@ -12,7 +12,8 @@
 		"prepare": "npm run build",
 		"dev:tsc": "tsc --watch -p .",
 		"dev:serve": "nodemon -e js -w dist dist/index.js",
-		"dev": "run-p dev:*"
+		"dev": "run-p dev:*",
+		"test": "jest"
 	},
 	"keywords": [
 		"axelar",
@@ -39,6 +40,10 @@
 		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
-		"@terra-money/terra.js": "^3.0.0"
+		"@babel/preset-env": "^7.16.4",
+		"@babel/preset-typescript": "^7.16.0",
+		"@terra-money/terra.js": "^3.0.0",
+		"@types/jest": "^27.0.3",
+		"jest": "^27.3.1"
 	}
 }
