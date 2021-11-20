@@ -15,6 +15,7 @@ export class RestServices {
 				headers: {
 					'Content-Type': 'application/json',
 					'x-traceId': payload.transactionTraceId || uuidv4(),
+					'recaptcha-token': payload?.recaptchaToken
 				},
 				body: JSON.stringify(payload)
 			};
