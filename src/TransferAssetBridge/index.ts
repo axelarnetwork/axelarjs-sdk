@@ -30,13 +30,14 @@ export class TransferAssetBridge {
 
 	public async transferAssets(message: IAssetTransferObject,
 	                            sourceCbs: ICallbackStatus,
-	                            destCbs: ICallbackStatus
+	                            destCbs: ICallbackStatus,
+	                            showAlerts: boolean = true
 	): Promise<IAssetInfoWithTrace> {
 
 		if (!validateDestinationAddress(message?.destinationChainInfo?.chainSymbol, message?.selectedDestinationAsset))
 			throw new Error(`invalid destination address in ${message?.selectedDestinationAsset?.assetSymbol}`);
 
-		const depositAddressWithTraceId: IAssetInfoWithTrace = await this.getDepositAddress(message);
+		const depositAddressWithTraceId: IAssetInfoWithTrace = await this.getDepositAddress(message, showAlerts);
 		const traceId: string = depositAddressWithTraceId.traceId;
 
 		const sourceAssetInfoForWaitService: IAssetInfoResponse = {
@@ -67,11 +68,11 @@ export class TransferAssetBridge {
 		return depositAddressWithTraceId;
 	}
 
-	private async getDepositAddress(message: IAssetTransferObject): Promise<IAssetInfoWithTrace> {
+	private async getDepositAddress(message: IAssetTransferObject, showAlerts: boolean): Promise<IAssetInfoWithTrace> {
 		try {
 			return await this.restServices.post(CLIENT_API_POST_TRANSFER_ASSET, message) as IAssetInfoWithTrace;
 		} catch (e: any) {
-			if (e?.message && !e?.uncaught) {
+			if (showAlerts && e?.message && !e?.uncaught) {
 				alert("There was a problem in attempting to generate a deposit address. Details: " + JSON.stringify(e));
 			}
 			throw e;
