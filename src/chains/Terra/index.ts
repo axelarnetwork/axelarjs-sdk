@@ -1,5 +1,7 @@
-import {IChain, IChainInfo} from "../../interface";
-import Axelar               from "../Axelar";
+import {IAssetInfo, IChain, IChainInfo} from "../../interface";
+import Axelar                           from "../Axelar";
+import WaitingService                   from "./WaitingService";
+
 
 export default class Terra extends Axelar implements IChain {
 
@@ -14,5 +16,7 @@ export default class Terra extends Axelar implements IChain {
 	constructor() {
 		super();
 	}
+
+	public waitingService = (chainInfo: IChainInfo, assetInfo: IAssetInfo) => new WaitingService(chainInfo, assetInfo)
 
 }

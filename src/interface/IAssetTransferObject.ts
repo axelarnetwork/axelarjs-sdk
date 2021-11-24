@@ -47,9 +47,13 @@ export interface ICOSLinkRequestBody extends ILinkRequestBody {
 // for connections from ui >> bridge server
 export enum ISocketListenerTypes {
 
-	/*wait for deposit in axelarnet, i.e. for Cosmos >> <DEST_CHAIN> transfers*/
+	/*wait for deposit in axelarnet*/
 	WAIT_FOR_AXL_DEPOSIT = "WAIT_FOR_AXL_DEPOSIT",
 	AXL_DEPOSIT_CONFIRMED = "AXL_DEPOSIT_CONFIRMED",
+
+	/*wait for IBC_transfer_event*/
+	WAIT_FOR_IBC_TRANSFER = "WAIT_FOR_IBC_TRANSFER",
+	IBC_TRANSFER_CONFIRMED = "IBC_TRANSFER_CONFIRMED",
 
 	/*wait for deposit in evm, i.e. for ETH >> <DEST_CHAIN> transfers*/
 	WAIT_FOR_EVM_DEPOSIT = "WAIT_FOR_EVM_DEPOSIT",
