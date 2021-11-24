@@ -28,6 +28,7 @@
 	"dependencies": {
 		"@types/lodash": "^4.14.176",
 		"@types/uuid": "^8.3.1",
+		"@terra-money/terra.js": "^3.0.0",
 		"bech32": "^2.0.0",
 		"bitcoin-address-validation": "^2.1.0",
 		"blockcypher": "^0.3.0",
@@ -42,7 +43,6 @@
 	"devDependencies": {
 		"@babel/preset-env": "^7.16.4",
 		"@babel/preset-typescript": "^7.16.0",
-		"@terra-money/terra.js": "^3.0.0",
 		"@types/jest": "^27.0.3",
 		"jest": "^27.3.1"
 	}
