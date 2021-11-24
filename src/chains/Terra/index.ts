@@ -1,6 +1,7 @@
 import {IAssetInfo, IChain, IChainInfo} from "../../interface";
 import Axelar                           from "../Axelar";
 import {AccAddress}                     from '@terra-money/terra.js'
+import WaitingService                   from "./WaitingService";
 
 export default class Terra extends Axelar implements IChain {
 
@@ -17,5 +18,7 @@ export default class Terra extends Axelar implements IChain {
 	}
 
 	public validateAddress = (addressInfo: IAssetInfo) => AccAddress.validate(addressInfo.assetAddress as string);
+
+	public waitingService = (chainInfo: IChainInfo, assetInfo: IAssetInfo) => new WaitingService(chainInfo, assetInfo)
 
 }
