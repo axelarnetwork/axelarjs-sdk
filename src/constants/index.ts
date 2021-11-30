@@ -23,7 +23,7 @@ const devnetConfigs: IEnvironmentConfigs = {
 			AXL: null,
 		}
 	},
-	resourceUrl: `https://axelar-bridge-devnet.herokuapp.com`
+	resourceUrl: `https://rest-server-devnet.bridge.axelar.dev`
 }
 
 const localConfigs: IEnvironmentConfigs = cloneDeep(devnetConfigs);
