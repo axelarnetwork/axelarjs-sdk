@@ -35,7 +35,7 @@ const testnetConfigs: IEnvironmentConfigs = {
 			AXL: "",
 		}
 	},
-	resourceUrl: `https://rest-server-testnet.bridge.axelar.dev`
+	resourceUrl: `https://axelar-bridge-testnet.herokuapp.com`
 }
 
 configsMap["local"] = localConfigs;
