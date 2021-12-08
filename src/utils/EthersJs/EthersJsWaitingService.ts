@@ -2,7 +2,6 @@ import {Contract, ethers}                                   from "ethers";
 import {formatEther}                                        from "ethers/lib/utils";
 import {BaseWaitingService}                                from "../../chains/models/BaseWaitingService";
 import {getEthersJsProvider, ProviderType}                 from "./ethersjsProvider";
-
 import {IAssetAndChainInfo, IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
 import {getConfigs, IEnvironmentConfigs, IEthersJsTokenMap} from "../../constants";
 import {RestServices}                                       from "../../services/RestServices";
@@ -22,18 +21,16 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 	private tokenContract!: Contract;
 	private filter!: ethers.EventFilter;
 
-
 	constructor(chainInfo: IChainInfo, assetInfo: IAssetInfo) {
 		super(30, assetInfo.assetAddress as string);
 	}
+
 
 	public async build(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType): Promise<EthersJsWaitingService> {
 		const api: EthersJsWaitingService = new EthersJsWaitingService(chainInfo, assetInfo);
 		await api.init(chainInfo, assetInfo, environment, providerType);
 		return api;
 	}
-
-
 
 	private async init(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType) {
 		const configs: IEnvironmentConfigs = getConfigs(environment);
