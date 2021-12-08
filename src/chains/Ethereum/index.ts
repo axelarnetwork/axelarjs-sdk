@@ -11,7 +11,8 @@ export default class Ethereum implements IChain {
 		chainName: "Ethereum",
 		estimatedWaitTime: 15,
 		fullySupported: true,
-		assets: []
+		assets: [],
+		txFeeInPercent: 0.1
 	};
 
 	constructor() {

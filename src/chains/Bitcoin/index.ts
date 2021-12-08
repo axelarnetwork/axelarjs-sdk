@@ -9,7 +9,8 @@ export default class Bitcoin implements IChain {
 		chainSymbol: "BTC",
 		chainName: "Bitcoin",
 		fullySupported: false,
-		estimatedWaitTime: 90
+		estimatedWaitTime: 90,
+		txFeeInPercent: 0.1
 	}
 
 	constructor() {

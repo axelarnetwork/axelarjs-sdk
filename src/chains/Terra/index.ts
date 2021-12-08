@@ -10,7 +10,8 @@ export default class Terra extends Axelar implements IChain {
 		chainName: "Terra",
 		estimatedWaitTime: 5,
 		fullySupported: true,
-		assets: []
+		assets: [],
+		txFeeInPercent: 0.1
 	};
 
 	constructor() {

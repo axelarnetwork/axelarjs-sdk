@@ -9,7 +9,8 @@ export default class Axelar implements IChain {
 		chainName: "Axelar",
 		estimatedWaitTime: 10,
 		fullySupported: true,
-		assets: []
+		assets: [],
+		txFeeInPercent: 0.1
 	};
 
 	public validateAddress = (addressInfo: IAssetInfo): boolean => {

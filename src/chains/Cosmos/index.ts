@@ -8,7 +8,8 @@ export default class Cosmos extends Axelar implements IChain {
 		chainName: "Cosmos",
 		estimatedWaitTime: 5,
 		fullySupported: false,
-		assets: []
+		assets: [],
+		txFeeInPercent: 0.1
 	};
 
 	constructor() {

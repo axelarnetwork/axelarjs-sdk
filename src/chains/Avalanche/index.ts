@@ -8,7 +8,8 @@ export default class Avalanche extends Ethereum implements IChain {
 		chainName: "Avalanche",
 		estimatedWaitTime: 5,
 		fullySupported: true,
-		assets: []
+		assets: [],
+		txFeeInPercent: 0.1
 	};
 
 	constructor() {

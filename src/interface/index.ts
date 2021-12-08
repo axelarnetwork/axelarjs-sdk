@@ -19,6 +19,7 @@ export interface IChainInfo {
 	chainName: string;
 	fullySupported: boolean;
 	estimatedWaitTime: number;
+	txFeeInPercent: number;
 }
 
 export interface IAssetInfo {
