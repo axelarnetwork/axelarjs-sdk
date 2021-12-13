@@ -59,12 +59,12 @@ export class TransferAssetBridge {
 			sourceCbs.failCb,
 			"source"
 		).then(() => {
-			// this.listenForTransactionStatus(destinationAssetInfoForWaitService,
-			// 	message.destinationChainInfo,
-			// 	destCbs.successCb,
-			// 	destCbs.failCb,
-			// 	"destination"
-			// );
+			this.listenForTransactionStatus(destinationAssetInfoForWaitService,
+				message.destinationChainInfo,
+				destCbs.successCb,
+				destCbs.failCb,
+				"destination"
+			);
 		})
 
 		return depositAddressWithTraceId;
