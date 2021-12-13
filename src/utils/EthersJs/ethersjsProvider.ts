@@ -46,7 +46,7 @@ providers.fantom = (url?: string) => new ethers.providers.StaticJsonRpcProvider(
 
 providers.moonbeamWS = (url?: string) => new ethers.providers.WebSocketProvider(url || "");
 
-export const getEthersJsProvider = (providerType: ProviderType) => {
+export const getEthersJsProvider = (providerType: ProviderType, environment: string) => {
 	if (providerType === 'infuraWS')
 		return providers[providerType]("wss://ropsten.infura.io/ws/v3/2be110f3450b494f8d637ed7bb6954e3");
 	if (providerType === 'moonbeamWS')

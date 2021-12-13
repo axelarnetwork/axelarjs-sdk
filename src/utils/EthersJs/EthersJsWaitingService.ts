@@ -51,7 +51,7 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 
 		console.log("EthersJsWaitingService token contract for " + tokenSymbol + ": ", tokenContract + " on: " + chainInfo.chainName);
 
-		this.provider = getEthersJsProvider(providerType);
+		this.provider = getEthersJsProvider(providerType, environment);
 		this.tokenContract = new ethers.Contract(tokenContract, abi, this.provider);
 		this.filter = this.tokenContract.filters.Transfer(null, depositAddress); //filter all transfers TO my address
 	}

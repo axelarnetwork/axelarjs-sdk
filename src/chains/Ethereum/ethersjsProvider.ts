@@ -1,4 +1,5 @@
-import {ethers} from "ethers";
+import {ethers}     from "ethers";
+import {getConfigs} from "../../constants";
 
 type ProviderType =
 	| 'jsonRPC'
@@ -12,8 +13,13 @@ providers.ropsten = (url?: string) => ethers.getDefaultProvider('ropsten');
 providers.infura = (url?: string) => new ethers.providers.InfuraProvider('ropsten');
 providers.infuraWS = (url?: string) => new ethers.providers.WebSocketProvider(url || "", "ropsten");
 
-export const getEthersJsProvider = (providerType: ProviderType) => {
-	if (providerType === 'infuraWS')
-		return providers[providerType]("wss://ropsten.infura.io/ws/v3/2be110f3450b494f8d637ed7bb6954e3");
+export const getEthersJsProvider = (providerType: ProviderType, environment: string) => {
+	if (providerType === 'infuraWS') {
+		const infuraFromConfigs: string = getConfigs(environment).ethersjsConfigs.infuraProvider;
+		const infuraFromEnv: string = process.env.INFURA_PROVIDER as string;
+		console.log("providers",infuraFromConfigs,infuraFromEnv);
+		return providers[providerType](getConfigs(environment).ethersjsConfigs.infuraProvider);
+	}
+
 	return providers[providerType]();
 }
