@@ -1,12 +1,12 @@
 import {IAssetInfoResponse, IAssetInfoWithTrace, IAssetTransferObject} from "../interface/IAssetTransferObject";
 import {
-	CLIENT_API_POST_TRANSFER_ASSET,
+	CLIENT_API_POST_TRANSFER_ASSET, IAssetAndChainInfo,
 	IBlockchainWaitingService,
 	ICallbackStatus,
 	IChainInfo,
 	SourceOrDestination,
 	StatusResponse
-}                                                                      from "../interface";
+} from "../interface";
 import {RestServices}                                                  from "../services/RestServices";
 import getWaitingService                                               from "./status";
 import {SocketServices}                                     from "../services/SocketServices";
@@ -59,12 +59,12 @@ export class TransferAssetBridge {
 			sourceCbs.failCb,
 			"source"
 		).then(() => {
-			this.listenForTransactionStatus(destinationAssetInfoForWaitService,
-				message.destinationChainInfo,
-				destCbs.successCb,
-				destCbs.failCb,
-				"destination"
-			);
+			// this.listenForTransactionStatus(destinationAssetInfoForWaitService,
+			// 	message.destinationChainInfo,
+			// 	destCbs.successCb,
+			// 	destCbs.failCb,
+			// 	"destination"
+			// );
 		})
 
 		return depositAddressWithTraceId;
@@ -96,8 +96,12 @@ export class TransferAssetBridge {
 			this.environment
 		);
 
+		const assetAndChainInfo: IAssetAndChainInfo = {
+			assetInfo: addressInformation,
+			chainInfo
+		}
 		try {
-			await waitingService.wait(addressInformation, waitCb, this.clientSocketConnect);
+			await waitingService.wait(assetAndChainInfo, waitCb, this.clientSocketConnect);
 		} catch (e) {
 			errCb(e);
 		}

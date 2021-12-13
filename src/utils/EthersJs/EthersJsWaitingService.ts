@@ -2,9 +2,12 @@ import {Contract, ethers}                                   from "ethers";
 import {formatEther}                                        from "ethers/lib/utils";
 import {BaseWaitingService}                                from "../../chains/models/BaseWaitingService";
 import {getEthersJsProvider, ProviderType}                 from "./ethersjsProvider";
-import {IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
+
+import {IAssetAndChainInfo, IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
 import {getConfigs, IEnvironmentConfigs, IEthersJsTokenMap} from "../../constants";
 import {RestServices}                                       from "../../services/RestServices";
+import {SocketServices}                                                        from "../../services/SocketServices";
+
 
 const abi: string[] = [
 	"function name() view returns (string)",
@@ -19,6 +22,7 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 	private tokenContract!: Contract;
 	private filter!: ethers.EventFilter;
 
+
 	constructor(chainInfo: IChainInfo, assetInfo: IAssetInfo) {
 		super(30, assetInfo.assetAddress as string);
 	}
@@ -29,19 +33,9 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 		return api;
 	}
 
-	public async wait(address: string, cb: any): Promise<any> {
-		return new Promise((resolve, reject) => {
-			this.tokenContract.once(this.filter, (from: any, to: any, amount: any, event: any) => {
-				console.log(`Incoming amount of: ${formatEther(amount)}, from: ${from}.`, event);
-				event.axelarRequiredNumConfirmations = this.numConfirmations;
-				cb(event);
-				resolve(event);
-			});
-		});
-	}
+
 
 	private async init(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType) {
-
 		const configs: IEnvironmentConfigs = getConfigs(environment);
 		const { tokenAddressMap } = (configs as any)[chainInfo.chainName.toLowerCase()];
 		const tokenSymbol: keyof IEthersJsTokenMap = assetInfo.assetSymbol as keyof IEthersJsTokenMap;
@@ -64,5 +58,17 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 		this.tokenContract = new ethers.Contract(tokenContract, abi, this.provider);
 		this.filter = this.tokenContract.filters.Transfer(null, depositAddress); //filter all transfers TO my address
 	}
+
+	public async wait(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void> {
+		return new Promise((resolve, reject) => {
+			this.tokenContract.once(this.filter, (from: any, to: any, amount: any, event: any) => {
+				console.log(`Incoming amount of: ${formatEther(amount)}, from: ${from}.`, event);
+				event.axelarRequiredNumConfirmations = this.numConfirmations;
+				interimStatusCb(event);
+				resolve(event);
+			});
+		});
+	}
+
 
 }

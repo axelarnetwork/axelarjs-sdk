@@ -48,6 +48,10 @@ export interface ICOSLinkRequestBody extends ILinkRequestBody {
 export enum ISocketListenerTypes {
 
 	/*wait for deposit in axelarnet*/
+	WAIT_FOR_DEPOSIT = "WAIT_FOR_DEPOSIT",
+	DEPOSIT_CONFIRMED = "DEPOSIT_CONFIRMED",
+
+	/*wait for deposit in axelarnet*/
 	WAIT_FOR_AXL_DEPOSIT = "WAIT_FOR_AXL_DEPOSIT",
 	AXL_DEPOSIT_CONFIRMED = "AXL_DEPOSIT_CONFIRMED",
 
