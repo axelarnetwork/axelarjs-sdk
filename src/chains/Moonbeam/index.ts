@@ -1,5 +1,9 @@
-import {IChain, IChainInfo} from "../../interface";
-import Ethereum             from "../Ethereum";
+import {IAssetInfo, IBlockchainWaitingServiceFinder, IChain, IChainInfo, SourceOrDestination} from "../../interface";
+import Ethereum                                                                               from "../Ethereum";
+import WaitingService
+                                                                                              from "../Ethereum/WaitingService";
+import EthersJsWaitingService
+                                                                                              from "../../utils/EthersJs/EthersJsWaitingService";
 
 export default class Moonbeam extends Ethereum implements IChain {
 
@@ -14,6 +18,17 @@ export default class Moonbeam extends Ethereum implements IChain {
 
 	constructor() {
 		super();
+	}
+
+	public waitingService: IBlockchainWaitingServiceFinder = async (
+		chainInfo: IChainInfo,
+		assetInfo: IAssetInfo,
+		sOrDChain: SourceOrDestination,
+		environment: string
+	) => {
+		return (sOrDChain === 'source')
+			? new WaitingService(chainInfo, assetInfo)
+			: await new EthersJsWaitingService(chainInfo, assetInfo).build(chainInfo, assetInfo, environment, "moonbeam");
 	}
 
 }
