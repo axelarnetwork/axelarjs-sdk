@@ -14,6 +14,7 @@ export default class Polygon extends Ethereum implements IChain {
 
 	constructor() {
 		super();
+		this.providerType = "polygon";
 	}
 
 }
