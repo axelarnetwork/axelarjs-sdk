@@ -1,7 +1,7 @@
-import {ethers}                                             from "ethers";
+import {Contract, ethers}                                   from "ethers";
 import {formatEther}                                        from "ethers/lib/utils";
 import {BaseWaitingService}                                 from "../models/BaseWaitingService";
-import {getEthersJsProvider}                                from "../../TransferAssetBridge/status/utils/ethersjsProvider";
+import {getEthersJsProvider}                                from "./ethersjsProvider";
 import {IAssetInfo, IBlockchainWaitingService, IChainInfo}  from "../../interface";
 import {getConfigs, IEnvironmentConfigs, IEthersJsTokenMap} from "../../constants";
 import {RestServices}                                       from "../../services/RestServices";
@@ -15,9 +15,9 @@ const abi: string[] = [
 
 export default class EthersJsWaitingService extends BaseWaitingService implements IBlockchainWaitingService {
 
-	private provider: any;
-	private tokenContract: any;
-	private filter: any;
+	private provider!: ethers.providers.BaseProvider;
+	private tokenContract!: Contract;
+	private filter!: ethers.EventFilter;
 
 	constructor(assetInfo: IAssetInfo) {
 		super(30, assetInfo.assetAddress as string);
@@ -26,7 +26,6 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 	public async build(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string): Promise<EthersJsWaitingService> {
 		const api: EthersJsWaitingService = new EthersJsWaitingService(assetInfo);
 		await api.init(chainInfo, assetInfo, environment);
-		debugger;
 		return api;
 	}
 
