@@ -1,8 +1,8 @@
 import {Contract, ethers}                                   from "ethers";
 import {formatEther}                                        from "ethers/lib/utils";
-import {BaseWaitingService}                                 from "../models/BaseWaitingService";
-import {getEthersJsProvider}                                from "./ethersjsProvider";
-import {IAssetInfo, IBlockchainWaitingService, IChainInfo}  from "../../interface";
+import {BaseWaitingService}                                from "../../chains/models/BaseWaitingService";
+import {getEthersJsProvider, ProviderType}                 from "./ethersjsProvider";
+import {IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
 import {getConfigs, IEnvironmentConfigs, IEthersJsTokenMap} from "../../constants";
 import {RestServices}                                       from "../../services/RestServices";
 
@@ -19,20 +19,21 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 	private tokenContract!: Contract;
 	private filter!: ethers.EventFilter;
 
-	constructor(assetInfo: IAssetInfo) {
+	constructor(chainInfo: IChainInfo, assetInfo: IAssetInfo) {
 		super(30, assetInfo.assetAddress as string);
 	}
 
-	public async build(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string): Promise<EthersJsWaitingService> {
-		const api: EthersJsWaitingService = new EthersJsWaitingService(assetInfo);
-		await api.init(chainInfo, assetInfo, environment);
+	public async build(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType): Promise<EthersJsWaitingService> {
+		const api: EthersJsWaitingService = new EthersJsWaitingService(chainInfo, assetInfo);
+		await api.init(chainInfo, assetInfo, environment, providerType);
 		return api;
 	}
 
 	public async wait(address: string, cb: any): Promise<any> {
 		return new Promise((resolve, reject) => {
 			this.tokenContract.once(this.filter, (from: any, to: any, amount: any, event: any) => {
-				console.log(`Incoming amount of: ${formatEther(amount)}, from: ${from}.`, event);
+
+				console.log(`Incoming amount of: ${(amount)}, from: ${from}.`, event);
 				event.axelarRequiredNumConfirmations = this.numConfirmations;
 				cb(event);
 				resolve(event);
@@ -40,10 +41,13 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 		});
 	}
 
-	private async init(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string) {
+	private async init(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType) {
 
+		debugger;
 		const configs: IEnvironmentConfigs = getConfigs(environment);
-		const tokenAddressMap: IEthersJsTokenMap = configs?.ethersjsConfigs?.tokenAddressMap;
+		console.log("configssss",configs,chainInfo.chainName);
+		debugger;
+		const { tokenAddressMap } = (configs as any)[chainInfo.chainName.toLowerCase()];
 		const tokenSymbol: keyof IEthersJsTokenMap = assetInfo.assetSymbol as keyof IEthersJsTokenMap;
 		const depositAddress: string = assetInfo.assetAddress as string;
 
@@ -51,7 +55,7 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 		if (tokenAddressMap[tokenSymbol]) {
 			tokenContract = tokenAddressMap[tokenSymbol] as string;
 		} else {
-			const endpoint = `/getTokenAddress?module=evm&chain=ethereum&asset=${assetInfo.common_key}`;
+			const endpoint = `/getTokenAddress?module=evm&chain=${chainInfo?.chainName?.toLowerCase()}&asset=${assetInfo.common_key}`;
 			const resourceUrl: string = configs.resourceUrl;
 			const response = await new RestServices(resourceUrl).get(endpoint);
 			tokenContract = response.data;
@@ -60,8 +64,10 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 
 		console.log("EthersJsWaitingService token contract for " + tokenSymbol + ": ", tokenContract);
 
-		this.provider = getEthersJsProvider("infura");
+		this.provider = getEthersJsProvider(providerType);
+		console.log("provider",this.provider);
 		this.tokenContract = new ethers.Contract(tokenContract, abi, this.provider);
+		console.log("tokenContract",this.tokenContract);
 		this.filter = this.tokenContract.filters.Transfer(null, depositAddress); //filter all transfers TO my address
 	}
 

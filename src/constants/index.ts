@@ -4,25 +4,21 @@ export const GREPTCHA_SITE_KEY = "6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR"; //t
 
 const configsMap: { [key: string]: IEnvironmentConfigs } = {};
 
-export type IEthersJsTokenMap = {
-	AXL: string | null;
-}
+export type IEthersJsTokenMap = { [tokenKey: string]: string }
 
 interface IEthersJsConfigs {
 	tokenAddressMap: IEthersJsTokenMap;
 }
 
 export interface IEnvironmentConfigs {
-	ethersjsConfigs: IEthersJsConfigs;
+	ethereum: IEthersJsConfigs;
+	moonbeam: IEthersJsConfigs;
 	resourceUrl: string;
 }
 
 const devnetConfigs: IEnvironmentConfigs = {
-	ethersjsConfigs: {
-		tokenAddressMap: {
-			AXL: null,
-		}
-	},
+	ethereum: { tokenAddressMap: {} },
+	moonbeam: { tokenAddressMap: {} },
 	resourceUrl: `https://axelar-bridge-devnet.herokuapp.com`
 }
 
@@ -30,11 +26,8 @@ const localConfigs: IEnvironmentConfigs = cloneDeep(devnetConfigs);
 localConfigs.resourceUrl = `http://localhost:4000`;
 
 const testnetConfigs: IEnvironmentConfigs = {
-	ethersjsConfigs: {
-		tokenAddressMap: {
-			AXL: "",
-		}
-	},
+	ethereum: { tokenAddressMap: {} },
+	moonbeam: { tokenAddressMap: {} },
 	resourceUrl: `https://axelar-bridge-testnet.herokuapp.com`
 }
 
