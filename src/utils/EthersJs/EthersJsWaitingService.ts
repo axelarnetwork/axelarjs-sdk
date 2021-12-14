@@ -32,8 +32,7 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 	public async wait(address: string, cb: any): Promise<any> {
 		return new Promise((resolve, reject) => {
 			this.tokenContract.once(this.filter, (from: any, to: any, amount: any, event: any) => {
-
-				console.log(`Incoming amount of: ${(amount)}, from: ${from}.`, event);
+				console.log(`Incoming amount of: ${formatEther(amount)}, from: ${from}.`, event);
 				event.axelarRequiredNumConfirmations = this.numConfirmations;
 				cb(event);
 				resolve(event);
@@ -43,7 +42,6 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 
 	private async init(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType) {
 
-		debugger;
 		const configs: IEnvironmentConfigs = getConfigs(environment);
 		const { tokenAddressMap } = (configs as any)[chainInfo.chainName.toLowerCase()];
 		const tokenSymbol: keyof IEthersJsTokenMap = assetInfo.assetSymbol as keyof IEthersJsTokenMap;
