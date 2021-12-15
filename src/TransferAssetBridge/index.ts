@@ -9,9 +9,9 @@ import {
 }                                                                      from "../interface";
 import {RestServices}                                                  from "../services/RestServices";
 import getWaitingService                                               from "./status";
-import {SocketServices}                                                from "../services/SocketServices";
-import {validateDestinationAddress}                                    from "../utils";
-import {getConfigs, IEnvironmentConfigs}                               from "../constants";
+import {SocketServices}                                     from "../services/SocketServices";
+import {findModuleForChainName, validateDestinationAddress} from "../utils";
+import {getConfigs, IEnvironmentConfigs}                    from "../constants";
 
 export class TransferAssetBridge {
 
@@ -43,7 +43,7 @@ export class TransferAssetBridge {
 		// TODO: evm module does not have "depositAddress" attribute on emitted event on the vote result
 		//  for deposit confirmations, and only destinationAddress and destinationChain for now, so we use that here
 		const sourceAssetInfoForWaitService: IAssetInfoResponse = {
-			...(message.sourceChainInfo.chainSymbol === "ETH" ? message.selectedDestinationAsset : depositAddressWithTraceId.assetInfo),
+			...(findModuleForChainName(message.sourceChainInfo.chainName.toLowerCase()) === "evm" ? message.selectedDestinationAsset : depositAddressWithTraceId.assetInfo),
 			traceId: depositAddressWithTraceId.traceId,
 			sourceOrDestChain: "source"
 		};
