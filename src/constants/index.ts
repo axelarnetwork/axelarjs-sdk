@@ -13,12 +13,18 @@ interface IEthersJsConfigs {
 export interface IEnvironmentConfigs {
 	ethereum: IEthersJsConfigs;
 	moonbeam: IEthersJsConfigs;
+	avalanche: IEthersJsConfigs;
+	fantom: IEthersJsConfigs;
+	polygon: IEthersJsConfigs;
 	resourceUrl: string;
 }
 
 const devnetConfigs: IEnvironmentConfigs = {
 	ethereum: { tokenAddressMap: {} },
 	moonbeam: { tokenAddressMap: {} },
+	avalanche: { tokenAddressMap: {} },
+	fantom: { tokenAddressMap: {} },
+	polygon: { tokenAddressMap: {} },
 	resourceUrl: `https://axelar-bridge-devnet.herokuapp.com`
 }
 
@@ -28,6 +34,9 @@ localConfigs.resourceUrl = `http://localhost:4000`;
 const testnetConfigs: IEnvironmentConfigs = {
 	ethereum: { tokenAddressMap: {} },
 	moonbeam: { tokenAddressMap: {} },
+	avalanche: { tokenAddressMap: {} },
+	fantom: { tokenAddressMap: {} },
+	polygon: { tokenAddressMap: {} },
 	resourceUrl: `https://axelar-bridge-testnet.herokuapp.com`
 }
 
