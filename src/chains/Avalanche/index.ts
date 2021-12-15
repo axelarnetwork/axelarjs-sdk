@@ -14,7 +14,7 @@ export default class Avalanche extends Ethereum implements IChain {
 
 	constructor() {
 		super();
-		this.providerType = "moonbeam";
+		this.providerType = "avalanche";
 	}
 
 }
