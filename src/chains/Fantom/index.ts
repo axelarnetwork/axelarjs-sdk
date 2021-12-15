@@ -14,6 +14,7 @@ export default class Fantom extends Ethereum implements IChain {
 
 	constructor() {
 		super();
+		this.providerType = "fantom";
 	}
 
 }
