@@ -1,9 +1,13 @@
 import {IAssetInfo} from "../interface";
 
+export interface IAssetInfoForChain extends IAssetInfo {
+	minDepositAmt: number;
+}
+
 export interface IAssetConfig {
 	common_key: string;
 	native_chain: string;
-	chain_aliases: { [key: string]: IAssetInfo }
+	chain_aliases: { [key: string]: IAssetInfoForChain }
 }
 
 const ust_terra: IAssetConfig = {
