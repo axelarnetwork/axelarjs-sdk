@@ -17,6 +17,8 @@ export interface IAssetAndChainInfo {
 }
 
 export interface IBlockchainWaitingService {
+	waitForDepositConfirmation(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
+	waitForTransferEvent(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
 	wait(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
 }
 

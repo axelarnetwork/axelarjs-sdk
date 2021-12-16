@@ -81,6 +81,33 @@ export class TransferAssetBridge {
 		}
 	}
 
+	private async waitForDepositConfirmation(addressInformation: IAssetInfoResponse,
+	                                         chainInfo: IChainInfo,
+	                                         waitCb: StatusResponse,
+	                                         errCb: any,
+	                                         sOrDChain: SourceOrDestination
+	) {
+
+		const waitingService: IBlockchainWaitingService = await getWaitingService(
+			chainInfo.chainSymbol,
+			chainInfo,
+			addressInformation,
+			sOrDChain,
+			this.environment
+		);
+
+		const assetAndChainInfo: IAssetAndChainInfo = {
+			assetInfo: addressInformation,
+			chainInfo
+		}
+		try {
+			await waitingService.wait(assetAndChainInfo, waitCb, this.clientSocketConnect);
+		} catch (e) {
+			errCb(e);
+		}
+
+	}
+
 	private async listenForTransactionStatus(addressInformation: IAssetInfoResponse,
 	                                         chainInfo: IChainInfo,
 	                                         waitCb: StatusResponse,

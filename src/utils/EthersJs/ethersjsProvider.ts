@@ -1,4 +1,5 @@
-import {ethers} from "ethers";
+import {ethers}     from "ethers";
+import {getConfigs} from "../../constants";
 
 export type ProviderType =
 	| 'jsonRPC'
@@ -8,7 +9,6 @@ export type ProviderType =
 	| 'avalanche'
 	| 'fantom'
 	| 'polygon'
-	| 'moonbeamWS'
 	| 'ropsten';
 
 const providers: { [key: string]: (url?: string) => ethers.providers.BaseProvider } = {};
@@ -47,9 +47,14 @@ providers.fantom = (url?: string) => new ethers.providers.StaticJsonRpcProvider(
 providers.moonbeamWS = (url?: string) => new ethers.providers.WebSocketProvider(url || "");
 
 export const getEthersJsProvider = (providerType: ProviderType, environment: string) => {
-	if (providerType === 'infuraWS')
-		return providers[providerType]("wss://ropsten.infura.io/ws/v3/2be110f3450b494f8d637ed7bb6954e3");
-	if (providerType === 'moonbeamWS')
-		return providers[providerType]("wss://wss-relay.testnet.moonbeam.network");
+
+	if (providerType === 'infuraWS') {
+		const infuraFromConfigs: string = getConfigs(environment).ethereum.infuraProvider as string;
+		const infuraFromEnv: string = process.env.INFURA_PROVIDER as string;
+		console.log("providers",infuraFromConfigs,infuraFromEnv);
+		return providers[providerType](infuraFromConfigs);
+	}
+
 	return providers[providerType]();
+
 }

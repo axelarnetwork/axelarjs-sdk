@@ -2,7 +2,7 @@ import {cloneDeep} from "lodash";
 
 export const GREPTCHA_SITE_KEY = "6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR"; //this is intentionally public
 
-const configsMap: { [key: string]: IEnvironmentConfigs } = {};
+const configsMap: { [environment: string]: IEnvironmentConfigs } = {};
 
 export type IEthersJsTokenMap = { [tokenKey: string]: string }
 

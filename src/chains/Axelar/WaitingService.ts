@@ -15,19 +15,11 @@ export default class WaitingService extends BaseWaitingService implements IBlock
 		super(1, assetInfo.assetAddress as string);
 	}
 
-	public async wait(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
+	public async waitForDepositConfirmation(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
+		return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
+	}
 
-		console.log("asset and chain info in wait",assetAndChainInfo)
-		const data: any = await clientSocketConnect.emitMessageAndWaitForReply(
-			ISocketListenerTypes.WAIT_FOR_DEPOSIT,
-			assetAndChainInfo,
-			ISocketListenerTypes.DEPOSIT_CONFIRMED,
-			((data: any) => {
-				data.axelarRequiredNumConfirmations = this.numConfirmations;
-				interimStatusCb(data);
-			}).bind(this)
-		);
-		return data;
-
+	public async waitForTransferEvent(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
+		return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
 	}
 }
