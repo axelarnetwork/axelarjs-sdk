@@ -3,7 +3,7 @@ import Axelar                    from "./Axelar";
 import Ethereum                  from "./Ethereum";
 import Avalanche                 from "./Avalanche";
 import Terra                     from "./Terra";
-import {allAssets, IAssetConfig} from "../constants/assetsPerEnvironment";
+import {allAssets, IAssetConfig} from "../assets";
 import Fantom                    from "./Fantom";
 import Moonbeam                  from "./Moonbeam";
 import Polygon                   from "./Polygon";

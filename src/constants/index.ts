@@ -33,7 +33,6 @@ const localConfigs: IEnvironmentConfigs = cloneDeep(devnetConfigs);
 localConfigs.resourceUrl = `http://localhost:4000`;
 
 const testnetConfigs: IEnvironmentConfigs = {
-
 	ethereum: { tokenAddressMap: {}, infuraProvider: "wss://ropsten.infura.io/ws/v3/2be110f3450b494f8d637ed7bb6954e3" },
 	moonbeam: { tokenAddressMap: {} },
 	avalanche: { tokenAddressMap: {} },
