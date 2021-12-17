@@ -53,13 +53,15 @@ export class TransferAssetBridge {
 			sourceOrDestChain: "destination"
 		};
 
-		this.listenForTransactionStatus(sourceAssetInfoForWaitService,
+		this.confirmDeposit(sourceAssetInfoForWaitService,
 			message.sourceChainInfo,
+			message.destinationChainInfo,
 			sourceCbs.successCb,
 			sourceCbs.failCb,
 			"source"
 		).then(() => {
-			this.listenForTransactionStatus(destinationAssetInfoForWaitService,
+			this.detectTransferOnDestinationChain(destinationAssetInfoForWaitService,
+				message.sourceChainInfo,
 				message.destinationChainInfo,
 				destCbs.successCb,
 				destCbs.failCb,
@@ -81,54 +83,58 @@ export class TransferAssetBridge {
 		}
 	}
 
-	private async waitForDepositConfirmation(addressInformation: IAssetInfoResponse,
-	                                         chainInfo: IChainInfo,
+	private async confirmDeposit(assetInfo: IAssetInfoResponse,
+	                                         sourceChainInfo: IChainInfo,
+	                                         destinationChainInfo: IChainInfo,
 	                                         waitCb: StatusResponse,
 	                                         errCb: any,
 	                                         sOrDChain: SourceOrDestination
 	) {
 
 		const waitingService: IBlockchainWaitingService = await getWaitingService(
-			chainInfo.chainSymbol,
-			chainInfo,
-			addressInformation,
+			sourceChainInfo.chainSymbol,
+			sourceChainInfo,
+			assetInfo,
 			sOrDChain,
 			this.environment
 		);
 
 		const assetAndChainInfo: IAssetAndChainInfo = {
-			assetInfo: addressInformation,
-			chainInfo
+			assetInfo,
+			sourceChainInfo,
+			destinationChainInfo
 		}
 		try {
-			await waitingService.wait(assetAndChainInfo, waitCb, this.clientSocketConnect);
+			await waitingService.waitForDepositConfirmation(assetAndChainInfo, waitCb, this.clientSocketConnect);
 		} catch (e) {
 			errCb(e);
 		}
 
 	}
 
-	private async listenForTransactionStatus(addressInformation: IAssetInfoResponse,
-	                                         chainInfo: IChainInfo,
+	private async detectTransferOnDestinationChain(assetInfo: IAssetInfoResponse,
+                                           sourceChainInfo: IChainInfo,
+                                           destinationChainInfo: IChainInfo,
 	                                         waitCb: StatusResponse,
 	                                         errCb: any,
 	                                         sOrDChain: SourceOrDestination
 	) {
 
 		const waitingService: IBlockchainWaitingService = await getWaitingService(
-			chainInfo.chainSymbol,
-			chainInfo,
-			addressInformation,
+			destinationChainInfo.chainSymbol,
+			destinationChainInfo,
+			assetInfo,
 			sOrDChain,
 			this.environment
 		);
 
 		const assetAndChainInfo: IAssetAndChainInfo = {
-			assetInfo: addressInformation,
-			chainInfo
+			assetInfo,
+			sourceChainInfo,
+			destinationChainInfo
 		}
 		try {
-			await waitingService.wait(assetAndChainInfo, waitCb, this.clientSocketConnect);
+			await waitingService.waitForTransferEvent(assetAndChainInfo, waitCb, this.clientSocketConnect);
 		} catch (e) {
 			errCb(e);
 		}

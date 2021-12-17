@@ -1,3 +1,4 @@
+// TODO: maybe we can delete this?
 import {
 	IAssetAndChainInfo,
 	IAssetInfo,

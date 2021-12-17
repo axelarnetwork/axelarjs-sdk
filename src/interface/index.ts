@@ -13,7 +13,8 @@ export interface IChain {
 
 export interface IAssetAndChainInfo {
 	assetInfo: IAssetInfoResponse;
-	chainInfo: IChainInfo;
+	sourceChainInfo: IChainInfo;
+	destinationChainInfo: IChainInfo;
 }
 
 export interface IBlockchainWaitingService {
