@@ -7,8 +7,7 @@ export type ProviderType =
 	| 'moonbeam'
 	| 'avalanche'
 	| 'fantom'
-	| 'polygon'
-	| 'ropsten';
+	| 'polygon';
 
 const providers: { [key: string]: (provider: string, networkOptions?: Network | undefined) => ethers.providers.BaseProvider } = {};
 
@@ -20,8 +19,8 @@ providers.fantom = (provider: string, networkOptions: Network | undefined) => ne
 
 export const getEthersJsProvider = (providerType: ProviderType, environment: string) => {
 
-	const provider: string = getConfigs(environment).ethereum.providerOptions.provider as string;
-	const networkOptions: Network | undefined = getConfigs(environment).ethereum.providerOptions.network;
+	const provider: string = getConfigs(environment).ethersJsConfigs[providerType as string]?.providerOptions.provider as string;
+	const networkOptions: Network | undefined = getConfigs(environment).ethersJsConfigs[providerType as string]?.providerOptions.network;
 
 	if (providers[providerType])
 		return providers[providerType](provider, networkOptions);

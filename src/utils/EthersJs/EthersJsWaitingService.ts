@@ -3,7 +3,7 @@ import {formatEther}                                                           f
 import {BaseWaitingService}                                                    from "../../chains/models/BaseWaitingService";
 import {getEthersJsProvider, ProviderType}                                     from "./ethersjsProvider";
 import {IAssetAndChainInfo, IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
-import {getConfigs, IEnvironmentConfigs, IEthersJsTokenMap}                    from "../../constants";
+import {getConfigs, IEnvironmentConfigs, IEthersJsConfigs, IEthersJsTokenMap}  from "../../constants";
 import {RestServices}                                                          from "../../services/RestServices";
 import {SocketServices}                                                        from "../../services/SocketServices";
 
@@ -45,7 +45,8 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 
 	private async init(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType) {
 		const configs: IEnvironmentConfigs = getConfigs(environment);
-		const {tokenAddressMap} = (configs as any)[chainInfo.chainName.toLowerCase()];
+		const ethersJsConfigs: { [chain: string]: IEthersJsConfigs } = configs.ethersJsConfigs;
+		const {tokenAddressMap} = ethersJsConfigs[chainInfo.chainName.toLowerCase()];
 		const tokenSymbol: keyof IEthersJsTokenMap = assetInfo.assetSymbol as keyof IEthersJsTokenMap;
 		const depositAddress: string = assetInfo.assetAddress as string;
 
