@@ -1,25 +1,39 @@
-import {IAssetInfo, IBlockchainWaitingService, IChainInfo, ISocketListenerTypes, StatusResponse} from "../../interface";
-import {BaseWaitingService}                                                                      from "../models/BaseWaitingService";
-import {SocketServices}                                                                          from "../../services/SocketServices";
+import {
+	IAssetAndChainInfo,
+	IAssetInfo,
+	IBlockchainWaitingService,
+	IChainInfo,
+	ISocketListenerTypes,
+	StatusResponse
+}                             from "../../interface";
+import {BaseWaitingService}   from "../models/BaseWaitingService";
+import {SocketServices}       from "../../services/SocketServices";
+import EthersJsWaitingService from "../../utils/EthersJs/EthersJsWaitingService";
+import {ProviderType}         from "../../utils/EthersJs/ethersjsProvider";
 
 export default class WaitingService extends BaseWaitingService implements IBlockchainWaitingService {
 
-	constructor(chainInfo: IChainInfo, assetInfo: IAssetInfo) {
+	public environment: string;
+	public providerType: ProviderType;
+
+	constructor(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType) {
 		super(1, assetInfo.assetAddress as string);
+		this.environment = environment;
+		this.providerType = providerType;
 	}
 
-	public async wait(depositAddress: IAssetInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
+	public async waitForDepositConfirmation(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
+		return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
+	}
 
-		const data: any = await clientSocketConnect.emitMessageAndWaitForReply(
-			ISocketListenerTypes.WAIT_FOR_EVM_DEPOSIT,
-			depositAddress,
-			ISocketListenerTypes.EVM_DEPOSIT_CONFIRMED,
-			((data: any) => {
-				data.axelarRequiredNumConfirmations = this.numConfirmations;
-				interimStatusCb(data);
-			}).bind(this)
-		);
-		return data;
+	public async waitForTransferEvent(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
+
+		const { assetInfo, destinationChainInfo } = assetAndChainInfo;
+
+		return (await new EthersJsWaitingService(destinationChainInfo, assetInfo)
+			.build(destinationChainInfo, assetInfo, this.environment, this.providerType))
+			.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
 
 	}
+
 }

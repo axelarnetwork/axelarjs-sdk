@@ -1,6 +1,7 @@
-import {BaseWaitingService}                                from "../models/BaseWaitingService";
-import {poll}                                              from "../utils/poll";
-import {IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
+import {BaseWaitingService}                                                    from "../models/BaseWaitingService";
+import {poll}                                                                  from "../utils/poll";
+import {IAssetAndChainInfo, IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
+import {SocketServices}                                                        from "../../services/SocketServices";
 
 export interface UnconfirmedTxRef {
 	address: string;
@@ -59,7 +60,8 @@ export class WaitingService extends BaseWaitingService implements IBlockchainWai
 		console.log("waiting service constructor");
 	}
 
-	public async wait(depositAddress: IAssetInfo, interimStatusCb: StatusResponse): Promise<any> {
+	public async wait(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void> {
+		const depositAddress = assetAndChainInfo.assetInfo;
 		const url = `https://api.blockcypher.com/v1/btc/test3/addrs/${depositAddress.assetAddress}`;
 		const asyncRequest = (attempts: number) => new Promise((res, rej) => {
 			fetch(url, {
@@ -82,8 +84,6 @@ export class WaitingService extends BaseWaitingService implements IBlockchainWai
 			interval: this.pollingInterval,
 			maxAttempts: this.maxPollingAttempts
 		});
-		return true;
-
 	}
 
 	private validate(res: BlockCypherResponse): boolean {

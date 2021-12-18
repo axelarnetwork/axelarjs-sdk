@@ -1,10 +1,12 @@
-import {Contract, ethers}                                   from "ethers";
-import {formatEther}                                        from "ethers/lib/utils";
-import {BaseWaitingService}                                from "../../chains/models/BaseWaitingService";
-import {getEthersJsProvider, ProviderType}                 from "./ethersjsProvider";
-import {IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
-import {getConfigs, IEnvironmentConfigs, IEthersJsTokenMap} from "../../constants";
-import {RestServices}                                       from "../../services/RestServices";
+import {Contract, ethers}                                                      from "ethers";
+import {formatEther}                                                           from "ethers/lib/utils";
+import {BaseWaitingService}                                                    from "../../chains/models/BaseWaitingService";
+import {getEthersJsProvider, ProviderType}                                     from "./ethersjsProvider";
+import {IAssetAndChainInfo, IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
+import {getConfigs, IEnvironmentConfigs, IEthersJsConfigs, IEthersJsTokenMap}  from "../../constants";
+import {RestServices}                                                          from "../../services/RestServices";
+import {SocketServices}                                                        from "../../services/SocketServices";
+
 
 const abi: string[] = [
 	"function name() view returns (string)",
@@ -23,27 +25,28 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 		super(30, assetInfo.assetAddress as string);
 	}
 
+
 	public async build(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType): Promise<EthersJsWaitingService> {
 		const api: EthersJsWaitingService = new EthersJsWaitingService(chainInfo, assetInfo);
 		await api.init(chainInfo, assetInfo, environment, providerType);
 		return api;
 	}
 
-	public async wait(address: string, cb: any): Promise<any> {
+	public async wait(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void> {
 		return new Promise((resolve, reject) => {
 			this.tokenContract.once(this.filter, (from: any, to: any, amount: any, event: any) => {
 				console.log(`Incoming amount of: ${formatEther(amount)}, from: ${from}.`, event);
 				event.axelarRequiredNumConfirmations = this.numConfirmations;
-				cb(event);
+				interimStatusCb(event);
 				resolve(event);
 			});
 		});
 	}
 
 	private async init(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType) {
-
 		const configs: IEnvironmentConfigs = getConfigs(environment);
-		const { tokenAddressMap } = (configs as any)[chainInfo.chainName.toLowerCase()];
+		const ethersJsConfigs: { [chain: string]: IEthersJsConfigs } = configs.ethersJsConfigs;
+		const {tokenAddressMap} = ethersJsConfigs[chainInfo.chainName.toLowerCase()];
 		const tokenSymbol: keyof IEthersJsTokenMap = assetInfo.assetSymbol as keyof IEthersJsTokenMap;
 		const depositAddress: string = assetInfo.assetAddress as string;
 
@@ -60,9 +63,10 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 
 		console.log("EthersJsWaitingService token contract for " + tokenSymbol + ": ", tokenContract + " on: " + chainInfo.chainName);
 
-		this.provider = getEthersJsProvider(providerType);
+		this.provider = getEthersJsProvider(providerType, environment);
 		this.tokenContract = new ethers.Contract(tokenContract, abi, this.provider);
 		this.filter = this.tokenContract.filters.Transfer(null, depositAddress); //filter all transfers TO my address
 	}
+
 
 }

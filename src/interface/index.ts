@@ -1,4 +1,6 @@
-import {SourceOrDestination} from "./IMiscTopics";
+import {SourceOrDestination, StatusResponse} from "./IMiscTopics";
+import {SocketServices}                      from "../services/SocketServices";
+import {IAssetInfoResponse}                  from "./IAssetTransferObject";
 
 export * from "./IAssetTransferObject";
 export * from "./IMiscTopics";
@@ -9,8 +11,16 @@ export interface IChain {
 	waitingService: IBlockchainWaitingServiceFinder;
 }
 
+export interface IAssetAndChainInfo {
+	assetInfo: IAssetInfoResponse;
+	sourceChainInfo: IChainInfo;
+	destinationChainInfo: IChainInfo;
+}
+
 export interface IBlockchainWaitingService {
-	wait(...args: any[]): Promise<void>;
+	waitForDepositConfirmation(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
+	waitForTransferEvent(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
+	wait(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
 }
 
 export interface IChainInfo {

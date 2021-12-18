@@ -1,8 +1,6 @@
 import WaitingService                                                                         from "./WaitingService";
 import {isAddress as isValidEVMAddress}                                                       from "ethers/lib/utils";
 import {IAssetInfo, IBlockchainWaitingServiceFinder, IChain, IChainInfo, SourceOrDestination} from "../../interface";
-import EthersJsWaitingService
-                                                                                              from "../../utils/EthersJs/EthersJsWaitingService";
 import {ProviderType}                                                                         from "../../utils/EthersJs/ethersjsProvider";
 
 export default class Ethereum implements IChain {
@@ -19,7 +17,7 @@ export default class Ethereum implements IChain {
 	};
 
 	constructor() {
-		this.providerType = "infuraWS";
+		this.providerType = "ethereum";
 	}
 
 	public validateAddress = (addressInfo: IAssetInfo) => isValidEVMAddress(addressInfo.assetAddress as string);
@@ -30,8 +28,6 @@ export default class Ethereum implements IChain {
 		sOrDChain: SourceOrDestination,
 		environment: string
 	) => {
-		return (sOrDChain === 'source')
-			? new WaitingService(chainInfo, assetInfo)
-			: await new EthersJsWaitingService(chainInfo, assetInfo).build(chainInfo, assetInfo, environment, this.providerType);
+		return new WaitingService(chainInfo, assetInfo, environment, this.providerType)
 	}
 }

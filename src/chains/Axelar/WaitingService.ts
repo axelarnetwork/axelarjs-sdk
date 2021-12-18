@@ -1,4 +1,11 @@
-import {IAssetInfo, IBlockchainWaitingService, IChainInfo, ISocketListenerTypes, StatusResponse} from "../../interface";
+import {
+	IAssetAndChainInfo,
+	IAssetInfo,
+	IBlockchainWaitingService,
+	IChainInfo,
+	ISocketListenerTypes,
+	StatusResponse
+} from "../../interface";
 import {BaseWaitingService}                                                                      from "../models/BaseWaitingService";
 import {SocketServices}                                                                          from "../../services/SocketServices";
 
@@ -8,18 +15,11 @@ export default class WaitingService extends BaseWaitingService implements IBlock
 		super(1, assetInfo.assetAddress as string);
 	}
 
-	public async wait(depositAddress: IAssetInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
+	public async waitForDepositConfirmation(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
+		return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
+	}
 
-		const data: any = await clientSocketConnect.emitMessageAndWaitForReply(
-			ISocketListenerTypes.WAIT_FOR_AXL_DEPOSIT,
-			depositAddress,
-			ISocketListenerTypes.AXL_DEPOSIT_CONFIRMED,
-			((data: any) => {
-				data.axelarRequiredNumConfirmations = this.numConfirmations;
-				interimStatusCb(data);
-			}).bind(this)
-		);
-		return data;
-
+	public async waitForTransferEvent(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
+		return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
 	}
 }
