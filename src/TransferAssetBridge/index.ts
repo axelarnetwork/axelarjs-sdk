@@ -1,17 +1,17 @@
 import {IAssetInfoResponse, IAssetInfoWithTrace, IAssetTransferObject} from "../interface/IAssetTransferObject";
 import {
-	CLIENT_API_POST_TRANSFER_ASSET, IAssetAndChainInfo,
+	CLIENT_API_POST_TRANSFER_ASSET,
+	IAssetAndChainInfo,
 	IBlockchainWaitingService,
 	ICallbackStatus,
-	IChainInfo,
 	SourceOrDestination,
 	StatusResponse
-} from "../interface";
+}                                                                      from "../interface";
 import {RestServices}                                                  from "../services/RestServices";
 import getWaitingService                                               from "./status";
-import {SocketServices}                                     from "../services/SocketServices";
-import {findModuleForChainName, validateDestinationAddress} from "../utils";
-import {getConfigs, IEnvironmentConfigs}                    from "../constants";
+import {SocketServices}                                                from "../services/SocketServices";
+import {findModuleForChainName, validateDestinationAddress}            from "../utils";
+import {getConfigs, IEnvironmentConfigs}                               from "../constants";
 
 export class TransferAssetBridge {
 
@@ -34,40 +34,42 @@ export class TransferAssetBridge {
 	                            showAlerts: boolean = true
 	): Promise<IAssetInfoWithTrace> {
 
-		if (!validateDestinationAddress(message?.destinationChainInfo?.chainSymbol, message?.selectedDestinationAsset))
-			throw new Error(`invalid destination address in ${message?.selectedDestinationAsset?.assetSymbol}`);
+		const {selectedDestinationAsset, sourceChainInfo, destinationChainInfo} = message;
+
+		if (!validateDestinationAddress(destinationChainInfo?.chainSymbol, selectedDestinationAsset))
+			throw new Error(`invalid destination address in ${selectedDestinationAsset?.assetSymbol}`);
 
 		const depositAddressWithTraceId: IAssetInfoWithTrace = await this.getDepositAddress(message, showAlerts);
 		const traceId: string = depositAddressWithTraceId.traceId;
 
-		// TODO: evm module does not have "depositAddress" attribute on emitted event on the vote result
-		//  for deposit confirmations, and only destinationAddress and destinationChain for now, so we use that here
-		const sourceAssetInfoForWaitService: IAssetInfoResponse = {
-			...(findModuleForChainName(message.sourceChainInfo.chainName.toLowerCase()) === "evm" ? message.selectedDestinationAsset : depositAddressWithTraceId.assetInfo),
+		// TODO: evm module does not have "depositAddress" attribute on emitted event on the vote result for deposit confirmations,
+		//  on the evm module, the right depositConfirmation event only has fields for destinationAddress and destinationChain for now,
+		//  so we use that here in the listener
+		const srcAssetForDepositConfirmation: IAssetInfoResponse = {
+			...(findModuleForChainName(sourceChainInfo.chainName.toLowerCase()) === "evm"
+				? selectedDestinationAsset
+				: depositAddressWithTraceId.assetInfo),
 			traceId: depositAddressWithTraceId.traceId,
 			sourceOrDestChain: "source"
 		};
-		const destinationAssetInfoForWaitService: IAssetInfoResponse = {
-			...message.selectedDestinationAsset,
+		const destAssetForTransferEvent: IAssetInfoResponse = {
+			...selectedDestinationAsset,
 			traceId,
 			sourceOrDestChain: "destination"
 		};
 
-		this.confirmDeposit(sourceAssetInfoForWaitService,
-			message.sourceChainInfo,
-			message.destinationChainInfo,
+		this.confirmDeposit(
+			{assetInfo: srcAssetForDepositConfirmation, sourceChainInfo, destinationChainInfo},
 			sourceCbs.successCb,
 			sourceCbs.failCb,
 			"source"
-		).then(() => {
-			this.detectTransferOnDestinationChain(destinationAssetInfoForWaitService,
-				message.sourceChainInfo,
-				message.destinationChainInfo,
-				destCbs.successCb,
-				destCbs.failCb,
-				"destination"
-			);
-		})
+		)
+		.then(() => this.detectTransferOnDestinationChain(
+			{assetInfo: destAssetForTransferEvent, sourceChainInfo, destinationChainInfo},
+			destCbs.successCb,
+			destCbs.failCb,
+			"destination"
+		))
 
 		return depositAddressWithTraceId;
 	}
@@ -83,27 +85,20 @@ export class TransferAssetBridge {
 		}
 	}
 
-	private async confirmDeposit(assetInfo: IAssetInfoResponse,
-	                                         sourceChainInfo: IChainInfo,
-	                                         destinationChainInfo: IChainInfo,
-	                                         waitCb: StatusResponse,
-	                                         errCb: any,
-	                                         sOrDChain: SourceOrDestination
+	private async confirmDeposit(assetAndChainInfo: IAssetAndChainInfo,
+	                             waitCb: StatusResponse,
+	                             errCb: any,
+	                             sOrDChain: SourceOrDestination
 	) {
 
+		const {assetInfo, sourceChainInfo} = assetAndChainInfo;
 		const waitingService: IBlockchainWaitingService = await getWaitingService(
-			sourceChainInfo.chainSymbol,
 			sourceChainInfo,
 			assetInfo,
 			sOrDChain,
 			this.environment
 		);
 
-		const assetAndChainInfo: IAssetAndChainInfo = {
-			assetInfo,
-			sourceChainInfo,
-			destinationChainInfo
-		}
 		try {
 			await waitingService.waitForDepositConfirmation(assetAndChainInfo, waitCb, this.clientSocketConnect);
 		} catch (e) {
@@ -112,27 +107,19 @@ export class TransferAssetBridge {
 
 	}
 
-	private async detectTransferOnDestinationChain(assetInfo: IAssetInfoResponse,
-                                           sourceChainInfo: IChainInfo,
-                                           destinationChainInfo: IChainInfo,
-	                                         waitCb: StatusResponse,
-	                                         errCb: any,
-	                                         sOrDChain: SourceOrDestination
+	private async detectTransferOnDestinationChain(assetAndChainInfo: IAssetAndChainInfo,
+	                                               waitCb: StatusResponse,
+	                                               errCb: any,
+	                                               sOrDChain: SourceOrDestination
 	) {
 
+		const {assetInfo, destinationChainInfo} = assetAndChainInfo;
 		const waitingService: IBlockchainWaitingService = await getWaitingService(
-			destinationChainInfo.chainSymbol,
 			destinationChainInfo,
 			assetInfo,
 			sOrDChain,
 			this.environment
 		);
-
-		const assetAndChainInfo: IAssetAndChainInfo = {
-			assetInfo,
-			sourceChainInfo,
-			destinationChainInfo
-		}
 		try {
 			await waitingService.waitForTransferEvent(assetAndChainInfo, waitCb, this.clientSocketConnect);
 		} catch (e) {

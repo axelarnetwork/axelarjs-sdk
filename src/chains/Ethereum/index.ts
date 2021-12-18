@@ -17,7 +17,7 @@ export default class Ethereum implements IChain {
 	};
 
 	constructor() {
-		this.providerType = "infuraWS";
+		this.providerType = "ethereum";
 	}
 
 	public validateAddress = (addressInfo: IAssetInfo) => isValidEVMAddress(addressInfo.assetAddress as string);

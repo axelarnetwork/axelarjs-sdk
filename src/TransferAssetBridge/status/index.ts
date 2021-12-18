@@ -15,19 +15,18 @@ ChainList.forEach((chainInfo: IChain) => {
 	waitingServiceMap[chainKey] = chainInfo.waitingService as IBlockchainWaitingServiceFinder
 });
 
-type IGetWaitingService = (chainKey: string,
-                           chainInfo: IChainInfo,
+type IGetWaitingService = (chainInfo: IChainInfo,
                            assetInfo: IAssetInfo,
                            sOrDChain: SourceOrDestination,
                            environment: string) => IBlockchainWaitingService | Promise<IBlockchainWaitingService>;
 const getWaitingService: IGetWaitingService = (
-	chainKey: string,
 	chainInfo: IChainInfo,
 	assetInfo: IAssetInfo,
 	sOrDChain: SourceOrDestination,
 	environment: string
 ) => {
-	return waitingServiceMap[chainKey.toLowerCase()](chainInfo, assetInfo, sOrDChain, environment);
+	const chainKey = chainInfo.chainSymbol.toLowerCase();
+	return waitingServiceMap[chainKey](chainInfo, assetInfo, sOrDChain, environment);
 };
 
 export default getWaitingService;

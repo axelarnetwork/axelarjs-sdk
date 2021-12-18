@@ -1,60 +1,30 @@
 import {ethers}     from "ethers";
+import { Network } from "@ethersproject/networks";
 import {getConfigs} from "../../constants";
 
 export type ProviderType =
-	| 'jsonRPC'
-	| 'infura'
-	| 'infuraWS'
+	| 'ethereum'
 	| 'moonbeam'
 	| 'avalanche'
 	| 'fantom'
 	| 'polygon'
 	| 'ropsten';
 
-const providers: { [key: string]: (url?: string) => ethers.providers.BaseProvider } = {};
+const providers: { [key: string]: (provider: string, networkOptions?: Network | undefined) => ethers.providers.BaseProvider } = {};
 
-providers.ropsten = (url?: string) => ethers.getDefaultProvider('ropsten');
-providers.infura = (url?: string) => new ethers.providers.InfuraProvider('ropsten');
-providers.infuraWS = (url?: string) => new ethers.providers.WebSocketProvider(url || "");
-providers.moonbeam = (url?: string) => new ethers.providers.StaticJsonRpcProvider('https://rpc.testnet.moonbeam.network', {
-	chainId: 1287,
-	name: 'moonbase-alpha'
-});
-
-providers.polygon = (url?: string) => new ethers.providers.StaticJsonRpcProvider(
-	'https://rpc-mumbai.maticvigil.com', //https://mumbai.polygonscan.com/apis#rpc
-	{
-		chainId: 80001,
-		name: 'polygon-testnet'
-	}
-);
-providers.avalanche = (url?: string) => new ethers.providers.StaticJsonRpcProvider(
-	'https://api.avax-test.network/ext/bc/C/rpc', //https://docs.avax.network/build/tutorials/smart-contracts/deploy-a-smart-contract-on-avalanche-using-remix-and-metamask/
-	{
-		chainId: 43113,
-		name: 'Avalanche Testnet C-Chain'
-	}
-);
-
-providers.fantom = (url?: string) => new ethers.providers.StaticJsonRpcProvider(
-	'https://rpc.testnet.fantom.network', //https://docs.fantom.foundation/tutorials/set-up-metamask-testnet
-	{
-		chainId: 4002,
-		name: 'Fantom testnet'
-	}
-);
-
-providers.moonbeamWS = (url?: string) => new ethers.providers.WebSocketProvider(url || "");
+providers.ethereum = (provider: string) => new ethers.providers.WebSocketProvider(provider);
+providers.avalanche = (provider: string, networkOptions: Network | undefined) => new ethers.providers.StaticJsonRpcProvider(provider, networkOptions);
+providers.moonbeam = (provider: string, networkOptions: Network | undefined) => new ethers.providers.StaticJsonRpcProvider(provider, networkOptions);
+providers.polygon = (provider: string, networkOptions: Network | undefined) => new ethers.providers.StaticJsonRpcProvider(provider, networkOptions);
+providers.fantom = (provider: string, networkOptions: Network | undefined) => new ethers.providers.StaticJsonRpcProvider(provider, networkOptions);
 
 export const getEthersJsProvider = (providerType: ProviderType, environment: string) => {
 
-	if (providerType === 'infuraWS') {
-		const infuraFromConfigs: string = getConfigs(environment).ethereum.infuraProvider as string;
-		const infuraFromEnv: string = process.env.INFURA_PROVIDER as string;
-		console.log("providers",infuraFromConfigs,infuraFromEnv);
-		return providers[providerType](infuraFromConfigs);
-	}
+	const provider: string = getConfigs(environment).ethereum.providerOptions.provider as string;
+	const networkOptions: Network | undefined = getConfigs(environment).ethereum.providerOptions.network;
 
-	return providers[providerType]();
+	if (providers[providerType])
+		return providers[providerType](provider, networkOptions);
 
+	throw new Error(`provider not found for: ${providerType} in ${environment}`);
 }
