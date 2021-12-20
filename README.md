@@ -17,9 +17,19 @@ The list will continue to grow, as will the use cases of this SDK.
 Thank you for your support!
 
 ## Note
-This SDK repo is still in early development. 
+This SDK repo is still in early development, and candidly, Axelar's own webapp has been its only consumer. 
 
-Please let us know of any issues you encounter using the SDK. 
+Accordingly, please let us know of any issues you encounter using the SDK. 
+
+## Onboarding process
+Initially, we are gatekeeping the rollout of this SDK a bit as we work through some kinks. 
+
+For now, this means that we are whitelisting hosts that can access the APIs and underlying services downstream, 
+i.e. it is restricted by both recaptcha validation and cors settings.
+
+So, our proposed process is as follows:
+1. Install and integrate the API, as shown in the `Installation` and `Getting Started` steps below.
+2. Let us know the hostnames you intend to have access the APIs. We will add that to our list of approved domains.
 
 ## Installation
 
