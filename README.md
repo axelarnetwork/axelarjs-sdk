@@ -1,5 +1,26 @@
 # AxelarJS SDK
 
+## Overview
+
+The Axelar JS SDK was created to abstract a set of tools used to make requests into the Axelar Network.
+
+One of our early use cases is a simple transfer of crypto assets across any of our supported chains.
+
+Day 1, this will include:
+
+| All Supported Assets  | All Supported Blockchain Networks |
+| ------------- | ------------- |
+| Axelar native tokens, aUST, UST (Terra stablecoin), LUNA (Terra native tokens)  | Avalanche, Axelar, Ethereum Fantom |
+
+The list will continue to grow, as will the use cases of this SDK. 
+
+Thank you for your support!
+
+## Note
+This SDK repo is still in early development. 
+
+Please let us know of any issues you encounter using the SDK. 
+
 ## Installation
 
 ```bash
