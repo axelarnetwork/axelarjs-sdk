@@ -10,7 +10,7 @@ Day 1, this will include:
 
 | All Supported Assets  | All Supported Blockchain Networks |
 | ------------- | ------------- |
-| Axelar native tokens, aUST, UST (Terra stablecoin), LUNA (Terra native tokens)  | Avalanche, Axelar, Ethereum Fantom |
+| Axelar native tokens, aUST, UST (Terra stablecoin), LUNA (Terra native tokens)  | Avalanche, Axelar, Ethereum, Fantom, Polygon, Terra |
 
 The list will continue to grow, as will the use cases of this SDK. 
 
