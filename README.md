@@ -6,7 +6,7 @@
 npm i --save @axelar-network/axelarjs-sdk
 ```
 
-##Getting Started
+## Getting Started
 
 ```tsx
 import {
