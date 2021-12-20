@@ -1,6 +1,6 @@
 # AxelarJS SDK
 
-## Setup
+## Installation
 
 ```bash
 npm i --save @axelar-network/axelarjs-sdk
@@ -8,6 +8,9 @@ npm i --save @axelar-network/axelarjs-sdk
 
 ## Getting Started
 
+You can use something like the following snippets to first set up the library consumer and then to instantiate it
+
+For initial setup:
 ```tsx
 import {
     IAssetInfoWithTrace,
@@ -16,20 +19,20 @@ import {
     TransferAssetBridge
 } from "@axelar-network/axelarjs-sdk";
 
-export class TransferAssetBridgeFacade {
+export class AxelarJSSDKFacade {
 
     private static environment: string;
-    private static transferAssetBridge: TransferAssetBridge;
+    private static axelarJsSDK: TransferAssetBridge;
 
     constructor(environment: string) {
-        TransferAssetBridgeFacade.environment = environment;
-        TransferAssetBridgeFacade.transferAssetBridge = new TransferAssetBridge(TransferAssetBridgeFacade.environment);
+        AxelarJSSDKFacade.environment = environment;
+        AxelarJSSDKFacade.axelarJsSDK = new TransferAssetBridge(AxelarJSSDKFacade.environment);
     }
 
-    public static async transferAssets(message: IAssetTransferObject, sourceCbs: ICallbackStatus, destCbs: ICallbackStatus): Promise<IAssetInfoWithTrace> {
+    public static async transferAssets(payload: IAssetTransferObject, sourceCbs: ICallbackStatus, destCbs: ICallbackStatus): Promise<IAssetInfoWithTrace> {
 
         try {
-            return TransferAssetBridgeFacade.transferAssetBridge.transferAssets(message, sourceCbs, destCbs, false);
+            return AxelarJSSDKFacade.axelarJsSDK.transferAssets(payload, sourceCbs, destCbs, false);
         } catch (e: any) {
             sourceCbs?.failCb();
             throw e;
@@ -38,6 +41,16 @@ export class TransferAssetBridgeFacade {
 
 }
 ```
+
+For instantiation:
+```tsx
+
+const environment = "devnet"; /*environment must be one of local | devnet | testnet*/
+
+new AxelarJSSDKFacade(environment);
+
+```
+
 ## Development
 
 If you like, you can get this repo running locally:
