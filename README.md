@@ -74,9 +74,9 @@ const environment: string = "devnet"; /*environment should be one of local | dev
 
 const api: AxelarJSSDKFacade = new AxelarJSSDKFacade(environment);
 
-const payload, sourceCbs, destCbs; /*see sample parameters below*/
+const payload, sourceCbs, destCbs;
 
-/*...*/
+/*...set up parmeters here; see sample parameters below for more guidance*/
 
 api.transferAssets(payload, sourceCbs, destCbs, true);
 
