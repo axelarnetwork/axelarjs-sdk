@@ -50,7 +50,11 @@ export class AxelarJSSDKFacade {
         AxelarJSSDKFacade.axelarJsSDK = new TransferAssetBridge(AxelarJSSDKFacade.environment);
     }
 
-    public static async transferAssets(payload: IAssetTransferObject, sourceCbs: ICallbackStatus, destCbs: ICallbackStatus): Promise<IAssetInfoWithTrace> {
+    public static async transferAssets(
+    	payload: IAssetTransferObject, 
+        sourceCbs: ICallbackStatus, 
+        destCbs: ICallbackStatus
+    ): Promise<IAssetInfoWithTrace> {
 
         try {
             return AxelarJSSDKFacade.axelarJsSDK.transferAssets(payload, sourceCbs, destCbs, false);
@@ -63,12 +67,23 @@ export class AxelarJSSDKFacade {
 }
 ```
 
-For instantiation:
+For instantiation and invocation:
 ```tsx
 
-const environment = "devnet"; /*environment must be one of local | devnet | testnet*/
+const environment: string = "devnet"; /*environment should be one of local | devnet | testnet*/
 
-new AxelarJSSDKFacade(environment);
+const api: AxelarJSSDKFacade = new AxelarJSSDKFacade(environment);
+
+const payload, sourceCbs, destCbs; /*see sample parameters below*/
+
+/*...*/
+
+api.transferAssets(payload, sourceCbs, destCbs, true);
+
+```
+
+Sample parameters:
+```tsx
 
 ```
 
