@@ -89,7 +89,7 @@ For instantiation and invocation:
     
     const api: AxelarJSSDKFacade = new AxelarJSSDKFacade(environment);
     
-    const requestPayload, sourceCbs, destCbs;
+    const requestPayload, sourceChainCbs, destinationChainCbs;
 
     const depositAddress: IAssetInfo, 
         traceId: string;
@@ -105,13 +105,16 @@ For instantiation and invocation:
             try {
                 const res: IAssetInfoWithTrace = await api.transferAssets(
                     requestPayload,
-                    {successCb: (data: any) => sCb(data, setSourceNumConfirmations), failCb},
-                    {successCb: (data: any) => sCb(data, setDestinationNumConfirmations), failCb}
+                    {successCb: sourceChainCbs.successCb, failCb: sourceChainCbs.failCb},
+	                {successCb: destinationChainCbs.successCb, destinationChainCbs: sourceChainCbs.failCb},
                 );
                 depositAddress = res.assetInfo;
 	            traceId = res.traceId;
             } catch (e: any) {
-                reject("transfer bridge error" + e);
+            	/*
+            	your error handling here, i.e:            	
+                reject("transfer asset api error" + e);
+            	* */
             }
     
         }
