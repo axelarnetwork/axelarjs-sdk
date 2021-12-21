@@ -80,7 +80,10 @@ export class AxelarJSSDKFacade {
 For instantiation and invocation:
 ```tsx
 
-    const RECAPTCHA_SITE_KEY: string = "6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR"; //this is intentionally made public for you to use
+    /*This recaptcha public site key is intentionally made public for you to use
+    * For more information on Google Recaptcha V3: https://developers.google.com/recaptcha/docs/v3
+    * */
+    const RECAPTCHA_SITE_KEY: string = "6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR"; 
     
     const environment: string = "devnet"; /*environment should be one of local | devnet | testnet*/
     
@@ -91,7 +94,7 @@ For instantiation and invocation:
     const depositAddress: IAssetInfo, 
         traceId: string;
     
-    /*...set up parmeters here; see sample parameters below for more guidance*/
+    /*...set up parmeters here; see sample parameters in `API Usage Details` below for more guidance*/
     
     authenticateWithRecaptcha().then(async (recaptchaToken: string) => {
         
@@ -120,6 +123,8 @@ Sample recaptcha authentication
 ```tsx
 //authenticateWithRecaptcha.ts
 
+    /* For more information on Google Recaptcha V3: https://developers.google.com/recaptcha/docs/v3 */
+
     declare const grecaptcha: any;
 
     const authenticateWithRecaptcha = () => {
@@ -129,7 +134,7 @@ Sample recaptcha authentication
                     const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY);
                     resolve(token);
                 } catch (e: any) {
-                	//handle error here
+                	/*error handling of failed recaptcha here*/
                 }
             });
         });
