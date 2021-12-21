@@ -80,6 +80,8 @@ export class AxelarJSSDKFacade {
 For instantiation and invocation:
 ```tsx
 
+    const RECAPTCHA_SITE_KEY: string = "6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR"; //this is intentionally made public for you to use
+    
     const environment: string = "devnet"; /*environment should be one of local | devnet | testnet*/
     
     const api: AxelarJSSDKFacade = new AxelarJSSDKFacade(environment);
