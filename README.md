@@ -17,9 +17,9 @@ The list will continue to grow, as will the use cases of this SDK.
 Thank you for your support!
 
 ## Note
-This SDK repo is still in early development, and candidly, Axelar's own webapp has been its only consumer. 
+This SDK repo is still in early development, and candidly, Axelar's own webapp has been its only consumer so far. 
 
-Accordingly, please let us know of any issues you encounter using the SDK. 
+Accordingly, please let us know of any issues you encounter using the SDK. Either reach out to us directly or file a github issue on the repo.
 
 ## Onboarding process
 Initially, we are gatekeeping the rollout of this SDK a bit as we work through some kinks. 
@@ -80,11 +80,6 @@ export class AxelarJSSDKFacade {
 For instantiation and invocation:
 ```tsx
 
-    /*This recaptcha public site key is intentionally made public for you to use
-    * For more information on Google Recaptcha V3: https://developers.google.com/recaptcha/docs/v3
-    * */
-    const RECAPTCHA_SITE_KEY: string = "6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR"; 
-    
     const environment: string = "devnet"; /*environment should be one of local | devnet | testnet*/
     
     const api: AxelarJSSDKFacade = new AxelarJSSDKFacade(environment);
@@ -129,8 +124,11 @@ Sample recaptcha authentication
 ```tsx
 //authenticateWithRecaptcha.ts
 
-    /* For more information on Google Recaptcha V3: https://developers.google.com/recaptcha/docs/v3 */
-
+    /*This recaptcha public site key is intentionally made public for you to use
+    * For more information on Google Recaptcha V3: https://developers.google.com/recaptcha/docs/v3
+    * */
+    const RECAPTCHA_SITE_KEY: string = "6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR";
+    
     declare const grecaptcha: any;
 
     const authenticateWithRecaptcha = () => {
@@ -160,7 +158,7 @@ Sample parameters:
 
 const getParameters = () => {
 	
-	let requestPayload = {
+	let requestPayload: IAssetTransferObject = {
 		sourceChainInfo: {
 			chainSymbol: "ETH",
 			chainName: "Ethereum",
@@ -187,7 +185,7 @@ const getParameters = () => {
 			assetSymbol: "AXL", 
 			common_key: "uaxl"
 		},
-		recaptchaToken: null, // for now, to be populated in authenticateWithRecaptcha's response callback, as shown above  
+		recaptchaToken: null, // null for now, to be populated in authenticateWithRecaptcha's response callback, as shown above  
 		transactionTraceId: "YOUR_OWN_UUID" //your own UUID, helpful for tracing purposes
 	}
 	
