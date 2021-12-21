@@ -80,15 +80,58 @@ export class AxelarJSSDKFacade {
 For instantiation and invocation:
 ```tsx
 
-const environment: string = "devnet"; /*environment should be one of local | devnet | testnet*/
+    const environment: string = "devnet"; /*environment should be one of local | devnet | testnet*/
+    
+    const api: AxelarJSSDKFacade = new AxelarJSSDKFacade(environment);
+    
+    const requestPayload, sourceCbs, destCbs;
 
-const api: AxelarJSSDKFacade = new AxelarJSSDKFacade(environment);
+    const depositAddress: IAssetInfo, 
+        traceId: string;
+    
+    /*...set up parmeters here; see sample parameters below for more guidance*/
+    
+    authenticateWithRecaptcha().then(async (recaptchaToken: string) => {
+        
+        if (isRecaptchaAuthenticated) {
+        
+            requestPayload.recaptchaToken = recaptchaToken;
+        
+            try {
+                const res: IAssetInfoWithTrace = await api.transferAssets(
+                    requestPayload,
+                    {successCb: (data: any) => sCb(data, setSourceNumConfirmations), failCb},
+                    {successCb: (data: any) => sCb(data, setDestinationNumConfirmations), failCb}
+                );
+                depositAddress = res.assetInfo;
+	            traceId = res.traceId;
+            } catch (e: any) {
+                reject("transfer bridge error" + e);
+            }
+    
+        }
+    })
 
-const payload, sourceCbs, destCbs;
+```
 
-/*...set up parmeters here; see sample parameters below for more guidance*/
+Sample recaptcha authentication
+```tsx
+//authenticateWithRecaptcha.ts
 
-api.transferAssets(payload, sourceCbs, destCbs, true);
+    declare const grecaptcha: any;
+
+    const authenticateWithRecaptcha = () => {
+        return new Promise((resolve, reject) => {
+            grecaptcha.ready(async () => {
+                try {
+                    const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY);
+                    resolve(token);
+                } catch (e: any) {
+                	//handle error here
+                }
+            });
+        });
+    }
 
 ```
 
