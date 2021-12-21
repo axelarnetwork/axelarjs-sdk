@@ -89,12 +89,10 @@ For instantiation and invocation:
     
     const api: AxelarJSSDKFacade = new AxelarJSSDKFacade(environment);
     
-    const requestPayload, sourceChainCbs, destinationChainCbs;
+    /*set up parmeters here; see sample parameters in `API Usage Details` below for more guidance*/
+    const {requestPayload, sourceChainCbs, destinationChainCbs} = getParameters();
 
-    const depositAddress: IAssetInfo, 
-        traceId: string;
-    
-    /*...set up parmeters here; see sample parameters in `API Usage Details` below for more guidance*/
+    const depositAddress: IAssetInfo, traceId: string;
     
     authenticateWithRecaptcha().then(async (recaptchaToken: string) => {
         
@@ -149,10 +147,61 @@ Sample recaptcha authentication
     }
 
 ```
+## API Usage Details
+
+The transferAssets method takes three parameters:
+1. requestPayload: a complex struct of type `IAssetTransferObject`
+2. sourceChainCbs: an object of success(/fail) callbacks invoked on a success(/fail) result while attempting to confirm your deposit from the requestPayload on the source chain
+3. destinationChainCbs: an object of success(/fail) callbacks invoked on a success(/fail) result while attempting to confirm your asset on the destination chain
 
 Sample parameters:
 ```tsx
+// getParameters.ts
 
+const getParameters = () => {
+	
+	let requestPayload = {
+		sourceChainInfo: {
+			chainSymbol: "ETH",
+			chainName: "Ethereum",
+			estimatedWaitTime: 15,
+			fullySupported: true,
+			assets: [],
+			txFeeInPercent: 0.1
+		},
+		selectedSourceAsset: {
+			assetAddress: "NA",
+			assetSymbol: "AXL",
+			common_key: "uaxl"
+		},
+		destinationChainInfo: {
+			chainSymbol: "MOONBEAM",
+			chainName: "Moonbeam",
+			estimatedWaitTime: 5,
+			fullySupported: true,
+			assets: [],
+			txFeeInPercent: 0.1
+		},
+		selectedDestinationAsset: {
+			assetAddress: "YOUR_VALID_MOONBEAM_ADDRESS",
+			assetSymbol: "AXL", 
+			common_key: "uaxl"
+		},
+		recaptchaToken: null, // for now, to be populated in authenticateWithRecaptcha's response callback, as shown above  
+		transactionTraceId: "YOUR_OWN_UUID" //your own UUID, helpful for tracing purposes
+	}
+	
+	const sourceChainCbs = {
+        successCb: (data: any) => console.log("looks like deposit on the source chain was confirmed by Axelar. data=", JSON.stringify(data)),
+		failCb: (data: any) => console.log("sad outcome on the source chain, :-( data=", JSON.stringify(data)),
+    }
+	const destinationChainCbs = {
+		successCb: (data: any) => console.log("good outcome on the destination chain! data=", JSON.stringify(data)),
+		failCb: (data: any) => console.log("sad outcome on the destination chain, :-( data=", JSON.stringify(data)),
+	}
+	
+	return {requestPayload, sourceChainCbs, destinationChainCbs} as const;
+}
 ```
 
 ## Development
