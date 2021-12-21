@@ -105,8 +105,13 @@ For instantiation and invocation:
             try {
                 const res: IAssetInfoWithTrace = await api.transferAssets(
                     requestPayload,
-                    {successCb: sourceChainCbs.successCb, failCb: sourceChainCbs.failCb},
-	                {successCb: destinationChainCbs.successCb, destinationChainCbs: sourceChainCbs.failCb},
+                    {
+                    	successCb: sourceChainCbs.successCb, 
+                        failCb: sourceChainCbs.failCb
+                    },{
+                    	successCb: destinationChainCbs.successCb,
+		                failCb: destinationChainCbs.failCb
+                    }
                 );
                 depositAddress = res.assetInfo;
 	            traceId = res.traceId;
