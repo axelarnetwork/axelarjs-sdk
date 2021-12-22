@@ -19,7 +19,14 @@ Thank you for your support!
 ## Note
 This SDK repo is still in early development, and candidly, Axelar's own webapp has been its only consumer so far. 
 
-Accordingly, please let us know of any issues you encounter using the SDK. Either reach out to us directly or file a github issue on the repo.
+***We expect to continue iterating quickly until the ultimate launch, and there are several (potentially breaking) changes in the hopper including
+- requirements for API keys/tokens for SDK consumers
+- cleanup of typed interface names
+- other potential refactoring
+
+Accordingly, please ensure you have the latest and let us know of any issues you encounter using the SDK. 
+
+Either reach out to us directly or file a github issue on the repo.
 
 ## Onboarding process
 Initially, we are gatekeeping the rollout of this SDK a bit as we work through some kinks. 
