@@ -36,7 +36,6 @@ const devnetConfigs: IEnvironmentConfigs = {
 }
 
 const localConfigs: IEnvironmentConfigs = cloneDeep(devnetConfigs);
-localConfigs.resourceUrl = `http://localhost:4000`;
 
 const testnetConfigs: IEnvironmentConfigs = cloneDeep(devnetConfigs);
 testnetConfigs.resourceUrl = `https://axelar-bridge-testnet.herokuapp.com`;

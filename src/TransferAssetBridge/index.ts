@@ -42,13 +42,8 @@ export class TransferAssetBridge {
 		const depositAddressWithTraceId: IAssetInfoWithTrace = await this.getDepositAddress(message, showAlerts);
 		const traceId: string = depositAddressWithTraceId.traceId;
 
-		// TODO: evm module does not have "depositAddress" attribute on emitted event on the vote result for deposit confirmations,
-		//  on the evm module, the right depositConfirmation event only has fields for destinationAddress and destinationChain for now,
-		//  so we use that here in the listener
 		const srcAssetForDepositConfirmation: IAssetInfoResponse = {
-			...(findModuleForChainName(sourceChainInfo.chainName.toLowerCase()) === "evm"
-				? selectedDestinationAsset
-				: depositAddressWithTraceId.assetInfo),
+			...(depositAddressWithTraceId.assetInfo),
 			traceId: depositAddressWithTraceId.traceId,
 			sourceOrDestChain: "source"
 		};
