@@ -8,9 +8,9 @@ One of our early use cases is a simple transfer of crypto assets across any of o
 
 Day 1, this will include:
 
-| All Supported Assets  | All Supported Blockchain Networks |
+| Supported Assets  | Supported Blockchain Networks |
 | ------------- | ------------- |
-| <ul><li>Axelar native tokens</li><li>aUST</li><li>LUNA (Terra native tokens)</li><li>UST (Terra stablecoin)</li></ul> | <ul><li>Avalanche</li><li>Axelar</li><li>Ethereum</li><li>Fantom</li><li>Polygon</li><li>Terra</li></ul> |
+| <ul><li>Axelar native tokens</li><li>LUNA (Terra native tokens)</li><li>UST (Terra stablecoin)</li></ul> | <ul><li>Avalanche</li><li>Axelar</li><li>Ethereum</li><li>Fantom</li><li>Polygon</li><li>Terra</li></ul> |
 
 The list will continue to grow, as will the use cases of this SDK. 
 
@@ -19,9 +19,11 @@ Thank you for your support!
 ## Technical Overview
 
 The Axelar JS SDK is an npm dependency that includes libraries that make requests into the Axelar Network. 
-Any request is routed through a node rest server that redirects requests through a coordinated collection of microservices
-controlled by Axelar; these microservices facilitate the relay of cross-chain transactions that run on top of the Axelar Network.
-See diagram below. 
+
+- Any request from the JS SDK is routed through a node rest server that redirects requests through a coordinated 
+collection of microservices controlled by Axelar.
+- These microservices facilitate the relay of cross-chain transactions that run on top of the Axelar Network.
+- See diagram below.
 
 ![Architecture diagram](sdk-diagram.png)
 
@@ -29,7 +31,8 @@ See diagram below.
 ## Note
 This SDK repo is still in early development, and candidly, Axelar's own webapp has been its only consumer so far. 
 
-***We expect to continue iterating quickly until the ultimate launch, and there are several (potentially breaking) changes in the hopper including
+***We expect to continue iterating quickly until the ultimate launch, and there are several (potentially breaking) 
+changes in the hopper including
 - requirements for API keys/tokens for SDK consumers
 - cleanup of typed interface names
 - other potential refactoring
