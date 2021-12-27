@@ -5,7 +5,6 @@ import Avalanche                 from "./Avalanche";
 import Terra                     from "./Terra";
 import {allAssets, IAssetConfig} from "../assets";
 import Fantom                    from "./Fantom";
-import Moonbeam                  from "./Moonbeam";
 import Polygon                   from "./Polygon";
 
 const rawChains: IChain[] = [
@@ -13,7 +12,6 @@ const rawChains: IChain[] = [
 	new Avalanche(),
 	new Ethereum(),
 	new Fantom(),
-	new Moonbeam(),
 	new Polygon(),
 	new Terra()
 ];
