@@ -53,5 +53,6 @@ const axl_axelar: IAssetConfig = {
 
 export const allAssets: IAssetConfig[] = [
 	axl_axelar,
+	luna_terra,
 	ust_terra
 ];
