@@ -10,11 +10,21 @@ Day 1, this will include:
 
 | All Supported Assets  | All Supported Blockchain Networks |
 | ------------- | ------------- |
-| <ul><li>Axelar native tokens</li><li>aUST</li><li>LUNA (Terra native tokens)</li><li>UST (Terra stablecoin)</li></ul> | <ul><li>Avalanche</li><li>Axelar</li><li>Ethereum</li><li>Fantom</li><li>Moonbeam</li><li>Polygon</li><li>Terra</li></ul> |
+| <ul><li>Axelar native tokens</li><li>aUST</li><li>LUNA (Terra native tokens)</li><li>UST (Terra stablecoin)</li></ul> | <ul><li>Avalanche</li><li>Axelar</li><li>Ethereum</li><li>Fantom</li><li>Polygon</li><li>Terra</li></ul> |
 
 The list will continue to grow, as will the use cases of this SDK. 
 
 Thank you for your support!
+
+## Technical Overview
+
+The Axelar JS SDK is an npm dependency that includes libraries that make requests into the Axelar Network. 
+Any request is routed through a node rest server that redirects requests through a coordinated collection of microservices
+controlled by Axelar; these microservices facilitate the relay of cross-chain transactions that run on top of the Axelar Network.
+See diagram below. 
+
+![Architecture diagram](sdk-diagram.png)
+
 
 ## Note
 This SDK repo is still in early development, and candidly, Axelar's own webapp has been its only consumer so far. 
