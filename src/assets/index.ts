@@ -10,6 +10,20 @@ export interface IAssetConfig {
 	chain_aliases: { [key: string]: IAssetInfoForChain }
 }
 
+const luna_terra: IAssetConfig = {
+	common_key: "uluna",
+	native_chain: "terra",
+	chain_aliases: {
+		axelar: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.001 },
+		avalanche: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.1 },
+		ethereum: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 1 },
+		fantom: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.1 },
+		moonbeam: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.1 },
+		polygon: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.1 },
+		terra: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.001 },
+	}
+}
+
 const ust_terra: IAssetConfig = {
 	common_key: "uusd",
 	native_chain: "terra",
