@@ -49,12 +49,21 @@ i.e. it is restricted by both recaptcha validation and cors settings.
 
 So, our proposed process is as follows:
 1. Install and integrate the API, as shown in the `Installation` and `Getting Started` steps below.
-2. Let us know the hostnames you intend to have access the APIs. We will add that to our list of approved domains.
+2. Let us know the hostnames you intend to have access the APIs. We will add that to our list of approved domains. 
+Note: API access will shortly be restricted by API keys
 
 ## Installation
 
 ```bash
 npm i --save @axelar-network/axelarjs-sdk
+```
+
+For the time being, the repo is a private repository that can only be accessed with an NPM token. 
+
+** Set your `.npmrc` file accordingly and secure your NPM TOKEN safely! (i.e. in secrets injected directly into your environment variables)
+
+```bash
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
 ```
 
 ## Getting Started
