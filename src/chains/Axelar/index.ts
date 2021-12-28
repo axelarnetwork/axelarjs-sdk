@@ -7,7 +7,7 @@ export default class Axelar implements IChain {
 	public chainInfo: IChainInfo = {
 		chainSymbol: "AXL",
 		chainName: "Axelar",
-		estimatedWaitTime: 10,
+		estimatedWaitTime: 5,
 		fullySupported: true,
 		assets: [],
 		txFeeInPercent: 0.1
