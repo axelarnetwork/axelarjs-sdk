@@ -39,6 +39,7 @@ export interface IAssetInfo {
 	common_key?: string;
 	native_chain?: string;
 	minDepositAmt?: number;
+	decimals?: number;
 }
 
 export type IBlockchainWaitingServiceFinder = (chainInfo: IChainInfo,

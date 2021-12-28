@@ -27,6 +27,7 @@ rawChains.forEach(({chainInfo}) => {
 		const assetToPush: IAssetInfo = asset.chain_aliases[chainInfo.chainName.toLowerCase()]
 		assetToPush.common_key = asset.common_key;
 		assetToPush.native_chain = asset.native_chain;
+		assetToPush.decimals = asset.decimals;
 		assetsList.push(assetToPush);
 	});
 

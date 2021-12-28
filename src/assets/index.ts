@@ -7,12 +7,14 @@ export interface IAssetInfoForChain extends IAssetInfo {
 export interface IAssetConfig {
 	common_key: string;
 	native_chain: string;
+	decimals: number;
 	chain_aliases: { [key: string]: IAssetInfoForChain }
 }
 
 const luna_terra: IAssetConfig = {
 	common_key: "uluna",
 	native_chain: "terra",
+	decimals: 6,
 	chain_aliases: {
 		axelar: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.001 },
 		avalanche: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.1 },
@@ -27,6 +29,7 @@ const luna_terra: IAssetConfig = {
 const ust_terra: IAssetConfig = {
 	common_key: "uusd",
 	native_chain: "terra",
+	decimals: 6,
 	chain_aliases: {
 		axelar: {assetSymbol: "axelarUST", assetName: "Terra USD", minDepositAmt: 0.1 },
 		avalanche: {assetSymbol: "axelarUST", assetName: "Terra USD", minDepositAmt: 10 },
@@ -41,6 +44,7 @@ const ust_terra: IAssetConfig = {
 const axl_axelar: IAssetConfig = {
 	common_key: "uaxl",
 	native_chain: "axelar",
+	decimals: 6,
 	chain_aliases: {
 		axelar: {assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 0.1 },
 		avalanche: {assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 10 },
