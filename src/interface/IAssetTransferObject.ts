@@ -27,7 +27,6 @@ export enum LinkType {
 
 export interface ILinkRequestBody {
 	"@type": LinkType;
-	"sender": string;
 	"recipient_addr": string;
 	"recipient_chain": string;
 }
