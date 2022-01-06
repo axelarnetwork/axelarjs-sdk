@@ -9,7 +9,8 @@ export default class Polygon extends Ethereum implements IChain {
 		estimatedWaitTime: 5,
 		fullySupported: true,
 		assets: [],
-		txFeeInPercent: 0.1
+		txFeeInPercent: 0.1,
+		module: "evm"
 	};
 
 	constructor() {

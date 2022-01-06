@@ -30,6 +30,7 @@ export interface IChainInfo {
 	fullySupported: boolean;
 	estimatedWaitTime: number;
 	txFeeInPercent: number;
+	module: "axelarnet" | "evm" | "bitcoin";
 }
 
 export interface IAssetInfo {

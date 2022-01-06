@@ -1,7 +1,6 @@
 import {IAssetInfo, IChain, IChainInfo} from "../../interface";
 import Axelar                           from "../Axelar";
 import {AccAddress}                     from '@terra-money/terra.js'
-// import WaitingService                   from "./WaitingService";
 
 export default class Terra extends Axelar implements IChain {
 
@@ -11,7 +10,8 @@ export default class Terra extends Axelar implements IChain {
 		estimatedWaitTime: 5,
 		fullySupported: true,
 		assets: [],
-		txFeeInPercent: 0.1
+		txFeeInPercent: 0.1,
+		module: "axelarnet"
 	};
 
 	constructor() {

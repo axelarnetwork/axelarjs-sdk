@@ -9,7 +9,8 @@ export default class Cosmos extends Axelar implements IChain {
 		estimatedWaitTime: 5,
 		fullySupported: false,
 		assets: [],
-		txFeeInPercent: 0.1
+		txFeeInPercent: 0.1,
+		module: "axelarnet"
 	};
 
 	constructor() {

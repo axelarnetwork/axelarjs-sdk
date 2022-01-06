@@ -10,7 +10,8 @@ export default class Axelar implements IChain {
 		estimatedWaitTime: 5,
 		fullySupported: true,
 		assets: [],
-		txFeeInPercent: 0.1
+		txFeeInPercent: 0.1,
+		module: "axelarnet"
 	};
 
 	public validateAddress = (addressInfo: IAssetInfo): boolean => {

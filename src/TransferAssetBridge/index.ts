@@ -1,16 +1,12 @@
 import {IAssetInfoResponse, IAssetInfoWithTrace, IAssetTransferObject} from "../interface/IAssetTransferObject";
 import {
-	CLIENT_API_POST_TRANSFER_ASSET,
-	IAssetAndChainInfo,
-	IBlockchainWaitingService,
-	ICallbackStatus,
-	SourceOrDestination,
+	CLIENT_API_POST_TRANSFER_ASSET, IAssetAndChainInfo, IBlockchainWaitingService, ICallbackStatus, SourceOrDestination,
 	StatusResponse
 }                                                                      from "../interface";
 import {RestServices}                                                  from "../services/RestServices";
 import getWaitingService                                               from "./status";
 import {SocketServices}                                                from "../services/SocketServices";
-import {findModuleForChainName, validateDestinationAddress}            from "../utils";
+import {validateDestinationAddress}                                    from "../utils";
 import {getConfigs, IEnvironmentConfigs}                               from "../constants";
 
 export class TransferAssetBridge {
@@ -36,7 +32,7 @@ export class TransferAssetBridge {
 
 		const {selectedDestinationAsset, sourceChainInfo, destinationChainInfo} = message;
 
-		if (!validateDestinationAddress(destinationChainInfo?.chainSymbol, selectedDestinationAsset))
+		if (!validateDestinationAddress(destinationChainInfo?.chainSymbol as string, selectedDestinationAsset))
 			throw new Error(`invalid destination address in ${selectedDestinationAsset?.assetSymbol}`);
 
 		const depositAddressWithTraceId: IAssetInfoWithTrace = await this.getDepositAddress(message, showAlerts);

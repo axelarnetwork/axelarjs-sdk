@@ -13,7 +13,8 @@ export default class Ethereum implements IChain {
 		estimatedWaitTime: 15,
 		fullySupported: true,
 		assets: [],
-		txFeeInPercent: 0.1
+		txFeeInPercent: 0.1,
+		module: "evm"
 	};
 
 	constructor() {

@@ -13,7 +13,7 @@ export const validateDestinationAddress = (chainSymbol: string, destTokenInfo: I
 
 	// TODO: what should we do if we don't have a validator for supported chain?
 	if (!validator)
-		return true;
+		return false;
 
 	return validator(destTokenInfo);
 
