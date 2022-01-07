@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Axelar JS SDK was created to abstract a set of tools used to make requests into the Axelar Network.
+The Axelar JS SDK was created to abstract a set of tools used to make requests into the Axelar Network from a frontend.
 
 One of our early use cases is a simple transfer of crypto assets across any of our supported chains.
 
@@ -34,12 +34,19 @@ This SDK repo is still in early development, and candidly, Axelar's own webapp h
 ***We expect to continue iterating quickly until the ultimate launch, and there are several (potentially breaking) 
 changes in the hopper including
 - requirements for API keys/tokens for SDK consumers
-- cleanup of typed interface names
 - other potential refactoring
 
 Accordingly, please ensure you have the latest and let us know of any issues you encounter using the SDK. 
 
 Either reach out to us directly or file a github issue on the repo.
+
+## Access Restrictions
+
+Users of this SDK will notice that there is no explicit requirement for frontend users to connect to a Web3 wallet. This is by design and, we believe, an advantage as it relates to the adoption of the SDK and platform. 
+
+For the time, being, we have leveraged (among other things) Google's `reCAPTCHA v3` authentication mechanism, so any request that goes into our services will need a valid `reCAPTCHA v3 token`. Read the docs here[https://developers.google.com/recaptcha/docs/v3].
+
+Eventually, we will instill an API-key mechanism for our SDK users.
 
 ## Onboarding process
 Initially, we are gatekeeping the rollout of this SDK a bit as we work through some kinks. 
@@ -68,14 +75,21 @@ For the time being, the repo is a private repository that can only be accessed w
 
 ## Getting Started
 
-You can use something like the following snippets to first set up the library consumer and then to instantiate it
+First step, ensure your frontend is equipped with Google's `reCAPTCHA v3` authentication mechanism. You can do this by loading the following script with this `PUBLIC SITE KEY` below. 
+
+```bash
+<script src="https://www.google.com/recaptcha/api.js?render=6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR"></script>
+```
+If that works, you should be able to see the `grecaptcha` object instantiated on the window object. 
+
+From there, you can use something like the following snippets to first set up the library consumer and then to instantiate it
 
 For initial setup:
 ```tsx
 import {
-    IAssetInfoWithTrace,
-    IAssetTransferObject,
-    ICallbackStatus,
+    AssetInfoWithTrace,
+    AssetTransferObject,
+    CallbackStatus,
     TransferAssetBridge
 } from "@axelar-network/axelarjs-sdk";
 
@@ -90,10 +104,10 @@ export class AxelarJSSDKFacade {
     }
 
     public static async transferAssets(
-    	payload: IAssetTransferObject, 
-        sourceCbs: ICallbackStatus, 
-        destCbs: ICallbackStatus
-    ): Promise<IAssetInfoWithTrace> {
+    	payload: AssetTransferObject, 
+        sourceCbs: CallbackStatus, 
+        destCbs: CallbackStatus
+    ): Promise<AssetInfoWithTrace> {
 
         try {
             return AxelarJSSDKFacade.axelarJsSDK.transferAssets(payload, sourceCbs, destCbs, false);
@@ -109,23 +123,23 @@ export class AxelarJSSDKFacade {
 For instantiation and invocation:
 ```tsx
 
-    const environment: string = "devnet"; /*environment should be one of local | devnet | testnet*/
+    const environment: string = "testnet"; /*environment should be one of local | devnet | testnet*/
     
     const api: AxelarJSSDKFacade = new AxelarJSSDKFacade(environment);
     
     /*set up parmeters here; see sample parameters in `API Usage Details` below for more guidance*/
     const {requestPayload, sourceChainCbs, destinationChainCbs} = getParameters();
 
-    const depositAddress: IAssetInfo, traceId: string;
+    const depositAddress: AssetInfo, traceId: string;
     
     authenticateWithRecaptcha().then(async (recaptchaToken: string) => {
         
-        if (isRecaptchaAuthenticated) {
+        if (recaptchaToken !== null) {
         
             requestPayload.recaptchaToken = recaptchaToken;
         
             try {
-                const res: IAssetInfoWithTrace = await api.transferAssets(
+                const res: AssetInfoWithTrace = await AxelarJSSDKFacade.axelarJsSDK.transferAssets(
                     requestPayload,
                     {
                     	successCb: sourceChainCbs.successCb, 
@@ -160,7 +174,7 @@ Sample recaptcha authentication
     
     declare const grecaptcha: any;
 
-    const authenticateWithRecaptcha = () => {
+    const authenticateWithRecaptcha = (): Promise<string> => {
         return new Promise((resolve, reject) => {
             grecaptcha.ready(async () => {
                 try {
@@ -177,7 +191,7 @@ Sample recaptcha authentication
 ## API Usage Details
 
 The transferAssets method takes three parameters:
-1. requestPayload: a complex struct of type `IAssetTransferObject`
+1. requestPayload: a complex struct of type `AssetTransferObject`
 2. sourceChainCbs: an object of success(/fail) callbacks invoked on a success(/fail) result while attempting to confirm your deposit from the requestPayload on the source chain
 3. destinationChainCbs: an object of success(/fail) callbacks invoked on a success(/fail) result while attempting to confirm your asset on the destination chain
 
@@ -187,7 +201,7 @@ Sample parameters:
 
 const getParameters = () => {
 	
-	let requestPayload: IAssetTransferObject = {
+	let requestPayload: AssetTransferObject = {
 		sourceChainInfo: {
 			chainSymbol: "ETH",
 			chainName: "Ethereum",
@@ -202,15 +216,15 @@ const getParameters = () => {
 			common_key: "uaxl"
 		},
 		destinationChainInfo: {
-			chainSymbol: "MOONBEAM",
-			chainName: "Moonbeam",
+			chainSymbol: "FTM",
+			chainName: "Fantom",
 			estimatedWaitTime: 5,
 			fullySupported: true,
 			assets: [],
 			txFeeInPercent: 0.1
 		},
 		selectedDestinationAsset: {
-			assetAddress: "YOUR_VALID_MOONBEAM_ADDRESS",
+			assetAddress: "YOUR_VALID_FANTOM_ADDRESS",
 			assetSymbol: "AXL", 
 			common_key: "uaxl"
 		},
@@ -246,3 +260,5 @@ npm run dev # build the files and watch for changes
 ```
 
 **Start coding!** 🎉
+
+For issues, file a github issue or feel free to put forward a pull request with a fix/enhancement. 
