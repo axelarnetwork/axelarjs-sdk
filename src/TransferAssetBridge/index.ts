@@ -1,8 +1,8 @@
-import {AssetInfoResponse, AssetTransferObject, IAssetInfoWithTrace} from "../interface/AssetTransferObject";
+import {AssetInfoResponse, AssetTransferObject, AssetInfoWithTrace} from "../interface/AssetTransferObject";
 import {
 	AssetAndChainInfo, BlockchainWaitingService, CallbackStatus, CLIENT_API_POST_TRANSFER_ASSET, SourceOrDestination,
 	StatusResponse
-}                                                                    from "../interface";
+}                                                                   from "../interface";
 import {RestServices}                                                from "../services/RestServices";
 import getWaitingService                                             from "./status";
 import {SocketServices}                                              from "../services/SocketServices";
@@ -28,14 +28,14 @@ export class TransferAssetBridge {
 	                            sourceCbs: CallbackStatus,
 	                            destCbs: CallbackStatus,
 	                            showAlerts: boolean = true
-	): Promise<IAssetInfoWithTrace> {
+	): Promise<AssetInfoWithTrace> {
 
 		const {selectedDestinationAsset, sourceChainInfo, destinationChainInfo} = message;
 
 		if (!validateDestinationAddress(destinationChainInfo?.chainSymbol as string, selectedDestinationAsset))
 			throw new Error(`invalid destination address in ${selectedDestinationAsset?.assetSymbol}`);
 
-		const depositAddressWithTraceId: IAssetInfoWithTrace = await this.getDepositAddress(message, showAlerts);
+		const depositAddressWithTraceId: AssetInfoWithTrace = await this.getDepositAddress(message, showAlerts);
 		const traceId: string = depositAddressWithTraceId.traceId;
 
 		const srcAssetForDepositConfirmation: AssetInfoResponse = {
@@ -65,9 +65,9 @@ export class TransferAssetBridge {
 		return depositAddressWithTraceId;
 	}
 
-	private async getDepositAddress(message: AssetTransferObject, showAlerts: boolean): Promise<IAssetInfoWithTrace> {
+	private async getDepositAddress(message: AssetTransferObject, showAlerts: boolean): Promise<AssetInfoWithTrace> {
 		try {
-			return await this.restServices.post(CLIENT_API_POST_TRANSFER_ASSET, message) as IAssetInfoWithTrace;
+			return await this.restServices.post(CLIENT_API_POST_TRANSFER_ASSET, message) as AssetInfoWithTrace;
 		} catch (e: any) {
 			if (showAlerts && e?.message && !e?.uncaught) {
 				alert("There was a problem in attempting to generate a deposit address. Details: " + JSON.stringify(e));

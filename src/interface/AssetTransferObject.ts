@@ -9,7 +9,7 @@ export interface AssetTransferObject {
 	transactionTraceId?: string;
 }
 
-export interface IAssetInfoWithTrace extends AssetInfo {
+export interface AssetInfoWithTrace extends AssetInfo {
 	traceId: string;
 	assetInfo: AssetInfo;
 }
