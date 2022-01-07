@@ -49,7 +49,7 @@ const mainnetConfigs: EnvironmentConfigs = {
 				"UST": "0x085416975fe14C2A731a97eC38B9bF8135231F62",
 				"LUNA": "0x31DAB3430f3081dfF3Ccd80F17AD98583437B213"
 			},
-			providerOptions: { provider: "wss://mainnet.infura.io/ws/v3/9f97ba60be0446988f99f44bfae9158c" }
+			providerOptions: { provider: "wss://mainnet.infura.io/v3/10de1265f1234c93acfec19ca8f4afd7" }
 		},
 		moonbeam: { tokenAddressMap: {}, providerOptions: { provider: 'https://rpc.moonriver.moonbeam.network', network: {chainId: 1285, name: 'Moonriver'}}}, //https://docs.moonbeam.network/builders/get-started/moonriver/
 		avalanche: { tokenAddressMap: {
@@ -71,7 +71,7 @@ const mainnetConfigs: EnvironmentConfigs = {
 				"UST": "0xeDDc6eDe8F3AF9B4971e1Fa9639314905458bE87",
 				"LUNA": "0xa17927fB75E9faEA10C08259902d0468b3DEad88"
 			},
-			providerOptions: { provider: 'https://polygon-rpc.com/', network: {chainId: 137, name: 'polygon-mainnet'}} //https://blog.polygon.technology/polygon-rpc-gateway-will-provide-a-free-high-performance-connection-to-the-polygon-pos-blockchain/
+			providerOptions: { provider: 'https://polygon-mainnet.infura.io/v3/10de1265f1234c93acfec19ca8f4afd7', network: {chainId: 137, name: 'polygon-mainnet'}}
 		},
 	},
 	resourceUrl: `https://axelar-bridge-mainnet.herokuapp.com`
