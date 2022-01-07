@@ -1,17 +1,16 @@
-import {IAssetInfo, IChain} from "../interface";
-import {ChainList}          from "../chains";
+import {AssetInfo, Chain} from "../interface";
+import {ChainList}        from "../chains";
 
-const validatorsDict: { [chainSymbol: string]: (asset: IAssetInfo) => boolean } = {};
-ChainList.forEach((chain: IChain) => {
+const validatorsDict: { [chainSymbol: string]: (asset: AssetInfo) => boolean } = {};
+ChainList.forEach((chain: Chain) => {
 	const key = chain.chainInfo.chainSymbol.toLowerCase();
-	validatorsDict[key] = chain.validateAddress as (asset: IAssetInfo) => boolean
+	validatorsDict[key] = chain.validateAddress as (asset: AssetInfo) => boolean
 })
 
-export const validateDestinationAddress = (chainSymbol: string, destTokenInfo: IAssetInfo): boolean => {
+export const validateDestinationAddress = (chainSymbol: string, destTokenInfo: AssetInfo): boolean => {
 
-	const validator: (assetInfo: IAssetInfo) => boolean = validatorsDict[chainSymbol?.toLowerCase()];
+	const validator: (assetInfo: AssetInfo) => boolean = validatorsDict[chainSymbol?.toLowerCase()];
 
-	// TODO: what should we do if we don't have a validator for supported chain?
 	if (!validator)
 		return false;
 

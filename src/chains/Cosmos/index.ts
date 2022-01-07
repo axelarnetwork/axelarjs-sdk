@@ -1,9 +1,9 @@
-import {IChain, IChainInfo} from "../../interface";
-import Axelar               from "../Axelar";
+import {Chain, ChainInfo} from "../../interface";
+import Axelar             from "../Axelar";
 
-export default class Cosmos extends Axelar implements IChain {
+export default class Cosmos extends Axelar implements Chain {
 
-	public chainInfo: IChainInfo = {
+	public chainInfo: ChainInfo = {
 		chainSymbol: "COS",
 		chainName: "Cosmos",
 		estimatedWaitTime: 5,

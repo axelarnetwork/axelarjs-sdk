@@ -1,10 +1,10 @@
-import WaitingService                   from "./WaitingService";
-import {IAssetInfo, IChain, IChainInfo} from "../../interface";
-import {bech32}                         from "bech32";
+import WaitingService                from "./WaitingService";
+import {AssetInfo, Chain, ChainInfo} from "../../interface";
+import {bech32}                      from "bech32";
 
-export default class Axelar implements IChain {
+export default class Axelar implements Chain {
 
-	public chainInfo: IChainInfo = {
+	public chainInfo: ChainInfo = {
 		chainSymbol: "AXL",
 		chainName: "Axelar",
 		estimatedWaitTime: 5,
@@ -14,7 +14,7 @@ export default class Axelar implements IChain {
 		module: "axelarnet"
 	};
 
-	public validateAddress = (addressInfo: IAssetInfo): boolean => {
+	public validateAddress = (addressInfo: AssetInfo): boolean => {
 
 		if (!(addressInfo?.assetAddress))
 			return false;
@@ -27,6 +27,6 @@ export default class Axelar implements IChain {
 
 	};
 
-	public waitingService = (chainInfo: IChainInfo, assetInfo: IAssetInfo) => new WaitingService(chainInfo, assetInfo)
+	public waitingService = (chainInfo: ChainInfo, assetInfo: AssetInfo) => new WaitingService(chainInfo, assetInfo)
 
 }

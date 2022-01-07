@@ -1,10 +1,10 @@
-import {IAssetInfo, IChain, IChainInfo} from "../../interface";
-import Axelar                           from "../Axelar";
+import {AssetInfo, Chain, ChainInfo} from "../../interface";
+import Axelar                        from "../Axelar";
 import {AccAddress}                     from '@terra-money/terra.js'
 
-export default class Terra extends Axelar implements IChain {
+export default class Terra extends Axelar implements Chain {
 
-	public chainInfo: IChainInfo = {
+	public chainInfo: ChainInfo = {
 		chainSymbol: "Terra",
 		chainName: "Terra",
 		estimatedWaitTime: 5,
@@ -18,6 +18,6 @@ export default class Terra extends Axelar implements IChain {
 		super();
 	}
 
-	public validateAddress = (addressInfo: IAssetInfo) => AccAddress.validate(addressInfo.assetAddress as string);
+	public validateAddress = (addressInfo: AssetInfo) => AccAddress.validate(addressInfo.assetAddress as string);
 
 }

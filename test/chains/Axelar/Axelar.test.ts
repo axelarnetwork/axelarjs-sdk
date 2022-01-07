@@ -1,8 +1,8 @@
-import Axelar       from "../../../src/chains/Axelar";
-import {IAssetInfo} from "../../../src/interface";
+import Axelar      from "../../../src/chains/Axelar";
+import {AssetInfo} from "../../../src/interface";
 
 let axelarChain: Axelar;
-let asset: IAssetInfo;
+let asset: AssetInfo;
 
 beforeEach(() => {
 	axelarChain = new Axelar();

@@ -1,7 +1,7 @@
-import {BaseWaitingService}                                                    from "../models/BaseWaitingService";
-import {poll}                                                                  from "../utils/poll";
-import {IAssetAndChainInfo, IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
-import {SocketServices}                                                        from "../../services/SocketServices";
+import {BaseWaitingService}                                                from "../models/BaseWaitingService";
+import {poll}                                                              from "../utils/poll";
+import {AssetAndChainInfo, AssetInfo, BlockchainWaitingService, ChainInfo} from "../../interface";
+import {SocketServices}                                                    from "../../services/SocketServices";
 
 export interface UnconfirmedTxRef {
 	address: string;
@@ -45,22 +45,22 @@ export interface BlockCypherResponse {
 	unconfirmed_txrefs: UnconfirmedTxRef[]
 }
 
-export type StatusResponse = IBlockCypherResponse
+export type StatusResponse = BlockCypherResponseCallback
 	| (() => void);
 
-export type IBlockCypherResponse = (data: BlockCypherResponse) => any;
+export type BlockCypherResponseCallback = (data: BlockCypherResponse) => any;
 
-export class WaitingService extends BaseWaitingService implements IBlockchainWaitingService {
+export class WaitingService extends BaseWaitingService implements BlockchainWaitingService {
 
 	private maxPollingAttempts: number = 2;
 	private pollingInterval: number = 300000;
 
-	constructor(chainInfo: IChainInfo, assetInfo: IAssetInfo) {
+	constructor(chainInfo: ChainInfo, assetInfo: AssetInfo) {
 		super(6, assetInfo.assetAddress as string);
 		console.log("waiting service constructor");
 	}
 
-	public async wait(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void> {
+	public async wait(assetAndChainInfo: AssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void> {
 		const depositAddress = assetAndChainInfo.assetInfo;
 		const url = `https://api.blockcypher.com/v1/btc/test3/addrs/${depositAddress.assetAddress}`;
 		const asyncRequest = (attempts: number) => new Promise((res, rej) => {

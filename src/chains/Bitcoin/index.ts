@@ -1,10 +1,10 @@
-import {WaitingService}                                                  from "./WaitingService";
-import {validate as isValidBTCAddress}                                   from "bitcoin-address-validation";
-import {IAssetInfo, IBlockchainWaitingServiceFinder, IChain, IChainInfo} from "../../interface";
+import {WaitingService}                                              from "./WaitingService";
+import {validate as isValidBTCAddress}                               from "bitcoin-address-validation";
+import {AssetInfo, BlockchainWaitingServiceFinder, Chain, ChainInfo} from "../../interface";
 
-export default class Bitcoin implements IChain {
+export default class Bitcoin implements Chain {
 
-	public chainInfo: IChainInfo = {
+	public chainInfo: ChainInfo = {
 		assets: [],
 		chainSymbol: "BTC",
 		chainName: "Bitcoin",
@@ -17,11 +17,11 @@ export default class Bitcoin implements IChain {
 	constructor() {
 	}
 
-	public validateAddress(addressInfo: IAssetInfo) {
+	public validateAddress(addressInfo: AssetInfo) {
 		return isValidBTCAddress(addressInfo.assetAddress as string);
 	}
 
-	public waitingService: IBlockchainWaitingServiceFinder = (chainInfo: IChainInfo, assetInfo: IAssetInfo) => {
+	public waitingService: BlockchainWaitingServiceFinder = (chainInfo: ChainInfo, assetInfo: AssetInfo) => {
 		return new WaitingService(chainInfo, assetInfo);
 	}
 

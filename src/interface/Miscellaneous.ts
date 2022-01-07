@@ -1,24 +1,24 @@
 // TODO: all miscellaneous topics go here for now
 
-import {IBlockCypherResponse} from "../chains/Bitcoin/WaitingService";
+import {BlockCypherResponseCallback} from "../chains/Bitcoin/WaitingService";
 
 export const TRANSFER_RESULT: string = "socket-transfer-result";
 
 // POST REQUEST CONSTS
 export const CLIENT_API_POST_TRANSFER_ASSET: string = "/transferAssets";
 
-export interface ISocketOptions {
+export interface SocketOptions {
 	reconnectionDelayMax: number;
 	auth: { token: string };
 	query: { [key: string]: string }
 }
 
-export interface ICallbackStatus {
+export interface CallbackStatus {
 	successCb: any;
 	failCb: any;
 }
 
-export type StatusResponse = IBlockCypherResponse
+export type StatusResponse = BlockCypherResponseCallback
 	| (() => void);
 
 export type SourceOrDestination = "source" | "destination";

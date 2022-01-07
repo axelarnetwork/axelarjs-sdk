@@ -1,6 +1,6 @@
-import {io}                                   from "socket.io-client";
-import {ISocketListenerTypes, ISocketOptions} from "../interface";
-import {GREPTCHA_SITE_KEY}                    from "../constants";
+import {io}                                 from "socket.io-client";
+import {SocketListenerTypes, SocketOptions} from "../interface";
+import {GREPTCHA_SITE_KEY}                  from "../constants";
 
 /**
  * SocketServices establishes socket connection between webapp and rest server
@@ -39,7 +39,7 @@ export class SocketServices {
 			query: {
 				"my-key": "my-value"
 			}
-		} as ISocketOptions);
+		} as SocketOptions);
 
 		this.socket.once('connect', (data: any) => {
 			cb && cb();
@@ -49,7 +49,7 @@ export class SocketServices {
 		});
 	}
 
-	public emitMessageAndWaitForReply(triggerTopic: ISocketListenerTypes, message: any, waitTopic: ISocketListenerTypes, waitCb: any) {
+	public emitMessageAndWaitForReply(triggerTopic: SocketListenerTypes, message: any, waitTopic: SocketListenerTypes, waitCb: any) {
 		return new Promise((resolve, reject) => {
 			this.connect(() => {
 				this.emitMessage(triggerTopic, message);
@@ -61,11 +61,11 @@ export class SocketServices {
 		});
 	}
 
-	public emitMessage(topic: ISocketListenerTypes, message: any): void {
+	public emitMessage(topic: SocketListenerTypes, message: any): void {
 		this.socket?.emit(topic, message);
 	}
 
-	public awaitResponse(topic: ISocketListenerTypes, waitCb: any): void {
+	public awaitResponse(topic: SocketListenerTypes, waitCb: any): void {
 		this.socket?.on(topic, (data: any) => {
 			waitCb && waitCb(data);
 			this.disconnect();

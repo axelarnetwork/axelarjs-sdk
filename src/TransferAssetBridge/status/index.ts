@@ -1,27 +1,27 @@
 import {
-	IAssetInfo,
-	IBlockchainWaitingService,
-	IBlockchainWaitingServiceFinder,
-	IChain,
-	IChainInfo,
+	AssetInfo,
+	BlockchainWaitingService,
+	BlockchainWaitingServiceFinder,
+	Chain,
+	ChainInfo,
 	SourceOrDestination
 }                  from "../../interface";
 import {ChainList} from "../../chains";
 
-const waitingServiceMap: { [chainKey: string]: IBlockchainWaitingServiceFinder } = {};
+const waitingServiceMap: { [chainKey: string]: BlockchainWaitingServiceFinder } = {};
 
-ChainList.forEach((chainInfo: IChain) => {
+ChainList.forEach((chainInfo: Chain) => {
 	const chainKey: string = chainInfo.chainInfo.chainSymbol.toLowerCase();
-	waitingServiceMap[chainKey] = chainInfo.waitingService as IBlockchainWaitingServiceFinder
+	waitingServiceMap[chainKey] = chainInfo.waitingService as BlockchainWaitingServiceFinder
 });
 
-type IGetWaitingService = (chainInfo: IChainInfo,
-                           assetInfo: IAssetInfo,
+type IGetWaitingService = (chainInfo: ChainInfo,
+                           assetInfo: AssetInfo,
                            sOrDChain: SourceOrDestination,
-                           environment: string) => IBlockchainWaitingService | Promise<IBlockchainWaitingService>;
+                           environment: string) => BlockchainWaitingService | Promise<BlockchainWaitingService>;
 const getWaitingService: IGetWaitingService = (
-	chainInfo: IChainInfo,
-	assetInfo: IAssetInfo,
+	chainInfo: ChainInfo,
+	assetInfo: AssetInfo,
 	sOrDChain: SourceOrDestination,
 	environment: string
 ) => {
