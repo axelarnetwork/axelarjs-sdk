@@ -1,9 +1,9 @@
-import {IChain, IChainInfo} from "../../interface";
-import Ethereum             from "../Ethereum";
+import {Chain, ChainInfo} from "../../interface";
+import Ethereum           from "../Ethereum";
 
-export default class Fantom extends Ethereum implements IChain {
+export default class Fantom extends Ethereum implements Chain {
 
-	public chainInfo: IChainInfo = {
+	public chainInfo: ChainInfo = {
 		chainSymbol: "FTM",
 		chainName: "Fantom",
 		estimatedWaitTime: 5,

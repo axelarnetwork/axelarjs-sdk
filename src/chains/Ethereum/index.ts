@@ -1,13 +1,13 @@
-import WaitingService                                                                         from "./WaitingService";
-import {isAddress as isValidEVMAddress}                                                       from "ethers/lib/utils";
-import {IAssetInfo, IBlockchainWaitingServiceFinder, IChain, IChainInfo, SourceOrDestination} from "../../interface";
-import {ProviderType}                                                                         from "../../utils/EthersJs/ethersjsProvider";
+import WaitingService                                                                     from "./WaitingService";
+import {isAddress as isValidEVMAddress}                                                   from "ethers/lib/utils";
+import {AssetInfo, BlockchainWaitingServiceFinder, Chain, ChainInfo, SourceOrDestination} from "../../interface";
+import {ProviderType}                                                                     from "../../utils/EthersJs/ethersjsProvider";
 
-export default class Ethereum implements IChain {
+export default class Ethereum implements Chain {
 
 	public providerType: ProviderType;
 
-	public chainInfo: IChainInfo = {
+	public chainInfo: ChainInfo = {
 		chainSymbol: "ETH",
 		chainName: "Ethereum",
 		estimatedWaitTime: 15,
@@ -21,11 +21,11 @@ export default class Ethereum implements IChain {
 		this.providerType = "ethereum";
 	}
 
-	public validateAddress = (addressInfo: IAssetInfo) => isValidEVMAddress(addressInfo.assetAddress as string);
+	public validateAddress = (addressInfo: AssetInfo) => isValidEVMAddress(addressInfo.assetAddress as string);
 
-	public waitingService: IBlockchainWaitingServiceFinder = async (
-		chainInfo: IChainInfo,
-		assetInfo: IAssetInfo,
+	public waitingService: BlockchainWaitingServiceFinder = async (
+		chainInfo: ChainInfo,
+		assetInfo: AssetInfo,
 		sOrDChain: SourceOrDestination,
 		environment: string
 	) => {

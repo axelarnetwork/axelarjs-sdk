@@ -1,7 +1,7 @@
-import {IAssetAndChainInfo, IBlockchainWaitingService, ISocketListenerTypes, StatusResponse} from "../../interface";
-import {SocketServices}                                                                      from "../../services/SocketServices";
+import {AssetAndChainInfo, BlockchainWaitingService, SocketListenerTypes, StatusResponse} from "../../interface";
+import {SocketServices}                                                                   from "../../services/SocketServices";
 
-export class BaseWaitingService implements IBlockchainWaitingService {
+export class BaseWaitingService implements BlockchainWaitingService {
 
 	public numConfirmations: number = 0;
 	public depositAddress: string = "";
@@ -17,13 +17,12 @@ export class BaseWaitingService implements IBlockchainWaitingService {
 		}
 
 	}
-	public async wait(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
+	public async wait(assetAndChainInfo: AssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
 
-		console.log("asset and chain info in wait",assetAndChainInfo)
 		const data: any = await clientSocketConnect.emitMessageAndWaitForReply(
-			ISocketListenerTypes.WAIT_FOR_DEPOSIT,
+			SocketListenerTypes.WAIT_FOR_DEPOSIT,
 			assetAndChainInfo,
-			ISocketListenerTypes.DEPOSIT_CONFIRMED,
+			SocketListenerTypes.DEPOSIT_CONFIRMED,
 			((data: any) => {
 				data.axelarRequiredNumConfirmations = this.numConfirmations;
 				interimStatusCb(data);

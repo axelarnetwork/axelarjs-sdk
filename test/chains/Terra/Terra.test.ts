@@ -1,8 +1,8 @@
 import Terra       from "../../../src/chains/Terra";
-import {IAssetInfo} from "../../../src/interface";
+import {AssetInfo} from "../../../src/interface";
 
 let terraChain: Terra;
-let asset: IAssetInfo;
+let asset: AssetInfo;
 
 beforeEach(() => {
 	terraChain = new Terra();

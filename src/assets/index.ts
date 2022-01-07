@@ -1,17 +1,17 @@
-import {IAssetInfo} from "../interface";
+import {AssetInfo} from "../interface";
 
-export interface IAssetInfoForChain extends IAssetInfo {
+export interface AssetInfoForChain extends AssetInfo {
 	minDepositAmt: number;
 }
 
-export interface IAssetConfig {
+export interface AssetConfig {
 	common_key: string;
 	native_chain: string;
 	decimals: number;
-	chain_aliases: { [key: string]: IAssetInfoForChain }
+	chain_aliases: { [key: string]: AssetInfoForChain }
 }
 
-const luna_terra: IAssetConfig = {
+const luna_terra: AssetConfig = {
 	common_key: "uluna",
 	native_chain: "terra",
 	decimals: 6,
@@ -26,7 +26,7 @@ const luna_terra: IAssetConfig = {
 	}
 }
 
-const ust_terra: IAssetConfig = {
+const ust_terra: AssetConfig = {
 	common_key: "uusd",
 	native_chain: "terra",
 	decimals: 6,
@@ -41,7 +41,7 @@ const ust_terra: IAssetConfig = {
 	}
 }
 
-const axl_axelar: IAssetConfig = {
+const axl_axelar: AssetConfig = {
 	common_key: "uaxl",
 	native_chain: "axelar",
 	decimals: 6,
@@ -56,7 +56,7 @@ const axl_axelar: IAssetConfig = {
 	}
 }
 
-export const allAssets: IAssetConfig[] = [
+export const allAssets: AssetConfig[] = [
 	axl_axelar,
 	luna_terra,
 	ust_terra

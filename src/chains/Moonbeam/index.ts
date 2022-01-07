@@ -1,9 +1,9 @@
-import {IChain, IChainInfo} from "../../interface";
-import Ethereum             from "../Ethereum";
+import {Chain, ChainInfo} from "../../interface";
+import Ethereum           from "../Ethereum";
 
-export default class Moonbeam extends Ethereum implements IChain {
+export default class Moonbeam extends Ethereum implements Chain {
 
-	public chainInfo: IChainInfo = {
+	public chainInfo: ChainInfo = {
 		chainSymbol: "MOONBEAM",
 		chainName: "Moonbeam",
 		estimatedWaitTime: 5,

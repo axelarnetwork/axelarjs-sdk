@@ -1,12 +1,11 @@
-import {Contract, ethers}                                                      from "ethers";
-import {formatEther}                                                           from "ethers/lib/utils";
-import {BaseWaitingService}                                                    from "../../chains/models/BaseWaitingService";
-import {getEthersJsProvider, ProviderType}                                     from "./ethersjsProvider";
-import {IAssetAndChainInfo, IAssetInfo, IBlockchainWaitingService, IChainInfo} from "../../interface";
-import {getConfigs, IEnvironmentConfigs, IEthersJsConfigs, IEthersJsTokenMap}  from "../../constants";
-import {RestServices}                                                          from "../../services/RestServices";
-import {SocketServices}                                                        from "../../services/SocketServices";
-
+import {Contract, ethers}                                                  from "ethers";
+import {formatEther}                                                       from "ethers/lib/utils";
+import {BaseWaitingService}                                                from "../../chains/models/BaseWaitingService";
+import {getEthersJsProvider, ProviderType}                                 from "./ethersjsProvider";
+import {AssetAndChainInfo, AssetInfo, BlockchainWaitingService, ChainInfo} from "../../interface";
+import {EnvironmentConfigs, EthersJsConfigs, EthersJsTokenMap, getConfigs} from "../../constants";
+import {RestServices}                                                      from "../../services/RestServices";
+import {SocketServices}                                                    from "../../services/SocketServices";
 
 const abi: string[] = [
 	"function name() view returns (string)",
@@ -15,24 +14,24 @@ const abi: string[] = [
 	"event Transfer(address indexed from, address indexed to, uint amount)"
 ];
 
-export default class EthersJsWaitingService extends BaseWaitingService implements IBlockchainWaitingService {
+export default class EthersJsWaitingService extends BaseWaitingService implements BlockchainWaitingService {
 
 	private provider!: ethers.providers.BaseProvider;
 	private tokenContract!: Contract;
 	private filter!: ethers.EventFilter;
 
-	constructor(chainInfo: IChainInfo, assetInfo: IAssetInfo) {
+	constructor(chainInfo: ChainInfo, assetInfo: AssetInfo) {
 		super(30, assetInfo.assetAddress as string);
 	}
 
 
-	public async build(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType): Promise<EthersJsWaitingService> {
+	public async build(chainInfo: ChainInfo, assetInfo: AssetInfo, environment: string, providerType: ProviderType): Promise<EthersJsWaitingService> {
 		const api: EthersJsWaitingService = new EthersJsWaitingService(chainInfo, assetInfo);
 		await api.init(chainInfo, assetInfo, environment, providerType);
 		return api;
 	}
 
-	public async wait(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void> {
+	public async wait(assetAndChainInfo: AssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void> {
 		return new Promise((resolve, reject) => {
 			this.tokenContract.once(this.filter, (from: any, to: any, amount: any, event: any) => {
 				console.log(`Incoming amount of: ${formatEther(amount)}, from: ${from}.`, event);
@@ -43,11 +42,11 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 		});
 	}
 
-	private async init(chainInfo: IChainInfo, assetInfo: IAssetInfo, environment: string, providerType: ProviderType) {
-		const configs: IEnvironmentConfigs = getConfigs(environment);
-		const ethersJsConfigs: { [chain: string]: IEthersJsConfigs } = configs.ethersJsConfigs;
+	private async init(chainInfo: ChainInfo, assetInfo: AssetInfo, environment: string, providerType: ProviderType) {
+		const configs: EnvironmentConfigs = getConfigs(environment);
+		const ethersJsConfigs: { [chain: string]: EthersJsConfigs } = configs.ethersJsConfigs;
 		const {tokenAddressMap} = ethersJsConfigs[chainInfo.chainName.toLowerCase()];
-		const tokenSymbol: keyof IEthersJsTokenMap = assetInfo.assetSymbol as keyof IEthersJsTokenMap;
+		const tokenSymbol: keyof EthersJsTokenMap = assetInfo.assetSymbol as keyof EthersJsTokenMap;
 		const depositAddress: string = assetInfo.assetAddress as string;
 
 		let tokenContract: string;
@@ -67,6 +66,5 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 		this.tokenContract = new ethers.Contract(tokenContract, abi, this.provider);
 		this.filter = this.tokenContract.filters.Transfer(null, depositAddress); //filter all transfers TO my address
 	}
-
 
 }

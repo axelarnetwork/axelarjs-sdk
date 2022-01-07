@@ -1,30 +1,30 @@
-import {SourceOrDestination, StatusResponse} from "./IMiscTopics";
-import {SocketServices}                      from "../services/SocketServices";
-import {IAssetInfoResponse}                  from "./IAssetTransferObject";
+import {SourceOrDestination} from "./Miscellaneous";
+import {SocketServices}      from "../services/SocketServices";
+import {AssetInfoResponse}   from "./AssetTransferObject";
 
-export * from "./IAssetTransferObject";
-export * from "./IMiscTopics";
+export * from "./AssetTransferObject";
+export * from "./Miscellaneous";
 
-export interface IChain {
-	chainInfo: IChainInfo;
-	validateAddress: (assetInfo: IAssetInfo) => boolean;
-	waitingService: IBlockchainWaitingServiceFinder;
+export interface Chain {
+	chainInfo: ChainInfo;
+	validateAddress: (assetInfo: AssetInfo) => boolean;
+	waitingService: BlockchainWaitingServiceFinder;
 }
 
-export interface IAssetAndChainInfo {
-	assetInfo: IAssetInfoResponse;
-	sourceChainInfo: IChainInfo;
-	destinationChainInfo: IChainInfo;
+export interface AssetAndChainInfo {
+	assetInfo: AssetInfoResponse;
+	sourceChainInfo: ChainInfo;
+	destinationChainInfo: ChainInfo;
 }
 
-export interface IBlockchainWaitingService {
-	waitForDepositConfirmation(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
-	waitForTransferEvent(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
-	wait(assetAndChainInfo: IAssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
+export interface BlockchainWaitingService {
+	waitForDepositConfirmation(assetAndChainInfo: AssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
+	waitForTransferEvent(assetAndChainInfo: AssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
+	wait(assetAndChainInfo: AssetAndChainInfo, interimStatusCb: any, clientSocketConnect: SocketServices): Promise<void>;
 }
 
-export interface IChainInfo {
-	assets?: IAssetInfo[];
+export interface ChainInfo {
+	assets?: AssetInfo[];
 	chainSymbol: string;
 	chainName: string;
 	fullySupported: boolean;
@@ -33,7 +33,7 @@ export interface IChainInfo {
 	module: "axelarnet" | "evm" | "bitcoin";
 }
 
-export interface IAssetInfo {
+export interface AssetInfo {
 	assetSymbol?: string;
 	assetName?: string;
 	assetAddress?: string;
@@ -43,8 +43,8 @@ export interface IAssetInfo {
 	decimals?: number;
 }
 
-export type IBlockchainWaitingServiceFinder = (chainInfo: IChainInfo,
-                                               assetInfo: IAssetInfo,
-                                               sOrDChain: SourceOrDestination,
-                                               environment: string
-) => IBlockchainWaitingService | Promise<IBlockchainWaitingService>;
+export type BlockchainWaitingServiceFinder = (chainInfo: ChainInfo,
+                                              assetInfo: AssetInfo,
+                                              sOrDChain: SourceOrDestination,
+                                              environment: string
+) => BlockchainWaitingService | Promise<BlockchainWaitingService>;
