@@ -31,12 +31,12 @@ const ust_terra: AssetConfig = {
 	native_chain: "terra",
 	decimals: 6,
 	chain_aliases: {
-		axelar: {assetSymbol: "axelarUST", assetName: "Terra USD", minDepositAmt: 0.1 },
-		avalanche: {assetSymbol: "axelarUST", assetName: "Terra USD", minDepositAmt: 10 },
-		ethereum: {assetSymbol: "axelarUST", assetName: "Terra USD", minDepositAmt: 100 },
-		fantom: {assetSymbol: "axelarUST", assetName: "Terra USD", minDepositAmt: 10 },
-		moonbeam: {assetSymbol: "axelarUST", assetName: "Terra USD", minDepositAmt: 10 },
-		polygon: {assetSymbol: "axelarUST", assetName: "Terra USD", minDepositAmt: 10 },
+		axelar: {assetSymbol: "UST", assetName: "Terra USD", minDepositAmt: 0.1 },
+		avalanche: {assetSymbol: "UST", assetName: "Terra USD", minDepositAmt: 10 },
+		ethereum: {assetSymbol: "UST", assetName: "Terra USD", minDepositAmt: 100 },
+		fantom: {assetSymbol: "UST", assetName: "Terra USD", minDepositAmt: 10 },
+		moonbeam: {assetSymbol: "UST", assetName: "Terra USD", minDepositAmt: 10 },
+		polygon: {assetSymbol: "UST", assetName: "Terra USD", minDepositAmt: 10 },
 		terra: {assetSymbol: "UST", assetName: "Terra USD", minDepositAmt: 0.1 },
 	}
 }
