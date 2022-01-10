@@ -14,7 +14,8 @@ export default class Ethereum implements Chain {
 		fullySupported: true,
 		assets: [],
 		txFeeInPercent: 0.1,
-		module: "evm"
+		module: "evm",
+		confirmLevel: 40
 	};
 
 	constructor() {

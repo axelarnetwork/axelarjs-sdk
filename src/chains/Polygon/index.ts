@@ -10,7 +10,8 @@ export default class Polygon extends Ethereum implements Chain {
 		fullySupported: true,
 		assets: [],
 		txFeeInPercent: 0.1,
-		module: "evm"
+		module: "evm",
+		confirmLevel: 150
 	};
 
 	constructor() {

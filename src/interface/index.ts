@@ -31,6 +31,7 @@ export interface ChainInfo {
 	estimatedWaitTime: number;
 	txFeeInPercent: number;
 	module: "axelarnet" | "evm" | "bitcoin";
+	confirmLevel?: number;
 }
 
 export interface AssetInfo {
