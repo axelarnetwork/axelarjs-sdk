@@ -67,7 +67,7 @@ export class TransferAssetBridge {
 
 	private async getDepositAddress(message: AssetTransferObject, showAlerts: boolean): Promise<AssetInfoWithTrace> {
 		try {
-			return await this.restServices.post(CLIENT_API_POST_TRANSFER_ASSET, message) as AssetInfoWithTrace;
+			return await this.restServices.post(CLIENT_API_POST_TRANSFER_ASSET, message as AssetTransferObject) as AssetInfoWithTrace;
 		} catch (e: any) {
 			if (showAlerts && e?.message && !e?.uncaught) {
 				alert("There was a problem in attempting to generate a deposit address. Details: " + JSON.stringify(e));

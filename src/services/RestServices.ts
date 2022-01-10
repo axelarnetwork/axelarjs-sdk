@@ -1,4 +1,5 @@
-import {v4 as uuidv4} from 'uuid';
+import {v4 as uuidv4}        from 'uuid';
+import {AssetTransferObject} from "../interface";
 
 export class RestServices {
 
@@ -8,14 +9,15 @@ export class RestServices {
 		this.host = host;
 	}
 
-	public post(endpoint: string, payload: any, headers?: any): Promise<any> {
+	public post(endpoint: string, payload: AssetTransferObject, headers?: any): Promise<any> {
 		return new Promise((resolve, reject) => {
 			const requestOptions = {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					'x-traceId': payload.transactionTraceId || uuidv4(),
-					'recaptcha-token': payload?.recaptchaToken
+					'recaptcha-token': payload.recaptchaToken,
+					'use-legacy-recaptcha': payload.useLegacyRecaptcha
 				},
 				body: JSON.stringify(payload)
 			};

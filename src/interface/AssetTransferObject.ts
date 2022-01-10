@@ -6,6 +6,7 @@ export interface AssetTransferObject {
 	selectedSourceAsset: AssetInfo;
 	selectedDestinationAsset: AssetInfo;
 	recaptchaToken?: any;
+	useLegacyRecaptcha?: boolean;
 	transactionTraceId?: string;
 }
 
