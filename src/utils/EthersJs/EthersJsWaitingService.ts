@@ -21,7 +21,7 @@ export default class EthersJsWaitingService extends BaseWaitingService implement
 	private filter!: ethers.EventFilter;
 
 	constructor(chainInfo: ChainInfo, assetInfo: AssetInfo) {
-		super(30, assetInfo.assetAddress as string);
+		super(chainInfo.confirmLevel as number, assetInfo.assetAddress as string);
 	}
 
 
