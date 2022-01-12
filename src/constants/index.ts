@@ -32,13 +32,13 @@ const devnetConfigs: EnvironmentConfigs = {
 		fantom: { tokenAddressMap: {}, providerOptions: { provider: 'https://rpc.testnet.fantom.network', network: {chainId: 4002, name: 'Fantom testnet'}}},
 		polygon: { tokenAddressMap: {}, providerOptions: { provider: 'https://rpc-mumbai.maticvigil.com', network: {chainId: 80001, name: 'polygon-testnet'}}},
 	},
-	resourceUrl: `https://axelar-bridge-devnet.herokuapp.com`
+	resourceUrl: `https://bridge-rest-server.devnet.axelar.dev`
 }
 
 const localConfigs: EnvironmentConfigs = cloneDeep(devnetConfigs);
 
 const testnetConfigs: EnvironmentConfigs = cloneDeep(devnetConfigs);
-testnetConfigs.resourceUrl = `https://axelar-bridge-testnet.herokuapp.com`;
+testnetConfigs.resourceUrl = `https://bridge-rest-server.testnet.axelar.dev`;
 
 /* since these tokens are not expected to change, we can set them here so they will not need to be a query*/
 const mainnetConfigs: EnvironmentConfigs = {
@@ -74,7 +74,7 @@ const mainnetConfigs: EnvironmentConfigs = {
 			providerOptions: { provider: 'https://polygon-mainnet.infura.io/v3/10de1265f1234c93acfec19ca8f4afd7', network: {chainId: 137, name: 'polygon-mainnet'}}
 		},
 	},
-	resourceUrl: `https://axelar-bridge-mainnet.herokuapp.com`
+	resourceUrl: `https://bridge-rest-server.mainnet.axelar.dev`
 }
 
 configsMap["local"] = localConfigs;
