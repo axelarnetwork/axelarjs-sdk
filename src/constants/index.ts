@@ -51,7 +51,7 @@ const mainnetConfigs: EnvironmentConfigs = {
 			},
 			providerOptions: { provider: "wss://mainnet.infura.io/v3/10de1265f1234c93acfec19ca8f4afd7" }
 		},
-		moonbeam: { tokenAddressMap: {}, providerOptions: { provider: 'https://rpc.moonriver.moonbeam.network', network: {chainId: 1285, name: 'Moonriver'}}}, //https://docs.moonbeam.network/builders/get-started/moonriver/
+		moonbeam: { tokenAddressMap: {}, providerOptions: { provider: 'https://rpc.api.moonbeam.network', network: {chainId: 1284, name: 'Moonbeam'}}}, //https://docs.moonbeam.network/tokens/connect/metamask/
 		avalanche: { tokenAddressMap: {
 				"AXL": "0x1B7C03Bc2c25b8B5989F4Bc2872cF9342CEc80AE",
 				"UST": "0x260Bbf5698121EB85e7a74f2E45E16Ce762EbE11",

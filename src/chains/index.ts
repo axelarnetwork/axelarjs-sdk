@@ -6,12 +6,14 @@ import Terra                    from "./Terra";
 import {allAssets, AssetConfig} from "../assets";
 import Fantom                   from "./Fantom";
 import Polygon                  from "./Polygon";
+import Moonbeam                 from "./Moonbeam";
 
 const rawChains: Chain[] = [
 	new Axelar(),
 	new Avalanche(),
 	new Ethereum(),
 	new Fantom(),
+	new Moonbeam(),
 	new Polygon(),
 	new Terra()
 ];
