@@ -51,8 +51,7 @@ const axl_axelar: AssetConfig = {
 		ethereum: {assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 100 },
 		fantom: {assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 10 },
 		moonbeam: {assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 10 },
-		polygon: {assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 10 },
-		terra: {assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 0.1 }
+		polygon: {assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 10 }
 	}
 }
 
