@@ -39,6 +39,7 @@ export interface AssetInfo {
 	assetName?: string;
 	assetAddress?: string;
 	common_key?: string;
+	fullySupported?: boolean;
 	native_chain?: string;
 	minDepositAmt?: number;
 	decimals?: number;

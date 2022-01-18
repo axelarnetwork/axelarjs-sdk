@@ -31,6 +31,7 @@ rawChains.forEach(({chainInfo}) => {
 		assetToPush.common_key = asset.common_key;
 		assetToPush.native_chain = asset.native_chain;
 		assetToPush.decimals = asset.decimals;
+		assetToPush.fullySupported = asset.fully_supported;
 		assetsList.push(assetToPush);
 	});
 
