@@ -8,7 +8,7 @@ export default class Axelar implements Chain {
 		chainSymbol: "AXL",
 		chainName: "Axelar",
 		estimatedWaitTime: 5,
-		fullySupported: true,
+		fullySupported: false,
 		assets: [],
 		txFeeInPercent: 0.1,
 		module: "axelarnet"

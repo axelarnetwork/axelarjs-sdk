@@ -7,7 +7,7 @@ export default class Moonbeam extends Ethereum implements Chain {
 		chainSymbol: "MOONBEAM",
 		chainName: "Moonbeam",
 		estimatedWaitTime: 5,
-		fullySupported: true,
+		fullySupported: false,
 		assets: [],
 		txFeeInPercent: 0.1,
 		module: "evm",

@@ -7,6 +7,7 @@ export interface AssetInfoForChain extends AssetInfo {
 export interface AssetConfig {
 	common_key: string;
 	native_chain: string;
+	fully_supported: boolean;
 	decimals: number;
 	chain_aliases: { [key: string]: AssetInfoForChain }
 }
@@ -14,6 +15,7 @@ export interface AssetConfig {
 const luna_terra: AssetConfig = {
 	common_key: "uluna",
 	native_chain: "terra",
+	fully_supported: true,
 	decimals: 6,
 	chain_aliases: {
 		axelar: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.001 },
@@ -29,6 +31,7 @@ const luna_terra: AssetConfig = {
 const ust_terra: AssetConfig = {
 	common_key: "uusd",
 	native_chain: "terra",
+	fully_supported: true,
 	decimals: 6,
 	chain_aliases: {
 		axelar: {assetSymbol: "UST", assetName: "Terra USD", minDepositAmt: 0.1 },
@@ -44,6 +47,7 @@ const ust_terra: AssetConfig = {
 const axl_axelar: AssetConfig = {
 	common_key: "uaxl",
 	native_chain: "axelar",
+	fully_supported: false,
 	decimals: 6,
 	chain_aliases: {
 		axelar: {assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 0.1 },
