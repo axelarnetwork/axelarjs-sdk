@@ -64,7 +64,7 @@ const mainnetConfigs: EnvironmentConfigs = {
 				"UST": "0x2B9d3F168905067D88d93F094C938BACEe02b0cB",
 				"LUNA": "0x5e3C572A97D898Fe359a2Cea31c7D46ba5386895"
 			},
-			providerOptions: { provider: 'https://rpc.ftm.tools', network: {chainId: 250, name: 'Fantom Opera'}} //https://docs.fantom.foundation/tutorials/set-up-metamask
+			providerOptions: { provider: 'https://dark-proud-glitter.fantom.quiknode.pro', network: {chainId: 250, name: 'Fantom Opera'}} //https://docs.fantom.foundation/tutorials/set-up-metamask
 		},
 		polygon: { tokenAddressMap: {
 				"AXL": "0x161cE0D2a3F625654abF0098B06e9EAF5f308691",
