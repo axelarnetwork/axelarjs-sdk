@@ -34,6 +34,7 @@ export class SocketServices {
 		}
 
 		this.socket = io(this.resourceUrl, {
+			transports: ['websocket'],
 			reconnectionDelayMax: 10000,
 			auth: {token},
 			query: {
