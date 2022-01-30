@@ -5,8 +5,9 @@ export interface AssetTransferObject {
 	destinationChainInfo: ChainInfo;
 	selectedSourceAsset: AssetInfo;
 	selectedDestinationAsset: AssetInfo;
-	recaptchaToken?: any;
-	useLegacyRecaptcha?: boolean;
+	signature: string;
+	otc: string;
+	publicAddr: string;
 	transactionTraceId?: string;
 }
 
