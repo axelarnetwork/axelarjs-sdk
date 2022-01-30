@@ -34,12 +34,10 @@ export class SocketServices {
 		}
 
 		this.socket = io(this.resourceUrl, {
-			transports: ['websocket'],
+			// transports: ['websocket'],
 			reconnectionDelayMax: 10000,
 			auth: {token},
-			query: {
-				"my-key": "my-value"
-			}
+			query: {}
 		} as SocketOptions);
 
 		this.socket.once('connect', (data: any) => {
