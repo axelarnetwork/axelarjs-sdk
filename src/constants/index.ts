@@ -31,13 +31,13 @@ const devnetConfigs: EnvironmentConfigs = {
 				"UST": "0x5f1E1bdc2c73EFA2eEEe6b30128d968791D1c55C",
 				"LUNA": "0xB7454D02D4190dAe72be2051482aCF044435C5D8"
 			},
-			providerOptions: { provider: "wss://ropsten.infura.io/ws/v3/2be110f3450b494f8d637ed7bb6954e3" } },
+			providerOptions: { provider: "https://ropsten.infura.io/v3/467477790bfa4b7684be1336e789a068" } },
 		moonbeam: { tokenAddressMap: {
 				"AXL": "0xa9d0D7b596AC9F1704E886892870daB084ECd220",
 				"UST": "0x1c84ea8C5Fd26f8e49aF418De742982980d88593",
 				"LUNA": "0x3a89372397265fAFd704fb8DA373926901CEFA19"
 			},
-			providerOptions: { provider: 'https://rpc.testnet.moonbeam.network', network: {chainId: 1287, name: 'moonbase-alpha'}}},
+			providerOptions: { provider: 'https://rpc.api.moonbase.moonbeam.network', network: {chainId: 1287, name: 'moonbase-alpha'}}},
 		avalanche: { tokenAddressMap: {
 				"AXL": "0x5a3cF244040Ab7C8e6B192E8eb8eF6C78C9D612b",
 				"UST": "0x0749e7902520ab6b3DBD28a1203A2d358700655e",
@@ -55,7 +55,7 @@ const devnetConfigs: EnvironmentConfigs = {
 				"UST": "0x1912e95A44960c785e96d43651660aF55cA84ab8",
 				"LUNA": "0xaf11e7D46A146256D9178251CBe8A1e5E6218f90"
 			},
-			providerOptions: { provider: 'https://rpc-mumbai.maticvigil.com', network: {chainId: 80001, name: 'polygon-testnet'}}},
+			providerOptions: { provider: 'https://polygon-mumbai.infura.io/v3/467477790bfa4b7684be1336e789a068', network: {chainId: 80001, name: 'polygon-testnet'}}},
 	},
 	resourceUrl: `https://bridge-rest-server.devnet.axelar.dev`
 }
@@ -74,7 +74,7 @@ const mainnetConfigs: EnvironmentConfigs = {
 				"UST": "0x085416975fe14C2A731a97eC38B9bF8135231F62",
 				"LUNA": "0x31DAB3430f3081dfF3Ccd80F17AD98583437B213"
 			},
-			providerOptions: { provider: "wss://mainnet.infura.io/v3/10de1265f1234c93acfec19ca8f4afd7" }
+			providerOptions: { provider: "https://mainnet.infura.io/v3/467477790bfa4b7684be1336e789a068" }
 		},
 		moonbeam: { tokenAddressMap: {
 				"AXL": "0x3eacbDC6C382ea22b78aCc158581A55aaF4ef3Cc",
@@ -100,7 +100,7 @@ const mainnetConfigs: EnvironmentConfigs = {
 				"UST": "0xeDDc6eDe8F3AF9B4971e1Fa9639314905458bE87",
 				"LUNA": "0xa17927fB75E9faEA10C08259902d0468b3DEad88"
 			},
-			providerOptions: { provider: 'https://polygon-mainnet.infura.io/v3/10de1265f1234c93acfec19ca8f4afd7', network: {chainId: 137, name: 'polygon-mainnet'}}
+			providerOptions: { provider: 'https://polygon-mainnet.infura.io/v3/467477790bfa4b7684be1336e789a068', network: {chainId: 137, name: 'polygon-mainnet'}}
 		},
 	},
 	resourceUrl: `https://bridge-rest-server.mainnet.axelar.dev`
