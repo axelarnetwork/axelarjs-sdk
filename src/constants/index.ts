@@ -55,7 +55,7 @@ const devnetConfigs: EnvironmentConfigs = {
 				"UST": "0x1912e95A44960c785e96d43651660aF55cA84ab8",
 				"LUNA": "0xaf11e7D46A146256D9178251CBe8A1e5E6218f90"
 			},
-			providerOptions: { provider: 'https://polygon-mainnet.infura.io/v3/467477790bfa4b7684be1336e789a068', network: {chainId: 80001, name: 'polygon-testnet'}}},
+			providerOptions: { provider: 'https://polygon-mumbai.infura.io/v3/467477790bfa4b7684be1336e789a068', network: {chainId: 80001, name: 'polygon-testnet'}}},
 	},
 	resourceUrl: `https://bridge-rest-server.devnet.axelar.dev`
 }
@@ -100,7 +100,7 @@ const mainnetConfigs: EnvironmentConfigs = {
 				"UST": "0xeDDc6eDe8F3AF9B4971e1Fa9639314905458bE87",
 				"LUNA": "0xa17927fB75E9faEA10C08259902d0468b3DEad88"
 			},
-			providerOptions: { provider: 'https://polygon-mumbai.infura.io/v3/467477790bfa4b7684be1336e789a068', network: {chainId: 137, name: 'polygon-mainnet'}}
+			providerOptions: { provider: 'https://polygon-mainnet.infura.io/v3/467477790bfa4b7684be1336e789a068', network: {chainId: 137, name: 'polygon-mainnet'}}
 		},
 	},
 	resourceUrl: `https://bridge-rest-server.mainnet.axelar.dev`
