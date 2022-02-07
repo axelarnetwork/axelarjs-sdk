@@ -24,7 +24,7 @@ const luna_terra: AssetConfig = {
 		fantom: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.5 },
 		moonbeam: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.5 },
 		polygon: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.5 },
-		terra: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.001 },
+		terra: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.005 },
 	}
 }
 
