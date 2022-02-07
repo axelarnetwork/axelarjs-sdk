@@ -65,7 +65,19 @@ export class TransferAssetBridge {
 		return depositAddressWithTraceId;
 	}
 
-	private async getDepositAddress(message: AssetTransferObject, showAlerts: boolean): Promise<AssetInfoWithTrace> {
+	public async getOneTimeCode(): Promise<AssetInfoWithTrace> {
+
+		try {
+			// return await AxelarAPI.axelarJsSDK.getOneTimeCode();
+			return await (new Promise((resolve) => resolve({} as AssetInfoWithTrace)));
+		}
+		 catch (e: any) {
+			throw e;
+		}
+
+	}
+
+	public async getDepositAddress(message: AssetTransferObject, showAlerts: boolean): Promise<AssetInfoWithTrace> {
 		try {
 			return await this.restServices.post(CLIENT_API_POST_TRANSFER_ASSET, message as AssetTransferObject) as AssetInfoWithTrace;
 		} catch (e: any) {

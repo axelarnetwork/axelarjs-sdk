@@ -1,7 +1,5 @@
 // TODO: all miscellaneous topics go here for now
 
-import {BlockCypherResponseCallback} from "../chains/Bitcoin/WaitingService";
-
 export const TRANSFER_RESULT: string = "socket-transfer-result";
 
 // POST REQUEST CONSTS
@@ -18,7 +16,6 @@ export interface CallbackStatus {
 	failCb: any;
 }
 
-export type StatusResponse = BlockCypherResponseCallback
-	| (() => void);
+export type StatusResponse = (...args: any[]) => void;
 
 export type SourceOrDestination = "source" | "destination";
