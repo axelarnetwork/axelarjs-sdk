@@ -18,13 +18,13 @@ const luna_terra: AssetConfig = {
 	fully_supported: true,
 	decimals: 6,
 	chain_aliases: {
-		axelar: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.001 },
-		avalanche: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.1 },
-		ethereum: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 20 },
-		fantom: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.1 },
-		moonbeam: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.1 },
-		polygon: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.1 },
-		terra: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.001 },
+		axelar: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.005 },
+		avalanche: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.5 },
+		ethereum: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 25 },
+		fantom: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.5 },
+		moonbeam: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.5 },
+		polygon: {assetSymbol: "LUNA", assetName: "LUNA (Axelar-wrapped)", minDepositAmt: 0.5 },
+		terra: {assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.005 },
 	}
 }
 
@@ -34,13 +34,13 @@ const ust_terra: AssetConfig = {
 	fully_supported: true,
 	decimals: 6,
 	chain_aliases: {
-		axelar: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 0.1 },
-		avalanche: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 10 },
+		axelar: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 0.5 },
+		avalanche: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 15 },
 		ethereum: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 1000 },
-		fantom: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 10 },
-		moonbeam: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 10 },
-		polygon: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 10 },
-		terra: {assetSymbol: "UST", assetName: "UST", minDepositAmt: 0.1 },
+		fantom: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 15 },
+		moonbeam: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 15 },
+		polygon: {assetSymbol: "UST", assetName: "UST (Axelar-wrapped)", minDepositAmt: 15 },
+		terra: {assetSymbol: "UST", assetName: "UST", minDepositAmt: 0.5 },
 	}
 }
 
