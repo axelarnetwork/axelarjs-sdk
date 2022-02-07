@@ -1,6 +1,6 @@
 {
 	"name": "@axelar-network/axelarjs-sdk",
-	"version": "0.4.6",
+	"version": "0.4.7",
 	"description": "The JavaScript SDK for Axelar Network",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
