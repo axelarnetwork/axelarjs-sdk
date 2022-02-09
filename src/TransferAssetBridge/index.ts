@@ -1,8 +1,9 @@
 import {AssetInfoResponse, AssetTransferObject, AssetInfoWithTrace} from "../interface/AssetTransferObject";
 import {
-	AssetAndChainInfo, BlockchainWaitingService, CallbackStatus, CLIENT_API_POST_TRANSFER_ASSET, SourceOrDestination,
+	AssetAndChainInfo, BlockchainWaitingService, CallbackStatus, CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET,
+	SourceOrDestination,
 	StatusResponse
-}                                                                   from "../interface";
+} from "../interface";
 import {RestServices}                                                from "../services/RestServices";
 import getWaitingService                                             from "./status";
 import {SocketServices}                                              from "../services/SocketServices";
@@ -65,11 +66,10 @@ export class TransferAssetBridge {
 		return depositAddressWithTraceId;
 	}
 
-	public async getOneTimeCode(): Promise<AssetInfoWithTrace> {
+	public async getOneTimeCode(signerAddress: string): Promise<{validationMsg: string; otc: string;}> {
 
 		try {
-			// return await AxelarAPI.axelarJsSDK.getOneTimeCode();
-			return await (new Promise((resolve) => resolve({} as AssetInfoWithTrace)));
+			return await this.restServices.get(CLIENT_API_GET_OTC + `?publicAddress=${signerAddress}`) as {validationMsg: string; otc: string;};
 		}
 		 catch (e: any) {
 			throw e;

@@ -95,10 +95,10 @@ export class AxelarAPI {
         this.axelarJsSDK = new TransferAssetBridge(environment);
     }
 
-	public async getOneTimeMessageToSign(): Promise<AssetInfoWithTrace> {
+	public async getOneTimeMessageToSign(sigerAddress: string): Promise<{validationMsg: string; otc: string;}> {
 
 		try {
-			return await this.axelarJsSDK.getOneTimeCode();
+			return await this.axelarJsSDK.getOneTimeCode(sigerAddress);
 		} catch (e: any) {
 			throw e;
 		}
@@ -129,37 +129,31 @@ For instantiation and invocation:
     const provider = new ethers.providers.Web3Provider(window.ethereum, "any"); //2nd param is network type
     const signerAuthority = provider.getSigner();
     const signerAuthorityAddress = signerAuthority.getAddress();
-    
+
     const getNoncedMessageToSign = async () => {
-    	const {validationMessage, otc} = await api.getOneTimeMessageToSign(signerAuthorityAddress);
-    	return {validationMessage, otc};
+	    const signerAuthorityAddress = await signerAuthority.getAddress();
+	    const {validationMsg, otc} = await api.getOneTimeMessageToSign(signerAuthorityAddress);
+	    return {validationMsg, otc};
     }
-    
+
     const promptUserToSignMessage = async () => {
-    	const {validationMessage, otc} = await getNoncedMessageToSign();
-	    const signature = await signerAuthority.signMessage(validationMessage);
-	    return {otc, publicAddr, signature};
+	    const {validationMsg, otc} = await getNoncedMessageToSign();
+	    const signature = await signerAuthority.signMessage(validationMsg);
+
+	    return {
+		    otc,
+		    publicAddr: await signerAuthority.getAddress(),
+		    signature};
     }
-    
-    const getDepositAddress = async () => {
-        
-        /*set up parmeters here; see sample parameters in `API Usage Details` below for more guidance*/
-        const requestPayload: AssetTransferObject = getParameters();
-        
-        const {otc, publicAddr, signature} = await promptUserToSignMessage();
-        requestPayload.otc = otc;
-        requestPayload.publicAddr = publicAddr;
-        requestPayload.signature = signature;
-        
-        try {
-            const res: AssetInfoWithTrace = await api.getDepositAddress(requestPayload);
-            return res;
-        } catch (e: any) {
-            /*
-            your error handling here, i.e:            	
-            reject("api error" + e);
-            * */
-        }
+
+    const getDepositAddress = async (destinationAddress?: string) => {
+	    const {otc, publicAddr, signature} = await promptUserToSignMessage();
+	    const parameters: AssetTransferObject = getParameters(destinationAddress || publicAddr); // wherever you specify for the destination address on the destination chain
+	    parameters.otc = otc;
+	    parameters.publicAddr = publicAddr;
+	    parameters.signature = signature;
+
+	    const linkAddress = await api.getDepositAddress(parameters);
     }
     
 
@@ -175,44 +169,29 @@ Sample parameters:
 ```tsx
 // getParameters.ts
 
-const getParameters = () => {
-	
+const getParameters = (destinationAddress: string, sourceChainName: string = "terra", destinationChainName: string = "avalanche", asset_common_key: string = "uusd") => {
+
 	/*
-	info for sourceChainInfo and destinationChainInfo are hard-coded in this example, but they
-	do not need to be. you should be able to fetch them from the ChainList module directly. 
+	info for sourceChainInfo and destinationChainInfo fetched from the ChainList module. 
 	* */
+	const terraChain: ChainInfo = ChainList.map((chain: Chain) => chain.chainInfo).find((chainInfo: ChainInfo) => chainInfo.chainName.toLowerCase() === sourceChainName.toLowerCase()) as ChainInfo;
+	const avalancheChain: ChainInfo = ChainList.map((chain: Chain) => chain.chainInfo).find((chainInfo: ChainInfo) => chainInfo.chainName.toLowerCase() === destinationChainName.toLowerCase()) as ChainInfo;
+	const assetObj = terraChain.assets?.find((asset: AssetInfo) => asset.common_key === asset_common_key) as AssetInfo;
+
 	let requestPayload: AssetTransferObject = {
-		sourceChainInfo: {
-			chainSymbol: "ETH",
-			chainName: "Ethereum",
-			estimatedWaitTime: 15,
-			fullySupported: true,
-			assets: [],
-			txFeeInPercent: 0.1
-		},
-		destinationChainInfo: {
-			chainSymbol: "FTM",
-			chainName: "Fantom",
-			estimatedWaitTime: 5,
-			fullySupported: true,
-			assets: [],
-			txFeeInPercent: 0.1
-		},
-		selectedSourceAsset: {
-			assetSymbol: "UST",
-			common_key: "uusd"
-		},
+		sourceChainInfo: terraChain,
+		destinationChainInfo: avalancheChain,
+		selectedSourceAsset: assetObj,
 		selectedDestinationAsset: {
-			assetAddress: "YOUR_VALID_FANTOM_ADDRESS", //address on the destination chain where you want the tokens to arrive
-			assetSymbol: "UST", 
-			common_key: "uusd"
+			...assetObj,
+			assetAddress: destinationAddress, //address on the destination chain where you want the tokens to arrive
 		},
 		signature: "SIGNATURE_FROM_METAMASK_SIGN",
 		otc: "OTC_RECEIVED_FROM_SERVER",
 		publicAddr: "SIGNER_OF_SIGNATURE",
 		transactionTraceId: "YOUR_OWN_UUID" //your own UUID, helpful for tracing purposes. optional.
 	}
-	
+
 	return requestPayload;
 }
 ```
