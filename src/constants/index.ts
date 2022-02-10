@@ -27,33 +27,33 @@ export interface EnvironmentConfigs {
 const devnetConfigs: EnvironmentConfigs = {
 	ethersJsConfigs: {
 		ethereum: { tokenAddressMap: {
-				"AXL": "0xBf96Dfc6AE44e880681b7221deE21E900BC0F21c",
-				"UST": "0x5f1E1bdc2c73EFA2eEEe6b30128d968791D1c55C",
-				"LUNA": "0xB7454D02D4190dAe72be2051482aCF044435C5D8"
+				"AXL": "0x321C017c08b681b1a34909eb159ed128772a5Bbe",
+				"UST": "0x1487F3faefE78792CDC48D87FF32aaC6650fd85f",
+				"LUNA": "0x7Aa125543B9D4a361f58aC1Ff3Bea86eAF6D948B"
 			},
 			providerOptions: { provider: "https://ropsten.infura.io/v3/467477790bfa4b7684be1336e789a068" } },
 		moonbeam: { tokenAddressMap: {
-				"AXL": "0xa9d0D7b596AC9F1704E886892870daB084ECd220",
-				"UST": "0x1c84ea8C5Fd26f8e49aF418De742982980d88593",
-				"LUNA": "0x3a89372397265fAFd704fb8DA373926901CEFA19"
+				"AXL": "0x8a6614F33EC72FB70084B22b2EFfb643424e9Cc9",
+				"UST": "0xD34007Bb8A54B2FBb1D6647c5AbA04D507ABD21d",
+				"LUNA": "0xa1cF442E73045F1ea9960499FC8771454a01019D"
 			},
 			providerOptions: { provider: 'https://rpc.api.moonbase.moonbeam.network', network: {chainId: 1287, name: 'moonbase-alpha'}}},
 		avalanche: { tokenAddressMap: {
-				"AXL": "0x5a3cF244040Ab7C8e6B192E8eb8eF6C78C9D612b",
-				"UST": "0x0749e7902520ab6b3DBD28a1203A2d358700655e",
-				"LUNA": "0x28EE721a8128ee8ff57f14b131535E05b88fd636"
+				"AXL": "0x46Cc87ea84586C03bB2109ED9B33F998d40B7623",
+				"UST": "0x43F4600b552089655645f8c16D86A5a9Fa296bc3",
+				"LUNA": "0x50a70aBb7bd6EbBcC46Df7C0d033C568F563cA27"
 			},
 			providerOptions: { provider: 'https://api.avax-test.network/ext/bc/C/rpc', network: {chainId: 43113, name: 'Avalanche Testnet C-Chain'}}},
 		fantom: { tokenAddressMap: {
-				"AXL": "0x0efE77aEf986684650c84C149e0e37196D9b7abc",
-				"UST": "0x243615425b166719A13875A5Dc044094DDF3dA4d",
-				"LUNA": "0x79e1b09d919AE79D039BB81BEB7c53C70f95719B"
+				"AXL": "0xc1Ff1364f7A263a535E3caF60d424b78bB5b7c19",
+				"UST": "0x89A1D86901D25EFFe5D022bDD1132827e4D7f010",
+				"LUNA": "0x121286BeDd58d58558A30ED2db2f4a7c6Eb646A3"
 			},
 			providerOptions: { provider: 'https://rpc.testnet.fantom.network', network: {chainId: 4002, name: 'Fantom testnet'}}},
 		polygon: { tokenAddressMap: {
-				"AXL": "0x578aBd5AD95D0e85CB9b508295D4bC1B35496f8a",
-				"UST": "0x1912e95A44960c785e96d43651660aF55cA84ab8",
-				"LUNA": "0xaf11e7D46A146256D9178251CBe8A1e5E6218f90"
+				"AXL": "0x6ff1fa8CfB26551aA13e3d5dbf077f0a98ECd232",
+				"UST": "0xa32575f477FDEbFA02513880d47F6515Da42FB90",
+				"LUNA": "0x6Ad38DD216DC344c6B3CeDc34612e1014e2aa469"
 			},
 			providerOptions: { provider: 'https://polygon-mumbai.infura.io/v3/467477790bfa4b7684be1336e789a068', network: {chainId: 80001, name: 'polygon-testnet'}}},
 	},
