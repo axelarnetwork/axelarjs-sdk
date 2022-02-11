@@ -10,7 +10,7 @@ Day 1, this will include:
 
 | Supported Assets  | Supported Blockchain Networks |
 | ------------- | ------------- |
-| <ul><li>Axelar native tokens</li><li>LUNA (Terra native tokens)</li><li>UST (Terra stablecoin)</li></ul> | <ul><li>Avalanche</li><li>Axelar</li><li>Ethereum</li><li>Fantom</li><li>Polygon</li><li>Terra</li></ul> |
+| <ul><li>Axelar native tokens</li><li>LUNA (Terra native tokens)</li><li>UST (Terra stablecoin)</li></ul> | <ul><li>Avalanche</li><li>Axelar</li><li>Ethereum</li><li>Fantom</li><li>Moonbeam</li><li>Polygon</li><li>Terra</li></ul> |
 
 The list will continue to grow, as will the use cases of this SDK. 
 
@@ -40,19 +40,18 @@ Accordingly, please ensure you have the latest and let us know of any issues you
 
 Either reach out to us directly or file a github issue on the repo.
 
-## Access Restrictions
+## User Access Restrictions
 
-Users of this SDK will notice that there is no explicit requirement for frontend users to connect to a Web3 wallet. This is by design and, we believe, an advantage as it relates to the adoption of the SDK and platform. 
+Users of this API will notice that there is an explicit requirement for frontend users to connect to a Web3 wallet and sign a message with a one-time code with every invocation of getDepositAddress. Invocations to the API are also rate limited.
+This is by design and part of a growing list of security measures we have in place to protect our services. 
 
-For the time, being, we have leveraged (among other things) Google's `reCAPTCHA v3` authentication mechanism, so any request that goes into our services will need a valid `reCAPTCHA v3 token`. Read the docs here[https://developers.google.com/recaptcha/docs/v3].
-
-Eventually, we will instill an API-key mechanism for our SDK users.
+For API/SDK users, we will eventually implement an API-key mechanism.
 
 ## Onboarding process
 Initially, we are gatekeeping the rollout of this SDK a bit as we work through some kinks. 
 
 For now, this means that we are whitelisting hosts that can access the APIs and underlying services downstream, 
-i.e. it is restricted by both recaptcha validation and cors settings.
+i.e. it is restricted by both cryptographic signing and cors settings.
 
 So, our proposed process is as follows:
 1. Install and integrate the API, as shown in the `Installation` and `Getting Started` steps below.
@@ -75,14 +74,7 @@ For the time being, the repo is a private repository that can only be accessed w
 
 ## Getting Started
 
-First step, ensure your frontend is equipped with Google's `reCAPTCHA v3` authentication mechanism. You can do this by loading the following script with this `PUBLIC SITE KEY` below. 
-
-```bash
-<script src="https://www.google.com/recaptcha/api.js?render=6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR"></script>
-```
-If that works, you should be able to see the `grecaptcha` object instantiated on the window object. 
-
-From there, you can use something like the following snippets to first set up the library consumer and then to instantiate it
+After installation, you can use something like the following snippets to first set up the library consumer and then to instantiate it
 
 For initial setup:
 ```tsx
@@ -93,28 +85,34 @@ import {
     TransferAssetBridge
 } from "@axelar-network/axelarjs-sdk";
 
-export class AxelarJSSDKFacade {
+export class AxelarAPI {
 
-    private static environment: string;
-    private static axelarJsSDK: TransferAssetBridge;
+    private environment: string;
+    private axelarJsSDK: TransferAssetBridge;
 
     constructor(environment: string) {
-        AxelarJSSDKFacade.environment = environment;
-        AxelarJSSDKFacade.axelarJsSDK = new TransferAssetBridge(AxelarJSSDKFacade.environment);
+        this.environment = environment;
+        this.axelarJsSDK = new TransferAssetBridge(environment);
     }
 
-    public static async transferAssets(
-    	payload: AssetTransferObject, 
-        sourceCbs: CallbackStatus, 
-        destCbs: CallbackStatus
-    ): Promise<AssetInfoWithTrace> {
+	public async getOneTimeMessageToSign(sigerAddress: string): Promise<{validationMsg: string; otc: string;}> {
+
+		try {
+			return await this.axelarJsSDK.getOneTimeCode(sigerAddress);
+		} catch (e: any) {
+			throw e;
+		}
+
+	}
+
+    public async getDepositAddress(payload: AssetTransferObject, showAlerts: boolean = true): Promise<AssetInfoWithTrace> {
 
         try {
-            return AxelarJSSDKFacade.axelarJsSDK.transferAssets(payload, sourceCbs, destCbs, false);
+            return this.axelarJsSDK.getDepositAddress(payload, showAlerts);
         } catch (e: any) {
-            sourceCbs?.failCb();
             throw e;
         }
+        
     }
 
 }
@@ -123,125 +121,78 @@ export class AxelarJSSDKFacade {
 For instantiation and invocation:
 ```tsx
 
-    const environment: string = "testnet"; /*environment should be one of local | devnet | testnet*/
+    const environment: string = "testnet"; /*environment should be one of local | devnet | testnet | mainnet*/
     
-    const api: AxelarJSSDKFacade = new AxelarJSSDKFacade(environment);
-    
-    /*set up parmeters here; see sample parameters in `API Usage Details` below for more guidance*/
-    const {requestPayload, sourceChainCbs, destinationChainCbs} = getParameters();
+    const api: AxelarAPI = new AxelarAPI(environment);
 
-    const depositAddress: AssetInfo, traceId: string;
-    
-    authenticateWithRecaptcha().then(async (recaptchaToken: string) => {
-        
-        if (recaptchaToken !== null) {
-        
-            requestPayload.recaptchaToken = recaptchaToken;
-        
-            try {
-                const res: AssetInfoWithTrace = await AxelarJSSDKFacade.axelarJsSDK.transferAssets(
-                    requestPayload,
-                    {
-                    	successCb: sourceChainCbs.successCb, 
-                        failCb: sourceChainCbs.failCb
-                    },{
-                    	successCb: destinationChainCbs.successCb,
-		                failCb: destinationChainCbs.failCb
-                    }
-                );
-                depositAddress = res.assetInfo;
-	            traceId = res.traceId;
-            } catch (e: any) {
-            	/*
-            	your error handling here, i.e:            	
-                reject("transfer asset api error" + e);
-            	* */
-            }
-    
-        }
-    })
+    /*below is sample implementation using ethers.js, but you can use whatever you want*/
+    const provider = new ethers.providers.Web3Provider(window.ethereum, "any"); //2nd param is network type
+    const signerAuthority = provider.getSigner();
+    const signerAuthorityAddress = signerAuthority.getAddress();
 
-```
-
-Sample recaptcha authentication
-```tsx
-//authenticateWithRecaptcha.ts
-
-    /*This recaptcha public site key is intentionally made public for you to use
-    * For more information on Google Recaptcha V3: https://developers.google.com/recaptcha/docs/v3
-    * */
-    const RECAPTCHA_SITE_KEY: string = "6LcxwsocAAAAANQ1t72JEcligfeSr7SSq_pDC9vR";
-    
-    declare const grecaptcha: any;
-
-    const authenticateWithRecaptcha = (): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            grecaptcha.ready(async () => {
-                try {
-                    const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY);
-                    resolve(token);
-                } catch (e: any) {
-                	/*error handling of failed recaptcha here*/
-                }
-            });
-        });
+    const getNoncedMessageToSign = async () => {
+	    const signerAuthorityAddress = await signerAuthority.getAddress();
+	    const {validationMsg, otc} = await api.getOneTimeMessageToSign(signerAuthorityAddress);
+	    return {validationMsg, otc};
     }
 
+    const promptUserToSignMessage = async () => {
+	    const {validationMsg, otc} = await getNoncedMessageToSign();
+	    const signature = await signerAuthority.signMessage(validationMsg);
+
+	    return {
+		    otc,
+		    publicAddr: await signerAuthority.getAddress(),
+		    signature};
+    }
+
+    const getDepositAddress = async (destinationAddress?: string) => {
+	    const {otc, publicAddr, signature} = await promptUserToSignMessage();
+	    const parameters: AssetTransferObject = getParameters(destinationAddress || publicAddr); // wherever you specify for the destination address on the destination chain
+	    parameters.otc = otc;
+	    parameters.publicAddr = publicAddr;
+	    parameters.signature = signature;
+
+	    const linkAddress = await api.getDepositAddress(parameters);
+    }
+    
+
 ```
+
 ## API Usage Details
 
-The transferAssets method takes three parameters:
+The getDepositAddress method takes the following parameters:
 1. requestPayload: a complex struct of type `AssetTransferObject`
-2. sourceChainCbs: an object of success(/fail) callbacks invoked on a success(/fail) result while attempting to confirm your deposit from the requestPayload on the source chain
-3. destinationChainCbs: an object of success(/fail) callbacks invoked on a success(/fail) result while attempting to confirm your asset on the destination chain
+2. optional parameter on whether you want error alerts to show on the UI or not
 
 Sample parameters:
 ```tsx
 // getParameters.ts
 
-const getParameters = () => {
-	
+const getParameters = (destinationAddress: string, sourceChainName: string = "terra", destinationChainName: string = "avalanche", asset_common_key: string = "uusd") => {
+
+	/*
+	info for sourceChainInfo and destinationChainInfo fetched from the ChainList module. 
+	* */
+	const terraChain: ChainInfo = ChainList.map((chain: Chain) => chain.chainInfo).find((chainInfo: ChainInfo) => chainInfo.chainName.toLowerCase() === sourceChainName.toLowerCase()) as ChainInfo;
+	const avalancheChain: ChainInfo = ChainList.map((chain: Chain) => chain.chainInfo).find((chainInfo: ChainInfo) => chainInfo.chainName.toLowerCase() === destinationChainName.toLowerCase()) as ChainInfo;
+	const assetObj = terraChain.assets?.find((asset: AssetInfo) => asset.common_key === asset_common_key) as AssetInfo;
+
 	let requestPayload: AssetTransferObject = {
-		sourceChainInfo: {
-			chainSymbol: "ETH",
-			chainName: "Ethereum",
-			estimatedWaitTime: 15,
-			fullySupported: true,
-			assets: [],
-			txFeeInPercent: 0.1
-		},
-		selectedSourceAsset: {
-			assetAddress: "NA",
-			assetSymbol: "AXL",
-			common_key: "uaxl"
-		},
-		destinationChainInfo: {
-			chainSymbol: "FTM",
-			chainName: "Fantom",
-			estimatedWaitTime: 5,
-			fullySupported: true,
-			assets: [],
-			txFeeInPercent: 0.1
-		},
+		sourceChainInfo: terraChain,
+		destinationChainInfo: avalancheChain,
+		selectedSourceAsset: assetObj,
 		selectedDestinationAsset: {
-			assetAddress: "YOUR_VALID_FANTOM_ADDRESS",
-			assetSymbol: "AXL", 
-			common_key: "uaxl"
+			...assetObj,
+			assetAddress: destinationAddress, //address on the destination chain where you want the tokens to arrive
 		},
-		recaptchaToken: null, // null for now, to be populated in authenticateWithRecaptcha's response callback, as shown above  
-		transactionTraceId: "YOUR_OWN_UUID" //your own UUID, helpful for tracing purposes
+		signature: "SIGNATURE_FROM_METAMASK_SIGN",
+		otc: "OTC_RECEIVED_FROM_SERVER",
+		publicAddr: "SIGNER_OF_SIGNATURE",
+		transactionTraceId: "YOUR_OWN_UUID" //your own UUID, helpful for tracing purposes. optional.
 	}
-	
-	const sourceChainCbs = {
-        successCb: (data: any) => console.log("looks like deposit on the source chain was confirmed by Axelar. data=", JSON.stringify(data)),
-		failCb: (data: any) => console.log("sad outcome on the source chain, :-( data=", JSON.stringify(data)),
-    }
-	const destinationChainCbs = {
-		successCb: (data: any) => console.log("good outcome on the destination chain! data=", JSON.stringify(data)),
-		failCb: (data: any) => console.log("sad outcome on the destination chain, :-( data=", JSON.stringify(data)),
-	}
-	
-	return {requestPayload, sourceChainCbs, destinationChainCbs} as const;
+
+	return requestPayload;
 }
 ```
 
