@@ -30,7 +30,6 @@
 		"@types/uuid": "^8.3.1",
 		"@terra-money/terra.js": "^3.0.0",
 		"bech32": "^2.0.0",
-		"bitcoin-address-validation": "^2.1.0",
 		"blockcypher": "^0.3.0",
 		"ethers": "^5.4.7",
 		"lodash": "^4.17.21",

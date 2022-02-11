@@ -30,7 +30,7 @@ export interface ChainInfo {
 	fullySupported: boolean;
 	estimatedWaitTime: number;
 	txFeeInPercent: number;
-	module: "axelarnet" | "evm" | "bitcoin";
+	module: "axelarnet" | "evm";
 	confirmLevel?: number;
 }
 

@@ -22,7 +22,6 @@ export interface AssetInfoResponse extends AssetInfo {
 }
 
 export enum LinkType {
-	BITCOIN = "/bitcoin.v1beta1.LinkRequest",
 	EVM = "/evm.v1beta1.LinkRequest",
 	COS = "/axelarnet.v1beta1.LinkRequest"
 }
@@ -31,9 +30,6 @@ export interface LinkRequestBody {
 	"@type": LinkType;
 	"recipient_addr": string;
 	"recipient_chain": string;
-}
-
-export interface BTCLinkRequestBody extends LinkRequestBody {
 }
 
 export interface EVMLinkRequestBody extends LinkRequestBody {
