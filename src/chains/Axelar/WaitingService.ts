@@ -1,25 +1,35 @@
 import {
-	AssetAndChainInfo,
-	AssetInfo,
-	BlockchainWaitingService,
-	ChainInfo,
-	SocketListenerTypes,
-	StatusResponse
+  AssetAndChainInfo,
+  AssetInfo,
+  BlockchainWaitingService,
+  ChainInfo,
+  SocketListenerTypes,
+  StatusResponse,
 } from "../../interface";
-import {BaseWaitingService}                                                                      from "../models/BaseWaitingService";
-import {SocketServices}                                                                          from "../../services/SocketServices";
+import { BaseWaitingService } from "../models/BaseWaitingService";
+import { SocketServices } from "../../services/SocketServices";
 
-export default class WaitingService extends BaseWaitingService implements BlockchainWaitingService {
+export default class WaitingService
+  extends BaseWaitingService
+  implements BlockchainWaitingService
+{
+  constructor(chainInfo: ChainInfo, assetInfo: AssetInfo) {
+    super(1, assetInfo.assetAddress as string);
+  }
 
-	constructor(chainInfo: ChainInfo, assetInfo: AssetInfo) {
-		super(1, assetInfo.assetAddress as string);
-	}
+  public async waitForDepositConfirmation(
+    assetAndChainInfo: AssetAndChainInfo,
+    interimStatusCb: StatusResponse,
+    clientSocketConnect: SocketServices
+  ) {
+    return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
+  }
 
-	public async waitForDepositConfirmation(assetAndChainInfo: AssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
-		return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
-	}
-
-	public async waitForTransferEvent(assetAndChainInfo: AssetAndChainInfo, interimStatusCb: StatusResponse, clientSocketConnect: SocketServices) {
-		return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
-	}
+  public async waitForTransferEvent(
+    assetAndChainInfo: AssetAndChainInfo,
+    interimStatusCb: StatusResponse,
+    clientSocketConnect: SocketServices
+  ) {
+    return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
+  }
 }
