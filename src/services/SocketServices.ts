@@ -44,7 +44,7 @@ export class SocketServices {
       cb && cb();
     });
 
-    this.socket.once("disconnect", (data: any) => {});
+    // this.socket.once("disconnect", (data: any) => {});
   }
 
   public emitMessageAndWaitForReply(

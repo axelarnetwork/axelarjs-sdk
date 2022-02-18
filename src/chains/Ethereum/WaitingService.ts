@@ -3,7 +3,6 @@ import {
   AssetInfo,
   BlockchainWaitingService,
   ChainInfo,
-  SocketListenerTypes,
   StatusResponse,
 } from "../../interface";
 import { BaseWaitingService } from "../models/BaseWaitingService";

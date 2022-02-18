@@ -7,9 +7,9 @@ import {
 import { SocketServices } from "../../services/SocketServices";
 
 export class BaseWaitingService implements BlockchainWaitingService {
-  public numConfirmations: number = 0;
-  public depositAddress: string = "";
-  public environment: string = "";
+  public numConfirmations = 0;
+  public depositAddress = "";
+  public environment = "";
 
   public constructor(numConfirmations: number, depositAddress: string) {
     this.setNumConfirmations(numConfirmations);

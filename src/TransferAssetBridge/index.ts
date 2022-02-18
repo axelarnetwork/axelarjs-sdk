@@ -36,7 +36,7 @@ export class TransferAssetBridge {
     message: AssetTransferObject,
     sourceCbs: CallbackStatus,
     destCbs: CallbackStatus,
-    showAlerts: boolean = true
+    showAlerts = true
   ): Promise<AssetInfoWithTrace> {
     const { selectedDestinationAsset, sourceChainInfo, destinationChainInfo } =
       message;
