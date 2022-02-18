@@ -1,48 +1,56 @@
 {
-	"name": "@axelar-network/axelarjs-sdk",
-	"version": "0.4.9",
-	"description": "The JavaScript SDK for Axelar Network",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"files": [
-		"dist"
-	],
-	"scripts": {
-		"build": "tsc",
-		"prepare": "npm run build",
-		"dev:tsc": "tsc --watch -p .",
-		"dev:serve": "nodemon -e js -w dist dist/index.js",
-		"dev": "run-p dev:*",
-		"test": "jest"
-	},
-	"keywords": [
-		"axelar",
-		"blockchain",
-		"sdk",
-		"cryptocurrency",
-		"interoperability",
-		"smart-contracts"
-	],
-	"author": "Axelar Network",
-	"license": "MIT",
-	"dependencies": {
-		"@types/lodash": "^4.14.176",
-		"@types/uuid": "^8.3.1",
-		"@terra-money/terra.js": "^3.0.0",
-		"bech32": "^2.0.0",
-		"blockcypher": "^0.3.0",
-		"ethers": "^5.4.7",
-		"lodash": "^4.17.21",
-		"nodemon": "^2.0.12",
-		"npm-run-all": "^4.1.5",
-		"socket.io-client": "^4.2.0",
-		"typescript": "^4.4.2",
-		"uuid": "^8.3.2"
-	},
-	"devDependencies": {
-		"@babel/preset-env": "^7.16.4",
-		"@babel/preset-typescript": "^7.16.0",
-		"@types/jest": "^27.0.3",
-		"jest": "^27.3.1"
-	}
+  "name": "@axelar-network/axelarjs-sdk",
+  "version": "0.4.9",
+  "description": "The JavaScript SDK for Axelar Network",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "dev:tsc": "tsc --watch -p .",
+    "dev:serve": "nodemon -e js -w dist dist/index.js",
+    "dev": "run-p dev:*",
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "reformat": "prettier --write \"./**/*.{ts,json}\""
+  },
+  "keywords": [
+    "axelar",
+    "blockchain",
+    "sdk",
+    "cryptocurrency",
+    "interoperability",
+    "smart-contracts"
+  ],
+  "author": "Axelar Network",
+  "license": "MIT",
+  "dependencies": {
+    "@terra-money/terra.js": "^3.0.0",
+    "@types/lodash": "^4.14.176",
+    "@types/uuid": "^8.3.1",
+    "bech32": "^2.0.0",
+    "blockcypher": "^0.3.0",
+    "ethers": "^5.4.7",
+    "lodash": "^4.17.21",
+    "nodemon": "^2.0.12",
+    "npm-run-all": "^4.1.5",
+    "socket.io-client": "^4.2.0",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
+    "@types/jest": "^27.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "eslint": "^8.9.0",
+    "eslint-plugin-import": "^2.25.4",
+    "jest": "^27.3.1",
+    "prettier": "2.5.1",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^4.5.5"
+  }
 }
