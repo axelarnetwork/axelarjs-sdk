@@ -29,6 +29,8 @@ jobs:
         run: npm ci
       - name: Install dependencies for LinkAddress example
         run: cd examples/LinkAddress && npm ci
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Run linters
         uses: wearerequired/lint-action@v1
         with:
