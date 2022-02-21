@@ -3,5 +3,3 @@
 *.iml
 *.idea
 *.DS_store
-
-package-lock.json

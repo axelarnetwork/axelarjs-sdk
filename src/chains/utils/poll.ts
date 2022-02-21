@@ -1,24 +1,25 @@
-export const poll = ({asyncRequest, validate, interval, maxAttempts}: any) => {
+export const poll = ({
+  asyncRequest,
+  validate,
+  interval,
+  maxAttempts,
+}: any) => {
+  let attempts = 0;
 
-	let attempts = 0;
+  const executePoll = async (resolve: any, reject: any) => {
+    const asyncResult = await asyncRequest(attempts);
 
-	const executePoll = async (resolve: any, reject: any) => {
+    attempts++;
 
-		const asyncResult = await asyncRequest(attempts);
+    switch (true) {
+      case validate(asyncResult):
+        return resolve(asyncResult);
+      case maxAttempts && attempts === maxAttempts:
+        return reject(new Error("Exceeded max attempts"));
+      default:
+        setTimeout(executePoll, interval, resolve, reject);
+    }
+  };
 
-		attempts++;
-
-		switch (true) {
-			case validate(asyncResult):
-				return resolve(asyncResult);
-			case (maxAttempts && attempts === maxAttempts):
-				return reject(new Error('Exceeded max attempts'));
-			default:
-				setTimeout(executePoll, interval, resolve, reject);
-		}
-
-	};
-
-	return new Promise(executePoll);
-
+  return new Promise(executePoll);
 };

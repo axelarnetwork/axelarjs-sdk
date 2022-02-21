@@ -1,22 +1,20 @@
-import {Chain, ChainInfo} from "../../interface";
-import Ethereum           from "../Ethereum";
+import { Chain, ChainInfo } from "../../interface";
+import Ethereum from "../Ethereum";
 
 export default class Polygon extends Ethereum implements Chain {
+  public chainInfo: ChainInfo = {
+    chainSymbol: "POLYGON",
+    chainName: "Polygon",
+    estimatedWaitTime: 5,
+    fullySupported: true,
+    assets: [],
+    txFeeInPercent: 0.1,
+    module: "evm",
+    confirmLevel: 150,
+  };
 
-	public chainInfo: ChainInfo = {
-		chainSymbol: "POLYGON",
-		chainName: "Polygon",
-		estimatedWaitTime: 5,
-		fullySupported: true,
-		assets: [],
-		txFeeInPercent: 0.1,
-		module: "evm",
-		confirmLevel: 150
-	};
-
-	constructor() {
-		super();
-		this.providerType = "polygon";
-	}
-
+  constructor() {
+    super();
+    this.providerType = "polygon";
+  }
 }
