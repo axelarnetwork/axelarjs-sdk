@@ -37,3 +37,5 @@ jobs:
           eslint: true
           eslint_extensions: "ts"
           prettier: true
+          prettier_dir: "src,examples,test"
+          prettier_extensions: "ts"
