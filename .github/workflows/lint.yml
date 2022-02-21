@@ -25,8 +25,10 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 12
-      - name: Install dependencies
+      - name: Install dependencies for SDK
         run: npm ci
+      - name: Install dependencies for LinkAddress example
+        run: cd examples/LinkAddress && npm ci
       - name: Run linters
         uses: wearerequired/lint-action@v1
         with:
