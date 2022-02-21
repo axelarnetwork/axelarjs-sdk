@@ -14,7 +14,10 @@
     "declaration": true /* Generate .d.ts files from TypeScript and JavaScript files in your project. */,
     "declarationMap": true /* Create sourcemaps for d.ts files. */,
     "sourceMap": true /* Create source map files for emitted JavaScript files. */,
-    "rootDir": "./src" /* Specify the root folder within your source files. */,
+    "rootDirs": [
+      "./src",
+      "./test"
+    ] /* Specify the root folder within your source files. */,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
 
     /* Interop Constraints */
@@ -31,6 +34,6 @@
     "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["src"],
+  "include": ["src", "test"],
   "exclude": ["node_modules", "dist"]
 }
