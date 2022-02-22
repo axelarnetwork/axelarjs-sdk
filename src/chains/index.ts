@@ -1,12 +1,13 @@
-import { AssetInfo, Chain } from "../interface";
-import Axelar from "./Axelar";
-import Ethereum from "./Ethereum";
-import Avalanche from "./Avalanche";
-import Terra from "./Terra";
+import { AssetInfo, Chain }       from "../interface";
+import Axelar                     from "./Axelar";
+import Ethereum                   from "./Ethereum";
+import Avalanche                  from "./Avalanche";
+import Terra                      from "./Terra";
 import { allAssets, AssetConfig } from "../assets";
-import Fantom from "./Fantom";
-import Polygon from "./Polygon";
-import Moonbeam from "./Moonbeam";
+import Fantom                     from "./Fantom";
+import Polygon                    from "./Polygon";
+import Moonbeam                   from "./Moonbeam";
+import Osmosis                    from "./Osmosis";
 
 const rawChains: Chain[] = [
   new Axelar(),
@@ -14,6 +15,7 @@ const rawChains: Chain[] = [
   new Ethereum(),
   new Fantom(),
   new Moonbeam(),
+  new Osmosis(),
   new Polygon(),
   new Terra(),
 ];
