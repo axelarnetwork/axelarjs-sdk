@@ -30,7 +30,7 @@ const devnetConfigs: EnvironmentConfigs = {
         AXL: "0x321C017c08b681b1a34909eb159ed128772a5Bbe",
         UST: "0x1487F3faefE78792CDC48D87FF32aaC6650fd85f",
         LUNA: "0x7Aa125543B9D4a361f58aC1Ff3Bea86eAF6D948B",
-        ["USDC.fake"]: "0x772dF70ff68C8dEa1863794824410e90e46Cd433"
+        ["USDC.fake"]: "0x772dF70ff68C8dEa1863794824410e90e46Cd433",
       },
       providerOptions: {
         provider:

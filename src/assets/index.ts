@@ -136,4 +136,9 @@ const usdc_fake: AssetConfig = {
   },
 };
 
-export const allAssets: AssetConfig[] = [axl_axelar, luna_terra, ust_terra, usdc_fake];
+export const allAssets: AssetConfig[] = [
+  axl_axelar,
+  luna_terra,
+  ust_terra,
+  usdc_fake,
+];
