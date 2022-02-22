@@ -7,6 +7,7 @@ import { allAssets, AssetConfig } from "../assets";
 import Fantom from "./Fantom";
 import Polygon from "./Polygon";
 import Moonbeam from "./Moonbeam";
+import Osmosis from "./Osmosis";
 
 const rawChains: Chain[] = [
   new Axelar(),
@@ -14,6 +15,7 @@ const rawChains: Chain[] = [
   new Ethereum(),
   new Fantom(),
   new Moonbeam(),
+  new Osmosis(),
   new Polygon(),
   new Terra(),
 ];
