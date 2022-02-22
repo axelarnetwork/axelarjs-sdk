@@ -112,4 +112,28 @@ const axl_axelar: AssetConfig = {
   },
 };
 
-export const allAssets: AssetConfig[] = [axl_axelar, luna_terra, ust_terra];
+const usdc_fake: AssetConfig = {
+  common_key: "uusdc",
+  native_chain: "ethereum",
+  fully_supported: false,
+  decimals: 6,
+  chain_aliases: {
+    axelar: {
+      assetSymbol: "USDC.fake",
+      assetName: "USDC.fake",
+      minDepositAmt: 10,
+    },
+    ethereum: {
+      assetSymbol: "USDC.fake",
+      assetName: "USDC.fake",
+      minDepositAmt: 10,
+    },
+    osmosis: {
+      assetSymbol: "USDC.fake",
+      assetName: "USDC.fake",
+      minDepositAmt: 10,
+    },
+  },
+};
+
+export const allAssets: AssetConfig[] = [axl_axelar, luna_terra, ust_terra, usdc_fake];
