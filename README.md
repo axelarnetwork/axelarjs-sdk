@@ -2,61 +2,51 @@
 
 ## Overview
 
-The Axelar JS SDK was created to abstract a set of tools used to make requests into the Axelar Network from a frontend.
+The AxelarJS SDK empowers developers to make requests into the Axelar network from a frontend.
 
-One of our early use cases is a simple transfer of crypto assets across any of our supported chains.
+### Example use case: asset transfer
 
-Day 1, this will include:
+AxelarJS enables the transfer of crypto assets across any blockchain supported by Axelar.
+
+Currently supported assets and chains:
 
 | Supported Assets  | Supported Blockchain Networks |
 | ------------- | ------------- |
 | <ul><li>Axelar native tokens</li><li>LUNA (Terra native tokens)</li><li>UST (Terra stablecoin)</li></ul> | <ul><li>Avalanche</li><li>Axelar</li><li>Ethereum</li><li>Fantom</li><li>Moonbeam</li><li>Polygon</li><li>Terra</li></ul> |
 
-The list will continue to grow, as will the use cases of this SDK. 
+Axelar will continue to add support for new assets and chains in the future.
 
 Thank you for your support!
 
-## Technical Overview
+## Technical overview
 
-The Axelar JS SDK is an npm dependency that includes libraries that make requests into the Axelar Network. 
+The AxelarJS SDK is a `npm` dependency that includes libraries that make requests into the Axelar network. 
 
-- Any request from the JS SDK is routed through a node rest server that redirects requests through a coordinated 
-collection of microservices controlled by Axelar.
-- These microservices facilitate the relay of cross-chain transactions that run on top of the Axelar Network.
-- See diagram below.
+- Any request from the JS SDK is routed through a node REST server that redirects requests through a coordinated collection of microservices controlled by Axelar.
+- These microservices facilitate the relay of cross-chain transactions that run on top of the Axelar network.
 
 ![Architecture diagram](sdk-diagram.png)
 
+## AxelarJS is under active development
 
-## Note
-This SDK repo is still in early development, and candidly, Axelar's own webapp has been its only consumer so far. 
+AxelarJS is under active development.  The API might change.  Please ensure you pull the latest from this repo post issues to Github.
 
-***We expect to continue iterating quickly until the ultimate launch, and there are several (potentially breaking) 
-changes in the hopper including
-- requirements for API keys/tokens for SDK consumers
-- other potential refactoring
+## User access restrictions
 
-Accordingly, please ensure you have the latest and let us know of any issues you encounter using the SDK. 
+AxelarJS employs security measures to protect our services from abuse.  Currently every invocation of `getDepositAddress` requires frontend users to connect to a Web3 wallet and sign a message with a one-time code.  Invocations to the API are also rate limited.
 
-Either reach out to us directly or file a github issue on the repo.
+In the future AxelarJS will offer API-key authentication for API/SDK users.
 
-## User Access Restrictions
+## Early adopter onboarding
 
-Users of this API will notice that there is an explicit requirement for frontend users to connect to a Web3 wallet and sign a message with a one-time code with every invocation of getDepositAddress. Invocations to the API are also rate limited.
-This is by design and part of a growing list of security measures we have in place to protect our services. 
+Access to AxelarJS SDK is currently gated.  The Axelar team whitelists hosts that can access the API and underlying microservices via cryptographic signatures and CORS.
 
-For API/SDK users, we will eventually implement an API-key mechanism.
+How to add yourself to the whitelist:
 
-## Onboarding process
-Initially, we are gatekeeping the rollout of this SDK a bit as we work through some kinks. 
-
-For now, this means that we are whitelisting hosts that can access the APIs and underlying services downstream, 
-i.e. it is restricted by both cryptographic signing and cors settings.
-
-So, our proposed process is as follows:
 1. Install and integrate the API, as shown in the `Installation` and `Getting Started` steps below.
-2. Let us know the hostnames you intend to have access the APIs. We will add that to our list of approved domains. 
-Note: API access will shortly be restricted by API keys
+2. Contact the Axelar team [TODO how? email? discord?].  Tell us the hostnames you intend to have access the API.
+
+In the future AxelarJS will switch from a gated whitelist to a API-key system for authentication.
 
 ## Installation
 
@@ -64,19 +54,24 @@ Note: API access will shortly be restricted by API keys
 npm i --save @axelar-network/axelarjs-sdk
 ```
 
-For the time being, the repo is a private repository that can only be accessed with an NPM token. 
+This repo is currently private.  It can be accessed only with a NPM token. [TODO: how do I get a npm token?  Shouldn't this message be in "user access restrictions"?]
 
-** Set your `.npmrc` file accordingly and secure your NPM TOKEN safely! (i.e. in secrets injected directly into your environment variables)
+:::caution
+
+Set your `.npmrc` file accordingly and secure your NPM TOKEN safely! (i.e. in secrets injected directly into your environment variables)
+
+:::
 
 ```bash
 //registry.npmjs.org/:_authToken=${NPM_TOKEN}
 ```
 
-## Getting Started
+## Get started
 
-After installation, you can use something like the following snippets to first set up the library consumer and then to instantiate it
+The following sample code defines and instntiates the library consumer.
 
-For initial setup:
+### Definition
+
 ```tsx
 import {
     AssetInfoWithTrace,
@@ -118,7 +113,8 @@ export class AxelarAPI {
 }
 ```
 
-For instantiation and invocation:
+### Instantiation and invocation
+
 ```tsx
 
     const environment: string = "testnet"; /*environment should be one of local | devnet | testnet | mainnet*/
@@ -161,9 +157,10 @@ For instantiation and invocation:
 
 ## API Usage Details
 
-The getDepositAddress method takes the following parameters:
-1. requestPayload: a complex struct of type `AssetTransferObject`
-2. optional parameter on whether you want error alerts to show on the UI or not
+The `getDepositAddress` method takes the following parameters:
+
+1. `requestPayload`: a complex struct of type `AssetTransferObject`
+2. optional parameter on whether to show error alerts in the UI
 
 Sample parameters:
 ```tsx
@@ -198,18 +195,17 @@ const getParameters = (destinationAddress: string, sourceChainName: string = "te
 
 ## Development
 
-If you like, you can get this repo running locally:
-
-First, clone this repo on your machine, navigate to its location in the terminal and run:
+Run this repo locally:
 
 ```bash
 git clone git@github.com:axelarnetwork/axelarjs-sdk.git
+cd axelarjs-sdk
 npm install
 npm run build
 npm link # link your local repo to your global packages
 npm run dev # build the files and watch for changes
 ```
 
-**Start coding!** 🎉
+## Contribute 🎉
 
-For issues, file a github issue or feel free to put forward a pull request with a fix/enhancement. 
+Github issues and pull requests are welcome!
