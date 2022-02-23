@@ -31,40 +31,17 @@ The AxelarJS SDK is a `npm` dependency that includes libraries that make request
 
 AxelarJS is under active development.  The API might change.  Please ensure you pull the latest from this repo post issues to Github.
 
-## User access restrictions
-
-AxelarJS employs security measures to protect our services from abuse.  Currently every invocation of `getDepositAddress` requires frontend users to connect to a Web3 wallet and sign a message with a one-time code.  Invocations to the API are also rate limited.
-
-In the future AxelarJS will offer API-key authentication for API/SDK users.
-
-## Early adopter onboarding
-
-Access to AxelarJS SDK is currently gated.  The Axelar team whitelists hosts that can access the API and underlying microservices via cryptographic signatures and CORS.
-
-How to add yourself to the whitelist:
-
-1. Install and integrate the API, as shown in the `Installation` and `Getting Started` steps below.
-2. Contact the Axelar team [TODO how? email? discord?].  Tell us the hostnames you intend to have access the API.
-
-In the future AxelarJS will switch from a gated whitelist to a API-key system for authentication.
-
 ## Installation
 
 ```bash
 npm i --save @axelar-network/axelarjs-sdk
 ```
 
-This repo is currently private.  It can be accessed only with a NPM token. [TODO: how do I get a npm token?  Shouldn't this message be in "user access restrictions"?]
+### User access restrictions
 
-:::caution
+The `axelarjs-sdk` nodejs repo is currently private and can be accessed only with a NPM token.  The repo will be made public shortly.
 
-Set your `.npmrc` file accordingly and secure your NPM TOKEN safely! (i.e. in secrets injected directly into your environment variables)
-
-:::
-
-```bash
-//registry.npmjs.org/:_authToken=${NPM_TOKEN}
-```
+AxelarJS employs security measures to protect our services from abuse.  Currently every invocation of `getDepositAddress` requires frontend users to connect to a Web3 wallet and sign a message with a one-time code.  Invocations to the API are also rate limited.
 
 ## Get started
 
