@@ -52,7 +52,7 @@ export class RestServices {
     return new Promise((resolve, reject) => {
       fetch(this.host + endpoint, requestOptions)
         .then((response) => response.json())
-        .then((data) => {
+        .then((data: any) => {
           if (data?.error) {
             reject(data);
           } else {
