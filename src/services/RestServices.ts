@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { AssetTransferObject } from "../interface";
+import fetch from "node-fetch";
 
 export class RestServices {
   private host: string;
