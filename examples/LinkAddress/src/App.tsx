@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import { AssetInfo, AssetInfoWithTrace, AssetTransferObject, Chain, ChainInfo, ChainList } from '@axelar-network/axelarjs-sdk';
 import { useCallback, useState } from 'react';
 
-const api = new AxelarAPI("local");
+const api = new AxelarAPI("testnet");
 const provider = new ethers.providers.Web3Provider((window as any).ethereum, "any"); //2nd param is network type
 const signerAuthority = provider.getSigner();
 
@@ -36,7 +36,7 @@ function App() {
     parameters.signature = signature;
 
     const linkAddressInfo: AssetInfoWithTrace = await api.getDepositAddress(parameters);
-    if (linkAddressInfo?.assetAddress) setDepositAddr(linkAddressInfo.assetAddress);
+    if (linkAddressInfo?.assetInfo?.assetAddress) setDepositAddr(linkAddressInfo?.assetInfo?.assetAddress);
 
   }, [promptUserToSignMessage]);
 
@@ -47,7 +47,14 @@ function App() {
         <div style={{ cursor: `pointer`}} onClick={() => getDepositAddress()}>
           Click here to generate a link address for a Terra to Avalanche flow for Terra USD.
         </div>
-        {depositAddr && <div>TEMPORARY DEPOSIT ADDRESS: {depositAddr}</div>}
+        {depositAddr && <div style={{ fontSize: `0.8em`}}>
+          <br/>
+          <div>ONE TIME DEPOSIT ADDRESS GENERATED: </div>
+          <div>{depositAddr}</div>
+          <br/>
+          <div>Tell your users they will have to make a deposit into this one-time address.</div>
+          <div>When the source chain is Terra, the deposit address is an axelar-prefixed address. This will require an IBC transfer from Terra for the deposit.</div>
+        </div>}
       </header>
     </div>
   );
