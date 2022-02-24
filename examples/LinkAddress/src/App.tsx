@@ -68,8 +68,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <div style={{ cursor: `pointer` }} onClick={() => getDepositAddress()}>
-          Click here to generate a link address for a Terra to Avalanche flow
-          for Terra USD.
+          Click here to generate a link address for a transaction to initiate the transfer of AXL testnet tokens from Axelar to Avalanche network.
         </div>
         {depositAddr && (
           <div style={{ fontSize: `0.8em` }}>
@@ -78,13 +77,8 @@ function App() {
             <div>{depositAddr}</div>
             <br />
             <div>
-              Tell your users they will have to make a deposit into this
+              Tell your users they will have to make a deposit of AXL tokens into this
               one-time address.
-            </div>
-            <div>
-              When the source chain is Terra, the deposit address is an
-              axelar-prefixed address. This will require an IBC transfer from
-              Terra for the deposit.
             </div>
           </div>
         )}
@@ -95,9 +89,9 @@ function App() {
 
 const getParameters = (
   destinationAddress: string,
-  sourceChainName: string = "terra",
+  sourceChainName: string = "axelar",
   destinationChainName: string = "avalanche",
-  asset_common_key: string = "uusd"
+  asset_common_key: string = "uaxl"
 ) => {
   /*
 	info for sourceChainInfo and destinationChainInfo fetched from the ChainList module. 
