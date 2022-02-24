@@ -123,12 +123,32 @@ const usdc_fake: AssetConfig = {
       assetName: "USDC.fake",
       minDepositAmt: 10,
     },
+    avalanche: {
+      assetSymbol: "USDC.fake",
+      assetName: "USDC.fake",
+      minDepositAmt: 10,
+    },
     ethereum: {
       assetSymbol: "USDC.fake",
       assetName: "USDC.fake",
       minDepositAmt: 10,
     },
+    fantom: {
+      assetSymbol: "USDC.fake",
+      assetName: "USDC.fake",
+      minDepositAmt: 10,
+    },
+    moonbeam: {
+      assetSymbol: "USDC.fake",
+      assetName: "USDC.fake",
+      minDepositAmt: 10,
+    },
     osmosis: {
+      assetSymbol: "USDC.fake",
+      assetName: "USDC.fake",
+      minDepositAmt: 10,
+    },
+    polygon: {
       assetSymbol: "USDC.fake",
       assetName: "USDC.fake",
       minDepositAmt: 10,

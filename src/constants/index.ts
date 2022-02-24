@@ -42,6 +42,7 @@ const devnetConfigs: EnvironmentConfigs = {
         AXL: "0x8a6614F33EC72FB70084B22b2EFfb643424e9Cc9",
         UST: "0xD34007Bb8A54B2FBb1D6647c5AbA04D507ABD21d",
         LUNA: "0xa1cF442E73045F1ea9960499FC8771454a01019D",
+        ["USDC.fake"]: "0x80C65A8CAf599e9630984bC53b60F886006D2860",
       },
       providerOptions: {
         provider: "https://rpc.api.moonbase.moonbeam.network",
@@ -53,6 +54,7 @@ const devnetConfigs: EnvironmentConfigs = {
         AXL: "0x46Cc87ea84586C03bB2109ED9B33F998d40B7623",
         UST: "0x43F4600b552089655645f8c16D86A5a9Fa296bc3",
         LUNA: "0x50a70aBb7bd6EbBcC46Df7C0d033C568F563cA27",
+        ["USDC.fake"]: "0x3fb643De114d5dc03dDE8DFDBC06c60dcAF7D3C4",
       },
       providerOptions: {
         provider: "https://api.avax-test.network/ext/bc/C/rpc",
@@ -64,6 +66,7 @@ const devnetConfigs: EnvironmentConfigs = {
         AXL: "0xc1Ff1364f7A263a535E3caF60d424b78bB5b7c19",
         UST: "0x89A1D86901D25EFFe5D022bDD1132827e4D7f010",
         LUNA: "0x121286BeDd58d58558A30ED2db2f4a7c6Eb646A3",
+        ["USDC.fake"]: "0x0F09c67DBdb8bBe7E931975C38d591F0BE95b4a9",
       },
       providerOptions: {
         provider: "https://rpc.testnet.fantom.network",
@@ -75,6 +78,7 @@ const devnetConfigs: EnvironmentConfigs = {
         AXL: "0x6ff1fa8CfB26551aA13e3d5dbf077f0a98ECd232",
         UST: "0xa32575f477FDEbFA02513880d47F6515Da42FB90",
         LUNA: "0x6Ad38DD216DC344c6B3CeDc34612e1014e2aa469",
+        ["USDC.fake"]: "0xDD58E6c519172838f91cC9f86C5C053891346f70",
       },
       providerOptions: {
         provider:
