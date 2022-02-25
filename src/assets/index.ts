@@ -83,11 +83,6 @@ const ust_terra: AssetConfig = {
       assetName: "UST (Axelar-wrapped)",
       minDepositAmt: 15,
     },
-    osmosis: {
-      assetSymbol: "UST",
-      assetName: "UST (Axelar-wrapped)",
-      minDepositAmt: 0.5,
-    },
     polygon: {
       assetSymbol: "UST",
       assetName: "UST (Axelar-wrapped)",
