@@ -6,7 +6,7 @@ The `axelarjs-sdk` nodejs repo is currently private and can be accessed only wit
 
 ## Overview
 
-The AxelarJS SDK empowers developers to make requests into the Axelar network from a frontend.
+The AxelarJS SDK empowers developers to make cross-chain transfers using the Axelar network from their frontend.
 
 ### Example use case: asset transfer
 
