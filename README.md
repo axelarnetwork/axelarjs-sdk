@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AxelarJS SDK empowers developers to make requests into the Axelar network from a frontend.
+The AxelarJS SDK empowers developers to make cross-chain transfers using the Axelar network from their frontend.
 
 ### Example use case: asset transfer
 
