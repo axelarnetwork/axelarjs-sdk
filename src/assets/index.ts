@@ -138,7 +138,7 @@ const usdc_fake: AssetConfig = {
       assetName: "USDC.fake",
       minDepositAmt: 10,
     },
-    osmosis: {
+    "osmosis-2": {
       assetSymbol: "USDC.fake",
       assetName: "USDC.fake",
       minDepositAmt: 10,
