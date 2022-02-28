@@ -5,7 +5,6 @@ import {
 } from "../interface/AssetTransferObject";
 import {
   AssetAndChainInfo,
-  BlockchainWaitingService,
   CallbackStatus,
   CLIENT_API_GET_OTC,
   CLIENT_API_POST_TRANSFER_ASSET,
@@ -17,6 +16,7 @@ import getWaitingService from "./status";
 import { SocketServices } from "../services/SocketServices";
 import { validateDestinationAddress } from "../utils";
 import { EnvironmentConfigs, getConfigs } from "../constants";
+import { OTC } from "../types";
 
 export class TransferAssetBridge {
   private restServices: RestServices;
@@ -27,7 +27,7 @@ export class TransferAssetBridge {
     console.log("TransferAssetBridge initiated");
     this.environment = environment;
     const configs: EnvironmentConfigs = getConfigs(environment);
-    const resourceUrl: string = configs.resourceUrl;
+    const resourceUrl = configs.resourceUrl;
     this.restServices = new RestServices(resourceUrl);
     this.clientSocketConnect = new SocketServices(resourceUrl);
   }
@@ -44,19 +44,20 @@ export class TransferAssetBridge {
     const { selectedDestinationAsset, sourceChainInfo, destinationChainInfo } =
       message;
 
-    if (
-      !validateDestinationAddress(
-        destinationChainInfo?.chainSymbol as string,
-        selectedDestinationAsset
-      )
-    )
+    const isAddressValid = validateDestinationAddress(
+      destinationChainInfo?.chainSymbol,
+      selectedDestinationAsset
+    );
+    if (!isAddressValid)
       throw new Error(
         `invalid destination address in ${selectedDestinationAsset?.assetSymbol}`
       );
 
-    const depositAddressWithTraceId: AssetInfoWithTrace =
-      await this.getDepositAddress(message, showAlerts);
-    const traceId: string = depositAddressWithTraceId.traceId;
+    const depositAddressWithTraceId = await this.getDepositAddress(
+      message,
+      showAlerts
+    );
+    const traceId = depositAddressWithTraceId.traceId;
 
     const srcAssetForDepositConfirmation: AssetInfoResponse = {
       ...depositAddressWithTraceId.assetInfo,
@@ -69,7 +70,7 @@ export class TransferAssetBridge {
       sourceOrDestChain: "destination",
     };
 
-    this.confirmDeposit(
+    await this.confirmDeposit(
       {
         assetInfo: srcAssetForDepositConfirmation,
         sourceChainInfo,
@@ -78,29 +79,27 @@ export class TransferAssetBridge {
       sourceCbs.successCb,
       sourceCbs.failCb,
       "source"
-    ).then(() =>
-      this.detectTransferOnDestinationChain(
-        {
-          assetInfo: destAssetForTransferEvent,
-          sourceChainInfo,
-          destinationChainInfo,
-        },
-        destCbs.successCb,
-        destCbs.failCb,
-        "destination"
-      )
+    );
+    await this.detectTransferOnDestinationChain(
+      {
+        assetInfo: destAssetForTransferEvent,
+        sourceChainInfo,
+        destinationChainInfo,
+      },
+      destCbs.successCb,
+      destCbs.failCb,
+      "destination"
     );
 
     return depositAddressWithTraceId;
   }
 
-  public async getOneTimeCode(
-    signerAddress: string
-  ): Promise<{ validationMsg: string; otc: string }> {
+  public async getOneTimeCode(signerAddress: string): Promise<OTC> {
     try {
-      return (await this.restServices.get(
+      const response = await this.restServices.get(
         CLIENT_API_GET_OTC + `?publicAddress=${signerAddress}`
-      )) as { validationMsg: string; otc: string };
+      );
+      return response;
     } catch (e: any) {
       throw e;
     }
@@ -111,10 +110,11 @@ export class TransferAssetBridge {
     showAlerts: boolean
   ): Promise<AssetInfoWithTrace> {
     try {
-      return (await this.restServices.post(
+      const response = await this.restServices.post(
         CLIENT_API_POST_TRANSFER_ASSET,
-        message as AssetTransferObject
-      )) as AssetInfoWithTrace;
+        message
+      );
+      return response;
     } catch (e: any) {
       if (showAlerts && e?.message && !e?.uncaught) {
         alert(
@@ -136,7 +136,7 @@ export class TransferAssetBridge {
     sOrDChain: SourceOrDestination
   ) {
     const { assetInfo, sourceChainInfo } = assetAndChainInfo;
-    const waitingService: BlockchainWaitingService = await getWaitingService(
+    const waitingService = await getWaitingService(
       sourceChainInfo,
       assetInfo,
       sOrDChain,
@@ -164,7 +164,7 @@ export class TransferAssetBridge {
     sOrDChain: SourceOrDestination
   ) {
     const { assetInfo, destinationChainInfo } = assetAndChainInfo;
-    const waitingService: BlockchainWaitingService = await getWaitingService(
+    const waitingService = await getWaitingService(
       destinationChainInfo,
       assetInfo,
       sOrDChain,
