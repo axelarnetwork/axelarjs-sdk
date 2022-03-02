@@ -15,7 +15,7 @@ import { RestServices } from "../services/RestServices";
 import getWaitingService from "./status";
 import { SocketServices } from "../services/SocketServices";
 import { validateDestinationAddress } from "../utils";
-import { EnvironmentConfigs, getConfigs } from "../constants";
+import { getConfigs } from "../constants";
 import { OTC } from "../types";
 
 export class TransferAssetBridge {
@@ -26,7 +26,7 @@ export class TransferAssetBridge {
   constructor(environment: string) {
     console.log("TransferAssetBridge initiated");
     this.environment = environment;
-    const configs: EnvironmentConfigs = getConfigs(environment);
+    const configs = getConfigs(environment);
     const resourceUrl = configs.resourceUrl;
     this.restServices = new RestServices(resourceUrl);
     this.clientSocketConnect = new SocketServices(resourceUrl);
