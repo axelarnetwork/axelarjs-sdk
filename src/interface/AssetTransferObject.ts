@@ -44,6 +44,7 @@ export interface COSLinkRequestBody extends LinkRequestBody {
 // for connections from ui >> bridge server
 export enum SocketListenerTypes {
   /*axelarnet listener for deposit event*/
+  LINK = "LINK",
   WAIT_FOR_DEPOSIT = "WAIT_FOR_DEPOSIT",
   DEPOSIT_CONFIRMED = "DEPOSIT_CONFIRMED",
 }
