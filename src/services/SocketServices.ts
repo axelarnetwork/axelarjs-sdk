@@ -1,4 +1,4 @@
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { SocketListenerTypes, SocketOptions } from "../interface";
 import { GREPTCHA_SITE_KEY } from "../constants";
 
@@ -9,7 +9,7 @@ import { GREPTCHA_SITE_KEY } from "../constants";
 declare const grecaptcha: any;
 
 export class SocketServices {
-  private socket: any;
+  private socket: Socket;
   private resourceUrl: string;
 
   constructor(resourceUrl: string) {
@@ -38,13 +38,52 @@ export class SocketServices {
       reconnectionDelayMax: 10000,
       auth: { token },
       query: {},
-    } as SocketOptions);
+    });
 
-    this.socket.once("connect", (data: any) => {
+    this.socket.once("connect", () => {
       cb && cb();
     });
 
     // this.socket.once("disconnect", (data: any) => {});
+  }
+
+  public joinRoomAndWaitForEvent(roomId: string, waitCb: any) {
+    return new Promise((resolve) => {
+      // connect to socket.io
+      this.connect(() => {
+        // ask server to join room
+        this.socket.emit("room:join", roomId, () => {
+          // listen to bridge event
+          this.socket.on("bridge-event", (data: any) => {
+            console.log({
+              "joinRoomAndWaitForEvent socket": data,
+            });
+            waitCb && waitCb(data);
+            resolve(data);
+            // FIXME: this should only be initiated once, no need to disconnect as it's expensive
+            this.disconnect();
+          });
+        });
+      });
+    });
+  }
+
+  public joinRoomAndWaitDepositConfirmationEvent(roomId: string, waitCb: any) {
+    return new Promise((resolve) => {
+      // connect to socket.io
+      this.connect(() => {
+        // ask server to join room
+        this.socket.emit("room:join", roomId, () => {
+          // listen to bridge event
+          this.socket.on("bridge-event", (data: any) => {
+            waitCb && waitCb(data);
+            resolve(data);
+            // FIXME: this should only be initiated once, no need to disconnect as it's expensive
+            this.disconnect();
+          });
+        });
+      });
+    });
   }
 
   public emitMessageAndWaitForReply(

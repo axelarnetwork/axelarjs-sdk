@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { AssetTransferObject } from "../interface";
 import fetch from "cross-fetch";
 
@@ -14,10 +13,10 @@ export class RestServices {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-traceId": payload.transactionTraceId || uuidv4(),
         publicAddress: payload.publicAddr,
         signature: payload.signature,
         otc: payload.otc,
+        ...headers,
       },
       body: JSON.stringify(payload),
     };
@@ -29,12 +28,12 @@ export class RestServices {
     });
   }
 
-  public get(endpoint: string): Promise<any> {
+  public get(endpoint: string, headers?: any): Promise<any> {
     const requestOptions = {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "x-traceId": uuidv4(),
+        ...headers,
       },
     };
 

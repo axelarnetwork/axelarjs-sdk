@@ -19,6 +19,35 @@ export class BaseWaitingService implements BlockchainWaitingService {
       throw new Error("abstract class only.");
     }
   }
+
+  async waitForEvent(
+    roomId: string,
+    interimStatusCb: StatusResponse,
+    clientSocketConnect: SocketServices
+  ) {
+    return clientSocketConnect.joinRoomAndWaitForEvent(
+      roomId,
+      ((data: any) => {
+        data.axelarRequiredNumConfirmations = this.numConfirmations;
+        interimStatusCb(data);
+      }).bind(this)
+    );
+  }
+
+  async waitForDepositConfirmationEvent(
+    roomId: string,
+    interimStatusCb: StatusResponse,
+    clientSocketConnect: SocketServices
+  ) {
+    return clientSocketConnect.joinRoomAndWaitDepositConfirmationEvent(
+      roomId,
+      ((data: any) => {
+        data.axelarRequiredNumConfirmations = this.numConfirmations;
+        interimStatusCb(data);
+      }).bind(this)
+    );
+  }
+
   public async wait(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: StatusResponse,
@@ -36,7 +65,11 @@ export class BaseWaitingService implements BlockchainWaitingService {
     return data;
   }
 
-  public async waitForDepositConfirmation(...args: any[]) {
+  public async waitForLinkEvent(...args: any[]): Promise<any> {
+    throw new Error("Method 'wait()' should be implemented.");
+  }
+
+  public async waitForDepositConfirmation(...args: any[]): Promise<any> {
     throw new Error("Method 'wait()' should be implemented.");
   }
 

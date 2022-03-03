@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import {
   AssetInfoResponse,
   AssetTransferObject,
@@ -5,6 +6,7 @@ import {
 } from "../interface/AssetTransferObject";
 import {
   AssetAndChainInfo,
+  AssetInfo,
   CallbackStatus,
   CLIENT_API_GET_OTC,
   CLIENT_API_POST_TRANSFER_ASSET,
@@ -32,14 +34,21 @@ export class TransferAssetBridge {
     this.clientSocketConnect = new SocketServices(resourceUrl);
   }
 
+  /**
+   * Initialises socket connection to server
+   */
   public async transferAssets(
     message: AssetTransferObject,
     sourceCbs: CallbackStatus,
     destCbs: CallbackStatus,
     showAlerts = true
   ): Promise<AssetInfoWithTrace> {
-    const { selectedDestinationAsset, sourceChainInfo, destinationChainInfo } =
-      message;
+    const {
+      selectedDestinationAsset,
+      sourceChainInfo,
+      destinationChainInfo,
+      selectedSourceAsset,
+    } = message;
 
     const isAddressValid = validateDestinationAddress(
       destinationChainInfo?.chainSymbol,
@@ -50,24 +59,56 @@ export class TransferAssetBridge {
         `invalid destination address in ${selectedDestinationAsset?.assetSymbol}`
       );
 
-    const depositAddressWithTraceId = await this.getDepositAddress(
-      message,
-      showAlerts
-    );
-    const traceId = depositAddressWithTraceId.traceId;
+    const traceId = uuidv4();
 
-    const srcAssetForDepositConfirmation: AssetInfoResponse = {
-      ...depositAddressWithTraceId.assetInfo,
-      traceId: depositAddressWithTraceId.traceId,
+    // get room id from rest server to initiate socket connection
+    const { roomId } = await this.getDepositAddress(
+      message,
+      showAlerts,
+      traceId
+    );
+
+    let srcAssetForDepositConfirmation: AssetInfoResponse = {
+      assetAddress: "0x",
+      traceId,
       sourceOrDestChain: "source",
     };
+
+    const linkData: any = await this.getLinkEvent(
+      roomId,
+      {
+        assetInfo: srcAssetForDepositConfirmation,
+        sourceChainInfo,
+        destinationChainInfo,
+      },
+      (success) => console.log(success),
+      (error: any) => console.log(error),
+      "source"
+    );
+
+    console.log({
+      linkData,
+    });
+
+    const assetInfo: AssetInfo = {
+      assetAddress: linkData?.Attributes?.depositAddress,
+      assetSymbol: selectedSourceAsset?.assetSymbol,
+      common_key: selectedSourceAsset?.common_key,
+    };
+
+    srcAssetForDepositConfirmation = Object.assign(
+      srcAssetForDepositConfirmation,
+      assetInfo
+    );
+
     const destAssetForTransferEvent: AssetInfoResponse = {
       ...selectedDestinationAsset,
       traceId,
       sourceOrDestChain: "destination",
     };
 
-    await this.confirmDeposit(
+    this.confirmDeposit(
+      linkData?.newRoomId,
       {
         assetInfo: srcAssetForDepositConfirmation,
         sourceChainInfo,
@@ -76,22 +117,34 @@ export class TransferAssetBridge {
       sourceCbs.successCb,
       sourceCbs.failCb,
       "source"
-    );
-    await this.detectTransferOnDestinationChain(
-      {
-        assetInfo: destAssetForTransferEvent,
-        sourceChainInfo,
-        destinationChainInfo,
-      },
-      destCbs.successCb,
-      destCbs.failCb,
-      "destination"
-    );
+    ).then((data) => {
+      return this.detectTransferOnDestinationChain(
+        {
+          assetInfo: destAssetForTransferEvent,
+          sourceChainInfo,
+          destinationChainInfo,
+        },
+        destCbs.successCb,
+        destCbs.failCb,
+        "destination"
+      );
+    });
 
-    return depositAddressWithTraceId;
+    console.log({
+      assetInfo,
+      traceId,
+    });
+
+    return {
+      assetInfo,
+      traceId,
+    } as AssetInfoWithTrace;
   }
 
-  public async getOneTimeCode(signerAddress: string): Promise<OTC> {
+  public async getOneTimeCode(
+    signerAddress: string,
+    traceId: string
+  ): Promise<OTC> {
     try {
       const response = await this.restServices.get(
         CLIENT_API_GET_OTC + `?publicAddress=${signerAddress}`
@@ -102,16 +155,23 @@ export class TransferAssetBridge {
     }
   }
 
+  /**
+   * TODO: rename to initAssetTransfer
+   */
   public async getDepositAddress(
-    message: AssetTransferObject,
-    showAlerts: boolean
-  ): Promise<AssetInfoWithTrace> {
+    payload: AssetTransferObject,
+    showAlerts: boolean,
+    traceId: string
+  ): Promise<{ roomId: string }> {
     try {
       const response = await this.restServices.post(
         CLIENT_API_POST_TRANSFER_ASSET,
-        message
+        payload,
+        {
+          "x-trace-id": traceId,
+        }
       );
-      return response;
+      return response.data;
     } catch (e: any) {
       if (showAlerts && e?.message && !e?.uncaught) {
         alert(
@@ -123,7 +183,8 @@ export class TransferAssetBridge {
     }
   }
 
-  private async confirmDeposit(
+  async getLinkEvent(
+    roomId: string,
     assetAndChainInfo: AssetAndChainInfo,
     waitCb: StatusResponse,
     errCb: any,
@@ -138,11 +199,39 @@ export class TransferAssetBridge {
     );
 
     try {
-      await waitingService.waitForDepositConfirmation(
-        assetAndChainInfo,
+      const response = await waitingService.waitForLinkEvent(
+        roomId,
         waitCb,
         this.clientSocketConnect
       );
+      return response;
+    } catch (e) {
+      errCb(e);
+    }
+  }
+
+  private async confirmDeposit(
+    roomId: string,
+    assetAndChainInfo: AssetAndChainInfo,
+    waitCb: StatusResponse,
+    errCb: any,
+    sOrDChain: SourceOrDestination
+  ) {
+    const { assetInfo, sourceChainInfo } = assetAndChainInfo;
+    const waitingService = await getWaitingService(
+      sourceChainInfo,
+      assetInfo,
+      sOrDChain,
+      this.environment
+    );
+
+    try {
+      const response = await waitingService.waitForDepositConfirmation(
+        roomId,
+        waitCb,
+        this.clientSocketConnect
+      );
+      return response;
     } catch (e) {
       errCb(e);
     }
@@ -161,6 +250,7 @@ export class TransferAssetBridge {
       sOrDChain,
       this.environment
     );
+    // TODO: split between evm and axelar functions
     try {
       await waitingService.waitForTransferEvent(
         assetAndChainInfo,

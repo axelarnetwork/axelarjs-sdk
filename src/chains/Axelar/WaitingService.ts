@@ -17,11 +17,11 @@ export default class WaitingService
   }
 
   public async waitForDepositConfirmation(
-    assetAndChainInfo: AssetAndChainInfo,
+    roomId: string,
     interimStatusCb: StatusResponse,
     clientSocketConnect: SocketServices
   ) {
-    return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
+    return this.waitForEvent(roomId, interimStatusCb, clientSocketConnect);
   }
 
   public async waitForTransferEvent(

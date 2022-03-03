@@ -18,11 +18,16 @@ export interface AssetAndChainInfo {
 }
 
 export interface BlockchainWaitingService {
-  waitForDepositConfirmation(
-    assetAndChainInfo: AssetAndChainInfo,
+  waitForLinkEvent(
+    roomId: string,
     interimStatusCb: any,
     clientSocketConnect: SocketServices
-  ): Promise<void>;
+  ): Promise<unknown>;
+  waitForDepositConfirmation(
+    roomId: string,
+    interimStatusCb: any,
+    clientSocketConnect: SocketServices
+  ): Promise<unknown>;
   waitForTransferEvent(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: any,

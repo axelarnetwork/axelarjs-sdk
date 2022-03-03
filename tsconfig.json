@@ -29,6 +29,7 @@
     /* Type Checking */
     "strict": true /* Enable all strict type-checking options. */,
     "strictNullChecks": true /* When type checking, take into account `null` and `undefined`. */,
+    "strictPropertyInitialization": false,
 
     /* Completeness */
     "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
