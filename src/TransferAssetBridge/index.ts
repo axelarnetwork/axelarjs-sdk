@@ -32,6 +32,9 @@ export class TransferAssetBridge {
     this.clientSocketConnect = new SocketServices(resourceUrl);
   }
 
+  /**
+   * @deprecated The method should not be used and will soon be removed
+   */
   public async transferAssets(
     message: AssetTransferObject,
     sourceCbs: CallbackStatus,
@@ -123,6 +126,9 @@ export class TransferAssetBridge {
     }
   }
 
+  /**
+   * @deprecated The method should not be used and will soon be removed
+   */
   private async confirmDeposit(
     assetAndChainInfo: AssetAndChainInfo,
     waitCb: StatusResponse,
@@ -148,6 +154,9 @@ export class TransferAssetBridge {
     }
   }
 
+  /**
+   * @deprecated The method should not be used and will soon be removed
+   */
   private async detectTransferOnDestinationChain(
     assetAndChainInfo: AssetAndChainInfo,
     waitCb: StatusResponse,

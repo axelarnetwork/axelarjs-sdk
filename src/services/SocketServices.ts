@@ -8,6 +8,9 @@ import { GREPTCHA_SITE_KEY } from "../constants";
 
 declare const grecaptcha: any;
 
+/**
+ * @deprecated The class should not be used and will soon be removed
+ */
 export class SocketServices {
   private socket: any;
   private resourceUrl: string;
