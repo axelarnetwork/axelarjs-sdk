@@ -24,6 +24,9 @@ const abi: string[] = [
   "event Transfer(address indexed from, address indexed to, uint amount)",
 ];
 
+  /**
+   * @deprecated The class should not be used and will soon be removed
+   */
 export default class EthersJsWaitingService
   extends BaseWaitingService
   implements BlockchainWaitingService
