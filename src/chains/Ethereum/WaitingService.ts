@@ -28,12 +28,24 @@ export default class WaitingService
     this.providerType = providerType;
   }
 
-  public async waitForDepositConfirmation(
-    assetAndChainInfo: AssetAndChainInfo,
+  public async waitForLinkEvent(
+    roomId: string,
     interimStatusCb: StatusResponse,
     clientSocketConnect: SocketServices
   ) {
-    return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
+    return this.waitForEvent(roomId, interimStatusCb, clientSocketConnect);
+  }
+
+  public async waitForDepositConfirmation(
+    roomId: string,
+    interimStatusCb: StatusResponse,
+    clientSocketConnect: SocketServices
+  ) {
+    return this.waitForDepositConfirmationEvent(
+      roomId,
+      interimStatusCb,
+      clientSocketConnect
+    );
   }
 
   public async waitForTransferEvent(
