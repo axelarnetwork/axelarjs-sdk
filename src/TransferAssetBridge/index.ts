@@ -117,8 +117,9 @@ export class TransferAssetBridge {
       sourceCbs.successCb,
       sourceCbs.failCb,
       "source"
-    ).then((data) => {
+    ).then(() => {
       return this.detectTransferOnDestinationChain(
+        `link-module=evm-destinationAddress=${selectedDestinationAsset.assetAddress}`,
         {
           assetInfo: destAssetForTransferEvent,
           sourceChainInfo,
@@ -238,6 +239,7 @@ export class TransferAssetBridge {
   }
 
   private async detectTransferOnDestinationChain(
+    roomId: string,
     assetAndChainInfo: AssetAndChainInfo,
     waitCb: StatusResponse,
     errCb: any,
@@ -250,13 +252,24 @@ export class TransferAssetBridge {
       sOrDChain,
       this.environment
     );
-    // TODO: split between evm and axelar functions
     try {
-      await waitingService.waitForTransferEvent(
-        assetAndChainInfo,
-        waitCb,
-        this.clientSocketConnect
-      );
+      if (assetAndChainInfo.sourceChainInfo.module === "evm") {
+        // evm -> cosmos transfer
+        await waitingService.waitForTransferEvent(
+          assetAndChainInfo,
+          waitCb,
+          this.clientSocketConnect,
+          roomId
+        );
+      } else {
+        // cosmos -> evm transfer
+        await waitingService.waitForTransferEvent(
+          assetAndChainInfo,
+          waitCb,
+          this.clientSocketConnect,
+          roomId
+        );
+      }
     } catch (e) {
       errCb(e);
     }
