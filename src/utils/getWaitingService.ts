@@ -5,8 +5,8 @@ import {
   Chain,
   ChainInfo,
   SourceOrDestination,
-} from "../../interface";
-import { ChainList } from "../../chains";
+} from "../interface";
+import { ChainList } from "../chains";
 
 const waitingServiceMap: {
   [chainKey: string]: BlockchainWaitingServiceFinder;
@@ -24,7 +24,8 @@ type IGetWaitingService = (
   sOrDChain: SourceOrDestination,
   environment: string
 ) => BlockchainWaitingService | Promise<BlockchainWaitingService>;
-const getWaitingService: IGetWaitingService = (
+
+export const getWaitingService: IGetWaitingService = (
   chainInfo: ChainInfo,
   assetInfo: AssetInfo,
   sOrDChain: SourceOrDestination,
@@ -38,5 +39,3 @@ const getWaitingService: IGetWaitingService = (
     environment
   );
 };
-
-export default getWaitingService;
