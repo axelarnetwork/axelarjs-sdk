@@ -93,7 +93,7 @@ const devnetConfigs: EnvironmentConfigs = {
 const localConfigs: EnvironmentConfigs = cloneDeep(devnetConfigs);
 localConfigs.resourceUrl = "http://localhost:4000";
 const testnetConfigs: EnvironmentConfigs = cloneDeep(devnetConfigs);
-testnetConfigs.resourceUrl = `http://localhost:4000`;
+testnetConfigs.resourceUrl = `https://bridge-rest-server.testnet.axelar.dev`;
 
 /* since these tokens are not expected to change, we can set them here so they will not need to be a query*/
 const mainnetConfigs: EnvironmentConfigs = {
