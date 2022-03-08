@@ -14,7 +14,7 @@ import {
   StatusResponse,
 } from "../interface";
 import { RestServices } from "../services/RestServices";
-import getWaitingService from "./status";
+import { getWaitingService } from "../utils";
 import { SocketServices } from "../services/SocketServices";
 import { validateDestinationAddress } from "../utils";
 import { getConfigs } from "../constants";
@@ -50,6 +50,7 @@ export class TransferAssetBridge {
       selectedSourceAsset,
     } = message;
 
+    // validate destination address
     const isAddressValid = validateDestinationAddress(
       destinationChainInfo?.chainSymbol,
       selectedDestinationAsset
@@ -59,14 +60,11 @@ export class TransferAssetBridge {
         `invalid destination address in ${selectedDestinationAsset?.assetSymbol}`
       );
 
+    // generate uuid to trace the whole flow
     const traceId = uuidv4();
 
     // get room id from rest server to initiate socket connection
-    const { roomId } = await this.getDepositAddress(
-      message,
-      showAlerts,
-      traceId
-    );
+    const { roomId } = await this.getInitRoomId(message, showAlerts, traceId);
 
     let srcAssetForDepositConfirmation: AssetInfoResponse = {
       assetAddress: "0x",
@@ -156,10 +154,7 @@ export class TransferAssetBridge {
     }
   }
 
-  /**
-   * TODO: rename to initAssetTransfer
-   */
-  public async getDepositAddress(
+  public async getInitRoomId(
     payload: AssetTransferObject,
     showAlerts: boolean,
     traceId: string
