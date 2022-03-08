@@ -16,6 +16,14 @@ export default class WaitingService
     super(1, assetInfo.assetAddress as string);
   }
 
+  public async waitForLinkEvent(
+    roomId: string,
+    interimStatusCb: StatusResponse,
+    clientSocketConnect: SocketServices
+  ) {
+    return this.waitForEvent(roomId, interimStatusCb, clientSocketConnect);
+  }
+
   public async waitForDepositConfirmation(
     roomId: string,
     interimStatusCb: StatusResponse,
@@ -27,8 +35,13 @@ export default class WaitingService
   public async waitForTransferEvent(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketServices,
+    roomId: string
   ) {
-    return this.wait(assetAndChainInfo, interimStatusCb, clientSocketConnect);
+    return this.waitForEvent(
+      roomId as string,
+      interimStatusCb,
+      clientSocketConnect
+    );
   }
 }

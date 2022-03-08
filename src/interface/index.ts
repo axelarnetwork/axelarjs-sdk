@@ -22,17 +22,18 @@ export interface BlockchainWaitingService {
     roomId: string,
     interimStatusCb: any,
     clientSocketConnect: SocketServices
-  ): Promise<unknown>;
+  ): Promise<any>;
   waitForDepositConfirmation(
     roomId: string,
     interimStatusCb: any,
     clientSocketConnect: SocketServices
-  ): Promise<unknown>;
+  ): Promise<any>;
   waitForTransferEvent(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: any,
-    clientSocketConnect: SocketServices
-  ): Promise<void>;
+    clientSocketConnect: SocketServices,
+    roomId?: string
+  ): Promise<any>;
   wait(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: any,
@@ -66,5 +67,6 @@ export type BlockchainWaitingServiceFinder = (
   chainInfo: ChainInfo,
   assetInfo: AssetInfo,
   sOrDChain: SourceOrDestination,
-  environment: string
+  environment: string,
+  roomId?: string
 ) => BlockchainWaitingService | Promise<BlockchainWaitingService>;

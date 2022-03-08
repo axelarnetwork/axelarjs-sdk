@@ -73,7 +73,7 @@ export class BaseWaitingService implements BlockchainWaitingService {
     throw new Error("Method 'wait()' should be implemented.");
   }
 
-  public async waitForTransferEvent(...args: any[]) {
+  public async waitForTransferEvent(...args: any[]): Promise<any> {
     throw new Error("Method 'wait()' should be implemented.");
   }
 
