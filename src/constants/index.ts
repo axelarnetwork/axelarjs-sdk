@@ -87,13 +87,13 @@ const devnetConfigs: EnvironmentConfigs = {
       },
     },
   },
-  resourceUrl: `https://bridge-rest-server.devnet.axelar.dev`,
+  resourceUrl: `https://nest-server-devnet.axelar.dev`,
 };
 
 const localConfigs: EnvironmentConfigs = cloneDeep(devnetConfigs);
 localConfigs.resourceUrl = "http://localhost:4000";
 const testnetConfigs: EnvironmentConfigs = cloneDeep(devnetConfigs);
-testnetConfigs.resourceUrl = `https://bridge-rest-server.testnet.axelar.dev`;
+testnetConfigs.resourceUrl = `https://nest-server-testnet.axelar.dev`;
 
 /* since these tokens are not expected to change, we can set them here so they will not need to be a query*/
 const mainnetConfigs: EnvironmentConfigs = {
@@ -155,7 +155,7 @@ const mainnetConfigs: EnvironmentConfigs = {
       },
     },
   },
-  resourceUrl: `https://bridge-rest-server.mainnet.axelar.dev`,
+  resourceUrl: `https://nest-server-mainnet.axelar.dev`,
 };
 
 configsMap["local"] = localConfigs;
