@@ -24,9 +24,8 @@ export default class Ethereum implements Chain {
     chainIdentifier: {
       devnet: "ethereum",
       testnet: "ethereum",
-      mainnet: "ethereum"
-    }
-    
+      mainnet: "ethereum",
+    },
   };
 
   constructor() {

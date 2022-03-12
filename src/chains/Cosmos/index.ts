@@ -14,17 +14,15 @@ export default class Cosmos extends Axelar implements Chain {
     chainIdentifier: {
       devnet: "cosmoshub",
       testnet: "cosmoshub",
-      mainnet: "cosmoshub"
-    }
+      mainnet: "cosmoshub",
+    },
   };
 
   public validateAddress = (addressInfo: AssetInfo): boolean => {
     if (!addressInfo?.assetAddress) return false;
 
     try {
-      return (
-        bech32.decode(addressInfo.assetAddress).prefix === "cosmos"
-      );
+      return bech32.decode(addressInfo.assetAddress).prefix === "cosmos";
     } catch (e) {
       return false;
     }

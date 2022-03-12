@@ -14,8 +14,8 @@ export default class Fantom extends Ethereum implements Chain {
     chainIdentifier: {
       devnet: "fantom",
       testnet: "fantom",
-      mainnet: "fantom"
-    }
+      mainnet: "fantom",
+    },
   };
 
   constructor() {

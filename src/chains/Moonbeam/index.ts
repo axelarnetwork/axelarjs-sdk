@@ -14,8 +14,8 @@ export default class Moonbeam extends Ethereum implements Chain {
     chainIdentifier: {
       devnet: "moonbeam",
       testnet: "moonbeam",
-      mainnet: "moonbeam"
-    }
+      mainnet: "moonbeam",
+    },
   };
 
   constructor() {

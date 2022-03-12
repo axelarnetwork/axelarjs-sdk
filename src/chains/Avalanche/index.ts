@@ -14,8 +14,8 @@ export default class Avalanche extends Ethereum implements Chain {
     chainIdentifier: {
       devnet: "avalanche",
       testnet: "avalanche",
-      mainnet: "avalanche"
-    }
+      mainnet: "avalanche",
+    },
   };
 
   constructor() {
