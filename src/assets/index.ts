@@ -4,7 +4,6 @@ const environment = process.env.REACT_APP_STAGE || process.env.ENVIRONMENT || ""
 
 if (!["local","devnet","testnet","mainnet"].includes(environment as string)) 
   throw new Error("You must have a REACT_APP_STAGE or ENVIRONMENT environment variable be set in your app to either 'devnet', 'testnet' or 'mainnet'")
-console.log("environment???",process.env.REACT_APP_STAGE, environment);
 
 export interface AssetInfoForChain extends AssetInfo {
   minDepositAmt: number;
