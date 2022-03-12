@@ -11,6 +11,11 @@ export default class Axelar implements Chain {
     assets: [],
     txFeeInPercent: 0.1,
     module: "axelarnet",
+    chainIdentifier: {
+      devnet: "axelarnet",
+      testnet: "axelarnet",
+      mainnet: "axelarnet"
+    }
   };
 
   public validateAddress = (addressInfo: AssetInfo): boolean => {

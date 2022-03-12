@@ -11,6 +11,11 @@ export default class Fantom extends Ethereum implements Chain {
     txFeeInPercent: 0.1,
     module: "evm",
     confirmLevel: 6,
+    chainIdentifier: {
+      devnet: "fantom",
+      testnet: "fantom",
+      mainnet: "fantom"
+    }
   };
 
   constructor() {

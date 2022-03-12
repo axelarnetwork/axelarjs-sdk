@@ -44,6 +44,11 @@ export interface ChainInfo {
   txFeeInPercent: number;
   module: "axelarnet" | "evm";
   confirmLevel?: number;
+  chainIdentifier: {
+    devnet: string;
+    testnet: string;
+    mainnet: string;
+  }
 }
 
 export interface AssetInfo {
