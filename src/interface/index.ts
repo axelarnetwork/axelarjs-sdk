@@ -48,7 +48,7 @@ export interface ChainInfo {
     devnet: string;
     testnet: string;
     mainnet: string;
-  }
+  };
 }
 
 export interface AssetInfo {
