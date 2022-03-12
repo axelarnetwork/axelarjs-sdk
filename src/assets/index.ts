@@ -410,28 +410,28 @@ const wglmr_moonbeam: AssetConfig = {
   chain_aliases: {
     axelar: {
       assetSymbol: glmrName,
-      assetName: glmrName + "(Axelar-wrapped)",
+      assetName: glmrName + " (Axelar-wrapped)",
       minDepositAmt: 0.1,
     },
     avalanche: {
       assetSymbol: glmrName,
-      assetName: glmrName + "(Axelar-wrapped)",
+      assetName: glmrName + " (Axelar-wrapped)",
       minDepositAmt: 10,
     },
     ethereum: {
       assetSymbol: glmrName,
-      assetName: glmrName + "(Axelar-wrapped)",
+      assetName: glmrName + " (Axelar-wrapped)",
       minDepositAmt: 100,
     },
     fantom: {
       assetSymbol: glmrName,
-      assetName: glmrName + "(Axelar-wrapped)",
+      assetName: glmrName + " (Axelar-wrapped)",
       minDepositAmt: 10,
     },
     moonbeam: { assetSymbol: glmrName, assetName: glmrName, minDepositAmt: 10 },
     osmosis: {
       assetSymbol: glmrName,
-      assetName: glmrName + "(Axelar-wrapped)",
+      assetName: glmrName + " (Axelar-wrapped)",
       minDepositAmt: 10,
     },
     polygon: {
