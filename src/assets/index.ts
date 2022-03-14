@@ -32,35 +32,45 @@ const luna_terra: AssetConfig = {
   chain_aliases: {
     axelar: {
       assetSymbol: "LUNA",
-      assetName: "LUNA (Axelar-wrapped)",
-      minDepositAmt: 0.005,
-    },
-    avalanche: {
-      assetSymbol: "LUNA",
-      assetName: "LUNA (Axelar-wrapped)",
-      minDepositAmt: 0.5,
-    },
-    ethereum: {
-      assetSymbol: "LUNA",
-      assetName: "LUNA (Axelar-wrapped)",
-      minDepositAmt: 25,
-    },
-    fantom: {
-      assetSymbol: "LUNA",
-      assetName: "LUNA (Axelar-wrapped)",
-      minDepositAmt: 0.5,
+      assetName: "LUNA",
+      minDepositAmt: 0.0006,
     },
     moonbeam: {
       assetSymbol: "LUNA",
       assetName: "LUNA (Axelar-wrapped)",
-      minDepositAmt: 0.5,
+      minDepositAmt: 0.001,
+    },
+    fantom: {
+      assetSymbol: "LUNA",
+      assetName: "LUNA (Axelar-wrapped)",
+      minDepositAmt: 0.001,
+    },
+    ethereum: {
+      assetSymbol: "LUNA",
+      assetName: "LUNA (Axelar-wrapped)",
+      minDepositAmt: 0.006,
+    },
+    avalanche: {
+      assetSymbol: "LUNA",
+      assetName: "LUNA (Axelar-wrapped)",
+      minDepositAmt: 0.001,
     },
     polygon: {
       assetSymbol: "LUNA",
       assetName: "LUNA (Axelar-wrapped)",
-      minDepositAmt: 0.5,
+      minDepositAmt: 0.001,
     },
-    terra: { assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.005 },
+    cosmoshub: {
+      assetSymbol: "LUNA",
+      assetName: "LUNA",
+      minDepositAmt: 0.0006,
+    },
+    osmosis: {
+      assetSymbol: "LUNA",
+      assetName: "LUNA",
+      minDepositAmt: 0.0006,
+    },
+    terra: { assetSymbol: "LUNA", assetName: "LUNA", minDepositAmt: 0.0006 },
   },
 };
 
@@ -76,35 +86,45 @@ const ust_terra: AssetConfig = {
   chain_aliases: {
     axelar: {
       assetSymbol: "UST",
+      assetName: "UST",
+      minDepositAmt: 0.05,
+    },
+    moonbeam: {
+      assetSymbol: "UST",
+      assetName: "UST (Axelar-wrapped)",
+      minDepositAmt: 0.1,
+    },
+    fantom: {
+      assetSymbol: "UST",
+      assetName: "UST (Axelar-wrapped)",
+      minDepositAmt: 0.1,
+    },
+    ethereum: {
+      assetSymbol: "UST",
       assetName: "UST (Axelar-wrapped)",
       minDepositAmt: 0.5,
     },
     avalanche: {
       assetSymbol: "UST",
       assetName: "UST (Axelar-wrapped)",
-      minDepositAmt: 15,
-    },
-    ethereum: {
-      assetSymbol: "UST",
-      assetName: "UST (Axelar-wrapped)",
-      minDepositAmt: 1000,
-    },
-    fantom: {
-      assetSymbol: "UST",
-      assetName: "UST (Axelar-wrapped)",
-      minDepositAmt: 15,
-    },
-    moonbeam: {
-      assetSymbol: "UST",
-      assetName: "UST (Axelar-wrapped)",
-      minDepositAmt: 15,
+      minDepositAmt: 0.1,
     },
     polygon: {
       assetSymbol: "UST",
       assetName: "UST (Axelar-wrapped)",
-      minDepositAmt: 15,
+      minDepositAmt: 0.1,
     },
-    terra: { assetSymbol: "UST", assetName: "UST", minDepositAmt: 0.5 },
+    cosmoshub: {
+      assetSymbol: "UST",
+      assetName: "UST",
+      minDepositAmt: 0.05,
+    },
+    osmosis: {
+      assetSymbol: "UST",
+      assetName: "UST",
+      minDepositAmt: 0.05,
+    },
+    terra: { assetSymbol: "UST", assetName: "UST", minDepositAmt: 0.05 },
   },
 };
 
@@ -118,12 +138,22 @@ const axl_axelar: AssetConfig = {
   fully_supported: false,
   decimals: 6,
   chain_aliases: {
-    axelar: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 0.1 },
-    avalanche: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 10 },
-    ethereum: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 100 },
-    fantom: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 10 },
-    moonbeam: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 10 },
-    polygon: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 10 },
+    axelar: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 0.05 },
+    avalanche: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 0.1 },
+    ethereum: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 0.5 },
+    fantom: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 0.1 },
+    moonbeam: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 0.1 },
+    polygon: { assetSymbol: "AXL", assetName: "Axelar", minDepositAmt: 0.1 },
+    cosmoshub: {
+      assetSymbol: "AXL",
+      assetName: "AXL",
+      minDepositAmt: 0.05,
+    },
+    osmosis: {
+      assetSymbol: "AXL",
+      assetName: "AXL",
+      minDepositAmt: 0.05,
+    },
   },
 };
 
@@ -175,7 +205,6 @@ const usdc_fake: AssetConfig = {
   },
 };
 
-const atomName = "ATOM";
 const atom_cosmoshub: AssetConfig = {
   common_key: {
     devnet: "uatom",
@@ -186,37 +215,45 @@ const atom_cosmoshub: AssetConfig = {
   fully_supported: true,
   decimals: 6,
   chain_aliases: {
-    axelar: { assetSymbol: atomName, assetName: atomName, minDepositAmt: 0.1 },
-    cosmoshub: {
-      assetSymbol: atomName,
-      assetName: atomName,
-      minDepositAmt: 0.1,
-    },
-    avalanche: {
-      assetSymbol: atomName,
-      assetName: atomName + " (Axelar-wrapped)",
-      minDepositAmt: 10,
-    },
-    ethereum: {
-      assetSymbol: atomName,
-      assetName: atomName + " (Axelar-wrapped)",
-      minDepositAmt: 100,
-    },
-    fantom: {
-      assetSymbol: atomName,
-      assetName: atomName + " (Axelar-wrapped)",
-      minDepositAmt: 10,
+    axelar: {
+      assetSymbol: "ATOM",
+      assetName: "ATOM",
+      minDepositAmt: 0.002,
     },
     moonbeam: {
-      assetSymbol: atomName,
-      assetName: atomName + " (Axelar-wrapped)",
-      minDepositAmt: 10,
+      assetSymbol: "ATOM",
+      assetName: "ATOM (Axelar-wrapped)",
+      minDepositAmt: 0.003,
     },
-    osmosis: { assetSymbol: atomName, assetName: atomName, minDepositAmt: 0.1 },
+    fantom: {
+      assetSymbol: "ATOM",
+      assetName: "ATOM (Axelar-wrapped)",
+      minDepositAmt: 0.003,
+    },
+    ethereum: {
+      assetSymbol: "ATOM",
+      assetName: "ATOM (Axelar-wrapped)",
+      minDepositAmt: 0.02,
+    },
+    avalanche: {
+      assetSymbol: "ATOM",
+      assetName: "ATOM (Axelar-wrapped)",
+      minDepositAmt: 0.003,
+    },
     polygon: {
-      assetSymbol: atomName,
-      assetName: atomName + " (Axelar-wrapped)",
-      minDepositAmt: 10,
+      assetSymbol: "ATOM",
+      assetName: "ATOM (Axelar-wrapped)",
+      minDepositAmt: 0.003,
+    },
+    cosmoshub: {
+      assetSymbol: "ATOM",
+      assetName: "ATOM",
+      minDepositAmt: 0.002,
+    },
+    osmosis: {
+      assetSymbol: "ATOM",
+      assetName: "ATOM",
+      minDepositAmt: 0.002,
     },
   },
 };
@@ -233,36 +270,45 @@ const weth_ethereum: AssetConfig = {
   chain_aliases: {
     axelar: {
       assetSymbol: "WETH",
-      assetName: "WETH (Axelar-wrapped)",
-      minDepositAmt: 0.1,
-    },
-    avalanche: {
-      assetSymbol: "WETH",
-      assetName: "WETH (Axelar-wrapped)",
-      minDepositAmt: 10,
-    },
-    ethereum: { assetSymbol: "WETH", assetName: "WETH", minDepositAmt: 100 },
-    fantom: {
-      assetSymbol: "WETH",
-      assetName: "WETH (Axelar-wrapped)",
-      minDepositAmt: 10,
+      assetName: "WETH",
+      minDepositAmt: 2e-05
     },
     moonbeam: {
       assetSymbol: "WETH",
       assetName: "WETH (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 4e-05
     },
-    osmosis: {
+    fantom: {
       assetSymbol: "WETH",
       assetName: "WETH (Axelar-wrapped)",
-      minDepositAmt: 0.1,
+      minDepositAmt: 4e-05
+    },
+    ethereum: {
+      assetSymbol: "WETH",
+      assetName: "WETH",
+      minDepositAmt: 0.0002
+    },
+    avalanche: {
+      assetSymbol: "WETH",
+      assetName: "WETH (Axelar-wrapped)",
+      minDepositAmt: 4e-05
     },
     polygon: {
       assetSymbol: "WETH",
       assetName: "WETH (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 4e-05
     },
-  },
+    cosmoshub: {
+      assetSymbol: "WETH",
+      assetName: "WETH",
+      minDepositAmt: 2e-05
+    },
+    osmosis: {
+      assetSymbol: "WETH",
+      assetName: "WETH",
+      minDepositAmt: 2e-05
+    }
+  }
 };
 
 const wavax_avalanche: AssetConfig = {
@@ -275,38 +321,47 @@ const wavax_avalanche: AssetConfig = {
   fully_supported: true,
   decimals: 18,
   chain_aliases: {
-    axelar: {
+    "axelar": {
+      assetSymbol: "WAVAX",
+      assetName: "WAVAX",
+      minDepositAmt: 0.0007
+    },
+    "moonbeam": {
       assetSymbol: "WAVAX",
       assetName: "WAVAX (Axelar-wrapped)",
-      minDepositAmt: 0.1,
+      minDepositAmt: 0.001
     },
-    avalanche: { assetSymbol: "WAVAX", assetName: "WAVAX", minDepositAmt: 10 },
-    ethereum: {
+    "fantom": {
       assetSymbol: "WAVAX",
       assetName: "WAVAX (Axelar-wrapped)",
-      minDepositAmt: 100,
+      minDepositAmt: 0.001
     },
-    fantom: {
+    "ethereum": {
       assetSymbol: "WAVAX",
       assetName: "WAVAX (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 0.007
     },
-    moonbeam: {
+    "avalanche": {
+      assetSymbol: "WAVAX",
+      assetName: "WAVAX",
+      minDepositAmt: 0.001
+    },
+    "polygon": {
       assetSymbol: "WAVAX",
       assetName: "WAVAX (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 0.001
     },
-    osmosis: {
+    "cosmoshub": {
       assetSymbol: "WAVAX",
-      assetName: "WAVAX (Axelar-wrapped)",
-      minDepositAmt: 10,
+      assetName: "WAVAX",
+      minDepositAmt: 0.0007
     },
-    polygon: {
+    "osmosis": {
       assetSymbol: "WAVAX",
-      assetName: "WAVAX (Axelar-wrapped)",
-      minDepositAmt: 10,
-    },
-  },
+      assetName: "WAVAX",
+      minDepositAmt: 0.0007
+    }
+  }
 };
 
 const wmatic_polygon: AssetConfig = {
@@ -319,37 +374,46 @@ const wmatic_polygon: AssetConfig = {
   fully_supported: true,
   decimals: 18,
   chain_aliases: {
-    axelar: {
+    "axelar": {
+      assetSymbol: "WMATIC",
+      assetName: "WMATIC",
+      minDepositAmt: 0.03
+    },
+    "moonbeam": {
       assetSymbol: "WMATIC",
       assetName: "WMATIC (Axelar-wrapped)",
-      minDepositAmt: 0.1,
+      minDepositAmt: 0.07
     },
-    avalanche: {
+    "fantom": {
       assetSymbol: "WMATIC",
       assetName: "WMATIC (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 0.07
     },
-    ethereum: {
+    "ethereum": {
       assetSymbol: "WMATIC",
       assetName: "WMATIC (Axelar-wrapped)",
-      minDepositAmt: 100,
+      minDepositAmt: 0.3
     },
-    fantom: {
+    "avalanche": {
       assetSymbol: "WMATIC",
       assetName: "WMATIC (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 0.07
     },
-    osmosis: {
+    "polygon": {
       assetSymbol: "WMATIC",
-      assetName: "WMATIC (Axelar-wrapped)",
-      minDepositAmt: 10,
+      assetName: "WMATIC",
+      minDepositAmt: 0.07
     },
-    moonbeam: {
+    "cosmoshub": {
       assetSymbol: "WMATIC",
-      assetName: "WMATIC (Axelar-wrapped)",
-      minDepositAmt: 10,
+      assetName: "WMATIC",
+      minDepositAmt: 0.03
     },
-    polygon: { assetSymbol: "WMATIC", assetName: "WMATIC", minDepositAmt: 10 },
+    "osmosis": {
+      assetSymbol: "WMATIC",
+      assetName: "WMATIC",
+      minDepositAmt: 0.03
+    }
   },
 };
 
@@ -363,37 +427,46 @@ const wftm_fantom: AssetConfig = {
   fully_supported: true,
   decimals: 18,
   chain_aliases: {
-    axelar: {
+    "axelar": {
+      assetSymbol: "WFTM",
+      assetName: "WFTM",
+      minDepositAmt: 0.04
+    },
+    "moonbeam": {
       assetSymbol: "WFTM",
       assetName: "WFTM (Axelar-wrapped)",
-      minDepositAmt: 0.1,
+      minDepositAmt: 0.08
     },
-    avalanche: {
+    "fantom": {
+      assetSymbol: "WFTM",
+      assetName: "WFTM",
+      minDepositAmt: 0.08
+    },
+    "ethereum": {
       assetSymbol: "WFTM",
       assetName: "WFTM (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 0.4
     },
-    ethereum: {
+    "avalanche": {
       assetSymbol: "WFTM",
       assetName: "WFTM (Axelar-wrapped)",
-      minDepositAmt: 100,
+      minDepositAmt: 0.08
     },
-    fantom: { assetSymbol: "WFTM", assetName: "WFTM", minDepositAmt: 10 },
-    moonbeam: {
+    "polygon": {
       assetSymbol: "WFTM",
       assetName: "WFTM (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 0.08
     },
-    osmosis: {
+    "cosmoshub": {
       assetSymbol: "WFTM",
-      assetName: "WFTM (Axelar-wrapped)",
-      minDepositAmt: 10,
+      assetName: "WFTM",
+      minDepositAmt: 0.04
     },
-    polygon: {
+    "osmosis": {
       assetSymbol: "WFTM",
-      assetName: "WFTM (Axelar-wrapped)",
-      minDepositAmt: 10,
-    },
+      assetName: "WFTM",
+      minDepositAmt: 0.04
+    }
   },
 };
 
@@ -411,33 +484,33 @@ const wglmr_moonbeam: AssetConfig = {
     axelar: {
       assetSymbol: glmrName,
       assetName: glmrName + " (Axelar-wrapped)",
-      minDepositAmt: 0.1,
+      minDepositAmt: 0.02,
     },
     avalanche: {
       assetSymbol: glmrName,
       assetName: glmrName + " (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 0.04,
     },
     ethereum: {
       assetSymbol: glmrName,
       assetName: glmrName + " (Axelar-wrapped)",
-      minDepositAmt: 100,
+      minDepositAmt: 0.2,
     },
     fantom: {
       assetSymbol: glmrName,
       assetName: glmrName + " (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 0.04,
     },
-    moonbeam: { assetSymbol: glmrName, assetName: glmrName, minDepositAmt: 10 },
+    moonbeam: { assetSymbol: glmrName, assetName: glmrName, minDepositAmt: 0.04 },
     osmosis: {
       assetSymbol: glmrName,
       assetName: glmrName + " (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 0.02,
     },
     polygon: {
       assetSymbol: glmrName,
       assetName: glmrName + " (Axelar-wrapped)",
-      minDepositAmt: 10,
+      minDepositAmt: 0.02,
     },
   },
 };
