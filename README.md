@@ -122,6 +122,8 @@ const getDepositAddress = async (destinationAddress?: string) => {
   parameters.signature = signature;
 
   const linkAddress = await api.getDepositAddress(parameters);
+
+  return linkAddress;
 };
 ```
 
