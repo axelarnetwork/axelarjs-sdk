@@ -11,6 +11,11 @@ export default class Avalanche extends Ethereum implements Chain {
     txFeeInPercent: 0.1,
     module: "evm",
     confirmLevel: 12,
+    chainIdentifier: {
+      devnet: "avalanche",
+      testnet: "avalanche",
+      mainnet: "avalanche",
+    },
   };
 
   constructor() {

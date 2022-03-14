@@ -11,6 +11,11 @@ export default class Moonbeam extends Ethereum implements Chain {
     txFeeInPercent: 0.1,
     module: "evm",
     confirmLevel: 6,
+    chainIdentifier: {
+      devnet: "moonbeam",
+      testnet: "moonbeam",
+      mainnet: "moonbeam",
+    },
   };
 
   constructor() {

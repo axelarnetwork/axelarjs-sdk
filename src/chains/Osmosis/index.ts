@@ -5,12 +5,17 @@ import { bech32 } from "bech32";
 export default class Osmosis extends Axelar implements Chain {
   public chainInfo: ChainInfo = {
     chainSymbol: "OSMO",
-    chainName: "Osmosis-2",
+    chainName: "Osmosis",
     estimatedWaitTime: 5,
     fullySupported: false,
     assets: [],
     txFeeInPercent: 0.1,
     module: "axelarnet",
+    chainIdentifier: {
+      devnet: "osmosis",
+      testnet: "osmosis-2",
+      mainnet: "osmosis",
+    },
   };
 
   constructor() {
