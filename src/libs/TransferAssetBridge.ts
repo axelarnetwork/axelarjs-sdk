@@ -154,6 +154,18 @@ export class TransferAssetBridge {
     }
   }
 
+  public async getFeeForChainAndAsset(
+    chain: string, asset: string
+  ): Promise<any> {
+    try {
+      return (await this.restServices.get(
+        "/getFeeForChain" + `?chain=${chain}&asset=${asset}`
+      )) as any;
+    } catch (e: any) {
+      throw e;
+    }
+  }
+
   public async getInitRoomId(
     payload: AssetTransferObject,
     showAlerts: boolean,
