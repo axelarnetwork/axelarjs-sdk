@@ -114,7 +114,6 @@ export class TransferAssetBridge {
         "/getFeeForChain" + `?chain=${chain}&asset=${asset}`
       )) as any;
     } catch (e: any) {
-      console.log("eeeeeeee",e);
       throw e;
     }
   }
