@@ -40,7 +40,7 @@ npm i --save @axelar-network/axelarjs-sdk
 
 Set up the library consumer:
 
-```tsx
+```typescript
 import {
   AssetInfoWithTrace,
   AssetTransferObject,
@@ -82,7 +82,7 @@ export class AxelarAPI {
 
 Instantiate and invoke the library consumer:
 
-```tsx
+```typescript
 const environment: string =
   "testnet"; /*environment should be one of local | devnet | testnet | mainnet*/
 
@@ -136,7 +136,7 @@ The `getDepositAddress` method takes the following parameters:
 
 Sample parameters:
 
-```tsx
+```typescript
 // getParameters.ts
 
 const getParameters = (
