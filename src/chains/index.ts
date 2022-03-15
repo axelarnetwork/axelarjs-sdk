@@ -42,7 +42,7 @@ rawChains.forEach(({ chainInfo }) => {
   filteredAssetList.forEach((asset) => {
     const assetToPush: AssetInfo =
       asset.chain_aliases[chainInfo.chainName.toLowerCase()];
-    assetToPush.common_key = asset.common_key[environment];
+    assetToPush.common_key = asset.common_key[environment === "local" ? "testnet" : environment];
     assetToPush.native_chain = asset.native_chain;
     assetToPush.decimals = asset.decimals;
     assetToPush.fullySupported = asset.fully_supported;
