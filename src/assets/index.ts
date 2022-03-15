@@ -515,12 +515,50 @@ const wglmr_moonbeam: AssetConfig = {
   },
 };
 
+const uausdc = {
+  common_key: {
+    devnet: "uausdc",
+    testnet: "uausdc",
+    mainnet: "uausdc"
+  },
+  native_chain: "ethereum",
+  fully_supported: true,
+  decimals: 6,
+  chain_aliases: {
+    moonbeam: {
+      assetSymbol: "aUSDC",
+      assetName: "aUSDC (Axelar-wrapped)",
+      minDepositAmt: 1.0
+    },
+    fantom: {
+      assetSymbol: "aUSDC",
+      assetName: "aUSDC (Axelar-wrapped)",
+      minDepositAmt: 1.0
+    },
+    ethereum: {
+      assetSymbol: "aUSDC",
+      assetName: "aUSDC",
+      minDepositAmt: 20.0
+    },
+    avalanche: {
+      assetSymbol: "aUSDC",
+      assetName: "aUSDC (Axelar-wrapped)",
+      minDepositAmt: 1.0
+    },
+    polygon: {
+      assetSymbol: "aUSDC",
+      assetName: "aUSDC (Axelar-wrapped)",
+      minDepositAmt: 1.0
+    }
+  }
+}
+
 export const allAssets: AssetConfig[] = [
   axl_axelar,
   luna_terra,
   ust_terra,
-  usdc_fake,
   atom_cosmoshub,
+  uausdc,
   weth_ethereum,
   wavax_avalanche,
   wftm_fantom,
