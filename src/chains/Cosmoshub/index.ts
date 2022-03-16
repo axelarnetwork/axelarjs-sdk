@@ -2,7 +2,7 @@ import { AssetInfo, Chain, ChainInfo } from "../../interface";
 import { bech32 } from "bech32";
 import Axelar from "../Axelar";
 
-export default class Cosmos extends Axelar implements Chain {
+export default class Cosmoshub extends Axelar implements Chain {
   public chainInfo: ChainInfo = {
     chainSymbol: "COS",
     chainName: "Cosmoshub",

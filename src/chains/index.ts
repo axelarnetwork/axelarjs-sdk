@@ -8,12 +8,12 @@ import Fantom from "./Fantom";
 import Polygon from "./Polygon";
 import Moonbeam from "./Moonbeam";
 import Osmosis from "./Osmosis";
-import Cosmos from "./Cosmos";
+import Cosmoshub from "./Cosmoshub";
 
 const rawChains: Chain[] = [
   new Axelar(),
   new Avalanche(),
-  new Cosmos(),
+  new Cosmoshub(),
   new Ethereum(),
   new Fantom(),
   new Moonbeam(),

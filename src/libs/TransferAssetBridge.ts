@@ -159,7 +159,7 @@ export class TransferAssetBridge {
   ): Promise<any> {
     try {
       return (await this.restServices.get(
-        "/getFeeForChain" + `?chain=${chain}&asset=${asset}`
+        "/getFeeForChain" + `?chainName=${chain}&assetCommonKey=${asset}`
       )) as any;
     } catch (e: any) {
       throw e;
