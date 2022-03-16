@@ -1078,7 +1078,7 @@ const mainnet = {
       mainnet: "uaxl",
     },
     native_chain: "axelar",
-    fully_supported: true,
+    fully_supported: false,
     decimals: 6,
     chain_aliases: {
       axelar: {
