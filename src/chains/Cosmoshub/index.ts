@@ -7,7 +7,7 @@ export default class Cosmoshub extends Axelar implements Chain {
     chainSymbol: "COS",
     chainName: "Cosmoshub",
     estimatedWaitTime: 5,
-    fullySupported: false,
+    fullySupported: true,
     assets: [],
     txFeeInPercent: 0.1,
     module: "axelarnet",
