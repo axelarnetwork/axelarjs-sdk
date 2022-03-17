@@ -6,20 +6,20 @@ const mock = {
   loadAssets: loadAssets,
 };
 
-describe("assetLoader()", () => {
+describe("loadAssets()", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(mock, "loadAssets");
   });
 
-  describe("when assetLoader is called with known env, but not mainnet", () => {
+  describe("when loadAssets is called with known env, but not mainnet", () => {
     beforeEach(() => {
       mock.loadAssets({
         environment: "testnet",
       });
     });
 
-    test("then it should call assetLoader", () => {
+    test("then it should call loadAssets", () => {
       expect(mock.loadAssets).toHaveBeenCalledWith({ environment: "testnet" });
     });
 
@@ -28,14 +28,14 @@ describe("assetLoader()", () => {
     });
   });
 
-  describe("when assetLoader is called with mainnet", () => {
+  describe("when loadAssets is called with mainnet", () => {
     beforeEach(() => {
       mock.loadAssets({
         environment: "mainnet",
       });
     });
 
-    test("then it should call assetLoader", () => {
+    test("then it should call loadAssets", () => {
       expect(mock.loadAssets).toHaveBeenCalledWith({ environment: "mainnet" });
     });
 
@@ -44,7 +44,7 @@ describe("assetLoader()", () => {
     });
   });
 
-  describe("when assetLoader is called with unknown env", () => {
+  describe("when loadAssets is called with unknown env", () => {
     let error: Error;
     beforeEach(() => {
       try {
@@ -56,7 +56,7 @@ describe("assetLoader()", () => {
       }
     });
 
-    test("then it should call assetLoader", () => {
+    test("then it should call loadAssets", () => {
       expect(mock.loadAssets).toHaveBeenCalledWith({ environment: "axelar" });
     });
 
@@ -68,7 +68,7 @@ describe("assetLoader()", () => {
     });
   });
 
-  describe("when assetLoader is called with empty env", () => {
+  describe("when loadAssets is called with empty env", () => {
     let error: Error;
     beforeEach(() => {
       try {
@@ -80,7 +80,7 @@ describe("assetLoader()", () => {
       }
     });
 
-    test("then it should call assetLoader", () => {
+    test("then it should call loadAssets", () => {
       expect(mock.loadAssets).toHaveBeenCalledWith({ environment: "" });
     });
 
