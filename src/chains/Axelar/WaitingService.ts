@@ -1,12 +1,12 @@
-import {
-  AssetAndChainInfo,
-  AssetInfo,
-  BlockchainWaitingService,
-  ChainInfo,
-  StatusResponse,
-} from "../../interface";
 import { BaseWaitingService } from "../models/BaseWaitingService";
 import { SocketServices } from "../../services/SocketServices";
+import { AssetInfo } from "../../assets/types";
+import { StatusResponse } from "../../services/types";
+import {
+  BlockchainWaitingService,
+  ChainInfo,
+  AssetAndChainInfo,
+} from "../types";
 
 export default class WaitingService
   extends BaseWaitingService

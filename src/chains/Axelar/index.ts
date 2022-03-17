@@ -1,6 +1,7 @@
 import WaitingService from "./WaitingService";
-import { AssetInfo, Chain, ChainInfo } from "../../interface";
 import { bech32 } from "bech32";
+import { AssetInfo } from "../../assets/types";
+import { Chain, ChainInfo } from "../types";
 
 export default class Axelar implements Chain {
   public chainInfo: ChainInfo = {

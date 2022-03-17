@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { SocketListenerTypes, SocketOptions } from "../interface";
+import { SocketListenerTypes } from "../chains/types";
 import { GREPTCHA_SITE_KEY } from "../constants";
 
 /**

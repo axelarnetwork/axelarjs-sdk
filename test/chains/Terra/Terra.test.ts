@@ -1,5 +1,5 @@
 import Terra from "../../../src/chains/Terra";
-import { AssetInfo } from "../../../src/interface";
+import { AssetInfo } from "../../assets/types";
 
 let terraChain: Terra;
 let asset: AssetInfo;

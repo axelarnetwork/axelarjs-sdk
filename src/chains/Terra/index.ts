@@ -1,6 +1,7 @@
-import { AssetInfo, Chain, ChainInfo } from "../../interface";
+import { AssetInfo } from "../../assets/types";
 import Axelar from "../Axelar";
 import { AccAddress } from "@terra-money/terra.js";
+import { Chain, ChainInfo } from "../types";
 
 export default class Terra extends Axelar implements Chain {
   public chainInfo: ChainInfo = {

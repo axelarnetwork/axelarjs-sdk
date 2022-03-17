@@ -1,10 +1,10 @@
+import { AssetInfo } from "../../assets/types";
+import { StatusResponse } from "../../services/types";
 import {
-  AssetAndChainInfo,
-  AssetInfo,
   BlockchainWaitingService,
   ChainInfo,
-  StatusResponse,
-} from "../../interface";
+  AssetAndChainInfo,
+} from "../types";
 import { BaseWaitingService } from "../models/BaseWaitingService";
 import { SocketServices } from "../../services/SocketServices";
 import EthersJsWaitingService from "../../utils/EthersJs/EthersJsWaitingService";

@@ -1,0 +1,16 @@
+{
+  "name": "script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "run-example.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@axelar-network/axelarjs-sdk": "^0.4.20",
+    "ethers": "^5.6.1"
+  }
+}
