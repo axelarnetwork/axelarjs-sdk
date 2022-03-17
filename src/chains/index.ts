@@ -9,6 +9,7 @@ import Polygon from "./Polygon";
 import Moonbeam from "./Moonbeam";
 import Osmosis from "./Osmosis";
 import Cosmoshub from "./Cosmoshub";
+import Juno from "./Juno";
 
 const rawChains: Chain[] = [
   new Axelar(),
@@ -16,6 +17,7 @@ const rawChains: Chain[] = [
   new Cosmoshub(),
   new Ethereum(),
   new Fantom(),
+  new Juno(),
   new Moonbeam(),
   new Osmosis(),
   new Polygon(),

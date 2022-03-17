@@ -7,7 +7,7 @@ export default class Osmosis extends Axelar implements Chain {
     chainSymbol: "OSMO",
     chainName: "Osmosis",
     estimatedWaitTime: 5,
-    fullySupported: false,
+    fullySupported: true,
     assets: [],
     txFeeInPercent: 0.1,
     module: "axelarnet",
