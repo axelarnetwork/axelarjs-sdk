@@ -1,5 +1,6 @@
-import { AssetInfo, Chain } from "../interface";
+import { AssetInfo } from "../assets/types";
 import { ChainList } from "../chains";
+import { Chain } from "../chains/types";
 
 const validatorsDict: { [chainSymbol: string]: (asset: AssetInfo) => boolean } =
   {};

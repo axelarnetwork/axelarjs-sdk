@@ -1,5 +1,5 @@
 import Axelar from "../../../src/chains/Axelar";
-import { AssetInfo } from "../../../src/interface";
+import { AssetInfo } from "../../assets/types";
 
 let axelarChain: Axelar;
 let asset: AssetInfo;

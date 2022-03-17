@@ -1,23 +1,24 @@
 import { v4 as uuidv4 } from "uuid";
 import {
-  AssetInfoResponse,
-  AssetTransferObject,
-  AssetInfoWithTrace,
-} from "../interface/AssetTransferObject";
-import {
-  AssetAndChainInfo,
-  AssetInfo,
   CallbackStatus,
   CLIENT_API_GET_OTC,
   CLIENT_API_POST_TRANSFER_ASSET,
+  OTC,
   SourceOrDestination,
   StatusResponse,
-} from "../interface";
+} from "../services/types";
+import { AssetInfo } from "../assets/types";
+import {
+  AssetTransferObject,
+  AssetInfoWithTrace,
+  AssetInfoResponse,
+  AssetAndChainInfo,
+} from "../chains/types";
+
 import { RestServices, SocketServices } from "../services";
 import { getWaitingService } from "../utils";
 import { validateDestinationAddress } from "../utils";
 import { getConfigs } from "../constants";
-import { OTC } from "../types";
 
 export class TransferAssetBridge {
   private restServices: RestServices;

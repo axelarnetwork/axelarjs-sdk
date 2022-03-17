@@ -1,12 +1,12 @@
+import { AssetInfo } from "../assets/types";
+import { ChainList } from "../chains";
 import {
-  AssetInfo,
-  BlockchainWaitingService,
   BlockchainWaitingServiceFinder,
   Chain,
   ChainInfo,
-  SourceOrDestination,
-} from "../interface";
-import { ChainList } from "../chains";
+  BlockchainWaitingService,
+} from "../chains/types";
+import { SourceOrDestination } from "../services/types";
 
 const waitingServiceMap: {
   [chainKey: string]: BlockchainWaitingServiceFinder;

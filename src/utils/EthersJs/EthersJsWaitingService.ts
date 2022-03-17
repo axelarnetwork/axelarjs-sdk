@@ -3,11 +3,10 @@ import { formatEther } from "ethers/lib/utils";
 import { BaseWaitingService } from "../../chains/models/BaseWaitingService";
 import { getEthersJsProvider, ProviderType } from "./ethersjsProvider";
 import {
-  AssetAndChainInfo,
-  AssetInfo,
   BlockchainWaitingService,
   ChainInfo,
-} from "../../interface";
+  AssetAndChainInfo,
+} from "../../chains/types";
 import {
   EnvironmentConfigs,
   EthersJsConfigs,
@@ -16,6 +15,7 @@ import {
 } from "../../constants";
 import { RestServices } from "../../services/RestServices";
 import { SocketServices } from "../../services/SocketServices";
+import { AssetInfo } from "../../assets/types";
 
 const abi: string[] = [
   "function name() view returns (string)",

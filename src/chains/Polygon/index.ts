@@ -1,4 +1,4 @@
-import { Chain, ChainInfo } from "../../interface";
+import { Chain, ChainInfo } from "../types";
 import Ethereum from "../Ethereum";
 
 export default class Polygon extends Ethereum implements Chain {

@@ -20,3 +20,8 @@ export interface CallbackStatus {
 export type StatusResponse = (...args: any[]) => void;
 
 export type SourceOrDestination = "source" | "destination";
+
+export interface OTC {
+  otc: string;
+  validationMsg: string;
+}

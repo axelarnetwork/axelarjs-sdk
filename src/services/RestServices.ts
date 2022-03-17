@@ -1,5 +1,6 @@
-import { AssetTransferObject } from "../interface";
+
 import fetch from "cross-fetch";
+import { AssetTransferObject } from "../chains/types";
 
 export class RestServices {
   constructor(private host: string) {}
