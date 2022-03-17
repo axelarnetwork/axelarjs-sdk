@@ -13,9 +13,8 @@ import {
   SourceOrDestination,
   StatusResponse,
 } from "../interface";
-import { RestServices } from "../services/RestServices";
+import { RestServices, SocketServices } from "../services";
 import { getWaitingService } from "../utils";
-import { SocketServices } from "../services/SocketServices";
 import { validateDestinationAddress } from "../utils";
 import { getConfigs } from "../constants";
 import { OTC } from "../types";
@@ -155,7 +154,8 @@ export class TransferAssetBridge {
   }
 
   public async getFeeForChainAndAsset(
-    chain: string, asset: string
+    chain: string,
+    asset: string
   ): Promise<any> {
     try {
       return (await this.restServices.get(
