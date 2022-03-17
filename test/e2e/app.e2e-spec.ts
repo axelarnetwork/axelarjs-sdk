@@ -2,8 +2,10 @@ import { Wallet } from "ethers";
 import { createWallet, signOtc } from "../../src/utils";
 import { TransferAssetBridge } from "../../src/libs";
 import { OTC } from "../../src/services/types";
+import { AssetTransferObject } from "../../src/chains/types";
 
-describe("E2E", () => {
+describe("E2E - Depost address generation", () => {
+  const destinationAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
   let axelar: TransferAssetBridge;
   let wallet: Wallet;
   let signature: string;
@@ -45,5 +47,63 @@ describe("E2E", () => {
     });
   });
 
-  describe("getting deposit address", () => {});
+  describe("getting deposit address", () => {
+    let response: { roomId: string };
+
+    beforeAll(async () => {
+      const transferPayload: AssetTransferObject = {
+        signature,
+        publicAddr: wallet.address,
+        sourceChainInfo: {
+          chainSymbol: "Terra",
+          chainName: "Terra",
+          estimatedWaitTime: 5,
+          fullySupported: true,
+          txFeeInPercent: 0.1,
+          module: "axelarnet",
+          chainIdentifier: {
+            devnet: "terra",
+            testnet: "terra",
+            mainnet: "terra",
+          },
+        },
+        selectedSourceAsset: {
+          assetSymbol: "UST",
+          assetName: "UST",
+          minDepositAmt: 0.05,
+          common_key: "uusd",
+          native_chain: "terra",
+          decimals: 6,
+          fullySupported: true,
+        },
+        destinationChainInfo: {
+          chainSymbol: "AVAX",
+          chainName: "Avalanche",
+          estimatedWaitTime: 5,
+          fullySupported: true,
+          txFeeInPercent: 0.1,
+          module: "evm",
+          confirmLevel: 12,
+          chainIdentifier: {
+            devnet: "avalanche",
+            testnet: "avalanche",
+            mainnet: "avalanche",
+          },
+        },
+        selectedDestinationAsset: {
+          assetAddress: destinationAddress,
+          assetSymbol: "UST",
+          common_key: "uusd",
+        },
+        transactionTraceId: "0x",
+      };
+      response = await axelar.getInitRoomId(transferPayload, false, "0x");
+    });
+
+    it("should get room id", () => {
+      expect(response.roomId).toBeDefined();
+      expect(typeof response.roomId).toBe("string");
+      expect(response.roomId.includes(destinationAddress)).toBe(true);
+    });
+  });
 });
