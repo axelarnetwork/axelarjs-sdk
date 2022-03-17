@@ -68,7 +68,6 @@ export interface AssetTransferObject {
   selectedSourceAsset: AssetInfo;
   selectedDestinationAsset: AssetInfo;
   signature: string;
-  otc: string;
   publicAddr: string;
   transactionTraceId?: string;
 }

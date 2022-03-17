@@ -1,4 +1,3 @@
-
 import fetch from "cross-fetch";
 import { AssetTransferObject } from "../chains/types";
 
@@ -16,7 +15,7 @@ export class RestServices {
         "Content-Type": "application/json",
         publicAddress: payload.publicAddr,
         signature: payload.signature,
-        otc: payload.otc,
+        // otc: payload.otc,
         ...headers,
       },
       body: JSON.stringify(payload),
