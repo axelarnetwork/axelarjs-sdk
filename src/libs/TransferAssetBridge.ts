@@ -53,7 +53,8 @@ export class TransferAssetBridge {
     // validate destination address
     const isAddressValid = validateDestinationAddress(
       destinationChainInfo?.chainSymbol,
-      selectedDestinationAsset
+      selectedDestinationAsset,
+      this.environment
     );
     if (!isAddressValid)
       throw new Error(

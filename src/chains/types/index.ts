@@ -114,3 +114,7 @@ export enum SocketListenerTypes {
 export interface SocketListenerTopic {
   topic: SocketListenerTypes;
 }
+
+export type LoadChainConfig = {
+  environment: string | undefined;
+};

@@ -20,3 +20,7 @@ export interface AssetConfig {
   decimals: number;
   chain_aliases: { [key: string]: AssetInfoForChain };
 }
+
+export type LoadAssetConfig = {
+  environment: string | undefined;
+};

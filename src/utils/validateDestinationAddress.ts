@@ -1,18 +1,27 @@
 import { AssetInfo } from "../assets/types";
-import { ChainList } from "../chains";
+import { loadChains } from "../chains";
 import { Chain } from "../chains/types";
-
-const validatorsDict: { [chainSymbol: string]: (asset: AssetInfo) => boolean } =
-  {};
-ChainList.forEach((chain: Chain) => {
-  const key = chain.chainInfo.chainSymbol.toLowerCase();
-  validatorsDict[key] = chain.validateAddress as (asset: AssetInfo) => boolean;
-});
 
 export const validateDestinationAddress = (
   chainSymbol: string,
-  destTokenInfo: AssetInfo
+  destTokenInfo: AssetInfo,
+  environment: string
 ): boolean => {
+  const validatorsDict: {
+    [chainSymbol: string]: (asset: AssetInfo) => boolean;
+  } = {};
+
+  const chains = loadChains({
+    environment,
+  });
+
+  chains.forEach((chain: Chain) => {
+    const key = chain.chainInfo.chainSymbol.toLowerCase();
+    validatorsDict[key] = chain.validateAddress as (
+      asset: AssetInfo
+    ) => boolean;
+  });
+
   const validator: (assetInfo: AssetInfo) => boolean =
     validatorsDict[chainSymbol?.toLowerCase()];
 
