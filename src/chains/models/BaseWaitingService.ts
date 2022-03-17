@@ -1,9 +1,9 @@
 import {
-  AssetAndChainInfo,
   BlockchainWaitingService,
+  AssetAndChainInfo,
   SocketListenerTypes,
-  StatusResponse,
-} from "../../interface";
+} from "../types";
+import { StatusResponse } from "../../services/types";
 import { SocketServices } from "../../services/SocketServices";
 
 export class BaseWaitingService implements BlockchainWaitingService {

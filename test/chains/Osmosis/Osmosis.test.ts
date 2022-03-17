@@ -1,5 +1,5 @@
 import Osmosis from "../../../src/chains/Osmosis";
-import { AssetInfo } from "../../../src/interface";
+import { AssetInfo } from "../../assets/types";
 
 let osmosisChain: Osmosis;
 let asset: AssetInfo;

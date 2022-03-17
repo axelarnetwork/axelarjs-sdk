@@ -1,14 +1,15 @@
-import { AssetInfo, Chain } from "../interface";
 import Axelar from "./Axelar";
 import Ethereum from "./Ethereum";
 import Avalanche from "./Avalanche";
 import Terra from "./Terra";
-import { allAssets, AssetConfig } from "../assets";
 import Fantom from "./Fantom";
 import Polygon from "./Polygon";
 import Moonbeam from "./Moonbeam";
 import Osmosis from "./Osmosis";
 import Cosmoshub from "./Cosmoshub";
+import { allAssets } from "../assets";
+import { AssetConfig, AssetInfo } from "../assets/types";
+import { Chain } from "./types";
 
 const rawChains: Chain[] = [
   new Axelar(),
@@ -42,7 +43,8 @@ rawChains.forEach(({ chainInfo }) => {
   filteredAssetList.forEach((asset) => {
     const assetToPush: AssetInfo =
       asset.chain_aliases[chainInfo.chainName.toLowerCase()];
-    assetToPush.common_key = asset.common_key[environment === "local" ? "testnet" : environment];
+    assetToPush.common_key =
+      asset.common_key[environment === "local" ? "testnet" : environment];
     assetToPush.native_chain = asset.native_chain;
     assetToPush.decimals = asset.decimals;
     assetToPush.fullySupported = asset.fully_supported;

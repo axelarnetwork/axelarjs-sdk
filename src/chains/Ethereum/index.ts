@@ -1,12 +1,8 @@
 import WaitingService from "./WaitingService";
 import { isAddress as isValidEVMAddress } from "ethers/lib/utils";
-import {
-  AssetInfo,
-  BlockchainWaitingServiceFinder,
-  Chain,
-  ChainInfo,
-  SourceOrDestination,
-} from "../../interface";
+import { AssetInfo } from "../../assets/types";
+import { SourceOrDestination } from "../../services/types";
+import { Chain, ChainInfo, BlockchainWaitingServiceFinder } from "../types";
 import { ProviderType } from "../../utils/EthersJs/ethersjsProvider";
 
 export default class Ethereum implements Chain {

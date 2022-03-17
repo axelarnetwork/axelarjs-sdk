@@ -1,6 +1,7 @@
-import { AssetInfo, Chain, ChainInfo } from "../../interface";
+import { Chain, ChainInfo } from "../types";
 import Axelar from "../Axelar";
 import { bech32 } from "bech32";
+import { AssetInfo } from "../../assets/types";
 
 export default class Osmosis extends Axelar implements Chain {
   public chainInfo: ChainInfo = {
