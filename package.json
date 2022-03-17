@@ -15,6 +15,7 @@
     "dev": "run-p dev:*",
     "test": "jest --config jest.json",
     "test:watch": "jest --watch --no-cache --config jest.json",
+    "test:e2e": "jest --config test/e2e/jest.e2e.json",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"./**/*.{ts,json}\""
