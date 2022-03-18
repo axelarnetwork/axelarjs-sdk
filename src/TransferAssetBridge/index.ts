@@ -118,6 +118,19 @@ export class TransferAssetBridge {
     }
   }
 
+  public async getTransactionFee(
+    sourceChain: string, destinationChain: string, asset: string
+  ): Promise<any> {
+    try {
+      const sourceChainFeeInfo = await this.getFeeForChainAndAsset(sourceChain, asset);
+      const destinationChainFeeInfo = await this.getFeeForChainAndAsset(destinationChain, asset);
+      return (+sourceChainFeeInfo?.fee_info?.min_fee) + (+destinationChainFeeInfo?.fee_info?.min_fee);
+
+    } catch (e: any) {
+      throw e;
+    }
+  }
+
   public async getDepositAddress(
     message: AssetTransferObject,
     showAlerts: boolean
