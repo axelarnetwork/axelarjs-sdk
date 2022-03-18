@@ -52,6 +52,12 @@ export class SocketServices {
 
   public joinRoomAndWaitForEvent(roomId: string, waitCb: any) {
     return new Promise((resolve) => {
+      const ms: number = 1.8e+6; //30 minutes
+      const timeout = setTimeout(() => {
+        waitCb({ timedOut: true });
+        this.disconnect();
+      }, ms);
+
       // connect to socket.io
       this.connect(() => {
         // ask server to join room
@@ -62,6 +68,7 @@ export class SocketServices {
               "joinRoomAndWaitForEvent socket": data,
             });
             waitCb && waitCb(data);
+            clearTimeout(timeout);
             resolve(data);
             // FIXME: this should only be initiated once, no need to disconnect as it's expensive
             this.disconnect();
@@ -73,12 +80,11 @@ export class SocketServices {
 
   public joinRoomAndWaitDepositConfirmationEvent(roomId: string, waitCb: any) {
     return new Promise((resolve) => {
-
       const ms: number = 1.8e+6; //30 minutes
       const timeout = setTimeout(() => {
-        waitCb({ timedOut: true})
-        this.disconnect()
-      }, ms)
+        waitCb({ timedOut: true });
+        this.disconnect();
+      }, ms);
 
       // connect to socket.io
       this.connect(() => {
@@ -87,7 +93,7 @@ export class SocketServices {
           // listen to bridge event
           this.socket.on("bridge-event", (data: any) => {
             waitCb && waitCb(data);
-            clearTimeout(timeout)
+            clearTimeout(timeout);
             resolve(data);
             // FIXME: this should only be initiated once, no need to disconnect as it's expensive
             this.disconnect();
@@ -128,5 +134,4 @@ export class SocketServices {
   public disconnect() {
     this.socket.disconnect();
   }
-
 }
