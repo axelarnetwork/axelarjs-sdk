@@ -1174,7 +1174,7 @@ const mainnet = {
       mainnet: "uatom",
     },
     native_chain: "cosmoshub",
-    fully_supported: true,
+    fully_supported: false,
     decimals: 6,
     chain_aliases: {
       moonbeam: {
@@ -1222,7 +1222,7 @@ const mainnet = {
       mainnet: "uusdc",
     },
     native_chain: "ethereum",
-    fully_supported: true,
+    fully_supported: false,
     decimals: 6,
     chain_aliases: {
       axelar: {
@@ -1298,7 +1298,7 @@ const mainnet = {
       mainnet: "ujuno",
     },
     native_chain: "juno",
-    fully_supported: true,
+    fully_supported: false,
     decimals: 6,
     chain_aliases: {
       moonbeam: {
@@ -1346,7 +1346,7 @@ const mainnet = {
       mainnet: "frax-wei",
     },
     native_chain: "ethereum",
-    fully_supported: true,
+    fully_supported: false,
     decimals: 18,
     chain_aliases: {
       axelar: {
