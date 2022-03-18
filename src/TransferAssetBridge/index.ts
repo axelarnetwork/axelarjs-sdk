@@ -119,11 +119,11 @@ export class TransferAssetBridge {
     }
   }
 
-  public async getTransactionFee(
+  public async getTransferFee(
     sourceChain: string,
     destinationChain: string,
     asset: string
-  ): Promise<any> {
+  ): Promise<number> {
     try {
       const sourceChainFeeInfo = await this.getFeeForChainAndAsset(
         sourceChain,
