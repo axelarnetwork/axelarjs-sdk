@@ -107,12 +107,36 @@ export class TransferAssetBridge {
   }
 
   public async getFeeForChainAndAsset(
-    chain: string, asset: string
+    chain: string,
+    asset: string
   ): Promise<any> {
     try {
       return (await this.restServices.get(
         "/getFeeForChain" + `?chainName=${chain}&assetCommonKey=${asset}`
       )) as any;
+    } catch (e: any) {
+      throw e;
+    }
+  }
+
+  public async getTransferFee(
+    sourceChain: string,
+    destinationChain: string,
+    asset: string
+  ): Promise<number> {
+    try {
+      const sourceChainFeeInfo = await this.getFeeForChainAndAsset(
+        sourceChain,
+        asset
+      );
+      const destinationChainFeeInfo = await this.getFeeForChainAndAsset(
+        destinationChain,
+        asset
+      );
+      return (
+        +sourceChainFeeInfo?.fee_info?.min_fee +
+        +destinationChainFeeInfo?.fee_info?.min_fee
+      );
     } catch (e: any) {
       throw e;
     }
