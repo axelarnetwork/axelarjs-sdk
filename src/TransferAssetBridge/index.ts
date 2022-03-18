@@ -106,6 +106,18 @@ export class TransferAssetBridge {
     }
   }
 
+  public async getFeeForChainAndAsset(
+    chain: string, asset: string
+  ): Promise<any> {
+    try {
+      return (await this.restServices.get(
+        "/getFeeForChain" + `?chainName=${chain}&assetCommonKey=${asset}`
+      )) as any;
+    } catch (e: any) {
+      throw e;
+    }
+  }
+
   public async getDepositAddress(
     message: AssetTransferObject,
     showAlerts: boolean
