@@ -1,0 +1,80 @@
+import { ethers } from "ethers";
+import { ApproveTxArgs, Environment, EvmChain, SendTokenArgs } from "./types";
+import axelarGatewayAbi from "./abi/axelarGatewayAbi.json";
+import erc20Abi from "./abi/erc20Abi.json";
+import GatewayTx from "./GatewayTx";
+
+const config: Record<Environment, Record<EvmChain, string>> = {
+  [Environment.MAINNET]: {
+    [EvmChain.ETHEREUM]: "0x4F4495243837681061C4743b74B3eEdf548D56A5",
+    [EvmChain.AVALANCHE]: "0x5029C0EFf6C34351a0CEc334542cDb22c7928f78",
+    [EvmChain.FANTOM]: "0x304acf330bbE08d1e512eefaa92F6a57871fD895",
+    [EvmChain.POLYGON]: "0x6f015F16De9fC8791b234eF68D486d2bF203FBA8",
+    [EvmChain.MOONBEAM]: "0x4F4495243837681061C4743b74B3eEdf548D56A5",
+  },
+  [Environment.TESTNET]: {
+    [EvmChain.ETHEREUM]: "0xBC6fcce7c5487d43830a219CA6E7B83238B41e71",
+    [EvmChain.AVALANCHE]: "0xC249632c2D40b9001FE907806902f63038B737Ab",
+    [EvmChain.FANTOM]: "0x97837985Ec0494E7b9C71f5D3f9250188477ae14",
+    [EvmChain.POLYGON]: "0xBF62ef1486468a6bd26Dd669C06db43dEd5B849B",
+    [EvmChain.MOONBEAM]: "0x5769D84DD62a6fD969856c75c7D321b84d455929",
+  },
+};
+
+export default class AxelarGateway {
+  private chain: EvmChain;
+  private env: Environment;
+  private contract: ethers.Contract;
+  private provider: ethers.providers.Provider;
+
+  constructor(
+    env: Environment,
+    chain: EvmChain,
+    provider: ethers.providers.Provider
+  ) {
+    this.env = env;
+    this.chain = chain;
+    this.provider = provider;
+    this.contract = new ethers.Contract(
+      config[env][chain],
+      axelarGatewayAbi,
+      provider
+    );
+  }
+
+  async createSendTokenTx(args: SendTokenArgs): Promise<GatewayTx> {
+    // TODO: add args validation.
+
+    const unsignedTx = await this.contract.populateTransaction.sendToken(
+      args.destinationChain,
+      args.destinationAddress,
+      args.symbol,
+      args.amount
+    );
+
+    return new GatewayTx(unsignedTx, this.provider);
+  }
+
+  async createApproveTx(args: ApproveTxArgs): Promise<GatewayTx> {
+    const tokenAddress = args.tokenAddress;
+    const erc20Contract = new ethers.Contract(tokenAddress, erc20Abi);
+    const unsignedTx = await erc20Contract.populateTransaction.approve(
+      args.spender,
+      args.amount || ethers.constants.MaxUint256
+    );
+
+    return new GatewayTx(unsignedTx, this.provider);
+  }
+
+  isTokenFrozen(symbol: string): Promise<boolean> {
+    return this.contract.isTokenFrozen(symbol);
+  }
+
+  isCommandExecuted(commandId: string): Promise<boolean> {
+    return this.contract.isCommandExecuted(commandId);
+  }
+
+  getTokenAddress(symbol: string) {
+    return this.contract.tokenAddresses(symbol);
+  }
+}
