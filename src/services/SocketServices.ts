@@ -1,3 +1,4 @@
+import { reject } from "lodash";
 import { io, Socket } from "socket.io-client";
 import { SocketListenerTypes } from "../chains/types";
 import { GREPTCHA_SITE_KEY } from "../constants";
@@ -5,7 +6,6 @@ import { GREPTCHA_SITE_KEY } from "../constants";
 /**
  * SocketServices establishes socket connection between webapp and rest server
  */
-
 declare const grecaptcha: any;
 
 /**
@@ -14,76 +14,78 @@ declare const grecaptcha: any;
 export class SocketServices {
   private socket: Socket;
   private resourceUrl: string;
+  private testMode = false;
 
-  constructor(resourceUrl: string) {
+  constructor(resourceUrl: string, testMode = false) {
     this.resourceUrl = resourceUrl;
+    this.testMode = testMode;
   }
 
-  public async connect(cb?: any) {
-    if (!grecaptcha) {
-      console.log("need valid captcha first");
-      return;
-    }
-
-    let token: any;
-
-    try {
-      token = await grecaptcha.execute(GREPTCHA_SITE_KEY, {
-        action: "submit_from_sdk",
+  public async createSocket() {
+    if (this.testMode) {
+      this.socket = io(this.resourceUrl, {
+        reconnectionDelay: 0,
+        forceNew: true,
+        transports: ["websocket"],
       });
-    } catch (e: any) {
-      console.log("cannot get captcha", e);
-      return;
+    } else {
+      if (!grecaptcha) {
+        console.log("need valid captcha first");
+        return;
+      }
+
+      let token: any;
+
+      try {
+        token = await grecaptcha.execute(GREPTCHA_SITE_KEY, {
+          action: "submit_from_sdk",
+        });
+      } catch (e: any) {
+        console.log("cannot get captcha", e);
+        return;
+      }
+
+      this.socket = io(this.resourceUrl, {
+        transports: ["websocket"],
+        reconnectionDelayMax: 10000,
+        auth: { token },
+      });
     }
 
-    this.socket = io(this.resourceUrl, {
-      transports: ["websocket"],
-      reconnectionDelayMax: 10000,
-      auth: { token },
-      query: {},
+    return new Promise((resolve, reject) => {
+      this.socket.on("connect", () => {
+        resolve(true);
+      });
     });
-
-    this.socket.once("connect", () => {
-      cb && cb();
-    });
-
-    // this.socket.once("disconnect", (data: any) => {});
   }
 
   public joinRoomAndWaitForEvent(roomId: string, waitCb: any) {
-    return new Promise((resolve) => {
-      // connect to socket.io
-      this.connect(() => {
-        // ask server to join room
-        this.socket.emit("room:join", roomId, () => {
-          // listen to bridge event
-          this.socket.on("bridge-event", (data: any) => {
-            console.log({
-              "joinRoomAndWaitForEvent socket": data,
-            });
+    return new Promise(async (resolve) => {
+      await this.createSocket();
+
+      this.socket.emit("room:join", roomId, () => {
+        this.socket.on("bridge-event", (data: any) => {
+          if (roomId.includes(data.Attributes.destinationAddress)) {
             waitCb && waitCb(data);
             resolve(data);
-            // FIXME: this should only be initiated once, no need to disconnect as it's expensive
             this.disconnect();
-          });
+          }
         });
       });
     });
   }
 
   public joinRoomAndWaitDepositConfirmationEvent(roomId: string, waitCb: any) {
-    return new Promise((resolve) => {
-      // connect to socket.io
-      this.connect(() => {
-        // ask server to join room
-        this.socket.emit("room:join", roomId, () => {
-          // listen to bridge event
-          this.socket.on("bridge-event", (data: any) => {
-            waitCb && waitCb(data);
-            resolve(data);
-            // FIXME: this should only be initiated once, no need to disconnect as it's expensive
-            this.disconnect();
-          });
+    return new Promise(async (resolve) => {
+      await this.createSocket();
+      // ask server to join room
+      this.socket.emit("room:join", roomId, () => {
+        // listen to bridge event
+        this.socket.on("bridge-event", (data: any) => {
+          waitCb && waitCb(data);
+          resolve(data);
+          // FIXME: this should only be initiated once, no need to disconnect as it's expensive
+          this.disconnect();
         });
       });
     });
@@ -95,13 +97,12 @@ export class SocketServices {
     waitTopic: SocketListenerTypes,
     waitCb: any
   ) {
-    return new Promise((resolve, reject) => {
-      this.connect(() => {
-        this.emitMessage(triggerTopic, message);
-        this.awaitResponse(waitTopic, (data: any) => {
-          waitCb(data);
-          resolve(data);
-        });
+    return new Promise(async (resolve, reject) => {
+      await this.createSocket();
+      this.emitMessage(triggerTopic, message);
+      this.awaitResponse(waitTopic, (data: any) => {
+        waitCb(data);
+        resolve(data);
       });
     });
   }
