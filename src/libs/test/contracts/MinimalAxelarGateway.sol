@@ -98,10 +98,7 @@ contract MinimalAxelarGateway {
 
   function isCommandExecuted(bytes32 commandId) public pure returns (bool) {
     // byted32 string "executed"
-    if (
-      commandId ==
-      0x6578656375746564000000000000000000000000000000000000000000000000
-    ) {
+    if (commandId == bytes32("executed")) {
       return true;
     } else {
       return false;

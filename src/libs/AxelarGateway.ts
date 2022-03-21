@@ -29,8 +29,8 @@ const config: Record<Environment, Record<EvmChain, string>> = {
 };
 
 export default class AxelarGateway {
-  private chain: EvmChain;
-  private env: Environment;
+  chain: EvmChain;
+  env: Environment;
   private contract: ethers.Contract;
   private provider: ethers.providers.Provider;
 
@@ -83,8 +83,6 @@ export default class AxelarGateway {
   }
 
   async createSendTokenTx(args: SendTokenArgs): Promise<GatewayTx> {
-    // TODO: add args validation.
-
     const unsignedTx = await this.contract.populateTransaction.sendToken(
       args.destinationChain,
       args.destinationAddress,
@@ -97,7 +95,11 @@ export default class AxelarGateway {
 
   async createApproveTx(args: ApproveTxArgs): Promise<GatewayTx> {
     const tokenAddress = args.tokenAddress;
-    const erc20Contract = new ethers.Contract(tokenAddress, erc20Abi);
+    const erc20Contract = new ethers.Contract(
+      tokenAddress,
+      erc20Abi,
+      this.provider
+    );
     const unsignedTx = await erc20Contract.populateTransaction.approve(
       args.spender,
       args.amount || ethers.constants.MaxUint256
@@ -106,8 +108,17 @@ export default class AxelarGateway {
     return new GatewayTx(unsignedTx, this.provider);
   }
 
+  getAllowance(tokenAddress: string, signerAddress: string): Promise<number> {
+    const erc20Contract = new ethers.Contract(
+      tokenAddress,
+      erc20Abi,
+      this.provider
+    );
+    return erc20Contract.allowance(signerAddress, this.contract.address);
+  }
+
   isTokenFrozen(symbol: string): Promise<boolean> {
-    return this.contract.isTokenFrozen(symbol);
+    return this.contract.tokenFrozen(symbol);
   }
 
   isCommandExecuted(commandId: string): Promise<boolean> {
