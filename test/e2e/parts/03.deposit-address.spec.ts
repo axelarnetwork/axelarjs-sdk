@@ -1,14 +1,9 @@
-import { Wallet } from "ethers";
 import { TransferAssetBridge } from "../../../src";
-import { getDepositPayload, getTransferPayload } from "../data";
+import { getDepositPayload } from "../data";
 
 export default () => {
   describe("Deposit Address e2e", () => {
     let axelar: TransferAssetBridge;
-    let wallet: Wallet;
-    let sig: string;
-    let roomId: string;
-
     const destinationAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
 
     beforeAll(() => {
