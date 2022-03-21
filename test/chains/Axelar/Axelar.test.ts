@@ -20,14 +20,14 @@ test("destination address validation", () => {
   };
 
   asset.assetAddress = addressMap.validAddr45;
-  expect(axelarChain.validateAddress(asset)).toBe(true);
+  expect(axelarChain.validateAddress(asset.assetAddress)).toBe(true);
 
   asset.assetAddress = addressMap.invalidAddr45;
-  expect(axelarChain.validateAddress(asset)).toBe(false);
+  expect(axelarChain.validateAddress(asset.assetAddress)).toBe(false);
 
   asset.assetAddress = addressMap.validAddr65;
-  expect(axelarChain.validateAddress(asset)).toBe(true);
+  expect(axelarChain.validateAddress(asset.assetAddress)).toBe(true);
 
   asset.assetAddress = addressMap.invalidAddr65;
-  expect(axelarChain.validateAddress(asset)).toBe(false);
+  expect(axelarChain.validateAddress(asset.assetAddress)).toBe(false);
 });

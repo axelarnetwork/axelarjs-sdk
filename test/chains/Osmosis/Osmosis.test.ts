@@ -16,8 +16,8 @@ test("destination address validation", () => {
   };
 
   asset.assetAddress = addressMap.validAddr44;
-  expect(osmosisChain.validateAddress(asset)).toBe(true);
+  expect(osmosisChain.validateAddress(asset.assetAddress)).toBe(true);
 
   asset.assetAddress = addressMap.invalidAddr44;
-  expect(osmosisChain.validateAddress(asset)).toBe(false);
+  expect(osmosisChain.validateAddress(asset.assetAddress)).toBe(false);
 });
