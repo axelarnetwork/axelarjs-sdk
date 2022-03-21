@@ -54,6 +54,11 @@ export interface CallContractTxArgs {
   payload: string;
 }
 
+export interface CallContractWithTokenTxArgs extends CallContractTxArgs {
+  symbol: string;
+  amount: string;
+}
+
 export interface TxOption {
   gasLimit?: string;
   gasPrice?: string;

@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 import {
   ApproveTxArgs,
   CallContractTxArgs,
+  CallContractWithTokenTxArgs,
   Environment,
   EvmChain,
   SendTokenArgs,
@@ -54,6 +55,21 @@ export default class AxelarGateway {
       args.contractAddress,
       args.payload
     );
+
+    return new GatewayTx(unsignedTx, this.provider);
+  }
+
+  async createCallContractWithTokenTx(
+    args: CallContractWithTokenTxArgs
+  ): Promise<GatewayTx> {
+    const unsignedTx =
+      await this.contract.populateTransaction.callContractWithToken(
+        args.destinationChain,
+        args.contractAddress,
+        args.payload,
+        args.symbol,
+        args.amount
+      );
 
     return new GatewayTx(unsignedTx, this.provider);
   }
