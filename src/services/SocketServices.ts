@@ -82,10 +82,11 @@ export class SocketServices {
       this.socket.emit("room:join", roomId, () => {
         // listen to bridge event
         this.socket.on("bridge-event", (data: any) => {
-          waitCb && waitCb(data);
-          resolve(data);
-          // FIXME: this should only be initiated once, no need to disconnect as it's expensive
-          this.disconnect();
+          if (roomId.includes(data.Attributes.depositAddress)) {
+            waitCb && waitCb(data);
+            resolve(data);
+            this.disconnect();
+          }
         });
       });
     });
