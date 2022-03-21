@@ -1,5 +1,5 @@
+import { AssetInfo } from "../../../src";
 import Terra from "../../../src/chains/Terra";
-import { AssetInfo } from "../../assets/types";
 
 let terraChain: Terra;
 let asset: AssetInfo;
