@@ -62,10 +62,15 @@ export class SocketServices {
   public joinRoomAndWaitForEvent(roomId: string, waitCb: any) {
     return new Promise(async (resolve) => {
       await this.createSocket();
-
+      const ms: number = 1.8e+6; //30 minutes
+      const timeout = setTimeout(() => {
+        waitCb({ timedOut: true });
+        this.disconnect();
+      }, ms);
       this.socket.emit("room:join", roomId, () => {
         this.socket.on("bridge-event", (data: any) => {
           waitCb && waitCb(data);
+          clearTimeout(timeout);
           resolve(data);
           this.disconnect();
         });
@@ -76,10 +81,16 @@ export class SocketServices {
   public joinRoomAndWaitDepositConfirmationEvent(roomId: string, waitCb: any) {
     return new Promise(async (resolve) => {
       await this.createSocket();
+      const ms: number = 1.8e+6; //30 minutes
+      const timeout = setTimeout(() => {
+        waitCb({ timedOut: true });
+        this.disconnect();
+      }, ms);
       this.socket.emit("room:join", roomId, () => {
         this.socket.on("bridge-event", (data: any) => {
           waitCb && waitCb(data);
           resolve(data);
+          clearTimeout(timeout);
           this.disconnect();
         });
       });
