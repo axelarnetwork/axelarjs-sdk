@@ -48,6 +48,12 @@ export interface ApproveTxArgs {
   amount?: string;
 }
 
+export interface CallContractTxArgs {
+  destinationChain: EvmChain | CosmosChain;
+  contractAddress: string;
+  payload: string;
+}
+
 export interface TxOption {
   gasLimit?: string;
   gasPrice?: string;

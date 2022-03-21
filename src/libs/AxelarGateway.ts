@@ -1,5 +1,11 @@
 import { ethers } from "ethers";
-import { ApproveTxArgs, Environment, EvmChain, SendTokenArgs } from "./types";
+import {
+  ApproveTxArgs,
+  CallContractTxArgs,
+  Environment,
+  EvmChain,
+  SendTokenArgs,
+} from "./types";
 import axelarGatewayAbi from "./abi/axelarGatewayAbi.json";
 import erc20Abi from "./abi/erc20Abi.json";
 import GatewayTx from "./GatewayTx";
@@ -40,6 +46,16 @@ export default class AxelarGateway {
       axelarGatewayAbi,
       provider
     );
+  }
+
+  async createCallContractTx(args: CallContractTxArgs): Promise<GatewayTx> {
+    const unsignedTx = await this.contract.populateTransaction.callContract(
+      args.destinationChain,
+      args.contractAddress,
+      args.payload
+    );
+
+    return new GatewayTx(unsignedTx, this.provider);
   }
 
   async createSendTokenTx(args: SendTokenArgs): Promise<GatewayTx> {
