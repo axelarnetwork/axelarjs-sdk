@@ -28,8 +28,7 @@ export default class Ethereum implements Chain {
     this.providerType = "ethereum";
   }
 
-  public validateAddress = (addressInfo: AssetInfo) =>
-    isValidEVMAddress(addressInfo.assetAddress as string);
+  public validateAddress = (address: string) => isValidEVMAddress(address);
 
   public waitingService: BlockchainWaitingServiceFinder = async (
     chainInfo: ChainInfo,

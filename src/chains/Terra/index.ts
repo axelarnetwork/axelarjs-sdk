@@ -23,6 +23,5 @@ export default class Terra extends Axelar implements Chain {
     super();
   }
 
-  public validateAddress = (addressInfo: AssetInfo) =>
-    AccAddress.validate(addressInfo.assetAddress as string);
+  public validateAddress = (address: string) => AccAddress.validate(address);
 }

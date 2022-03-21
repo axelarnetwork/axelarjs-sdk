@@ -19,13 +19,12 @@ export default class Axelar implements Chain {
     },
   };
 
-  public validateAddress = (addressInfo: AssetInfo): boolean => {
-    if (!addressInfo?.assetAddress) return false;
+  public validateAddress = (address: string): boolean => {
+    if (!address) return false;
 
     try {
       return (
-        bech32.decode(addressInfo.assetAddress).prefix ===
-        this.chainInfo.chainName.toLowerCase()
+        bech32.decode(address).prefix === this.chainInfo.chainName.toLowerCase()
       );
     } catch (e) {
       return false;
