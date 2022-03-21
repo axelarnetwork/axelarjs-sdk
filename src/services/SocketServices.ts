@@ -65,11 +65,9 @@ export class SocketServices {
 
       this.socket.emit("room:join", roomId, () => {
         this.socket.on("bridge-event", (data: any) => {
-          if (roomId.includes(data.Attributes.destinationAddress)) {
-            waitCb && waitCb(data);
-            resolve(data);
-            this.disconnect();
-          }
+          waitCb && waitCb(data);
+          resolve(data);
+          this.disconnect();
         });
       });
     });
@@ -78,15 +76,11 @@ export class SocketServices {
   public joinRoomAndWaitDepositConfirmationEvent(roomId: string, waitCb: any) {
     return new Promise(async (resolve) => {
       await this.createSocket();
-      // ask server to join room
       this.socket.emit("room:join", roomId, () => {
-        // listen to bridge event
         this.socket.on("bridge-event", (data: any) => {
-          if (roomId.includes(data.Attributes.depositAddress)) {
-            waitCb && waitCb(data);
-            resolve(data);
-            this.disconnect();
-          }
+          waitCb && waitCb(data);
+          resolve(data);
+          this.disconnect();
         });
       });
     });
