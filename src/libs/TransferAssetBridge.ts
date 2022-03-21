@@ -16,9 +16,10 @@ import {
 } from "../chains/types";
 
 import { RestServices, SocketServices } from "../services";
-import { getWaitingService } from "../utils";
+import { createWallet, getWaitingService } from "../utils";
 import { validateDestinationAddress } from "../utils";
 import { getConfigs } from "../constants";
+import { GetDepositAddressDto } from "./types";
 
 export class TransferAssetBridge {
   private restServices: RestServices;
@@ -193,6 +194,55 @@ export class TransferAssetBridge {
     }
   }
 
+  async getDepositAddress(dto: GetDepositAddressDto): Promise<string> {
+    // generate trace id
+    const traceId = uuidv4();
+
+    // use auth
+    const wallet = createWallet();
+    const { validationMsg } = await this.getOneTimeCode(
+      wallet.address,
+      traceId
+    );
+    const sig = await wallet.signMessage(validationMsg);
+
+    const payload: AssetTransferObject = {
+      ...dto.payload,
+      signature: sig,
+      publicAddr: wallet.address,
+    };
+
+    const { roomId } = await this.getInitRoomId(payload, false, traceId);
+    if (!roomId) {
+      throw new Error("Get deposit address could not be fetched");
+    }
+
+    // listen for link event to extract deposit address
+    return new Promise(async (resolve, reject) => {
+      await this.getLinkEvent(
+        roomId,
+        {
+          assetInfo: {
+            assetAddress: payload.selectedDestinationAsset.assetSymbol,
+            traceId: traceId,
+            sourceOrDestChain: "source",
+          },
+          sourceChainInfo: payload.sourceChainInfo,
+          destinationChainInfo: payload.destinationChainInfo,
+        },
+        (success) => {
+          const roomId = success.newRoomId;
+          if (!roomId) reject("Could not extract deposit address");
+
+          const depositAddress = this.extractDepositAddress(roomId);
+          resolve(depositAddress);
+        },
+        (error: any) => reject(error),
+        "source"
+      );
+    });
+  }
+
   /**
    * @deprecated The method should not be used and will soon be removed
    */
@@ -288,5 +338,15 @@ export class TransferAssetBridge {
     } catch (e) {
       errCb(e);
     }
+  }
+
+  private extractDepositAddress(roomId: string) {
+    // eg: link-module=axelarnet-depositAddress=axelar1vcwr7x7dhq2ux5682c6am62uns9cy62cm6ktgwjqwjuj65yclajqhepd72
+    const splitByHyphen = roomId.split("-");
+    const depositAddressKV = splitByHyphen.filter((str) =>
+      str.includes("depositAddress")
+    )[0];
+    const depositAddress = depositAddressKV.replace("depositAddress=", "");
+    return depositAddress;
   }
 }
