@@ -230,21 +230,21 @@ const testnet = {
         assetName: "WMATIC",
         minDepositAmt: 0.03,
         ibcDenom:
-          "ibc/C31901B8CB873F83E5B383CABAC2133135E786BDE25380616E4B0DB5B8F08F3D",
+          "ibc/1BE5BF73F50D2D82C74628C6290834E66C5467F231B7FBC7DD45E217EE1D42A5",
       },
       osmosis: {
         assetSymbol: "WMATIC",
         assetName: "WMATIC",
         minDepositAmt: 0.03,
         ibcDenom:
-          "ibc/AAA3E023F151BA8331D1FA73D21260840BB756EF30101BBEE36843AAB6E30B9E",
+          "ibc/67D0DAF8D504ED1616A1886CCECB4E366DC81A8EF48BD22AEA1F44BE87ED19AE",
       },
       terra: {
         assetSymbol: "WMATIC",
         assetName: "WMATIC",
         minDepositAmt: 0.03,
         ibcDenom:
-          "ibc/58F8CEBA3C40A6EE70548B0011077FF9D12882D53FDF908E71A1F0A99E834212",
+          "ibc/90CC92BD6683D3D39933223D50FB678B6C2EDC4F4B048E21BF358570B2087916",
       },
     },
   },
@@ -299,21 +299,21 @@ const testnet = {
         assetName: "WFTM",
         minDepositAmt: 0.04,
         ibcDenom:
-          "ibc/49745E2A5A7D2F9CDB90491FB11D78B1DAE86D92404AAD6DC2DA11152A609CD0",
+          "ibc/947B84E653CBEC9386287883173A40D3C0A284AB554557342C50378219ECE147",
       },
       osmosis: {
         assetSymbol: "WFTM",
         assetName: "WFTM",
         minDepositAmt: 0.04,
         ibcDenom:
-          "ibc/DDCE954AC7E084CFB19799F897C3846A6FF94FC5A4DF94CFFD9118BFBD86DC25",
+          "ibc/033C5FCE2C549920B75CC794D12BC3407F638421C982CE9B48D4E5D986F4EFCE",
       },
       terra: {
         assetSymbol: "WFTM",
         assetName: "WFTM",
         minDepositAmt: 0.04,
         ibcDenom:
-          "ibc/AE5B3E33916FD05550C7D178F87F2564D5F7FF527059C5996BE8309470A61291",
+          "ibc/95482BCD668E74C030E1B8CE0874A447A593C144C8E9DB41BE05B7A9495ECDD7",
       },
     },
   },
@@ -368,21 +368,21 @@ const testnet = {
         assetName: "WETH",
         minDepositAmt: 0.00002,
         ibcDenom:
-          "ibc/375BC04D74C122624097D38B5D8449D2883D8EC4BB21A94F1C936EB454B02048",
+          "ibc/DEC3B614DEA87E77AFABE3EDA1F95A7E1A429080950AD9B0AF257FE01706CA0B",
       },
       osmosis: {
         assetSymbol: "WETH",
         assetName: "WETH",
         minDepositAmt: 0.00002,
         ibcDenom:
-          "ibc/29BCC56593641DF5447428ACB7965998DD32A25DC813DAB82D48FF851835B5B0",
+          "ibc/A8C7A5D5767DECBAF96AFDE4C2D99D95BE9FF38CA75BE3A1CD31E3D20264EFF9",
       },
       terra: {
         assetSymbol: "WETH",
         assetName: "WETH",
         minDepositAmt: 0.00002,
         ibcDenom:
-          "ibc/9339521B35444B4BF36D76BEBC97CC5921346A020AA1C99A7084CA068D3D2CFC",
+          "ibc/E614301CF4F54C23FAEEBF50F33D247AC743E9F247AB094AC57F68DB3A80635C",
       },
     },
   },
@@ -437,21 +437,21 @@ const testnet = {
         assetName: "WAVAX",
         minDepositAmt: 0.0007,
         ibcDenom:
-          "ibc/4786D3D8B8AC06B085F0C017742861F121F67501347149A054CAB77D24ECA49D",
+          "ibc/88C2DE3AE63A443385CDFE54A18B0FC48402DDF3FE5AC532A663F9C3A1144462",
       },
       osmosis: {
         assetSymbol: "WAVAX",
         assetName: "WAVAX",
         minDepositAmt: 0.0007,
         ibcDenom:
-          "ibc/724FBF119B7302FC6C27483EBCD3E8F0DD289F64A17FF7D6A9B3FE20E23341C3",
+          "ibc/9534907D2838E2134F21CC286A4CD0FF3CA96AA032F9F695ABF5621CC98AB17F",
       },
       terra: {
         assetSymbol: "WAVAX",
         assetName: "WAVAX",
         minDepositAmt: 0.0007,
         ibcDenom:
-          "ibc/3C74F6660E46281F2E85B35DC0ED2E2752AD6B36486FFA96CCA3F1FCE9BCDB16",
+          "ibc/0D2A39F3DF653685ED16DED245C83A51B9DD6CB8A55DE2C39D194BE44C108765",
       },
     },
   },
@@ -506,21 +506,21 @@ const testnet = {
         assetName: "WDEV",
         minDepositAmt: 0.02,
         ibcDenom:
-          "ibc/FD0B436BB2E3095C04E67481D4C7F03FABC9C0A85FFC0FBA8CFCE9C8FBCBB0F3",
+          "ibc/12B944E03F3E2197589129CB359E1BD5FA3F06841792FFE46852EAFE31EEB20A",
       },
       osmosis: {
         assetSymbol: "WDEV",
         assetName: "WDEV",
         minDepositAmt: 0.02,
         ibcDenom:
-          "ibc/24D41AD3F7BF7EECAB5302741309362F9AD6B8315CDBF2B1AE8186876D43EE9A",
+          "ibc/D3AF2C7986FA1191157529F68609887103EBBD0B9CAFAD615CF19B419E2F5566",
       },
       terra: {
         assetSymbol: "WDEV",
         assetName: "WDEV",
         minDepositAmt: 0.02,
         ibcDenom:
-          "ibc/01BE3FD11D199491ED3F43DEFBFC2D2216449DF5444621E48100DD4B544176C8",
+          "ibc/2A3208A0A402373F2E3E43228FC51F298433CE1BA5EDBF246ACE5F2E5111448E",
       },
     },
   },
@@ -630,14 +630,14 @@ const testnet = {
         assetName: "aUSDC",
         minDepositAmt: 0.05,
         ibcDenom:
-          "ibc/EF4FF7AE2FCBABA9660E8A843271F495194A667AD5853F5162F99D5C9CC26AB5",
+          "ibc/3DC20E9A12C8F19A92CDEBC37116C26EADF4C65E7498193791A3DAAD0B263556",
       },
       osmosis: {
         assetSymbol: "aUSDC",
         assetName: "aUSDC",
         minDepositAmt: 0.05,
         ibcDenom:
-          "ibc/7F0EA6F92B5AEBF95A0464FD969A8684B564C77E2FA2AF1F6CF5836A83D513AF",
+          "ibc/423FB88C7D1D4FCA2F7E67F07473DB4BB14282AE6F7B1A41B220A1AD9A762254",
       },
     },
   },
@@ -860,14 +860,14 @@ const mainnet = {
         assetName: "USDC",
         minDepositAmt: 0.5,
         ibcDenom:
-          "ibc/D14E72008CFCEA3350A78D784EF8387D8D4A1E91E9E3FBB22A8BE86FAFBC04BE",
+          "ibc/932D6003DA334ECBC5B23A071B4287D0A5CC97331197FE9F1C0689BA002A8421",
       },
       osmosis: {
         assetSymbol: "USDC",
         assetName: "USDC",
         minDepositAmt: 0.5,
         ibcDenom:
-          "ibc/6CE0F4F76F1B5CB3C233BE6167DBD2BB5CF72CF52A30146AE96EF7D29E4FE15C",
+          "ibc/D189335C6E4A68B513C10AB227BF1C1D38C746766278BA3EEB4FB14124F1D858",
       },
     },
   },
@@ -922,14 +922,14 @@ const mainnet = {
         assetName: "FRAX",
         minDepositAmt: 0.5,
         ibcDenom:
-          "ibc/260F19355653B57FC201CA718EB831F7D58FE678B845AF19CAB91E2141D78979",
+          "ibc/3792246C7C422C037C603C955F8383B4E32E7555D693344F9A029A67FE221C57",
       },
       osmosis: {
         assetSymbol: "FRAX",
         assetName: "FRAX",
         minDepositAmt: 0.5,
         ibcDenom:
-          "ibc/0BB49E2DF79C5379A23B91EFA7A3E78EFF13673A0C8F759C45A8FEE6338A3599",
+          "ibc/0E43EDE2E2A3AFA36D0CD38BDDC0B49FECA64FA426A82E102F304E430ECF46EE",
       },
     },
   },
