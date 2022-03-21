@@ -34,16 +34,24 @@ export default class AxelarGateway {
   private contract: ethers.Contract;
   private provider: ethers.providers.Provider;
 
+  /**
+   *
+   * @param env This value will be used in pair with `chain` in order to find corresponding `AxelarGateway` contract address.
+   * @param chain This value will be used in pair with `env` in order to find corresponding `AxelarGateway` contract address.
+   * @param provider evm provider to read value from the contract.
+   * @param contractAddress If specified, the sdk will use this address for the AxelarGateway contract regardless of `chain` and `env`.
+   */
   constructor(
     env: Environment,
     chain: EvmChain,
-    provider: ethers.providers.Provider
+    provider: ethers.providers.Provider,
+    contractAddress?: string
   ) {
     this.env = env;
     this.chain = chain;
     this.provider = provider;
     this.contract = new ethers.Contract(
-      config[env][chain],
+      contractAddress || config[env][chain],
       axelarGatewayAbi,
       provider
     );

@@ -4,7 +4,7 @@ import { TxOption } from "./types";
 
 export default class GatewayTx {
   public txRequest: TransactionRequest;
-  public provider: Provider;
+  private provider: Provider;
 
   constructor(
     unsignedTx: UnsignedTransaction,
