@@ -42,11 +42,12 @@ export default () => {
       });
     });
 
-    describe("signin one time code", () => {
+    describe("creating signature based on validation message", () => {
       beforeAll(async () => {
         signature = await signOtc(wallet, validationMsg);
       });
-      it("should sign message", () => {
+
+      it("should sign validation message", () => {
         expect(signature).toBeDefined();
       });
     });
@@ -72,7 +73,7 @@ export default () => {
       });
     });
 
-    describe("getting roomId for deposit address", () => {
+    describe("getting deposit address", () => {
       jest.setTimeout(30000);
       let socket: SocketServices;
 
@@ -80,14 +81,16 @@ export default () => {
         socket = new SocketServices("http://localhost:4000", true);
       });
 
-      it("should pass", (done) => {
+      it("should connect to room and wait ", (done) => {
         socket.joinRoomAndWaitForEvent(roomId, (data: any) => {
           console.log({
             from: "socket",
             data,
           });
-
           expect(data.newRoomId).toBeDefined();
+
+          // deposit address is here
+          expect(data.Attributes.depositAddress).toBeDefined();
           done();
         });
       });
