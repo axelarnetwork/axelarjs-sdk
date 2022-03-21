@@ -5,7 +5,7 @@ import { createWallet } from "../../../src/utils/wallet";
 import { getTransferPayload } from "../data";
 
 export default () => {
-  describe("socket concurrency e2e", () => {
+  describe("Socket concurrency E2E", () => {
     let axelar: TransferAssetBridge;
 
     let wallet1: Wallet;

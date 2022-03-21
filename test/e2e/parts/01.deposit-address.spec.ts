@@ -6,7 +6,7 @@ import { getTransferPayload } from "../data";
 import { SocketServices } from "../../../src/services";
 
 export default () => {
-  describe("Depost address generation e2e", () => {
+  describe("Deposit address generation E2E", () => {
     const destinationAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
 
     let axelar: TransferAssetBridge;
