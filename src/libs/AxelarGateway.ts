@@ -9,7 +9,7 @@ import {
 } from "./types";
 import axelarGatewayAbi from "./abi/axelarGatewayAbi.json";
 import erc20Abi from "./abi/erc20Abi.json";
-import GatewayTx from "./GatewayTx";
+import { GatewayTx } from "./GatewayTx";
 
 const config: Record<Environment, Record<EvmChain, string>> = {
   [Environment.MAINNET]: {
@@ -28,7 +28,7 @@ const config: Record<Environment, Record<EvmChain, string>> = {
   },
 };
 
-export default class AxelarGateway {
+export class AxelarGateway {
   chain: EvmChain;
   env: Environment;
   private contract: ethers.Contract;

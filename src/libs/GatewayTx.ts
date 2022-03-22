@@ -2,7 +2,7 @@ import { Provider, TransactionRequest } from "@ethersproject/abstract-provider";
 import { ethers, Signer, UnsignedTransaction } from "ethers";
 import { TxOption } from "./types";
 
-export default class GatewayTx {
+export class GatewayTx {
   public txRequest: TransactionRequest;
   private provider: Provider;
 
