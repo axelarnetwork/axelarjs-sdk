@@ -1,13 +1,14 @@
-import { validateDestinationAddress } from "../validateDestinationAddress";
+import { validateDestinationAddressByChainSymbol } from "../validateDestinationAddress";
 
 const mock = {
-  validateDestinationAddress: validateDestinationAddress,
+  validateDestinationAddressByChainSymbol:
+    validateDestinationAddressByChainSymbol,
 };
 
 describe("validateDestinationAddress() - evm chain", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(mock, "validateDestinationAddress");
+    jest.spyOn(mock, "validateDestinationAddressByChainSymbol");
   });
 
   describe("on correct address", () => {
@@ -17,7 +18,7 @@ describe("validateDestinationAddress() - evm chain", () => {
 
     describe("when validateDestinationAddress is called", () => {
       beforeEach(() => {
-        mock.validateDestinationAddress(
+        mock.validateDestinationAddressByChainSymbol(
           chainSymbol,
           destinationAddress,
           environment
@@ -25,15 +26,15 @@ describe("validateDestinationAddress() - evm chain", () => {
       });
 
       test("then it should be called", () => {
-        expect(mock.validateDestinationAddress).toHaveBeenCalledWith(
-          chainSymbol,
-          destinationAddress,
-          environment
-        );
+        expect(
+          mock.validateDestinationAddressByChainSymbol
+        ).toHaveBeenCalledWith(chainSymbol, destinationAddress, environment);
       });
 
       test("then it should return true", () => {
-        expect(mock.validateDestinationAddress).toHaveReturnedWith(true);
+        expect(mock.validateDestinationAddressByChainSymbol).toHaveReturnedWith(
+          true
+        );
       });
     });
   });
@@ -45,7 +46,7 @@ describe("validateDestinationAddress() - evm chain", () => {
 
     describe("when validateDestinationAddress is called", () => {
       beforeEach(() => {
-        mock.validateDestinationAddress(
+        mock.validateDestinationAddressByChainSymbol(
           chainSymbol,
           destinationAddress,
           environment
@@ -53,15 +54,15 @@ describe("validateDestinationAddress() - evm chain", () => {
       });
 
       test("then it should be called", () => {
-        expect(mock.validateDestinationAddress).toHaveBeenCalledWith(
-          chainSymbol,
-          destinationAddress,
-          environment
-        );
+        expect(
+          mock.validateDestinationAddressByChainSymbol
+        ).toHaveBeenCalledWith(chainSymbol, destinationAddress, environment);
       });
 
       test("then it should return false", () => {
-        expect(mock.validateDestinationAddress).toHaveReturnedWith(false);
+        expect(mock.validateDestinationAddressByChainSymbol).toHaveReturnedWith(
+          false
+        );
       });
     });
   });
@@ -70,7 +71,7 @@ describe("validateDestinationAddress() - evm chain", () => {
 describe("validateDestinationAddress() - cosmos chain", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(mock, "validateDestinationAddress");
+    jest.spyOn(mock, "validateDestinationAddressByChainSymbol");
   });
 
   describe("on correct address", () => {
@@ -80,7 +81,7 @@ describe("validateDestinationAddress() - cosmos chain", () => {
 
     describe("when validateDestinationAddress is called", () => {
       beforeEach(() => {
-        mock.validateDestinationAddress(
+        mock.validateDestinationAddressByChainSymbol(
           chainSymbol,
           destinationAddress,
           environment
@@ -88,15 +89,15 @@ describe("validateDestinationAddress() - cosmos chain", () => {
       });
 
       test("then it should be called", () => {
-        expect(mock.validateDestinationAddress).toHaveBeenCalledWith(
-          chainSymbol,
-          destinationAddress,
-          environment
-        );
+        expect(
+          mock.validateDestinationAddressByChainSymbol
+        ).toHaveBeenCalledWith(chainSymbol, destinationAddress, environment);
       });
 
       test("then it should return true", () => {
-        expect(mock.validateDestinationAddress).toHaveReturnedWith(true);
+        expect(mock.validateDestinationAddressByChainSymbol).toHaveReturnedWith(
+          true
+        );
       });
     });
   });
@@ -108,7 +109,7 @@ describe("validateDestinationAddress() - cosmos chain", () => {
 
     describe("when validateDestinationAddress is called", () => {
       beforeEach(() => {
-        mock.validateDestinationAddress(
+        mock.validateDestinationAddressByChainSymbol(
           chainSymbol,
           destinationAddress,
           environment
@@ -116,15 +117,15 @@ describe("validateDestinationAddress() - cosmos chain", () => {
       });
 
       test("then it should be called", () => {
-        expect(mock.validateDestinationAddress).toHaveBeenCalledWith(
-          chainSymbol,
-          destinationAddress,
-          environment
-        );
+        expect(
+          mock.validateDestinationAddressByChainSymbol
+        ).toHaveBeenCalledWith(chainSymbol, destinationAddress, environment);
       });
 
       test("then it should return false", () => {
-        expect(mock.validateDestinationAddress).toHaveReturnedWith(false);
+        expect(mock.validateDestinationAddressByChainSymbol).toHaveReturnedWith(
+          false
+        );
       });
     });
   });
