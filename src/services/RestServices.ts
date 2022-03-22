@@ -4,6 +4,19 @@ import { AssetTransferObject } from "../chains/types";
 export class RestServices {
   constructor(private host: string) {}
 
+  post_v2(url: string, body: any, traceId?: string): Promise<any> {
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-trace-id": traceId || "none",
+      },
+      body: JSON.stringify(body),
+    };
+
+    return this.execRest(url, requestOptions);
+  }
+
   public post(
     endpoint: string,
     payload: AssetTransferObject,
@@ -44,25 +57,20 @@ export class RestServices {
     });
   }
 
-  private execRest(endpoint: string, requestOptions: any) {
-    return new Promise((resolve, reject) => {
-      fetch(this.host + endpoint, requestOptions)
-        .then((response) => response.json())
-        .then((data: any) => {
-          if (data?.error) {
-            reject(data);
-          } else {
-            console.log("RestServices response data", data);
-            resolve(data);
-          }
-        })
-        .catch((err) => {
-          reject({
-            message: "AxelarJS-SDK uncaught post error",
-            uncaught: true,
-            fullMessage: err,
-          });
-        });
-    });
+  private async execRest(endpoint: string, requestOptions: any) {
+    return fetch(this.host + endpoint, requestOptions)
+      .then((response) => {
+        if (!response.ok) throw response;
+        return response;
+      })
+      .then((response) => response.json())
+      .catch(async (err) => {
+        const _err = await err.json();
+        throw {
+          message: "AxelarJS-SDK uncaught post error",
+          uncaught: true,
+          fullMessage: _err.message,
+        };
+      });
   }
 }

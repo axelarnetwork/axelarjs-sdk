@@ -4,7 +4,7 @@ import { SourceOrDestination } from "../../services/types";
 
 export interface Chain {
   chainInfo: ChainInfo;
-  validateAddress: (assetInfo: AssetInfo) => boolean;
+  validateAddress: (destinationAddress: string) => boolean;
   waitingService: BlockchainWaitingServiceFinder;
 }
 

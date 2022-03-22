@@ -23,12 +23,12 @@ export default class Osmosis extends Axelar implements Chain {
     super();
   }
 
-  public validateAddress = (addressInfo: AssetInfo): boolean => {
-    if (!addressInfo?.assetAddress) return false;
+  public validateAddress = (address: string): boolean => {
+    if (!address) return false;
 
     try {
       return (
-        bech32.decode(addressInfo.assetAddress).prefix ===
+        bech32.decode(address).prefix ===
         this.chainInfo.chainSymbol.toLowerCase()
       );
     } catch (e) {

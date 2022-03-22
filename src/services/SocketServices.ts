@@ -1,12 +1,5 @@
-import { reject } from "lodash";
 import { io, Socket } from "socket.io-client";
 import { SocketListenerTypes } from "../chains/types";
-import { GREPTCHA_SITE_KEY } from "../constants";
-
-/**
- * SocketServices establishes socket connection between webapp and rest server
- */
-declare const grecaptcha: any;
 
 /**
  * @deprecated The class should not be used and will soon be removed
@@ -29,26 +22,9 @@ export class SocketServices {
         transports: ["websocket"],
       });
     } else {
-      if (!grecaptcha) {
-        console.log("need valid captcha first");
-        return;
-      }
-
-      let token: any;
-
-      try {
-        token = await grecaptcha.execute(GREPTCHA_SITE_KEY, {
-          action: "submit_from_sdk",
-        });
-      } catch (e: any) {
-        console.log("cannot get captcha", e);
-        return;
-      }
-
       this.socket = io(this.resourceUrl, {
         transports: ["websocket"],
         reconnectionDelayMax: 10000,
-        auth: { token },
       });
     }
 

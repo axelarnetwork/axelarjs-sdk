@@ -1,13 +1,13 @@
-import { AssetTransferObject } from "../../chains/types";
-
 type GetDepositAddressOptions = {
   useMetamask?: boolean;
 };
 
-export type GetDepositAddressPayload = Omit<
-  AssetTransferObject,
-  "signature" | "publicAddr"
->;
+export type GetDepositAddressPayload = {
+  fromChain: string;
+  toChain: string;
+  asset: string;
+  destinationAddress: string;
+};
 
 export type GetDepositAddressDto = {
   payload: GetDepositAddressPayload;

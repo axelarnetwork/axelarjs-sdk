@@ -17,22 +17,22 @@ import {
 
 import { RestServices, SocketServices } from "../services";
 import { createWallet, getWaitingService } from "../utils";
-import { validateDestinationAddress } from "../utils";
+import { validateDestinationAddressByChainSymbol } from "../utils";
 import { getConfigs } from "../constants";
-import { GetDepositAddressDto } from "./types";
+import { GetDepositAddressDto, GetDepositAddressPayload } from "./types";
 
 export class TransferAssetBridge {
   private restServices: RestServices;
   private clientSocketConnect: SocketServices;
   private environment: string;
+  private resourceUrl: string;
 
   constructor(environment: string) {
-    console.log("TransferAssetBridge initiated");
     this.environment = environment;
     const configs = getConfigs(environment);
-    const resourceUrl = configs.resourceUrl;
-    this.restServices = new RestServices(resourceUrl);
-    this.clientSocketConnect = new SocketServices(resourceUrl);
+    this.resourceUrl = configs.resourceUrl;
+    this.restServices = new RestServices(this.resourceUrl);
+    this.clientSocketConnect = new SocketServices(this.resourceUrl);
   }
 
   /**
@@ -52,9 +52,9 @@ export class TransferAssetBridge {
     } = message;
 
     // validate destination address
-    const isAddressValid = validateDestinationAddress(
+    const isAddressValid = validateDestinationAddressByChainSymbol(
       destinationChainInfo?.chainSymbol,
-      selectedDestinationAsset,
+      selectedDestinationAsset.assetAddress as string,
       this.environment
     );
     if (!isAddressValid)
@@ -194,6 +194,18 @@ export class TransferAssetBridge {
     }
   }
 
+  async getInitRoomId_v2(
+    payload: GetDepositAddressPayload & { signature: string },
+    traceId: string
+  ) {
+    return this.restServices
+      .post_v2(CLIENT_API_POST_TRANSFER_ASSET, payload, traceId)
+      .then((response) => response.data)
+      .catch((error) => {
+        throw error;
+      });
+  }
+
   async getDepositAddress(dto: GetDepositAddressDto): Promise<string> {
     // generate trace id
     const traceId = uuidv4();
@@ -206,41 +218,20 @@ export class TransferAssetBridge {
     );
     const sig = await wallet.signMessage(validationMsg);
 
-    const payload: AssetTransferObject = {
+    const payload: GetDepositAddressPayload & {
+      signature: string;
+      publicAddress: string;
+    } = {
       ...dto.payload,
       signature: sig,
-      publicAddr: wallet.address,
+      publicAddress: wallet.address,
     };
 
-    const { roomId } = await this.getInitRoomId(payload, false, traceId);
-    if (!roomId) {
-      throw new Error("Get deposit address could not be fetched");
-    }
+    const { roomId } = await this.getInitRoomId_v2(payload, traceId);
+    const newRoomId = await this.getLinkEvent_v2(roomId);
+    const depositAddress = this.extractDepositAddress(newRoomId);
 
-    // listen for link event to extract deposit address
-    return new Promise(async (resolve, reject) => {
-      await this.getLinkEvent(
-        roomId,
-        {
-          assetInfo: {
-            assetAddress: payload.selectedDestinationAsset.assetSymbol,
-            traceId: traceId,
-            sourceOrDestChain: "source",
-          },
-          sourceChainInfo: payload.sourceChainInfo,
-          destinationChainInfo: payload.destinationChainInfo,
-        },
-        (success) => {
-          const roomId = success.newRoomId;
-          if (!roomId) reject("Could not extract deposit address");
-
-          const depositAddress = this.extractDepositAddress(roomId);
-          resolve(depositAddress);
-        },
-        (error: any) => reject(error),
-        "source"
-      );
-    });
+    return depositAddress;
   }
 
   /**
@@ -271,6 +262,16 @@ export class TransferAssetBridge {
     } catch (e) {
       errCb(e);
     }
+  }
+
+  async getLinkEvent_v2(roomId: string): Promise<string> {
+    const sockets = new SocketServices(this.resourceUrl);
+
+    return new Promise((resolve) => {
+      sockets.joinRoomAndWaitForEvent(roomId, (data: any) => {
+        resolve(data.newRoomId);
+      });
+    });
   }
 
   private async confirmDeposit(
