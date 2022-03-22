@@ -25,6 +25,7 @@ const rawChains: Chain[] = [
   new Terra(),
 ];
 
+
 export function loadChains(config: LoadChainConfig) {
   const allAssets = loadAssets(config);
   const _environment = config.environment as string;

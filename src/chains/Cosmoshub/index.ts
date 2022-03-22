@@ -19,6 +19,7 @@ export default class Cosmoshub extends Axelar implements Chain {
     },
   };
 
+
   public validateAddress = (address: string): boolean => {
     if (!address) return false;
 
