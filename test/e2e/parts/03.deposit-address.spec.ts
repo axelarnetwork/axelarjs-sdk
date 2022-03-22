@@ -1,5 +1,5 @@
 import { TransferAssetBridge } from "../../../src";
-import { getDepositPayload } from "../data";
+// import { getDepositPayload } from "../data";
 
 export default () => {
   describe("Deposit Address e2e", () => {
@@ -15,9 +15,13 @@ export default () => {
       let response: string;
 
       beforeAll(async () => {
-        const dto = getDepositPayload(destinationAddress);
         response = await axelar.getDepositAddress({
-          payload: dto,
+          payload: {
+            fromChain: "Terra",
+            toChain: "Avalanche",
+            asset: "uusd",
+            destinationAddress,
+          },
         });
       });
 
