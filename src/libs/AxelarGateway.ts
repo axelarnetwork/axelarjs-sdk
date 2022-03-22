@@ -29,32 +29,36 @@ const config: Record<Environment, Record<EvmChain, string>> = {
 };
 
 export class AxelarGateway {
-  chain: EvmChain;
-  env: Environment;
   private contract: ethers.Contract;
   private provider: ethers.providers.Provider;
 
   /**
+   * @param contractAddress axelar gateway's contract address.
+   * @param provider evm provider to read value from the contract.
+   */
+  constructor(contractAddress: string, provider: ethers.providers.Provider) {
+    this.provider = provider;
+    this.contract = new ethers.Contract(
+      contractAddress,
+      axelarGatewayAbi,
+      provider
+    );
+  }
+
+  /**
+   * A convinient method to create AxelarGateway instance from our gateway contract that currently deployed on mainnet and testnet.
    *
    * @param env This value will be used in pair with `chain` in order to find corresponding `AxelarGateway` contract address.
    * @param chain This value will be used in pair with `env` in order to find corresponding `AxelarGateway` contract address.
    * @param provider evm provider to read value from the contract.
-   * @param contractAddress If specified, the sdk will use this address for the AxelarGateway contract regardless of `chain` and `env`.
+   * @returns AxelarGateway instance
    */
-  constructor(
+  static create(
     env: Environment,
     chain: EvmChain,
-    provider: ethers.providers.Provider,
-    contractAddress?: string
-  ) {
-    this.env = env;
-    this.chain = chain;
-    this.provider = provider;
-    this.contract = new ethers.Contract(
-      contractAddress || config[env][chain],
-      axelarGatewayAbi,
-      provider
-    );
+    provider: ethers.providers.Provider
+  ): AxelarGateway {
+    return new AxelarGateway(config[env][chain], provider);
   }
 
   async createCallContractTx(args: CallContractTxArgs): Promise<GatewayTx> {

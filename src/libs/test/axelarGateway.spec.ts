@@ -30,12 +30,7 @@ describe("AxelarGateway", () => {
     await gatewayContract.deployed();
     await erc20Contract.deployed();
 
-    axelarGateway = new AxelarGateway(
-      Environment.TESTNET,
-      EvmChain.AVALANCHE,
-      ethers.provider,
-      gatewayContract.address
-    );
+    axelarGateway = new AxelarGateway(gatewayContract.address, ethers.provider);
 
     signer = await hre.ethers.getSigners().then((signers) => signers[0]);
   });
