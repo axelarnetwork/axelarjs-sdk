@@ -13,3 +13,44 @@ export type GetDepositAddressDto = {
   payload: GetDepositAddressPayload;
   options?: GetDepositAddressOptions;
 };
+
+export enum Environment {
+  TESTNET = "testnet",
+  MAINNET = "mainnet",
+}
+
+export enum EvmChain {
+  ETHEREUM = "ethereum",
+  AVALANCHE = "avalanche",
+  FANTOM = "fantom",
+  POLYGON = "polygon",
+  MOONBEAM = "moonbeam",
+}
+
+export enum CosmosChain {
+  AXELAR = "axelar",
+  COSMOSHUB = "cosmoshub",
+  JUNO = "juno",
+  OSMOSIS = "osmosis",
+  TERRA = "terra",
+}
+
+export interface SendTokenArgs {
+  destinationChain: EvmChain | CosmosChain;
+  destinationAddress: string;
+  symbol: string;
+  amount: string;
+}
+
+export interface ApproveTxArgs {
+  tokenAddress: string;
+  spender: string;
+  amount?: string;
+}
+
+export interface TxOption {
+  gasLimit?: string;
+  gasPrice?: string;
+  maxFeePerGas: string;
+  maxPriorityFeePerGas: string;
+}
