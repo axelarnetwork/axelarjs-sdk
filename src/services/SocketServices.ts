@@ -9,7 +9,7 @@ export class SocketServices {
   private resourceUrl: string;
   private testMode = false;
 
-  constructor(resourceUrl: string, testMode = true) {
+  constructor(resourceUrl: string, testMode = false) {
     this.resourceUrl = resourceUrl;
     this.testMode = testMode;
   }
