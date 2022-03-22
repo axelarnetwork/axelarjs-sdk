@@ -8,7 +8,7 @@ export default class Juno extends Axelar implements Chain {
     chainSymbol: "JUNO",
     chainName: "Juno",
     estimatedWaitTime: 5,
-    fullySupported: true,
+    fullySupported: false,
     assets: [],
     txFeeInPercent: 0.1,
     module: "axelarnet",
