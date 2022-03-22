@@ -44,7 +44,6 @@ export interface SendTokenArgs {
 
 export interface ApproveTxArgs {
   tokenAddress: string;
-  spender: string;
   amount?: string;
 }
 

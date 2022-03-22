@@ -139,7 +139,6 @@ describe("AxelarGateway", () => {
   it("should call `createApproveTx` to increase allowance correctly given `tokenAddress` is ERC20 contract", async () => {
     const tx = await axelarGateway.createApproveTx({
       tokenAddress: erc20Contract.address,
-      spender: gatewayContract.address,
       amount: "1",
     });
 
@@ -160,7 +159,6 @@ describe("AxelarGateway", () => {
   it("should call `createApproveTx` to increase with MaxUint256 given amount is undefined", async () => {
     const tx = await axelarGateway.createApproveTx({
       tokenAddress: erc20Contract.address,
-      spender: gatewayContract.address,
     });
 
     expect(tx).toBeInstanceOf(GatewayTx);

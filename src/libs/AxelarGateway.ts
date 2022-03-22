@@ -105,7 +105,7 @@ export class AxelarGateway {
       this.provider
     );
     const unsignedTx = await erc20Contract.populateTransaction.approve(
-      args.spender,
+      this.contract.address,
       args.amount || ethers.constants.MaxUint256
     );
 
