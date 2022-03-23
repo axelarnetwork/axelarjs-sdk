@@ -53,9 +53,9 @@
         "type": "string"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
-        "name": "contractAddress",
+        "name": "destinationContractAddress",
         "type": "string"
       },
       {
@@ -176,9 +176,9 @@
         "type": "string"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
-        "name": "contractAddress",
+        "name": "destinationContractAddress",
         "type": "string"
       },
       {
@@ -245,7 +245,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "symbol",
         "type": "string"
@@ -270,7 +270,7 @@
         "type": "string"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "destinationAddress",
         "type": "string"
@@ -295,7 +295,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "symbol",
         "type": "string"
