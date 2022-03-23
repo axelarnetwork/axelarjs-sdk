@@ -1,7 +1,5 @@
 import { ethers } from "ethers";
 import {
-  CallContractTxArgs,
-  CallContractWithTokenTxArgs,
   Environment,
   EvmChain,
   SendTokenArgs,
@@ -60,41 +58,13 @@ export class AxelarGatewayV2 extends ethers.Contract {
     return new AxelarGatewayV2(config[env][chain], provider);
   }
 
-  async callContractTx(args: CallContractTxArgs): Promise<void> {
-    await this.callContract(
-      args.destinationChain,
-      args.contractAddress,
-      args.payload
-    );
-  }
-
-  async callContractWithTokenTx(
-    args: CallContractWithTokenTxArgs
-  ): Promise<void> {
-    await this.callContractWithToken(
-      args.destinationChain,
-      args.contractAddress,
-      args.payload,
-      args.symbol,
-      args.amount
-    );
-  }
-
-  async sendTokenTx(args: SendTokenArgs): Promise<void> {
+  async invokeSendToken(args: SendTokenArgs): Promise<void> {
     return await this.sendToken(
       args.destinationChain,
       args.destinationAddress,
       args.symbol,
       args.amount
     );
-  }
-
-  async getIsTokenFrozen(symbol: string): Promise<boolean> {
-    return await this.tokenFrozen(symbol);
-  }
-
-  async getIisCommandExecuted(commandId: string): Promise<boolean> {
-    return await this.isCommandExecuted(commandId);
   }
 
   async getTokenAddress(symbol: string) {

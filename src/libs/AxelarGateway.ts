@@ -26,6 +26,13 @@ const config: Record<Environment, Record<EvmChain, string>> = {
     [EvmChain.POLYGON]: "0xBF62ef1486468a6bd26Dd669C06db43dEd5B849B",
     [EvmChain.MOONBEAM]: "0x5769D84DD62a6fD969856c75c7D321b84d455929",
   },
+  [Environment.DEVNET]: {
+    [EvmChain.ETHEREUM]: "TBU",
+    [EvmChain.AVALANCHE]: "TBU",
+    [EvmChain.FANTOM]: "TBU",
+    [EvmChain.POLYGON]: "TBU",
+    [EvmChain.MOONBEAM]: "TBU",
+  },
 };
 
 export class AxelarGateway {
