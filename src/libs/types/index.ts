@@ -49,7 +49,7 @@ export interface ApproveTxArgs {
 
 export interface CallContractTxArgs {
   destinationChain: EvmChain | CosmosChain;
-  contractAddress: string;
+  destinationContractAddress: string;
   payload: string;
 }
 

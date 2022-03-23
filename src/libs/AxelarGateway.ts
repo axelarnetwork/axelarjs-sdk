@@ -64,7 +64,7 @@ export class AxelarGateway {
   async createCallContractTx(args: CallContractTxArgs): Promise<GatewayTx> {
     const unsignedTx = await this.contract.populateTransaction.callContract(
       args.destinationChain,
-      args.contractAddress,
+      args.destinationContractAddress,
       args.payload
     );
 
@@ -77,7 +77,7 @@ export class AxelarGateway {
     const unsignedTx =
       await this.contract.populateTransaction.callContractWithToken(
         args.destinationChain,
-        args.contractAddress,
+        args.destinationContractAddress,
         args.payload,
         args.symbol,
         args.amount
@@ -144,5 +144,4 @@ export class AxelarGateway {
   getContract(): ethers.Contract {
     return this.contract;
   }
-
 }

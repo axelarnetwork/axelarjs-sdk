@@ -38,7 +38,7 @@ describe("AxelarGateway", () => {
   it("should call `createCallContractTx` function without revert and `CallContract` event is emitted correctly", async () => {
     const bytesPayload = ethers.utils.formatBytes32String("test");
     const gatewayTx = await axelarGateway.createCallContractTx({
-      contractAddress: MOCK_DESTINATION_CONTRACT_ADDRESS,
+      destinationContractAddress: MOCK_DESTINATION_CONTRACT_ADDRESS,
       destinationChain: EvmChain.AVALANCHE,
       payload: bytesPayload,
     });
@@ -71,7 +71,7 @@ describe("AxelarGateway", () => {
   it("should call `createCallContractWithTokenTx` function without revert and `CallContractWithToken` event is emitted correctly", async () => {
     const bytesPayload = ethers.utils.formatBytes32String("test");
     const gatewayTx = await axelarGateway.createCallContractWithTokenTx({
-      contractAddress: MOCK_DESTINATION_CONTRACT_ADDRESS,
+      destinationContractAddress: MOCK_DESTINATION_CONTRACT_ADDRESS,
       destinationChain: EvmChain.AVALANCHE,
       payload: bytesPayload,
       symbol: "PNT",
