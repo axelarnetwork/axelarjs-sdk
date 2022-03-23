@@ -129,7 +129,20 @@ export class AxelarGateway {
     return this.contract.isCommandExecuted(commandId);
   }
 
-  getTokenAddress(symbol: string) {
+  getTokenAddress(symbol: string): Promise<string> {
     return this.contract.tokenAddresses(symbol);
   }
+
+  async getERC20TokenContract(tokenSymbol: string): Promise<ethers.Contract> {
+    return new ethers.Contract(
+      await this.getTokenAddress(tokenSymbol),
+      erc20Abi,
+      this.provider
+    );
+  }
+
+  getContract(): ethers.Contract {
+    return this.contract;
+  }
+
 }
