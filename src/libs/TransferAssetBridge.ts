@@ -16,7 +16,11 @@ import {
 } from "../chains/types";
 
 import { RestServices, SocketServices } from "../services";
-import { createWallet, getWaitingService } from "../utils";
+import {
+  createWallet,
+  getWaitingService,
+  validateDestinationAddressByChainName,
+} from "../utils";
 import { validateDestinationAddressByChainSymbol } from "../utils";
 import { getConfigs } from "../constants";
 import { GetDepositAddressDto, GetDepositAddressPayload } from "./types";
@@ -232,6 +236,16 @@ export class TransferAssetBridge {
   async getDepositAddress(dto: GetDepositAddressDto): Promise<string> {
     // generate trace id
     const traceId = uuidv4();
+
+    const isDestinationAddressValid = validateDestinationAddressByChainName(
+      dto.payload.toChain,
+      dto.payload.destinationAddress,
+      this.environment
+    );
+    if (!isDestinationAddressValid)
+      throw new Error(
+        `Invalid destination address for chain ${dto.payload.toChain}`
+      );
 
     // use auth
     const wallet = createWallet();
