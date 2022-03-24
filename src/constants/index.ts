@@ -20,10 +20,34 @@ export interface EnvironmentConfigs {
   resourceUrl: string;
 }
 
-//https://mumbai.polygonscan.com/apis#rpc
-//https://docs.fantom.foundation/tutorials/set-up-metamask-testnet
-//https://docs.avax.network/build/tutorials/smart-contracts/deploy-a-smart-contract-on-avalanche-using-remix-and-metamask/
 const devnetConfigs: EnvironmentConfigs = {
+  ethersJsConfigs: {
+    ethereum: {
+      tokenAddressMap: {},
+      providerOptions: {
+        provider:
+          "https://ropsten.infura.io/v3/467477790bfa4b7684be1336e789a068",
+      },
+    },
+    moonbeam: {
+      tokenAddressMap: {},
+      providerOptions: {
+        provider: "https://rpc.api.moonbase.moonbeam.network",
+        network: { chainId: 1287, name: "moonbase-alpha" },
+      },
+    },
+    avalanche: {
+      tokenAddressMap: {},
+      providerOptions: {
+        provider: "https://api.avax-test.network/ext/bc/C/rpc",
+        network: { chainId: 43113, name: "Avalanche Testnet C-Chain" },
+      },
+    },
+  },
+  resourceUrl: `https://nest-server-devnet.axelar.dev`,
+};
+
+const testnetConfigs: EnvironmentConfigs = {
   ethersJsConfigs: {
     ethereum: {
       tokenAddressMap: {
@@ -87,13 +111,11 @@ const devnetConfigs: EnvironmentConfigs = {
       },
     },
   },
-  resourceUrl: `https://nest-server-devnet.axelar.dev`,
+  resourceUrl: `https://nest-server-testnet.axelar.dev`,
 };
 
-const localConfigs: EnvironmentConfigs = cloneDeep(devnetConfigs);
+const localConfigs: EnvironmentConfigs = cloneDeep(testnetConfigs);
 localConfigs.resourceUrl = "http://localhost:4000";
-const testnetConfigs: EnvironmentConfigs = cloneDeep(devnetConfigs);
-testnetConfigs.resourceUrl = `https://nest-server-testnet.axelar.dev`;
 
 /* since these tokens are not expected to change, we can set them here so they will not need to be a query*/
 const mainnetConfigs: EnvironmentConfigs = {

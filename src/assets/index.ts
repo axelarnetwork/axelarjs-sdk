@@ -1,8 +1,11 @@
 import { AssetConfig, LoadAssetConfig } from "./types";
 import { mainnet } from "./mainnet.assets";
 import { testnet } from "./testnet.assets";
+import { devnet } from "./devnet.assets";
 
 const allowedEnvironments = ["local", "devnet", "testnet", "mainnet"];
+
+const assetMap: { [environment: string]: {}} = { "devnet": devnet, "testnet": testnet, "mainnet": mainnet };
 
 export function loadAssets(config: LoadAssetConfig): AssetConfig[] {
   // handle empty string case
@@ -17,7 +20,7 @@ export function loadAssets(config: LoadAssetConfig): AssetConfig[] {
     throw error;
   }
 
-  const assets = config.environment === "mainnet" ? mainnet : testnet;
+  const assets = _environment === "local" ? testnet : assetMap[_environment as string];
 
   return Object.values(assets);
 }
