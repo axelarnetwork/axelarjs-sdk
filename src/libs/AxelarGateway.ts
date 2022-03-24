@@ -63,7 +63,7 @@ export class AxelarGateway {
     chain: EvmChain,
     provider: ethers.providers.Provider
   ): AxelarGateway {
-    return new AxelarGateway(config[env][chain], provider);
+    return new AxelarGateway(config[env][chain] as string, provider);
   }
 
   async createCallContractTx(args: CallContractTxArgs): Promise<GatewayTx> {
