@@ -26,6 +26,13 @@ const config: Record<Environment, Record<EvmChain, string>> = {
     [EvmChain.POLYGON]: "0xBF62ef1486468a6bd26Dd669C06db43dEd5B849B",
     [EvmChain.MOONBEAM]: "0x5769D84DD62a6fD969856c75c7D321b84d455929",
   },
+  [Environment.DEVNET]: {
+    [EvmChain.ETHEREUM]: "0x7358799e0c8250f0B7D1164824F6Dd5bA31C9Cd6",
+    [EvmChain.AVALANCHE]: "0x4ffb57Aea2295d663B03810a5802ef2Bc322370D",
+    [EvmChain.FANTOM]: "0x...", //not available in DEVNET
+    [EvmChain.POLYGON]: "", //not available in DEVNET
+    [EvmChain.MOONBEAM]: "0x1b23BE90a16efe8fD3008E742dDd9531dC5845b0",
+  },
 };
 
 export class AxelarGateway {
