@@ -11,7 +11,7 @@ import axelarGatewayAbi from "./abi/axelarGatewayAbi.json";
 import erc20Abi from "./abi/erc20Abi.json";
 import { GatewayTx } from "./GatewayTx";
 
-const config: Record<Environment, Record<EvmChain, string>> = {
+const config: Record<Environment, Partial<Record<EvmChain, string>>> = {
   [Environment.MAINNET]: {
     [EvmChain.ETHEREUM]: "0x4F4495243837681061C4743b74B3eEdf548D56A5",
     [EvmChain.AVALANCHE]: "0x5029C0EFf6C34351a0CEc334542cDb22c7928f78",
@@ -29,8 +29,6 @@ const config: Record<Environment, Record<EvmChain, string>> = {
   [Environment.DEVNET]: {
     [EvmChain.ETHEREUM]: "0x7358799e0c8250f0B7D1164824F6Dd5bA31C9Cd6",
     [EvmChain.AVALANCHE]: "0x4ffb57Aea2295d663B03810a5802ef2Bc322370D",
-    [EvmChain.FANTOM]: "0x...", //not available in DEVNET
-    [EvmChain.POLYGON]: "", //not available in DEVNET
     [EvmChain.MOONBEAM]: "0x1b23BE90a16efe8fD3008E742dDd9531dC5845b0",
   },
 };
