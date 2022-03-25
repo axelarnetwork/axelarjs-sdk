@@ -20,11 +20,19 @@ export class SocketServices {
         reconnectionDelay: 0,
         forceNew: true,
         transports: ["websocket"],
+        extraHeaders: {
+          "User-Agent":
+            "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion",
+        },
       });
     } else {
       this.socket = io(this.resourceUrl, {
         transports: ["websocket"],
         reconnectionDelayMax: 10000,
+        extraHeaders: {
+          "User-Agent":
+            "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail Firefox/firefoxversion",
+        },
       });
     }
 
@@ -38,7 +46,7 @@ export class SocketServices {
   public joinRoomAndWaitForEvent(roomId: string, waitCb: any) {
     return new Promise(async (resolve) => {
       await this.createSocket();
-      const ms: number = 1.8e+6; //30 minutes
+      const ms: number = 1.8e6; //30 minutes
       const timeout = setTimeout(() => {
         waitCb({ timedOut: true });
         this.disconnect();
@@ -57,7 +65,7 @@ export class SocketServices {
   public joinRoomAndWaitDepositConfirmationEvent(roomId: string, waitCb: any) {
     return new Promise(async (resolve) => {
       await this.createSocket();
-      const ms: number = 1.8e+6; //30 minutes
+      const ms: number = 1.8e6; //30 minutes
       const timeout = setTimeout(() => {
         waitCb({ timedOut: true });
         this.disconnect();
