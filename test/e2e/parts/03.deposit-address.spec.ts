@@ -6,7 +6,7 @@ export default () => {
     let axelar: TransferAssetBridge;
 
     beforeAll(() => {
-      axelar = new TransferAssetBridge("testnet");
+      axelar = new TransferAssetBridge("devnet");
     });
 
     describe("getting deposit address - Terra -> Avalanche", () => {
@@ -26,6 +26,10 @@ export default () => {
       });
 
       it("should get response", () => {
+        console.log({
+          type: "Terra -> avalanche",
+          response,
+        });
         expect(response).toBeTruthy();
         expect(typeof response).toBe("string");
       });
@@ -48,6 +52,10 @@ export default () => {
       });
 
       it("should get response", () => {
+        console.log({
+          type: "avalanche -> terra",
+          response,
+        });
         expect(response).toBeTruthy();
         expect(typeof response).toBe("string");
       });
