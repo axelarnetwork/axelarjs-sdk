@@ -40,7 +40,6 @@ export class SocketServices {
 
   public joinRoomAndWaitForEvent(roomId: string, waitCb: any) {
 
-    console.log("waiting for event!")
     return new Promise(async (resolve) => {
       await this.createSocket();
       const ms = 1.8e6; //30 minutes
@@ -61,7 +60,6 @@ export class SocketServices {
 
   public joinRoomAndWaitDepositConfirmationEvent(roomId: string, waitCb: any) {
 
-    console.log("waiting for deposit confirmation!")
     return new Promise(async (resolve) => {
       await this.createSocket();
       const ms = 1.8e6; //30 minutes
