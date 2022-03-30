@@ -1,9 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { SocketListenerTypes } from "../chains/types";
 
-/**
- * @deprecated The class should not be used and will soon be removed
- */
 export class SocketServices {
   private socket: Socket;
   private resourceUrl: string;
@@ -42,6 +39,7 @@ export class SocketServices {
   }
 
   public joinRoomAndWaitForEvent(roomId: string, waitCb: any) {
+
     return new Promise(async (resolve) => {
       await this.createSocket();
       const ms = 1.8e6; //30 minutes
@@ -61,6 +59,7 @@ export class SocketServices {
   }
 
   public joinRoomAndWaitDepositConfirmationEvent(roomId: string, waitCb: any) {
+
     return new Promise(async (resolve) => {
       await this.createSocket();
       const ms = 1.8e6; //30 minutes

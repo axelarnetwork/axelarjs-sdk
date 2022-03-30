@@ -11,11 +11,14 @@ import Juno from "./Juno";
 import { loadAssets } from "../assets";
 import { AssetConfig, AssetInfo } from "../assets/types";
 import { Chain, LoadChainConfig } from "./types";
+import { cloneDeep } from "lodash";
+import Crescent from "./Crescent";
 
 const rawChains: Chain[] = [
   new Axelar(),
   new Avalanche(),
   new Cosmoshub(),
+  new Crescent(),
   new Ethereum(),
   new Fantom(),
   new Juno(),
@@ -41,8 +44,7 @@ export function loadChains(config: LoadChainConfig) {
     const assetsList: AssetInfo[] = [];
 
     filteredAssetList.forEach((asset) => {
-      const assetToPush: AssetInfo =
-        asset.chain_aliases[chainInfo.chainName.toLowerCase()];
+      const assetToPush: AssetInfo = cloneDeep(asset.chain_aliases[chainInfo.chainName.toLowerCase()]);
       assetToPush.common_key =
         asset.common_key[_environment === "local" ? "testnet" : _environment];
       assetToPush.native_chain = asset.native_chain;

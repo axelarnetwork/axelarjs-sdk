@@ -93,7 +93,7 @@ export default class EthersJsWaitingService
     if (tokenAddressMap[tokenSymbol]) {
       tokenContract = tokenAddressMap[tokenSymbol] as string;
     } else {
-      const endpoint = `/getTokenAddress?module=evm&chain=${chainInfo?.chainName?.toLowerCase()}&asset=${
+      const endpoint = `/token-address?module=evm&chain=${chainInfo?.chainName?.toLowerCase()}&asset=${
         assetInfo.common_key
       }`;
       const resourceUrl: string = configs.resourceUrl;
