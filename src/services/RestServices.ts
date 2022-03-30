@@ -17,6 +17,18 @@ export class RestServices {
     return this.execRest(url, requestOptions);
   }
 
+  get_v2(url: string, traceId?: string): Promise<any> {
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-trace-id": traceId || "none",
+      },
+    };
+
+    return this.execRest(url, requestOptions);
+  }
+
   public post(
     endpoint: string,
     payload: AssetTransferObject,
