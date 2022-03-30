@@ -11,7 +11,7 @@ export function buildDepositConfirmationTopic(
 ): string {
   const topic = {
     type: "deposit-confirmation",
-    sourceModule,
+    sourceModule: sourceModule.toLowerCase(),
     depositAddress,
   };
 
@@ -35,8 +35,8 @@ export function buildLinkTopic(
 ): string {
   const topic = {
     type: "link",
-    sourceModule,
-    destinationChainIdentifier,
+    sourceModule: sourceModule.toLowerCase(),
+    destinationChainIdentifier: destinationChainIdentifier.toLowerCase(),
     destinationAddress,
     assetCommonKey,
   };
