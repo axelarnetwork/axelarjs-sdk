@@ -12,11 +12,13 @@ import { loadAssets } from "../assets";
 import { AssetConfig, AssetInfo } from "../assets/types";
 import { Chain, LoadChainConfig } from "./types";
 import { cloneDeep } from "lodash";
+import Crescent from "./Crescent";
 
 const rawChains: Chain[] = [
   new Axelar(),
   new Avalanche(),
   new Cosmoshub(),
+  new Crescent(),
   new Ethereum(),
   new Fantom(),
   new Juno(),

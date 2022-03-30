@@ -409,6 +409,14 @@ export const testnet = {
           "ibc/E614301CF4F54C23FAEEBF50F33D247AC743E9F247AB094AC57F68DB3A80635C",
         fullDenomPath: "transfer/channel-78/weth-wei",
       },
+      crescent: {
+        assetSymbol: "WETH",
+        assetName: "WETH",
+        minDepositAmt: 0.00002,
+        ibcDenom:
+          "ibc/AAD7136DD626569C3DDE7C5F764968BB2E939875EFC568AE5712B62081850814",
+        fullDenomPath: "transfer/channel-3/weth-wei",
+      },
     },
   },
   "wavax-wei": {
