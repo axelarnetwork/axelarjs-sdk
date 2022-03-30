@@ -24,7 +24,7 @@ export class GatewayTx {
       ...txOption,
     };
 
-    return signer.sendTransaction(txRequest);
+    return signer.connect(this.provider).sendTransaction(txRequest);
   }
 
   estimateGas() {
