@@ -15,14 +15,13 @@ export function buildDepositConfirmationTopic(
     depositAddress,
   };
 
-  return JSON.stringify(topic);
+  return JSON.stringify(topic, Object.keys(topic).sort());
 }
 
 /**
  * Creates a topic to listen to link generation events
  *
  * @param {string} sourceModule - Module of the source chain: evm | axelarnet (cosmos)
- * @param {string} sourceChainIdentifier -  Name of the source chain. eg: terra (cosmos) | avalanche (evm)
  * @param {string} destinationChainIdentifier - Name of the destination chain. eg: terra (cosmos) | avalanche (evm)
  * @param {string} destinationAddress - Blockchain specific address where the final funds should be transfered to
  * @param {string} assetCommonKey - Common key of the asset to be transfered. eg: uusd
@@ -30,7 +29,6 @@ export function buildDepositConfirmationTopic(
  */
 export function buildLinkTopic(
   sourceModule: string,
-  sourceChainIdentifier: string,
   destinationChainIdentifier: string,
   destinationAddress: string, // user public address
   assetCommonKey: string
@@ -38,11 +36,10 @@ export function buildLinkTopic(
   const topic = {
     type: "link",
     sourceModule,
-    sourceChainIdentifier,
     destinationChainIdentifier,
     destinationAddress,
     assetCommonKey,
   };
 
-  return JSON.stringify(topic);
+  return JSON.stringify(topic, Object.keys(topic).sort());
 }
