@@ -268,6 +268,8 @@ export class TransferAssetBridge {
     const newRoomId = await this.getLinkEvent_v2(roomId);
     const depositAddress = this.extractDepositAddress(newRoomId);
 
+    console.log("deposit address!",depositAddress)
+
     return depositAddress;
   }
 
@@ -379,12 +381,7 @@ export class TransferAssetBridge {
   }
 
   private extractDepositAddress(roomId: string) {
-    // eg: link-module=axelarnet-depositAddress=axelar1vcwr7x7dhq2ux5682c6am62uns9cy62cm6ktgwjqwjuj65yclajqhepd72
-    const splitByHyphen = roomId.split("-");
-    const depositAddressKV = splitByHyphen.filter((str) =>
-      str.includes("depositAddress")
-    )[0];
-    const depositAddress = depositAddressKV.replace("depositAddress=", "");
-    return depositAddress;
+    // eg: {"depositAddress":"axelar1hwfjznc7zqfdfexczsec9rrz7cetyu3jlg358ugsxfvj8gjlcfzqjynltz","sourceModule":"axelarnet","type":"deposit-confirmation"}
+    return JSON.parse(roomId)?.depositAddress;
   }
 }
