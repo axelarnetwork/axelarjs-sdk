@@ -3,8 +3,9 @@
 export const TRANSFER_RESULT = "socket-transfer-result";
 
 // POST REQUEST CONSTS
-export const CLIENT_API_POST_TRANSFER_ASSET = "/transferAssets";
-export const CLIENT_API_GET_OTC = "/getOneTimeCode";
+export const CLIENT_API_POST_TRANSFER_ASSET = "/transfer-assets";
+export const CLIENT_API_GET_OTC = "/otc";
+export const CLIENT_API_GET_FEE = "/chain/fee";
 
 export interface SocketOptions {
   reconnectionDelayMax: number;
