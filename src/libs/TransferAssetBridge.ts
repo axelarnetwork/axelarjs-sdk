@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import {
   CallbackStatus,
+  CLIENT_API_GET_FEE,
   CLIENT_API_GET_OTC,
   CLIENT_API_POST_TRANSFER_ASSET,
   OTC,
@@ -150,27 +151,26 @@ export class TransferAssetBridge {
     signerAddress: string,
     traceId: string
   ): Promise<OTC> {
-    try {
-      const response = await this.restServices.get(
-        CLIENT_API_GET_OTC + `?publicAddress=${signerAddress}`
-      );
-      return response;
-    } catch (e: any) {
-      throw e;
-    }
+    return this.restServices
+      .get_v2(`${CLIENT_API_GET_OTC}?publicAddress=${signerAddress}`, traceId)
+      .then((response) => response)
+      .catch((error) => {
+        throw error;
+      });
   }
 
   public async getFeeForChainAndAsset(
     chain: string,
     asset: string
   ): Promise<any> {
-    try {
-      return (await this.restServices.get(
-        "/getFeeForChain" + `?chainName=${chain}&assetCommonKey=${asset}`
-      )) as any;
-    } catch (e: any) {
-      throw e;
-    }
+    return this.restServices
+      .get_v2(
+        `${CLIENT_API_GET_FEE}?chainName=${chain}&assetCommonKey=${asset}`
+      )
+      .then((response) => response)
+      .catch((error) => {
+        throw error;
+      });
   }
 
   public async getTransferFee(
