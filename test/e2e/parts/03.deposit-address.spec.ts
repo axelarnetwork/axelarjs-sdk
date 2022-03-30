@@ -6,7 +6,7 @@ export default () => {
     let axelar: TransferAssetBridge;
 
     beforeAll(() => {
-      axelar = new TransferAssetBridge("devnet");
+      axelar = new TransferAssetBridge("testnet");
     });
 
     describe("getting deposit address - Terra -> Avalanche", () => {
@@ -35,30 +35,30 @@ export default () => {
       });
     });
 
-    describe("getting deposit address - Avalanche -> Terra", () => {
-      jest.setTimeout(30000);
-      let response: string;
-      const destinationAddress = "terra1qem4njhac8azalrav7shvp06myhqldpmkk3p0t";
+    // describe("getting deposit address - Avalanche -> Terra", () => {
+    //   jest.setTimeout(30000);
+    //   let response: string;
+    //   const destinationAddress = "terra1qem4njhac8azalrav7shvp06myhqldpmkk3p0t";
 
-      beforeAll(async () => {
-        response = await axelar.getDepositAddress({
-          payload: {
-            fromChain: "Avalanche",
-            toChain: "Terra",
-            asset: "uusd",
-            destinationAddress,
-          },
-        });
-      });
+    //   beforeAll(async () => {
+    //     response = await axelar.getDepositAddress({
+    //       payload: {
+    //         fromChain: "Avalanche",
+    //         toChain: "Terra",
+    //         asset: "uusd",
+    //         destinationAddress,
+    //       },
+    //     });
+    //   });
 
-      it("should get response", () => {
-        console.log({
-          type: "avalanche -> terra",
-          response,
-        });
-        expect(response).toBeTruthy();
-        expect(typeof response).toBe("string");
-      });
-    });
+    //   it("should get response", () => {
+    //     console.log({
+    //       type: "avalanche -> terra",
+    //       response,
+    //     });
+    //     expect(response).toBeTruthy();
+    //     expect(typeof response).toBe("string");
+    //   });
+    // });
   });
 };
