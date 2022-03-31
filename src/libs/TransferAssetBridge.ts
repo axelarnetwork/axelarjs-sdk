@@ -268,8 +268,6 @@ export class TransferAssetBridge {
     const newRoomId = await this.getLinkEvent_v2(roomId);
     const depositAddress = this.extractDepositAddress(newRoomId);
 
-    console.log("deposit address!",depositAddress)
-
     return depositAddress;
   }
 
