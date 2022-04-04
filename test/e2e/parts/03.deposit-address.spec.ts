@@ -1,4 +1,4 @@
-import { TransferAssetBridge } from "../../../src";
+import { Environment, TransferAssetBridge } from "../../../src";
 // import { getDepositPayload } from "../data";
 
 export default () => {
@@ -6,7 +6,9 @@ export default () => {
     let axelar: TransferAssetBridge;
 
     beforeAll(() => {
-      axelar = new TransferAssetBridge("testnet");
+      axelar = new TransferAssetBridge({
+        environment: Environment.TESTNET,
+      });
     });
 
     describe("getting deposit address - Terra -> Avalanche", () => {
