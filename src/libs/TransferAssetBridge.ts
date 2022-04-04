@@ -24,6 +24,11 @@ export class TransferAssetBridge {
 
     this.environment = config.environment;
     this.resourceUrl = configs.resourceUrl;
+
+    // handle resource url overwrite (for tests)
+    if (config.overwriteResourceUrl)
+      this.resourceUrl = config.overwriteResourceUrl;
+
     this.api = new RestService(this.resourceUrl);
     this.socket = new SocketService(this.resourceUrl);
   }

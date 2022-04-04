@@ -53,4 +53,5 @@ export interface TxOption {
 export type TransferAssetBridgeConfig = {
   environment: Environment;
   auth?: "local" | "metamask";
+  overwriteResourceUrl?: string;
 };

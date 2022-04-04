@@ -7,6 +7,7 @@ export default () => {
     beforeAll(() => {
       axelar = new TransferAssetBridge({
         environment: Environment.TESTNET,
+        overwriteResourceUrl: "http://localhost:4000",
       });
     });
 
