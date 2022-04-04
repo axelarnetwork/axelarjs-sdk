@@ -136,7 +136,7 @@ describe("TransferAssetBridge", () => {
           jest.spyOn(bridge.api, "post_v2").mockRejectedValue(apiErrorStub());
 
           roomId = await bridge
-            .getInitRoomId_v2(depositAddressPayloadStub(), uuidStub())
+            .getInitRoomId(depositAddressPayloadStub(), uuidStub())
             .catch((_error) => {
               error = _error;
             });
@@ -171,7 +171,7 @@ describe("TransferAssetBridge", () => {
             data: roomIdStub(),
           });
 
-          roomId = await bridge.getInitRoomId_v2(
+          roomId = await bridge.getInitRoomId(
             depositAddressPayloadStub(),
             uuidStub()
           );
@@ -183,6 +183,80 @@ describe("TransferAssetBridge", () => {
               CLIENT_API_POST_TRANSFER_ASSET,
               depositAddressPayloadStub(),
               uuidStub()
+            );
+          });
+        });
+
+        describe("getInitRoomId_v2()", () => {
+          it("shoud return", () => {
+            expect(roomId).toBe(roomIdStub().roomId);
+          });
+        });
+      });
+    });
+  });
+
+  describe("getLinkEvent_v2()", () => {
+    let bridge: TransferAssetBridge;
+
+    beforeEach(() => {
+      bridge = new TransferAssetBridge({
+        environment: Environment.TESTNET,
+      });
+    });
+
+    describe("on error", () => {
+      describe("when called", () => {
+        let roomId: any;
+        let error: any;
+
+        beforeEach(async () => {
+          jest
+            .spyOn(bridge.socket, "joinRoomAndWaitForEvent")
+            .mockRejectedValue(apiErrorStub());
+
+          roomId = await bridge
+            .getLinkEvent(roomIdStub().roomId)
+            .catch((_error) => {
+              error = _error;
+            });
+        });
+
+        describe("api", () => {
+          it("should be called", () => {
+            expect(bridge.socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(
+              roomIdStub().roomId
+            );
+          });
+        });
+
+        describe("getLinkEvent_v2()", () => {
+          it("should throw", () => {
+            expect(error).toEqual(apiErrorStub());
+          });
+
+          it("shoud return", () => {
+            expect(roomId).toBeUndefined();
+          });
+        });
+      });
+    });
+
+    describe("on success", () => {
+      describe("when called", () => {
+        let roomId: any;
+        beforeEach(async () => {
+          jest
+            .spyOn(bridge.socket, "joinRoomAndWaitForEvent")
+            .mockResolvedValue(roomIdStub().roomId);
+
+          roomId = await bridge.getLinkEvent(roomIdStub().roomId);
+        });
+
+        describe("api", () => {
+          it("should be called", () => {
+            expect(bridge.socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(
+              roomIdStub().roomId
             );
           });
         });

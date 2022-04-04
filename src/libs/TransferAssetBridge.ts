@@ -83,31 +83,6 @@ export class TransferAssetBridge {
     }
   }
 
-  public async getInitRoomId(
-    payload: AssetTransferObject,
-    showAlerts: boolean,
-    traceId: string
-  ): Promise<{ roomId: string }> {
-    try {
-      const response = await this.api.post(
-        CLIENT_API_POST_TRANSFER_ASSET,
-        payload,
-        {
-          "x-trace-id": traceId,
-        }
-      );
-      return response.data;
-    } catch (e: any) {
-      if (showAlerts && e?.message && !e?.uncaught) {
-        alert(
-          "There was a problem in attempting to generate a deposit address. Details: " +
-            JSON.stringify(e)
-        );
-      }
-      throw e;
-    }
-  }
-
   public async getOneTimeCode(
     signerAddress: string,
     traceId: string
@@ -122,7 +97,7 @@ export class TransferAssetBridge {
     return otc;
   }
 
-  async getInitRoomId_v2(
+  async getInitRoomId(
     payload: GetDepositAddressPayload & { signature: string },
     traceId: string
   ): Promise<string> {
@@ -170,8 +145,8 @@ export class TransferAssetBridge {
       publicAddress: wallet.address,
     };
 
-    const roomId = await this.getInitRoomId_v2(payload, traceId);
-    const newRoomId = await this.getLinkEvent_v2(roomId);
+    const roomId = await this.getInitRoomId(payload, traceId);
+    const newRoomId = await this.getLinkEvent(roomId);
     const depositAddress = this.extractDepositAddress(newRoomId);
 
     console.log("deposit address!", depositAddress);
@@ -179,111 +154,14 @@ export class TransferAssetBridge {
     return depositAddress;
   }
 
-  /**
-   * @deprecated The method should not be used and will soon be removed
-   */
-  async getLinkEvent(
-    roomId: string,
-    assetAndChainInfo: AssetAndChainInfo,
-    waitCb: StatusResponse,
-    errCb: any,
-    sOrDChain: SourceOrDestination
-  ) {
-    const { assetInfo, sourceChainInfo } = assetAndChainInfo;
-    const waitingService = await getWaitingService(
-      sourceChainInfo,
-      assetInfo,
-      sOrDChain,
-      this.environment
-    );
-
-    try {
-      const response = await waitingService.waitForLinkEvent(
-        roomId,
-        waitCb,
-        this.socket
-      );
-      return response;
-    } catch (e) {
-      errCb(e);
-    }
-  }
-
-  async getLinkEvent_v2(roomId: string): Promise<string> {
-    const sockets = new SocketService(this.resourceUrl);
-
-    return new Promise((resolve) => {
-      sockets.joinRoomAndWaitForEvent(roomId, (data: any) => {
-        resolve(data.newRoomId);
+  async getLinkEvent(roomId: string): Promise<string> {
+    const newRoomId = await this.socket
+      .joinRoomAndWaitForEvent(roomId)
+      .catch((error) => {
+        throw error;
       });
-    });
-  }
 
-  private async confirmDeposit(
-    roomId: string,
-    assetAndChainInfo: AssetAndChainInfo,
-    waitCb: StatusResponse,
-    errCb: any,
-    sOrDChain: SourceOrDestination
-  ) {
-    const { assetInfo, sourceChainInfo } = assetAndChainInfo;
-    const waitingService = await getWaitingService(
-      sourceChainInfo,
-      assetInfo,
-      sOrDChain,
-      this.environment
-    );
-
-    try {
-      const response = await waitingService.waitForDepositConfirmation(
-        roomId,
-        waitCb,
-        this.socket
-      );
-      return response;
-    } catch (e) {
-      errCb(e);
-    }
-  }
-
-  /**
-   * @deprecated The method should not be used and will soon be removed
-   */
-  private async detectTransferOnDestinationChain(
-    roomId: string,
-    assetAndChainInfo: AssetAndChainInfo,
-    waitCb: StatusResponse,
-    errCb: any,
-    sOrDChain: SourceOrDestination
-  ) {
-    const { assetInfo, destinationChainInfo } = assetAndChainInfo;
-    const waitingService = await getWaitingService(
-      destinationChainInfo,
-      assetInfo,
-      sOrDChain,
-      this.environment
-    );
-    try {
-      if (assetAndChainInfo.sourceChainInfo.module === "evm") {
-        // evm -> cosmos transfer
-        await waitingService.waitForTransferEvent(
-          assetAndChainInfo,
-          waitCb,
-          this.socket,
-          roomId
-        );
-      } else {
-        // cosmos -> evm transfer
-        await waitingService.waitForTransferEvent(
-          assetAndChainInfo,
-          waitCb,
-          this.socket,
-          roomId
-        );
-      }
-    } catch (e) {
-      errCb(e);
-    }
+    return newRoomId;
   }
 
   private extractDepositAddress(roomId: string) {

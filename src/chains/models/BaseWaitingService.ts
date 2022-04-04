@@ -20,19 +20,19 @@ export class BaseWaitingService implements BlockchainWaitingService {
     }
   }
 
-  async waitForEvent(
-    roomId: string,
-    interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketService
-  ) {
-    return clientSocketConnect.joinRoomAndWaitForEvent(
-      roomId,
-      ((data: any) => {
-        data.axelarRequiredNumConfirmations = this.numConfirmations;
-        interimStatusCb(data);
-      }).bind(this)
-    );
-  }
+  // async waitForEvent(
+  //   roomId: string,
+  //   interimStatusCb: StatusResponse,
+  //   clientSocketConnect: SocketService
+  // ) {
+  //   return clientSocketConnect.joinRoomAndWaitForEvent(
+  //     roomId,
+  //     ((data: any) => {
+  //       data.axelarRequiredNumConfirmations = this.numConfirmations;
+  //       interimStatusCb(data);
+  //     }).bind(this)
+  //   );
+  // }
 
   async waitForDepositConfirmationEvent(
     roomId: string,

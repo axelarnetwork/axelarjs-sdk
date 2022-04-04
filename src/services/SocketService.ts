@@ -38,17 +38,15 @@ export class SocketService {
     });
   }
 
-  public joinRoomAndWaitForEvent(roomId: string, waitCb: any) {
+  public joinRoomAndWaitForEvent(roomId: string): Promise<string> {
     return new Promise(async (resolve) => {
       await this.createSocket();
       const ms = 1.8e6; //30 minutes
       const timeout = setTimeout(() => {
-        waitCb({ timedOut: true });
         this.disconnect();
       }, ms);
       this.socket.emit("room:join", roomId, () => {
-        this.socket.on("bridge-event", (data: any) => {
-          waitCb && waitCb(data);
+        this.socket.on("bridge-event", (data: string) => {
           clearTimeout(timeout);
           resolve(data);
           this.disconnect();

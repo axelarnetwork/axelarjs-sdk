@@ -28,13 +28,13 @@ export default class WaitingService
     this.providerType = providerType;
   }
 
-  public async waitForLinkEvent(
-    roomId: string,
-    interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketService
-  ) {
-    return this.waitForEvent(roomId, interimStatusCb, clientSocketConnect);
-  }
+  // public async waitForLinkEvent(
+  //   roomId: string,
+  //   interimStatusCb: StatusResponse,
+  //   clientSocketConnect: SocketService
+  // ) {
+  //   return this.waitForEvent(roomId, interimStatusCb, clientSocketConnect);
+  // }
 
   public async waitForDepositConfirmation(
     roomId: string,
