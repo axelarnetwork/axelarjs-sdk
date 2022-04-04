@@ -18,7 +18,6 @@ export enum Environment {
   DEVNET = "devnet",
   TESTNET = "testnet",
   MAINNET = "mainnet",
-  
 }
 
 export enum EvmChain {
@@ -66,3 +65,8 @@ export interface TxOption {
   maxFeePerGas: string;
   maxPriorityFeePerGas: string;
 }
+
+export type TransferAssetBridgeConfig = {
+  environment: Environment;
+  auth?: "local" | "metamask";
+};

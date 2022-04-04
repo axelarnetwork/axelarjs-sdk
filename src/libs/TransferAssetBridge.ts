@@ -16,7 +16,7 @@ import {
   AssetAndChainInfo,
 } from "../chains/types";
 
-import { RestServices, SocketServices } from "../services";
+import { RestService, SocketService } from "../services";
 import {
   createWallet,
   getWaitingService,
@@ -24,146 +24,33 @@ import {
 } from "../utils";
 import { validateDestinationAddressByChainSymbol } from "../utils";
 import { getConfigs } from "../constants";
-import { GetDepositAddressDto, GetDepositAddressPayload } from "./types";
+import {
+  GetDepositAddressDto,
+  GetDepositAddressPayload,
+  TransferAssetBridgeConfig,
+} from "./types";
 
 export class TransferAssetBridge {
-  private restServices: RestServices;
-  private clientSocketConnect: SocketServices;
-  private environment: string;
-  private resourceUrl: string;
+  readonly environment: string;
+  readonly resourceUrl: string;
 
-  constructor(environment: string) {
-    this.environment = environment;
-    const configs = getConfigs(environment);
+  readonly api: RestService;
+  readonly socket: SocketService;
+
+  constructor(config: TransferAssetBridgeConfig) {
+    const configs = getConfigs(config.environment);
+
+    this.environment = config.environment;
     this.resourceUrl = configs.resourceUrl;
-    this.restServices = new RestServices(this.resourceUrl);
-    this.clientSocketConnect = new SocketServices(this.resourceUrl);
-  }
-
-  /**
-   * @deprecated The method should not be used and will soon be removed
-   */
-  public async transferAssets(
-    message: AssetTransferObject,
-    sourceCbs: CallbackStatus,
-    destCbs: CallbackStatus,
-    showAlerts = true
-  ): Promise<AssetInfoWithTrace> {
-    const {
-      selectedDestinationAsset,
-      sourceChainInfo,
-      destinationChainInfo,
-      selectedSourceAsset,
-    } = message;
-
-    // validate destination address
-    const isAddressValid = validateDestinationAddressByChainSymbol(
-      destinationChainInfo?.chainSymbol,
-      selectedDestinationAsset.assetAddress as string,
-      this.environment
-    );
-    if (!isAddressValid)
-      throw new Error(
-        `invalid destination address in ${selectedDestinationAsset?.assetSymbol}`
-      );
-
-    // generate uuid to trace the whole flow
-    const traceId = uuidv4();
-
-    // get room id from rest server to initiate socket connection
-    const { roomId } = await this.getInitRoomId(message, showAlerts, traceId);
-
-    let srcAssetForDepositConfirmation: AssetInfoResponse = {
-      assetAddress: "0x",
-      traceId,
-      sourceOrDestChain: "source",
-    };
-
-    const linkData: any = await this.getLinkEvent(
-      roomId,
-      {
-        assetInfo: srcAssetForDepositConfirmation,
-        sourceChainInfo,
-        destinationChainInfo,
-      },
-      (success) => console.log(success),
-      (error: any) => console.log(error),
-      "source"
-    );
-
-    console.log({
-      linkData,
-    });
-
-    const assetInfo: AssetInfo = {
-      assetAddress: linkData?.Attributes?.depositAddress,
-      assetSymbol: selectedSourceAsset?.assetSymbol,
-      common_key: selectedSourceAsset?.common_key,
-    };
-
-    srcAssetForDepositConfirmation = Object.assign(
-      srcAssetForDepositConfirmation,
-      assetInfo
-    );
-
-    const destAssetForTransferEvent: AssetInfoResponse = {
-      ...selectedDestinationAsset,
-      traceId,
-      sourceOrDestChain: "destination",
-    };
-
-    this.confirmDeposit(
-      linkData?.newRoomId,
-      {
-        assetInfo: srcAssetForDepositConfirmation,
-        sourceChainInfo,
-        destinationChainInfo,
-      },
-      sourceCbs.successCb,
-      sourceCbs.failCb,
-      "source"
-    ).then(() => {
-      return this.detectTransferOnDestinationChain(
-        `link-module=evm-destinationAddress=${selectedDestinationAsset.assetAddress}`,
-        {
-          assetInfo: destAssetForTransferEvent,
-          sourceChainInfo,
-          destinationChainInfo,
-        },
-        destCbs.successCb,
-        destCbs.failCb,
-        "destination"
-      );
-    });
-
-    console.log({
-      assetInfo,
-      traceId,
-    });
-
-    return {
-      assetInfo,
-      traceId,
-    } as AssetInfoWithTrace;
-  }
-
-  public async getOneTimeCode(
-    signerAddress: string,
-    traceId: string
-  ): Promise<OTC> {
-    return this.restServices
-      .get_v2(`${CLIENT_API_GET_OTC}?publicAddress=${signerAddress}`, traceId)
-      .then((response) => response)
-      .catch((error) => {
-        throw error;
-      });
+    this.api = new RestService(this.resourceUrl);
+    this.socket = new SocketService(this.resourceUrl);
   }
 
   public async getFeeForChainAndAsset(
     chain: string,
     asset: string
   ): Promise<any> {
-    return this.restServices
+    return this.api
       .get_v2(
         `${CLIENT_API_GET_FEE}?chainName=${chain}&assetCommonKey=${asset}`
       )
@@ -202,7 +89,7 @@ export class TransferAssetBridge {
     traceId: string
   ): Promise<{ roomId: string }> {
     try {
-      const response = await this.restServices.post(
+      const response = await this.api.post(
         CLIENT_API_POST_TRANSFER_ASSET,
         payload,
         {
@@ -221,16 +108,35 @@ export class TransferAssetBridge {
     }
   }
 
-  async getInitRoomId_v2(
-    payload: GetDepositAddressPayload & { signature: string },
+  public async getOneTimeCode(
+    signerAddress: string,
     traceId: string
-  ) {
-    return this.restServices
-      .post_v2(CLIENT_API_POST_TRANSFER_ASSET, payload, traceId)
-      .then((response) => response.data)
+  ): Promise<OTC> {
+    const otc: OTC = await this.api
+      .get_v2(`${CLIENT_API_GET_OTC}?publicAddress=${signerAddress}`, traceId)
+      .then((response) => response)
       .catch((error) => {
         throw error;
       });
+
+    return otc;
+  }
+
+  async getInitRoomId_v2(
+    payload: GetDepositAddressPayload & { signature: string },
+    traceId: string
+  ): Promise<string> {
+    type RoomIdResponse = Record<"data", Record<"roomId", string>>;
+
+    const response: RoomIdResponse = await this.api
+      .post_v2(CLIENT_API_POST_TRANSFER_ASSET, payload, traceId)
+      .then((response) => response)
+      .catch((error) => {
+        throw error;
+      });
+
+    const roomId = response?.data?.roomId;
+    return roomId;
   }
 
   async getDepositAddress(dto: GetDepositAddressDto): Promise<string> {
@@ -264,11 +170,11 @@ export class TransferAssetBridge {
       publicAddress: wallet.address,
     };
 
-    const { roomId } = await this.getInitRoomId_v2(payload, traceId);
+    const roomId = await this.getInitRoomId_v2(payload, traceId);
     const newRoomId = await this.getLinkEvent_v2(roomId);
     const depositAddress = this.extractDepositAddress(newRoomId);
 
-    console.log("deposit address!",depositAddress)
+    console.log("deposit address!", depositAddress);
 
     return depositAddress;
   }
@@ -295,7 +201,7 @@ export class TransferAssetBridge {
       const response = await waitingService.waitForLinkEvent(
         roomId,
         waitCb,
-        this.clientSocketConnect
+        this.socket
       );
       return response;
     } catch (e) {
@@ -304,7 +210,7 @@ export class TransferAssetBridge {
   }
 
   async getLinkEvent_v2(roomId: string): Promise<string> {
-    const sockets = new SocketServices(this.resourceUrl);
+    const sockets = new SocketService(this.resourceUrl);
 
     return new Promise((resolve) => {
       sockets.joinRoomAndWaitForEvent(roomId, (data: any) => {
@@ -332,7 +238,7 @@ export class TransferAssetBridge {
       const response = await waitingService.waitForDepositConfirmation(
         roomId,
         waitCb,
-        this.clientSocketConnect
+        this.socket
       );
       return response;
     } catch (e) {
@@ -363,7 +269,7 @@ export class TransferAssetBridge {
         await waitingService.waitForTransferEvent(
           assetAndChainInfo,
           waitCb,
-          this.clientSocketConnect,
+          this.socket,
           roomId
         );
       } else {
@@ -371,7 +277,7 @@ export class TransferAssetBridge {
         await waitingService.waitForTransferEvent(
           assetAndChainInfo,
           waitCb,
-          this.clientSocketConnect,
+          this.socket,
           roomId
         );
       }
