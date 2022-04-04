@@ -18,7 +18,8 @@ export class SocketService {
         forceNew: true,
         transports: ["websocket"],
         extraHeaders: {
-          "User-Agent": "Axelar-Hackathon",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0",
         },
       });
     } else {
@@ -26,12 +27,13 @@ export class SocketService {
         transports: ["websocket"],
         reconnectionDelayMax: 10000,
         extraHeaders: {
-          "User-Agent": "Axelar-Hackathon",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0",
         },
       });
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.socket.on("connect", () => {
         resolve(true);
       });
