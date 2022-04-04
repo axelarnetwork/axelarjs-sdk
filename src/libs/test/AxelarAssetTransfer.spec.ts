@@ -1,5 +1,5 @@
 import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET } from "../..";
-import { TransferAssetBridge } from "../TransferAssetBridge";
+import { AxelarAssetTransfer } from "../AxelarAssetTransfer";
 import { Environment } from "../types";
 import {
   apiErrorStub,
@@ -12,21 +12,21 @@ import {
   uuidStub,
 } from "./stubs";
 
-describe("TransferAssetBridge", () => {
+describe("AxelarAssetTransfer", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe("on init", () => {
-    let bridge: TransferAssetBridge;
+    let bridge: AxelarAssetTransfer;
 
     beforeEach(() => {
-      bridge = new TransferAssetBridge({
+      bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
     });
 
-    describe("TransferAssetBridge", () => {
+    describe("AxelarAssetTransfer", () => {
       it("should be defined", () => {
         expect(bridge).toBeDefined();
       });
@@ -54,10 +54,10 @@ describe("TransferAssetBridge", () => {
   });
 
   describe("getOneTimeCode()", () => {
-    let bridge: TransferAssetBridge;
+    let bridge: AxelarAssetTransfer;
 
     beforeEach(() => {
-      bridge = new TransferAssetBridge({
+      bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
     });
@@ -125,10 +125,10 @@ describe("TransferAssetBridge", () => {
   });
 
   describe("getInitRoomId()", () => {
-    let bridge: TransferAssetBridge;
+    let bridge: AxelarAssetTransfer;
 
     beforeEach(() => {
-      bridge = new TransferAssetBridge({
+      bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
     });
@@ -220,10 +220,10 @@ describe("TransferAssetBridge", () => {
   });
 
   describe("getLinkEvent()", () => {
-    let bridge: TransferAssetBridge;
+    let bridge: AxelarAssetTransfer;
 
     beforeEach(() => {
-      bridge = new TransferAssetBridge({
+      bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
     });
@@ -294,10 +294,10 @@ describe("TransferAssetBridge", () => {
   });
 
   describe("getDepositAddress()", () => {
-    let bridge: TransferAssetBridge;
+    let bridge: AxelarAssetTransfer;
 
     beforeEach(() => {
-      bridge = new TransferAssetBridge({
+      bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
     });

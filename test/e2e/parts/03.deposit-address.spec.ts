@@ -1,11 +1,11 @@
-import { Environment, TransferAssetBridge } from "../../../src";
+import { Environment, AxelarAssetTransfer } from "../../../src";
 
 export default () => {
   describe("Deposit Address e2e", () => {
-    let axelar: TransferAssetBridge;
+    let axelar: AxelarAssetTransfer;
 
     beforeAll(() => {
-      axelar = new TransferAssetBridge({
+      axelar = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
         overwriteResourceUrl: "http://localhost:4000",
       });

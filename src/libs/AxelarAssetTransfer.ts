@@ -10,16 +10,16 @@ import { RestService, SocketService } from "../services";
 import { createWallet, validateDestinationAddressByChainName } from "../utils";
 
 import { getConfigs } from "../constants";
-import { TransferAssetBridgeConfig } from "./types";
+import { AxelarAssetTransferConfig } from "./types";
 
-export class TransferAssetBridge {
+export class AxelarAssetTransfer {
   readonly environment: string;
   readonly resourceUrl: string;
 
   readonly api: RestService;
   readonly socket: SocketService;
 
-  constructor(config: TransferAssetBridgeConfig) {
+  constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
 
     this.environment = config.environment;

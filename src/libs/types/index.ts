@@ -50,7 +50,7 @@ export interface TxOption {
   maxPriorityFeePerGas: string;
 }
 
-export type TransferAssetBridgeConfig = {
+export type AxelarAssetTransferConfig = {
   environment: Environment;
   auth?: "local" | "metamask";
   overwriteResourceUrl?: string;
