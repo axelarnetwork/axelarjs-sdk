@@ -38,7 +38,7 @@ export class SocketService {
     });
   }
 
-  public joinRoomAndWaitForEvent(roomId: string): Promise<string> {
+  public joinRoomAndWaitForEvent(roomId: string): Promise<any> {
     return new Promise(async (resolve) => {
       await this.createSocket();
       const ms = 1.8e6; //30 minutes
@@ -46,7 +46,7 @@ export class SocketService {
         this.disconnect();
       }, ms);
       this.socket.emit("room:join", roomId, () => {
-        this.socket.on("bridge-event", (data: string) => {
+        this.socket.on("bridge-event", (data: any) => {
           clearTimeout(timeout);
           resolve(data);
           this.disconnect();
