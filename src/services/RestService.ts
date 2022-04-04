@@ -1,10 +1,9 @@
 import fetch from "cross-fetch";
-import { AssetTransferObject } from "../chains/types";
 
 export class RestService {
   constructor(private host: string) {}
 
-  post_v2(url: string, body: any, traceId?: string) {
+  post(url: string, body: any, traceId?: string) {
     const requestOptions = {
       method: "POST",
       headers: {
@@ -17,7 +16,7 @@ export class RestService {
     return this.execRest(url, requestOptions);
   }
 
-  get_v2(url: string, traceId?: string) {
+  get(url: string, traceId?: string) {
     const requestOptions = {
       method: "GET",
       headers: {
@@ -27,46 +26,6 @@ export class RestService {
     };
 
     return this.execRest(url, requestOptions);
-  }
-
-  public post(
-    endpoint: string,
-    payload: AssetTransferObject,
-    headers?: any
-  ): Promise<any> {
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        publicAddress: payload.publicAddr,
-        signature: payload.signature,
-        // otc: payload.otc,
-        ...headers,
-      },
-      body: JSON.stringify(payload),
-    };
-
-    return new Promise((resolve, reject) => {
-      this.execRest(endpoint, requestOptions)
-        .then((data) => resolve(data))
-        .catch((error) => reject(error));
-    });
-  }
-
-  public get(endpoint: string, headers?: any): Promise<any> {
-    const requestOptions = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
-    };
-
-    return new Promise((resolve, reject) => {
-      this.execRest(endpoint, requestOptions)
-        .then((data) => resolve(data))
-        .catch((error) => reject(error));
-    });
   }
 
   private async execRest(endpoint: string, requestOptions: any) {

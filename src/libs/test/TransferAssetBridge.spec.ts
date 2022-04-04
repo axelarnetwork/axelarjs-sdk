@@ -62,7 +62,7 @@ describe("TransferAssetBridge", () => {
         let error: any;
 
         beforeEach(async () => {
-          jest.spyOn(bridge.api, "get_v2").mockRejectedValue(apiErrorStub());
+          jest.spyOn(bridge.api, "get").mockRejectedValue(apiErrorStub());
 
           otc = await bridge
             .getOneTimeCode(ethAddressStub(), uuidStub())
@@ -73,7 +73,7 @@ describe("TransferAssetBridge", () => {
 
         describe("api", () => {
           it("should be called", () => {
-            expect(bridge.api.get_v2).toHaveBeenCalledWith(
+            expect(bridge.api.get).toHaveBeenCalledWith(
               `${CLIENT_API_GET_OTC}?publicAddress=${ethAddressStub()}`,
               uuidStub()
             );
@@ -96,13 +96,13 @@ describe("TransferAssetBridge", () => {
         let otc: any;
 
         beforeEach(async () => {
-          jest.spyOn(bridge.api, "get_v2").mockResolvedValue(otcStub());
+          jest.spyOn(bridge.api, "get").mockResolvedValue(otcStub());
           otc = await bridge.getOneTimeCode(ethAddressStub(), uuidStub());
         });
 
         describe("api", () => {
           it("should be called", () => {
-            expect(bridge.api.get_v2).toHaveBeenCalledWith(
+            expect(bridge.api.get).toHaveBeenCalledWith(
               `${CLIENT_API_GET_OTC}?publicAddress=${ethAddressStub()}`,
               uuidStub()
             );
@@ -118,7 +118,7 @@ describe("TransferAssetBridge", () => {
     });
   });
 
-  describe("getInitRoomId_v2()", () => {
+  describe("getInitRoomId()", () => {
     let bridge: TransferAssetBridge;
 
     beforeEach(() => {
@@ -133,7 +133,7 @@ describe("TransferAssetBridge", () => {
         let error: any;
 
         beforeEach(async () => {
-          jest.spyOn(bridge.api, "post_v2").mockRejectedValue(apiErrorStub());
+          jest.spyOn(bridge.api, "post").mockRejectedValue(apiErrorStub());
 
           roomId = await bridge
             .getInitRoomId(depositAddressPayloadStub(), uuidStub())
@@ -144,7 +144,7 @@ describe("TransferAssetBridge", () => {
 
         describe("api", () => {
           it("should be called", () => {
-            expect(bridge.api.post_v2).toHaveBeenCalledWith(
+            expect(bridge.api.post).toHaveBeenCalledWith(
               CLIENT_API_POST_TRANSFER_ASSET,
               depositAddressPayloadStub(),
               uuidStub()
@@ -152,7 +152,7 @@ describe("TransferAssetBridge", () => {
           });
         });
 
-        describe("getInitRoomId_v2()", () => {
+        describe("getInitRoomId()", () => {
           it("should throw", () => {
             expect(error).toEqual(apiErrorStub());
           });
@@ -167,7 +167,7 @@ describe("TransferAssetBridge", () => {
       describe("when called", () => {
         let roomId: any;
         beforeEach(async () => {
-          jest.spyOn(bridge.api, "post_v2").mockResolvedValue({
+          jest.spyOn(bridge.api, "post").mockResolvedValue({
             data: roomIdStub(),
           });
 
@@ -179,7 +179,7 @@ describe("TransferAssetBridge", () => {
 
         describe("api", () => {
           it("should be called", () => {
-            expect(bridge.api.post_v2).toHaveBeenCalledWith(
+            expect(bridge.api.post).toHaveBeenCalledWith(
               CLIENT_API_POST_TRANSFER_ASSET,
               depositAddressPayloadStub(),
               uuidStub()
@@ -187,7 +187,7 @@ describe("TransferAssetBridge", () => {
           });
         });
 
-        describe("getInitRoomId_v2()", () => {
+        describe("getInitRoomId()", () => {
           it("shoud return", () => {
             expect(roomId).toBe(roomIdStub().roomId);
           });
@@ -196,7 +196,7 @@ describe("TransferAssetBridge", () => {
     });
   });
 
-  describe("getLinkEvent_v2()", () => {
+  describe("getLinkEvent()", () => {
     let bridge: TransferAssetBridge;
 
     beforeEach(() => {
@@ -230,7 +230,7 @@ describe("TransferAssetBridge", () => {
           });
         });
 
-        describe("getLinkEvent_v2()", () => {
+        describe("getLinkEvent()", () => {
           it("should throw", () => {
             expect(error).toEqual(apiErrorStub());
           });
@@ -261,7 +261,7 @@ describe("TransferAssetBridge", () => {
           });
         });
 
-        describe("getInitRoomId_v2()", () => {
+        describe("getInitRoomId()", () => {
           it("shoud return", () => {
             expect(roomId).toBe(roomIdStub().roomId);
           });

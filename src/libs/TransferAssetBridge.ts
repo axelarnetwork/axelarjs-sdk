@@ -46,74 +46,6 @@ export class TransferAssetBridge {
     this.socket = new SocketService(this.resourceUrl);
   }
 
-  public async getFeeForChainAndAsset(
-    chain: string,
-    asset: string
-  ): Promise<any> {
-    return this.api
-      .get_v2(
-        `${CLIENT_API_GET_FEE}?chainName=${chain}&assetCommonKey=${asset}`
-      )
-      .then((response) => response)
-      .catch((error) => {
-        throw error;
-      });
-  }
-
-  public async getTransferFee(
-    sourceChain: string,
-    destinationChain: string,
-    asset: string
-  ): Promise<number> {
-    try {
-      const sourceChainFeeInfo = await this.getFeeForChainAndAsset(
-        sourceChain,
-        asset
-      );
-      const destinationChainFeeInfo = await this.getFeeForChainAndAsset(
-        destinationChain,
-        asset
-      );
-      return (
-        +sourceChainFeeInfo?.fee_info?.min_fee +
-        +destinationChainFeeInfo?.fee_info?.min_fee
-      );
-    } catch (e: any) {
-      throw e;
-    }
-  }
-
-  public async getOneTimeCode(
-    signerAddress: string,
-    traceId: string
-  ): Promise<OTC> {
-    const otc: OTC = await this.api
-      .get_v2(`${CLIENT_API_GET_OTC}?publicAddress=${signerAddress}`, traceId)
-      .then((response) => response)
-      .catch((error) => {
-        throw error;
-      });
-
-    return otc;
-  }
-
-  async getInitRoomId(
-    payload: GetDepositAddressPayload & { signature: string },
-    traceId: string
-  ): Promise<string> {
-    type RoomIdResponse = Record<"data", Record<"roomId", string>>;
-
-    const response: RoomIdResponse = await this.api
-      .post_v2(CLIENT_API_POST_TRANSFER_ASSET, payload, traceId)
-      .then((response) => response)
-      .catch((error) => {
-        throw error;
-      });
-
-    const roomId = response?.data?.roomId;
-    return roomId;
-  }
-
   async getDepositAddress(dto: GetDepositAddressDto): Promise<string> {
     // generate trace id
     const traceId = uuidv4();
@@ -152,6 +84,72 @@ export class TransferAssetBridge {
     console.log("deposit address!", depositAddress);
 
     return depositAddress;
+  }
+
+  public async getFeeForChainAndAsset(
+    chain: string,
+    asset: string
+  ): Promise<any> {
+    return this.api
+      .get(`${CLIENT_API_GET_FEE}?chainName=${chain}&assetCommonKey=${asset}`)
+      .then((response) => response)
+      .catch((error) => {
+        throw error;
+      });
+  }
+
+  public async getTransferFee(
+    sourceChain: string,
+    destinationChain: string,
+    asset: string
+  ): Promise<number> {
+    try {
+      const sourceChainFeeInfo = await this.getFeeForChainAndAsset(
+        sourceChain,
+        asset
+      );
+      const destinationChainFeeInfo = await this.getFeeForChainAndAsset(
+        destinationChain,
+        asset
+      );
+      return (
+        Number(sourceChainFeeInfo?.fee_info?.min_fee) +
+        Number(destinationChainFeeInfo?.fee_info?.min_fee)
+      );
+    } catch (e: any) {
+      throw e;
+    }
+  }
+
+  public async getOneTimeCode(
+    signerAddress: string,
+    traceId: string
+  ): Promise<OTC> {
+    const otc: OTC = await this.api
+      .get(`${CLIENT_API_GET_OTC}?publicAddress=${signerAddress}`, traceId)
+      .then((response) => response)
+      .catch((error) => {
+        throw error;
+      });
+
+    return otc;
+  }
+
+  async getInitRoomId(
+    payload: GetDepositAddressPayload & { signature: string },
+    traceId: string
+  ): Promise<string> {
+    type RoomIdResponse = Record<"data", Record<"roomId", string>>;
+
+    const response: RoomIdResponse = await this.api
+      .post(CLIENT_API_POST_TRANSFER_ASSET, payload, traceId)
+      .then((response) => response)
+      .catch((error) => {
+        throw error;
+      });
+
+    const roomId = response?.data?.roomId;
+    return roomId;
   }
 
   async getLinkEvent(roomId: string): Promise<string> {
