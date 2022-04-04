@@ -1,2 +1,2 @@
-export * from "./RestServices";
-export * from "./SocketServices";
+export * from "./RestService";
+export * from "./SocketService";

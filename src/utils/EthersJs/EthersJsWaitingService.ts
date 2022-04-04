@@ -13,8 +13,8 @@ import {
   EthersJsTokenMap,
   getConfigs,
 } from "../../constants";
-import { RestServices } from "../../services/RestServices";
-import { SocketServices } from "../../services/SocketServices";
+import { RestService } from "../../services/RestService";
+import { SocketService } from "../../services/SocketService";
 import { AssetInfo } from "../../assets/types";
 
 const abi: string[] = [
@@ -56,7 +56,7 @@ export default class EthersJsWaitingService
   public async wait(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: any,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       this.tokenContract.once(
@@ -97,7 +97,7 @@ export default class EthersJsWaitingService
         assetInfo.common_key
       }`;
       const resourceUrl: string = configs.resourceUrl;
-      const response = await new RestServices(resourceUrl).get(endpoint);
+      const response = await new RestService(resourceUrl).get(endpoint);
       tokenContract = response.data;
       tokenAddressMap[tokenSymbol] = tokenContract;
     }

@@ -1,5 +1,5 @@
 import { AssetInfo } from "../../assets/types";
-import { SocketServices } from "../../services";
+import { SocketService } from "../../services";
 import { SourceOrDestination } from "../../services/types";
 
 export interface Chain {
@@ -18,23 +18,23 @@ export interface BlockchainWaitingService {
   waitForLinkEvent(
     roomId: string,
     interimStatusCb: any,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ): Promise<any>;
   waitForDepositConfirmation(
     roomId: string,
     interimStatusCb: any,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ): Promise<any>;
   waitForTransferEvent(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: any,
-    clientSocketConnect: SocketServices,
+    clientSocketConnect: SocketService,
     roomId?: string
   ): Promise<any>;
   wait(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: any,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ): Promise<void>;
 }
 

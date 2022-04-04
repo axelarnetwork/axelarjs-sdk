@@ -1,10 +1,10 @@
 import fetch from "cross-fetch";
 import { AssetTransferObject } from "../chains/types";
 
-export class RestServices {
+export class RestService {
   constructor(private host: string) {}
 
-  post_v2(url: string, body: any, traceId?: string): Promise<any> {
+  post_v2(url: string, body: any, traceId?: string) {
     const requestOptions = {
       method: "POST",
       headers: {
@@ -17,7 +17,7 @@ export class RestServices {
     return this.execRest(url, requestOptions);
   }
 
-  get_v2(url: string, traceId?: string): Promise<any> {
+  get_v2(url: string, traceId?: string) {
     const requestOptions = {
       method: "GET",
       headers: {

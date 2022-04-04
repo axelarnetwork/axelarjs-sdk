@@ -1,5 +1,5 @@
 import { BaseWaitingService } from "../models/BaseWaitingService";
-import { SocketServices } from "../../services/SocketServices";
+import { SocketService } from "../../services/SocketService";
 import { AssetInfo } from "../../assets/types";
 import { StatusResponse } from "../../services/types";
 import {
@@ -19,7 +19,7 @@ export default class WaitingService
   public async waitForLinkEvent(
     roomId: string,
     interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ) {
     return this.waitForEvent(roomId, interimStatusCb, clientSocketConnect);
   }
@@ -27,7 +27,7 @@ export default class WaitingService
   public async waitForDepositConfirmation(
     roomId: string,
     interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ) {
     return this.waitForEvent(roomId, interimStatusCb, clientSocketConnect);
   }
@@ -35,7 +35,7 @@ export default class WaitingService
   public async waitForTransferEvent(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketServices,
+    clientSocketConnect: SocketService,
     roomId: string
   ) {
     return this.waitForEvent(

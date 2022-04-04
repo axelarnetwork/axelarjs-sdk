@@ -4,7 +4,7 @@ import {
   SocketListenerTypes,
 } from "../types";
 import { StatusResponse } from "../../services/types";
-import { SocketServices } from "../../services/SocketServices";
+import { SocketService } from "../../services/SocketService";
 
 export class BaseWaitingService implements BlockchainWaitingService {
   public numConfirmations = 0;
@@ -23,7 +23,7 @@ export class BaseWaitingService implements BlockchainWaitingService {
   async waitForEvent(
     roomId: string,
     interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ) {
     return clientSocketConnect.joinRoomAndWaitForEvent(
       roomId,
@@ -37,7 +37,7 @@ export class BaseWaitingService implements BlockchainWaitingService {
   async waitForDepositConfirmationEvent(
     roomId: string,
     interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ) {
     return clientSocketConnect.joinRoomAndWaitDepositConfirmationEvent(
       roomId,
@@ -51,7 +51,7 @@ export class BaseWaitingService implements BlockchainWaitingService {
   public async wait(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ) {
     const data: any = await clientSocketConnect.emitMessageAndWaitForReply(
       SocketListenerTypes.WAIT_FOR_DEPOSIT,

@@ -1,7 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import { SocketListenerTypes } from "../chains/types";
 
-export class SocketServices {
+export class SocketService {
   private socket: Socket;
   private resourceUrl: string;
   private testMode = false;
@@ -39,7 +39,6 @@ export class SocketServices {
   }
 
   public joinRoomAndWaitForEvent(roomId: string, waitCb: any) {
-
     return new Promise(async (resolve) => {
       await this.createSocket();
       const ms = 1.8e6; //30 minutes
@@ -59,7 +58,6 @@ export class SocketServices {
   }
 
   public joinRoomAndWaitDepositConfirmationEvent(roomId: string, waitCb: any) {
-
     return new Promise(async (resolve) => {
       await this.createSocket();
       const ms = 1.8e6; //30 minutes

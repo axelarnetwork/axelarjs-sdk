@@ -6,7 +6,7 @@ import {
   AssetAndChainInfo,
 } from "../types";
 import { BaseWaitingService } from "../models/BaseWaitingService";
-import { SocketServices } from "../../services/SocketServices";
+import { SocketService } from "../../services/SocketService";
 import EthersJsWaitingService from "../../utils/EthersJs/EthersJsWaitingService";
 import { ProviderType } from "../../utils/EthersJs/ethersjsProvider";
 
@@ -31,7 +31,7 @@ export default class WaitingService
   public async waitForLinkEvent(
     roomId: string,
     interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ) {
     return this.waitForEvent(roomId, interimStatusCb, clientSocketConnect);
   }
@@ -39,7 +39,7 @@ export default class WaitingService
   public async waitForDepositConfirmation(
     roomId: string,
     interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ) {
     return this.waitForDepositConfirmationEvent(
       roomId,
@@ -51,7 +51,7 @@ export default class WaitingService
   public async waitForTransferEvent(
     assetAndChainInfo: AssetAndChainInfo,
     interimStatusCb: StatusResponse,
-    clientSocketConnect: SocketServices
+    clientSocketConnect: SocketService
   ) {
     const { assetInfo, destinationChainInfo } = assetAndChainInfo;
 
