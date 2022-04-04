@@ -1,6 +1,6 @@
 import { Wallet } from "ethers";
 import { OTC, TransferAssetBridge } from "../../../src";
-import { SocketServices } from "../../../src/services";
+import { SocketService } from "../../../src/services";
 import { createWallet } from "../../../src/utils/wallet";
 import { getTransferPayload } from "../data";
 
@@ -103,15 +103,15 @@ export default () => {
     describe("simultaneous sockets connection", () => {
       jest.setTimeout(30000);
 
-      let socket1: SocketServices;
-      let socket2: SocketServices;
+      let socket1: SocketService;
+      let socket2: SocketService;
 
       let response1: any;
       let response2: any;
 
       beforeAll(() => {
-        socket1 = new SocketServices("http://localhost:4000", true);
-        socket2 = new SocketServices("http://localhost:4000", true);
+        socket1 = new SocketService("http://localhost:4000", true);
+        socket2 = new SocketService("http://localhost:4000", true);
       });
 
       it("should wait for socket responses", (done) => {

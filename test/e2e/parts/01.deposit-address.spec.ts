@@ -3,7 +3,7 @@ import { createWallet, signOtc } from "../../../src/utils";
 import { TransferAssetBridge } from "../../../src/libs";
 import { OTC } from "../../../src/services/types";
 import { getTransferPayload } from "../data";
-import { SocketServices } from "../../../src/services";
+import { SocketService } from "../../../src/services";
 
 export default () => {
   describe("Deposit address generation E2E", () => {
@@ -75,10 +75,10 @@ export default () => {
 
     describe("getting deposit address", () => {
       jest.setTimeout(30000);
-      let socket: SocketServices;
+      let socket: SocketService;
 
       beforeAll(() => {
-        socket = new SocketServices("http://localhost:4000", true);
+        socket = new SocketService("http://localhost:4000", true);
       });
 
       it("should connect to room and wait ", (done) => {
