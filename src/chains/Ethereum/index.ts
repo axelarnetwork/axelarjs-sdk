@@ -1,8 +1,7 @@
-import WaitingService from "./WaitingService";
 import { isAddress as isValidEVMAddress } from "ethers/lib/utils";
 import { AssetInfo } from "../../assets/types";
 import { SourceOrDestination } from "../../services/types";
-import { Chain, ChainInfo, BlockchainWaitingServiceFinder } from "../types";
+import { Chain, ChainInfo } from "../types";
 import { ProviderType } from "../../utils/EthersJs/ethersjsProvider";
 
 export default class Ethereum implements Chain {
@@ -29,18 +28,4 @@ export default class Ethereum implements Chain {
   }
 
   public validateAddress = (address: string) => isValidEVMAddress(address);
-
-  public waitingService: BlockchainWaitingServiceFinder = async (
-    chainInfo: ChainInfo,
-    assetInfo: AssetInfo,
-    sOrDChain: SourceOrDestination,
-    environment: string
-  ) => {
-    return new WaitingService(
-      chainInfo,
-      assetInfo,
-      environment,
-      this.providerType
-    );
-  };
 }

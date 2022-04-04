@@ -1,4 +1,3 @@
-import { AssetInfo } from "../../assets/types";
 import Axelar from "../Axelar";
 import { AccAddress } from "@terra-money/terra.js";
 import { Chain, ChainInfo } from "../types";

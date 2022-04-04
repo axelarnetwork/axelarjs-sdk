@@ -1,41 +1,16 @@
 import { AssetInfo } from "../../assets/types";
-import { SocketService } from "../../services";
+
 import { SourceOrDestination } from "../../services/types";
 
 export interface Chain {
   chainInfo: ChainInfo;
   validateAddress: (destinationAddress: string) => boolean;
-  waitingService: BlockchainWaitingServiceFinder;
 }
 
 export interface AssetAndChainInfo {
   assetInfo: AssetInfoResponse;
   sourceChainInfo: ChainInfo;
   destinationChainInfo: ChainInfo;
-}
-
-export interface BlockchainWaitingService {
-  waitForLinkEvent(
-    roomId: string,
-    interimStatusCb: any,
-    clientSocketConnect: SocketService
-  ): Promise<any>;
-  waitForDepositConfirmation(
-    roomId: string,
-    interimStatusCb: any,
-    clientSocketConnect: SocketService
-  ): Promise<any>;
-  waitForTransferEvent(
-    assetAndChainInfo: AssetAndChainInfo,
-    interimStatusCb: any,
-    clientSocketConnect: SocketService,
-    roomId?: string
-  ): Promise<any>;
-  wait(
-    assetAndChainInfo: AssetAndChainInfo,
-    interimStatusCb: any,
-    clientSocketConnect: SocketService
-  ): Promise<void>;
 }
 
 export interface ChainInfo {
@@ -53,14 +28,6 @@ export interface ChainInfo {
     mainnet: string;
   };
 }
-
-export type BlockchainWaitingServiceFinder = (
-  chainInfo: ChainInfo,
-  assetInfo: AssetInfo,
-  sOrDChain: SourceOrDestination,
-  environment: string,
-  roomId?: string
-) => BlockchainWaitingService | Promise<BlockchainWaitingService>;
 
 export interface AssetTransferObject {
   sourceChainInfo: ChainInfo;

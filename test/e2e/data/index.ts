@@ -1,5 +1,4 @@
 import { AssetTransferObject } from "../../../src";
-import { GetDepositAddressPayload } from "../../../src/libs/types";
 
 export const getTransferPayload = (
   sig: string,
@@ -53,11 +52,3 @@ export const getTransferPayload = (
     transactionTraceId: "0x",
   };
 };
-
-// export const getDepositPayload = (
-//   destAddress: string
-// ): GetDepositAddressPayload => {
-//   return {
-
-//   };
-// };

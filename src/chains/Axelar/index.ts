@@ -1,4 +1,3 @@
-import WaitingService from "./WaitingService";
 import { bech32 } from "bech32";
 import { AssetInfo } from "../../assets/types";
 import { Chain, ChainInfo } from "../types";
@@ -30,7 +29,4 @@ export default class Axelar implements Chain {
       return false;
     }
   };
-
-  public waitingService = (chainInfo: ChainInfo, assetInfo: AssetInfo) =>
-    new WaitingService(chainInfo, assetInfo);
 }
