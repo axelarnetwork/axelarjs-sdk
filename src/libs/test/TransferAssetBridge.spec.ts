@@ -5,12 +5,18 @@ import {
   apiErrorStub,
   depositAddressPayloadStub,
   ethAddressStub,
+  linkEventStub,
+  newRoomIdStub,
   otcStub,
   roomIdStub,
   uuidStub,
 } from "./stubs";
 
 describe("TransferAssetBridge", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe("on init", () => {
     let bridge: TransferAssetBridge;
 
@@ -135,8 +141,18 @@ describe("TransferAssetBridge", () => {
         beforeEach(async () => {
           jest.spyOn(bridge.api, "post").mockRejectedValue(apiErrorStub());
 
+          const dto = depositAddressPayloadStub();
+
           roomId = await bridge
-            .getInitRoomId(depositAddressPayloadStub(), uuidStub())
+            .getInitRoomId(
+              dto.fromChain,
+              dto.toChain,
+              dto.destinationAddress,
+              dto.asset,
+              dto.publicAddress,
+              dto.signature,
+              uuidStub()
+            )
             .catch((_error) => {
               error = _error;
             });
@@ -171,8 +187,15 @@ describe("TransferAssetBridge", () => {
             data: roomIdStub(),
           });
 
+          const dto = depositAddressPayloadStub();
+
           roomId = await bridge.getInitRoomId(
-            depositAddressPayloadStub(),
+            dto.fromChain,
+            dto.toChain,
+            dto.destinationAddress,
+            dto.asset,
+            dto.publicAddress,
+            dto.signature,
             uuidStub()
           );
         });
@@ -248,7 +271,7 @@ describe("TransferAssetBridge", () => {
         beforeEach(async () => {
           jest
             .spyOn(bridge.socket, "joinRoomAndWaitForEvent")
-            .mockResolvedValue(roomIdStub().roomId);
+            .mockResolvedValue(linkEventStub());
 
           roomId = await bridge.getLinkEvent(roomIdStub().roomId);
         });
@@ -263,9 +286,46 @@ describe("TransferAssetBridge", () => {
 
         describe("getInitRoomId()", () => {
           it("shoud return", () => {
-            expect(roomId).toBe(roomIdStub().roomId);
+            expect(roomId).toEqual(newRoomIdStub());
           });
         });
+      });
+    });
+  });
+
+  describe("getDepositAddress()", () => {
+    let bridge: TransferAssetBridge;
+
+    beforeEach(() => {
+      bridge = new TransferAssetBridge({
+        environment: Environment.TESTNET,
+      });
+    });
+
+    describe("when called", () => {
+      const fromChain = "terra";
+      const toChain = "avalanche";
+      const depositAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
+      const asset = "uusd";
+      let response: any;
+      beforeEach(async () => {
+        jest.spyOn(bridge, "getOneTimeCode").mockResolvedValue(otcStub());
+        jest
+          .spyOn(bridge, "getInitRoomId")
+          .mockResolvedValue(roomIdStub().roomId);
+        jest
+          .spyOn(bridge, "getLinkEvent")
+          .mockResolvedValue(linkEventStub().newRoomId);
+        response = await bridge.getDepositAddress(
+          fromChain,
+          toChain,
+          depositAddress,
+          asset
+        );
+      });
+
+      it("should return deposit address", () => {
+        expect(response).toBe(JSON.parse(newRoomIdStub())["depositAddress"]);
       });
     });
   });

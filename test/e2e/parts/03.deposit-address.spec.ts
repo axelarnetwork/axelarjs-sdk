@@ -1,5 +1,4 @@
 import { Environment, TransferAssetBridge } from "../../../src";
-// import { getDepositPayload } from "../data";
 
 export default () => {
   describe("Deposit Address e2e", () => {
@@ -17,50 +16,38 @@ export default () => {
       const destinationAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
 
       beforeAll(async () => {
-        response = await axelar.getDepositAddress({
-          payload: {
-            fromChain: "Terra",
-            toChain: "Avalanche",
-            asset: "uusd",
-            destinationAddress,
-          },
-        });
+        response = await axelar.getDepositAddress(
+          "Terra",
+          "Avalanche",
+          destinationAddress,
+          "uusd"
+        );
       });
 
       it("should get response", () => {
-        console.log({
-          type: "Terra -> avalanche",
-          response,
-        });
         expect(response).toBeTruthy();
         expect(typeof response).toBe("string");
       });
     });
 
-    // describe("getting deposit address - Avalanche -> Terra", () => {
-    //   jest.setTimeout(30000);
-    //   let response: string;
-    //   const destinationAddress = "terra1qem4njhac8azalrav7shvp06myhqldpmkk3p0t";
+    describe("getting deposit address - Avalanche -> Terra", () => {
+      jest.setTimeout(30000);
+      let response: string;
+      const destinationAddress = "terra1qem4njhac8azalrav7shvp06myhqldpmkk3p0t";
 
-    //   beforeAll(async () => {
-    //     response = await axelar.getDepositAddress({
-    //       payload: {
-    //         fromChain: "Avalanche",
-    //         toChain: "Terra",
-    //         asset: "uusd",
-    //         destinationAddress,
-    //       },
-    //     });
-    //   });
+      beforeAll(async () => {
+        response = await axelar.getDepositAddress(
+          "Avalanche",
+          "Terra",
+          destinationAddress,
+          "uusd"
+        );
+      });
 
-    //   it("should get response", () => {
-    //     console.log({
-    //       type: "avalanche -> terra",
-    //       response,
-    //     });
-    //     expect(response).toBeTruthy();
-    //     expect(typeof response).toBe("string");
-    //   });
-    // });
+      it("should get response", () => {
+        expect(response).toBeTruthy();
+        expect(typeof response).toBe("string");
+      });
+    });
   });
 };

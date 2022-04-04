@@ -1,34 +1,16 @@
 import { v4 as uuidv4 } from "uuid";
 import {
-  CallbackStatus,
   CLIENT_API_GET_FEE,
   CLIENT_API_GET_OTC,
   CLIENT_API_POST_TRANSFER_ASSET,
   OTC,
-  SourceOrDestination,
-  StatusResponse,
 } from "../services/types";
-import { AssetInfo } from "../assets/types";
-import {
-  AssetTransferObject,
-  AssetInfoWithTrace,
-  AssetInfoResponse,
-  AssetAndChainInfo,
-} from "../chains/types";
 
 import { RestService, SocketService } from "../services";
-import {
-  createWallet,
-  getWaitingService,
-  validateDestinationAddressByChainName,
-} from "../utils";
-import { validateDestinationAddressByChainSymbol } from "../utils";
+import { createWallet, validateDestinationAddressByChainName } from "../utils";
+
 import { getConfigs } from "../constants";
-import {
-  GetDepositAddressDto,
-  GetDepositAddressPayload,
-  TransferAssetBridgeConfig,
-} from "./types";
+import { TransferAssetBridgeConfig } from "./types";
 
 export class TransferAssetBridge {
   readonly environment: string;
@@ -46,42 +28,48 @@ export class TransferAssetBridge {
     this.socket = new SocketService(this.resourceUrl);
   }
 
-  async getDepositAddress(dto: GetDepositAddressDto): Promise<string> {
+  async getDepositAddress(
+    fromChain: string,
+    toChain: string,
+    destinationAddress: string,
+    asset: string
+  ): Promise<string> {
     // generate trace id
     const traceId = uuidv4();
 
+    // verify destination address format
     const isDestinationAddressValid = validateDestinationAddressByChainName(
-      dto.payload.toChain,
-      dto.payload.destinationAddress,
+      toChain,
+      destinationAddress,
       this.environment
     );
     if (!isDestinationAddressValid)
-      throw new Error(
-        `Invalid destination address for chain ${dto.payload.toChain}`
-      );
+      throw new Error(`Invalid destination address for chain ${toChain}`);
 
-    // use auth
+    // auth/rate limiting
     const wallet = createWallet();
+
+    // sign validation message
     const { validationMsg } = await this.getOneTimeCode(
       wallet.address,
       traceId
     );
-    const sig = await wallet.signMessage(validationMsg);
+    const signature = await wallet.signMessage(validationMsg);
 
-    const payload: GetDepositAddressPayload & {
-      signature: string;
-      publicAddress: string;
-    } = {
-      ...dto.payload,
-      signature: sig,
-      publicAddress: wallet.address,
-    };
+    // get room id to listen for deposit address (to be extracted from link event)
+    const roomId = await this.getInitRoomId(
+      fromChain,
+      toChain,
+      destinationAddress,
+      asset,
+      wallet.address,
+      signature,
+      traceId
+    );
 
-    const roomId = await this.getInitRoomId(payload, traceId);
+    // extract deposit address from link event
     const newRoomId = await this.getLinkEvent(roomId);
     const depositAddress = this.extractDepositAddress(newRoomId);
-
-    console.log("deposit address!", depositAddress);
 
     return depositAddress;
   }
@@ -136,10 +124,24 @@ export class TransferAssetBridge {
   }
 
   async getInitRoomId(
-    payload: GetDepositAddressPayload & { signature: string },
+    fromChain: string,
+    toChain: string,
+    destinationAddress: string,
+    asset: string,
+    publicAddress: string,
+    signature: string,
     traceId: string
   ): Promise<string> {
     type RoomIdResponse = Record<"data", Record<"roomId", string>>;
+
+    const payload = {
+      fromChain,
+      toChain,
+      destinationAddress,
+      asset,
+      publicAddress,
+      signature,
+    };
 
     const response: RoomIdResponse = await this.api
       .post(CLIENT_API_POST_TRANSFER_ASSET, payload, traceId)
@@ -153,7 +155,7 @@ export class TransferAssetBridge {
   }
 
   async getLinkEvent(roomId: string): Promise<string> {
-    const newRoomId = await this.socket
+    const { newRoomId } = await this.socket
       .joinRoomAndWaitForEvent(roomId)
       .catch((error) => {
         throw error;
@@ -163,7 +165,6 @@ export class TransferAssetBridge {
   }
 
   private extractDepositAddress(roomId: string) {
-    // eg: {"depositAddress":"axelar1hwfjznc7zqfdfexczsec9rrz7cetyu3jlg358ugsxfvj8gjlcfzqjynltz","sourceModule":"axelarnet","type":"deposit-confirmation"}
     return JSON.parse(roomId)?.depositAddress;
   }
 }
