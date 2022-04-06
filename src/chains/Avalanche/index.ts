@@ -20,6 +20,5 @@ export default class Avalanche extends Ethereum implements Chain {
 
   constructor() {
     super();
-    this.providerType = "avalanche";
   }
 }
