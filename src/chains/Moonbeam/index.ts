@@ -20,6 +20,5 @@ export default class Moonbeam extends Ethereum implements Chain {
 
   constructor() {
     super();
-    this.providerType = "moonbeam";
   }
 }

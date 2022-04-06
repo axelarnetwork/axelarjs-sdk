@@ -20,6 +20,5 @@ export default class Fantom extends Ethereum implements Chain {
 
   constructor() {
     super();
-    this.providerType = "fantom";
   }
 }

@@ -37,10 +37,13 @@ export class AxelarAssetTransfer {
     fromChain: string,
     toChain: string,
     destinationAddress: string,
-    asset: string
+    asset: string,
+    options?: {
+      _traceId: string;
+    }
   ): Promise<string> {
-    // generate trace id
-    const traceId = uuidv4();
+    // use trace ID sent in by invoking user, or otherwise generate a new one
+    const traceId = options?._traceId || uuidv4();
 
     // verify destination address format
     const isDestinationAddressValid = validateDestinationAddressByChainName(

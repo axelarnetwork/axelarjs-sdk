@@ -1,12 +1,7 @@
 import { isAddress as isValidEVMAddress } from "ethers/lib/utils";
-import { AssetInfo } from "../../assets/types";
-import { SourceOrDestination } from "../../services/types";
 import { Chain, ChainInfo } from "../types";
-import { ProviderType } from "../../utils/EthersJs/ethersjsProvider";
 
 export default class Ethereum implements Chain {
-  public providerType: ProviderType;
-
   public chainInfo: ChainInfo = {
     chainSymbol: "ETH",
     chainName: "Ethereum",
@@ -23,9 +18,7 @@ export default class Ethereum implements Chain {
     },
   };
 
-  constructor() {
-    this.providerType = "ethereum";
-  }
+  constructor() {}
 
   public validateAddress = (address: string) => isValidEVMAddress(address);
 }
