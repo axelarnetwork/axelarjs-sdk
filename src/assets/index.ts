@@ -1050,6 +1050,146 @@ const mainnet = {
       },
     },
   },
+  "dai-wei": {
+    common_key: {
+      devnet: "dai-wei",
+      testnet: "dai-wei",
+      mainnet: "dai-wei",
+    },
+    native_chain: "ethereum",
+    fully_supported: true,
+    decimals: 18,
+    chain_aliases: {
+      axelar: {
+        assetSymbol: "DAI",
+        assetName: "DAI",
+        minDepositAmt: 0.5,
+        ibcDenom: "dai-wei",
+        fullDenomPath: "dai-wei",
+      },
+      moonbeam: {
+        assetSymbol: "axlDAI",
+        assetName: "axlDAI",
+        minDepositAmt: 1,
+        ibcDenom: "dai-wei",
+        fullDenomPath: "dai-wei",
+      },
+      fantom: {
+        assetSymbol: "axlDAI",
+        assetName: "axlDAI",
+        minDepositAmt: 1,
+        ibcDenom: "dai-wei",
+        fullDenomPath: "dai-wei",
+      },
+      ethereum: {
+        assetSymbol: "DAI",
+        assetName: "DAI",
+        minDepositAmt: 20,
+        ibcDenom: "dai-wei",
+        fullDenomPath: "dai-wei",
+      },
+      avalanche: {
+        assetSymbol: "axlDAI",
+        assetName: "axlDAI",
+        minDepositAmt: 1,
+        ibcDenom: "dai-wei",
+        fullDenomPath: "dai-wei",
+      },
+      polygon: {
+        assetSymbol: "axlDAI",
+        assetName: "axlDAI",
+        minDepositAmt: 1,
+        ibcDenom: "dai-wei",
+        fullDenomPath: "dai-wei",
+      },
+      cosmoshub: {
+        assetSymbol: "DAI",
+        assetName: "DAI",
+        minDepositAmt: 0.5,
+        ibcDenom:
+          "ibc/4A98C8AC2C35498162346F28EEBF3206CBEF81F44725FE62A3DB0CC10E88E695",
+        fullDenomPath: "transfer/channel-293/dai-wei",
+      },
+      osmosis: {
+        assetSymbol: "DAI",
+        assetName: "DAI",
+        minDepositAmt: 0.5,
+        ibcDenom:
+          "ibc/0CD3A0285E1341859B5E86B6AB7682F023D03E97607CCC1DC95706411D866DF7",
+        fullDenomPath: "transfer/channel-208/dai-wei",
+      },
+    },
+  },
+  uusdt: {
+    common_key: {
+      devnet: "uusdt",
+      testnet: "uusdt",
+      mainnet: "uusdt",
+    },
+    native_chain: "ethereum",
+    fully_supported: true,
+    decimals: 6,
+    chain_aliases: {
+      axelar: {
+        assetSymbol: "USDT",
+        assetName: "USDT",
+        minDepositAmt: 0.5,
+        ibcDenom: "uusdt",
+        fullDenomPath: "uusdt",
+      },
+      moonbeam: {
+        assetSymbol: "axlUSDT",
+        assetName: "axlUSDT",
+        minDepositAmt: 1,
+        ibcDenom: "uusdt",
+        fullDenomPath: "uusdt",
+      },
+      fantom: {
+        assetSymbol: "axlUSDT",
+        assetName: "axlUSDT",
+        minDepositAmt: 1,
+        ibcDenom: "uusdt",
+        fullDenomPath: "uusdt",
+      },
+      ethereum: {
+        assetSymbol: "USDT",
+        assetName: "USDT",
+        minDepositAmt: 20,
+        ibcDenom: "uusdt",
+        fullDenomPath: "uusdt",
+      },
+      avalanche: {
+        assetSymbol: "axlUSDT",
+        assetName: "axlUSDT",
+        minDepositAmt: 1,
+        ibcDenom: "uusdt",
+        fullDenomPath: "uusdt",
+      },
+      polygon: {
+        assetSymbol: "axlUSDT",
+        assetName: "axlUSDT",
+        minDepositAmt: 1,
+        ibcDenom: "uusdt",
+        fullDenomPath: "uusdt",
+      },
+      cosmoshub: {
+        assetSymbol: "USDT",
+        assetName: "USDT",
+        minDepositAmt: 0.5,
+        ibcDenom:
+          "ibc/5662412372381F56C5F83A0404DC7209E5143ABD32EF67B5705DBE8D9C2BF001",
+        fullDenomPath: "transfer/channel-293/uusdt",
+      },
+      osmosis: {
+        assetSymbol: "USDT",
+        assetName: "USDT",
+        minDepositAmt: 0.5,
+        ibcDenom:
+          "ibc/8242AD24008032E457D2E12D46588FD39FB54FB29680C6C7663D296B383C37C4",
+        fullDenomPath: "transfer/channel-208/uusdt",
+      },
+    },
+  },
 };
 
 export const allAssets: AssetConfig[] = Object.values(
