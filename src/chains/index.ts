@@ -10,11 +10,13 @@ import Moonbeam from "./Moonbeam";
 import Osmosis from "./Osmosis";
 import Cosmoshub from "./Cosmoshub";
 import Juno from "./Juno";
+import EMoney from "./EMoney";
 
 const rawChains: Chain[] = [
   new Axelar(),
   new Avalanche(),
   new Cosmoshub(),
+  new EMoney(),
   new Ethereum(),
   new Fantom(),
   new Juno(),
