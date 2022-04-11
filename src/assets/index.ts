@@ -1,15 +1,25 @@
 import { AssetConfig, LoadAssetConfig } from "./types";
-import { mainnet } from "./mainnet.assets";
-import { testnet } from "./testnet.assets";
-import { devnet } from "./devnet.assets";
+import fetch from "node-fetch";
 
 const allowedEnvironments = ["local", "devnet", "testnet", "mainnet"];
 
-const assetMap: { [environment: string]: {}} = { "devnet": devnet, "testnet": testnet, "mainnet": mainnet };
+let fetchedAssets: AssetConfig[] | null;
 
-export function loadAssets(config: LoadAssetConfig): AssetConfig[] {
-  // handle empty string case
-  const _environment = config.environment || undefined;
+export async function loadAssets(
+  config: LoadAssetConfig
+): Promise<AssetConfig[]> {
+  if (!fetchedAssets) {
+    fetchedAssets = await fetchAssets(config);
+  }
+
+  return Object.values(fetchedAssets);
+}
+
+export async function fetchAssets(
+  config: LoadAssetConfig
+): Promise<AssetConfig[]> {
+  const _environment =
+    config.environment === "local" ? "testnet" : config.environment;
 
   if (!_environment || !allowedEnvironments.includes(_environment)) {
     const joinedEnvs = allowedEnvironments.join("|");
@@ -20,7 +30,22 @@ export function loadAssets(config: LoadAssetConfig): AssetConfig[] {
     throw error;
   }
 
-  const assets = _environment === "local" ? testnet : assetMap[_environment as string];
+  const url = `https://raw.githubusercontent.com/axelarnetwork/axelarate-community/main/resources/${_environment}/assets.json`;
 
-  return Object.values(assets);
+  const assets = await fetch(url)
+    .then((response) => {
+      if (!response.ok) throw response;
+      return response;
+    })
+    .then((response) => response.json())
+    .catch(async (err) => {
+      const _err = await err.json();
+      throw {
+        fullMessage: _err.message,
+      };
+    });
+
+  // console.log("assets downloaded for environment", assets);
+
+  return assets;
 }

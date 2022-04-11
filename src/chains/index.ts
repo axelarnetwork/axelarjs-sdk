@@ -29,8 +29,8 @@ const rawChains: Chain[] = [
 ];
 
 
-export function loadChains(config: LoadChainConfig) {
-  const allAssets = loadAssets(config);
+export async function loadChains(config: LoadChainConfig) {
+  const allAssets = await loadAssets(config);
   const _environment = config.environment as string;
 
   /*push assets to supported chains*/
