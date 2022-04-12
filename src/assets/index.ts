@@ -1196,7 +1196,7 @@ const mainnet = {
       testnet: "ungm",
       mainnet: "ungm",
     },
-    native_chain: "e-Money",
+    native_chain: "e-money",
     fully_supported: true,
     decimals: 6,
     chain_aliases: {
@@ -1243,7 +1243,7 @@ const mainnet = {
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
       },
-      "e-Money": {
+      "e-money": {
         assetSymbol: "NGM",
         assetName: "NGM",
         minDepositAmt: 0.4,
@@ -1258,7 +1258,7 @@ const mainnet = {
       testnet: "eeur",
       mainnet: "eeur",
     },
-    native_chain: "e-Money",
+    native_chain: "e-money",
     fully_supported: true,
     decimals: 6,
     chain_aliases: {
@@ -1305,7 +1305,7 @@ const mainnet = {
         ibcDenom: "eeur",
         fullDenomPath: "eeur",
       },
-      "e-Money": {
+      "e-money": {
         assetSymbol: "EEUR",
         assetName: "EEUR",
         minDepositAmt: 0.5,
