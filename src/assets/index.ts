@@ -1314,68 +1314,6 @@ const mainnet = {
       },
     },
   },
-  echf: {
-    common_key: {
-      devnet: "echf",
-      testnet: "echf",
-      mainnet: "echf",
-    },
-    native_chain: "e-Money",
-    fully_supported: true,
-    decimals: 6,
-    chain_aliases: {
-      axelar: {
-        assetSymbol: "ECHF",
-        assetName: "ECHF",
-        minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/070BC757491B68B55BE06136B5EE317B15C3D16F71CC4F4AB45AD2E2CB1BEF16",
-        fullDenomPath: "transfer/channel-6/echf",
-      },
-      moonbeam: {
-        assetSymbol: "ECHF",
-        assetName: "ECHF",
-        minDepositAmt: 0.9,
-        ibcDenom: "echf",
-        fullDenomPath: "echf",
-      },
-      fantom: {
-        assetSymbol: "ECHF",
-        assetName: "ECHF",
-        minDepositAmt: 0.9,
-        ibcDenom: "echf",
-        fullDenomPath: "echf",
-      },
-      ethereum: {
-        assetSymbol: "ECHF",
-        assetName: "ECHF",
-        minDepositAmt: 20,
-        ibcDenom: "echf",
-        fullDenomPath: "echf",
-      },
-      avalanche: {
-        assetSymbol: "ECHF",
-        assetName: "ECHF",
-        minDepositAmt: 0.9,
-        ibcDenom: "echf",
-        fullDenomPath: "echf",
-      },
-      polygon: {
-        assetSymbol: "ECHF",
-        assetName: "ECHF",
-        minDepositAmt: 0.9,
-        ibcDenom: "echf",
-        fullDenomPath: "echf",
-      },
-      "e-Money": {
-        assetSymbol: "ECHF",
-        assetName: "ECHF",
-        minDepositAmt: 0.5,
-        ibcDenom: "echf",
-        fullDenomPath: "echf",
-      },
-    },
-  },
 };
 
 export const allAssets: AssetConfig[] = Object.values(
