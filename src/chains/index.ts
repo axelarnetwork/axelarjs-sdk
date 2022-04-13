@@ -13,25 +13,26 @@ import { AssetConfig, AssetInfo } from "../assets/types";
 import { Chain, LoadChainConfig } from "./types";
 import { cloneDeep } from "lodash";
 import Crescent from "./Crescent";
-
-const rawChains: Chain[] = [
-  new Axelar(),
-  new Avalanche(),
-  new Cosmoshub(),
-  new Crescent(),
-  new Ethereum(),
-  new Fantom(),
-  new Juno(),
-  new Moonbeam(),
-  new Osmosis(),
-  new Polygon(),
-  new Terra(),
-];
-
+import EMoney from "./EMoney";
 
 export function loadChains(config: LoadChainConfig) {
   const allAssets = loadAssets(config);
   const _environment = config.environment as string;
+
+  const rawChains: Chain[] = [
+    new Axelar(),
+    new Avalanche(),
+    new Cosmoshub(),
+    new Crescent(),
+    new Ethereum(),
+    new EMoney(),
+    new Fantom(),
+    new Juno(),
+    new Moonbeam(),
+    new Osmosis(),
+    new Polygon(),
+    new Terra(),
+  ];
 
   /*push assets to supported chains*/
   rawChains.forEach(({ chainInfo }) => {
