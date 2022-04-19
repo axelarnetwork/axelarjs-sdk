@@ -23,7 +23,7 @@ export default class EMoney extends Axelar implements Chain {
     if (!address) return false;
 
     try {
-      return bech32.decode(address).prefix === "cosmos";
+      return bech32.decode(address).prefix === "emoney";
     } catch (e) {
       return false;
     }
