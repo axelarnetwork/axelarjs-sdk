@@ -229,29 +229,13 @@ export const testnet = {
         ibcDenom: "wmatic-wei",
         fullDenomPath: "wmatic-wei",
       },
-      cosmoshub: {
-        assetSymbol: "WMATIC",
-        assetName: "WMATIC",
-        minDepositAmt: 0.03,
-        ibcDenom:
-          "ibc/1BE5BF73F50D2D82C74628C6290834E66C5467F231B7FBC7DD45E217EE1D42A5",
-        fullDenomPath: "transfer/channel-238/wmatic-wei",
-      },
       osmosis: {
         assetSymbol: "WMATIC",
         assetName: "WMATIC",
         minDepositAmt: 0.03,
         ibcDenom:
-          "ibc/67D0DAF8D504ED1616A1886CCECB4E366DC81A8EF48BD22AEA1F44BE87ED19AE",
-        fullDenomPath: "transfer/channel-184/wmatic-wei",
-      },
-      terra: {
-        assetSymbol: "WMATIC",
-        assetName: "WMATIC",
-        minDepositAmt: 0.03,
-        ibcDenom:
-          "ibc/90CC92BD6683D3D39933223D50FB678B6C2EDC4F4B048E21BF358570B2087916",
-        fullDenomPath: "transfer/channel-78/wmatic-wei",
+          "ibc/4E84944734F09DEAEC84882F5CF6ECD0F48CA9400F07ED355F6502C67930A3DD",
+        fullDenomPath: "transfer/channel-240/wmatic-wei",
       },
     },
   },
@@ -307,29 +291,13 @@ export const testnet = {
         ibcDenom: "wftm-wei",
         fullDenomPath: "wftm-wei",
       },
-      cosmoshub: {
-        assetSymbol: "WFTM",
-        assetName: "WFTM",
-        minDepositAmt: 0.04,
-        ibcDenom:
-          "ibc/947B84E653CBEC9386287883173A40D3C0A284AB554557342C50378219ECE147",
-        fullDenomPath: "transfer/channel-238/wftm-wei",
-      },
       osmosis: {
         assetSymbol: "WFTM",
         assetName: "WFTM",
         minDepositAmt: 0.04,
         ibcDenom:
-          "ibc/033C5FCE2C549920B75CC794D12BC3407F638421C982CE9B48D4E5D986F4EFCE",
-        fullDenomPath: "transfer/channel-184/wftm-wei",
-      },
-      terra: {
-        assetSymbol: "WFTM",
-        assetName: "WFTM",
-        minDepositAmt: 0.04,
-        ibcDenom:
-          "ibc/95482BCD668E74C030E1B8CE0874A447A593C144C8E9DB41BE05B7A9495ECDD7",
-        fullDenomPath: "transfer/channel-78/wftm-wei",
+          "ibc/6625132ACE6721012E7359AF2FF0F20B28E4122FB60673D17D4FC1D8D9D04559",
+        fullDenomPath: "transfer/channel-240/wftm-wei",
       },
     },
   },
@@ -385,37 +353,13 @@ export const testnet = {
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
       },
-      cosmoshub: {
-        assetSymbol: "WETH",
-        assetName: "WETH",
-        minDepositAmt: 0.00002,
-        ibcDenom:
-          "ibc/DEC3B614DEA87E77AFABE3EDA1F95A7E1A429080950AD9B0AF257FE01706CA0B",
-        fullDenomPath: "transfer/channel-238/weth-wei",
-      },
       osmosis: {
         assetSymbol: "WETH",
         assetName: "WETH",
         minDepositAmt: 0.00002,
         ibcDenom:
-          "ibc/A8C7A5D5767DECBAF96AFDE4C2D99D95BE9FF38CA75BE3A1CD31E3D20264EFF9",
-        fullDenomPath: "transfer/channel-184/weth-wei",
-      },
-      terra: {
-        assetSymbol: "WETH",
-        assetName: "WETH",
-        minDepositAmt: 0.00002,
-        ibcDenom:
-          "ibc/E614301CF4F54C23FAEEBF50F33D247AC743E9F247AB094AC57F68DB3A80635C",
-        fullDenomPath: "transfer/channel-78/weth-wei",
-      },
-      crescent: {
-        assetSymbol: "WETH",
-        assetName: "WETH",
-        minDepositAmt: 0.00002,
-        ibcDenom:
-          "ibc/AAD7136DD626569C3DDE7C5F764968BB2E939875EFC568AE5712B62081850814",
-        fullDenomPath: "transfer/channel-3/weth-wei",
+          "ibc/E3BDEB883AA9A48F52E3677A1167E0C10D8F9FEF4F56CA7D065551BF00B24B84",
+        fullDenomPath: "transfer/channel-240/weth-wei",
       },
     },
   },
@@ -471,29 +415,13 @@ export const testnet = {
         ibcDenom: "wavax-wei",
         fullDenomPath: "wavax-wei",
       },
-      cosmoshub: {
-        assetSymbol: "WAVAX",
-        assetName: "WAVAX",
-        minDepositAmt: 0.0007,
-        ibcDenom:
-          "ibc/88C2DE3AE63A443385CDFE54A18B0FC48402DDF3FE5AC532A663F9C3A1144462",
-        fullDenomPath: "transfer/channel-238/wavax-wei",
-      },
       osmosis: {
         assetSymbol: "WAVAX",
         assetName: "WAVAX",
         minDepositAmt: 0.0007,
         ibcDenom:
-          "ibc/9534907D2838E2134F21CC286A4CD0FF3CA96AA032F9F695ABF5621CC98AB17F",
-        fullDenomPath: "transfer/channel-184/wavax-wei",
-      },
-      terra: {
-        assetSymbol: "WAVAX",
-        assetName: "WAVAX",
-        minDepositAmt: 0.0007,
-        ibcDenom:
-          "ibc/0D2A39F3DF653685ED16DED245C83A51B9DD6CB8A55DE2C39D194BE44C108765",
-        fullDenomPath: "transfer/channel-78/wavax-wei",
+          "ibc/E49693D492828B1ACE243BBEC6FEC3ED036305CA06479DE8273FE9C7A94AADD6",
+        fullDenomPath: "transfer/channel-240/wavax-wei",
       },
     },
   },
@@ -549,91 +477,13 @@ export const testnet = {
         ibcDenom: "wdev-wei",
         fullDenomPath: "wdev-wei",
       },
-      cosmoshub: {
-        assetSymbol: "WDEV",
-        assetName: "WDEV",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/12B944E03F3E2197589129CB359E1BD5FA3F06841792FFE46852EAFE31EEB20A",
-        fullDenomPath: "transfer/channel-238/wdev-wei",
-      },
       osmosis: {
         assetSymbol: "WDEV",
         assetName: "WDEV",
         minDepositAmt: 0.02,
         ibcDenom:
-          "ibc/D3AF2C7986FA1191157529F68609887103EBBD0B9CAFAD615CF19B419E2F5566",
-        fullDenomPath: "transfer/channel-184/wdev-wei",
-      },
-      terra: {
-        assetSymbol: "WDEV",
-        assetName: "WDEV",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/2A3208A0A402373F2E3E43228FC51F298433CE1BA5EDBF246ACE5F2E5111448E",
-        fullDenomPath: "transfer/channel-78/wdev-wei",
-      },
-    },
-  },
-  uatom: {
-    common_key: {
-      devnet: "uatom",
-      testnet: "uatom",
-      mainnet: "uatom",
-    },
-    native_chain: "cosmoshub",
-    fully_supported: true,
-    decimals: 6,
-    chain_aliases: {
-      axelar: {
-        assetSymbol: "ATOM",
-        assetName: "ATOM",
-        minDepositAmt: 0.002,
-        ibcDenom:
-          "ibc/EF48E6B1A1A19F47ECAEA62F5670C37C0580E86A9E88498B7E393EB6F49F33C0",
-        fullDenomPath: "transfer/channel-4/uatom",
-      },
-      moonbeam: {
-        assetSymbol: "ATOM",
-        assetName: "ATOM (Axelar-wrapped)",
-        minDepositAmt: 0.004,
-        ibcDenom: "uatom",
-        fullDenomPath: "uatom",
-      },
-      fantom: {
-        assetSymbol: "ATOM",
-        assetName: "ATOM (Axelar-wrapped)",
-        minDepositAmt: 0.004,
-        ibcDenom: "uatom",
-        fullDenomPath: "uatom",
-      },
-      ethereum: {
-        assetSymbol: "ATOM",
-        assetName: "ATOM (Axelar-wrapped)",
-        minDepositAmt: 0.004,
-        ibcDenom: "uatom",
-        fullDenomPath: "uatom",
-      },
-      avalanche: {
-        assetSymbol: "ATOM",
-        assetName: "ATOM (Axelar-wrapped)",
-        minDepositAmt: 0.004,
-        ibcDenom: "uatom",
-        fullDenomPath: "uatom",
-      },
-      polygon: {
-        assetSymbol: "ATOM",
-        assetName: "ATOM (Axelar-wrapped)",
-        minDepositAmt: 0.004,
-        ibcDenom: "uatom",
-        fullDenomPath: "uatom",
-      },
-      cosmoshub: {
-        assetSymbol: "ATOM",
-        assetName: "ATOM",
-        minDepositAmt: 0.002,
-        ibcDenom: "uatom",
-        fullDenomPath: "uatom",
+          "ibc/BDEB81D8E81910D832AFCDEE9822923DB84ECD8981D10A2282D202EAAD2A6C0C",
+        fullDenomPath: "transfer/channel-240/wdev-wei",
       },
     },
   },
@@ -689,21 +539,13 @@ export const testnet = {
         ibcDenom: "uausdc",
         fullDenomPath: "uausdc",
       },
-      cosmoshub: {
-        assetSymbol: "aUSDC",
-        assetName: "aUSDC",
-        minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/3DC20E9A12C8F19A92CDEBC37116C26EADF4C65E7498193791A3DAAD0B263556",
-        fullDenomPath: "transfer/channel-238/uausdc",
-      },
       osmosis: {
         assetSymbol: "aUSDC",
         assetName: "aUSDC",
         minDepositAmt: 0.05,
         ibcDenom:
-          "ibc/423FB88C7D1D4FCA2F7E67F07473DB4BB14282AE6F7B1A41B220A1AD9A762254",
-        fullDenomPath: "transfer/channel-184/uausdc",
+          "ibc/DB39478B7315836EB481DE311182D882BEC8E232E9586F1D4FF509079901B27E",
+        fullDenomPath: "transfer/channel-240/uausdc",
       },
     },
   },
