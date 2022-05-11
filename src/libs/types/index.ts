@@ -55,3 +55,9 @@ export type AxelarAssetTransferConfig = {
   auth?: "local" | "metamask";
   overwriteResourceUrl?: string;
 };
+
+export type AxelarQueryAPIConfig = {
+  axelarRpcUrl?: string;
+  axelarLcdUrl?: string;
+  environment?: Environment;
+};

@@ -82,41 +82,6 @@ export class AxelarAssetTransfer {
     return depositAddress;
   }
 
-  public async getFeeForChainAndAsset(
-    chain: string,
-    asset: string
-  ): Promise<any> {
-    return this.api
-      .get(`${CLIENT_API_GET_FEE}?chainName=${chain}&assetCommonKey=${asset}`)
-      .then((response) => response)
-      .catch((error) => {
-        throw error;
-      });
-  }
-
-  public async getTransferFee(
-    sourceChain: string,
-    destinationChain: string,
-    asset: string
-  ): Promise<number> {
-    try {
-      const sourceChainFeeInfo = await this.getFeeForChainAndAsset(
-        sourceChain,
-        asset
-      );
-      const destinationChainFeeInfo = await this.getFeeForChainAndAsset(
-        destinationChain,
-        asset
-      );
-      return (
-        Number(sourceChainFeeInfo?.fee_info?.min_fee) +
-        Number(destinationChainFeeInfo?.fee_info?.min_fee)
-      );
-    } catch (e: any) {
-      throw e;
-    }
-  }
-
   public async getOneTimeCode(
     signerAddress: string,
     traceId: string
