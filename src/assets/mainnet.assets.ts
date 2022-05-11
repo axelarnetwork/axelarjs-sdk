@@ -395,6 +395,40 @@ export const mainnet = {
       },
     },
   },
+  "weth-wei": {
+    common_key: {
+      devnet: "weth-wei",
+      testnet: "weth-wei",
+      mainnet: "weth-wei",
+    },
+    native_chain: "ethereum",
+    fully_supported: true,
+    decimals: 18,
+    chain_aliases: {
+      axelar: {
+        assetSymbol: "WETH",
+        assetName: "WETH",
+        minDepositAmt: 0.5,
+        ibcDenom: "weth-wei",
+        fullDenomPath: "weth-wei",
+      },
+      ethereum: {
+        assetSymbol: "WETH",
+        assetName: "WETH",
+        minDepositAmt: 20,
+        ibcDenom: "weth-wei",
+        fullDenomPath: "weth-wei",
+      },
+      osmosis: {
+        assetSymbol: "WETH",
+        assetName: "WETH",
+        minDepositAmt: 0.5,
+        ibcDenom:
+          "ibc/EA1D43981D5C9A1C4AAEA9C23BB1D4FA126BA9BC7020A25E0AE4AA841EA25DC5",
+        fullDenomPath: "transfer/channel-208/weth-wei",
+      },
+    },
+  },
   uusdt: {
     common_key: {
       devnet: "uusdt",
