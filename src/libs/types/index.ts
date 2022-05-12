@@ -59,5 +59,22 @@ export type AxelarAssetTransferConfig = {
 export type AxelarQueryAPIConfig = {
   axelarRpcUrl?: string;
   axelarLcdUrl?: string;
-  environment?: Environment;
+  environment: Environment;
 };
+
+export interface FeeInfoResponse {
+  fee_info: {
+    chain: string;
+    asset: string;
+    fee_rate: string;
+    min_fee: string;
+    max_fee: string;
+  }
+}
+
+export interface TransferFeeResponse {
+  fee: {
+    denom: string;
+    amount: string;
+  }
+}
