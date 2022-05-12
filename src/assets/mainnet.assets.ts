@@ -34,7 +34,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "UST",
         assetName: "UST (Axelar-wrapped)",
-        minDepositAmt: 80.0,
+        minDepositAmt: 100.0,
         ibcDenom: "uusd",
         fullDenomPath: "uusd",
       },
@@ -96,7 +96,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "LUNA",
         assetName: "LUNA (Axelar-wrapped)",
-        minDepositAmt: 40.0,
+        minDepositAmt: 60.0,
         ibcDenom: "uluna",
         fullDenomPath: "uluna",
       },
@@ -158,7 +158,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "axlATOM",
         assetName: "axlATOM",
-        minDepositAmt: 4.0,
+        minDepositAmt: 6.0,
         ibcDenom: "uatom",
         fullDenomPath: "uatom",
       },
@@ -219,7 +219,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "USDC",
         assetName: "USDC",
-        minDepositAmt: 40.0,
+        minDepositAmt: 60.0,
         ibcDenom: "uusdc",
         fullDenomPath: "uusdc",
       },
@@ -289,7 +289,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "FRAX",
         assetName: "FRAX",
-        minDepositAmt: 40.0,
+        minDepositAmt: 60.0,
         ibcDenom: "frax-wei",
         fullDenomPath: "frax-wei",
       },
@@ -359,7 +359,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "DAI",
         assetName: "DAI",
-        minDepositAmt: 40.0,
+        minDepositAmt: 60.0,
         ibcDenom: "dai-wei",
         fullDenomPath: "dai-wei",
       },
@@ -429,7 +429,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "USDT",
         assetName: "USDT",
-        minDepositAmt: 40.0,
+        minDepositAmt: 60.0,
         ibcDenom: "uusdt",
         fullDenomPath: "uusdt",
       },
@@ -500,7 +500,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "NGM",
         assetName: "NGM",
-        minDepositAmt: 40.0,
+        minDepositAmt: 60.0,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
       },
@@ -562,7 +562,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "EEUR",
         assetName: "EEUR",
-        minDepositAmt: 40.0,
+        minDepositAmt: 60.0,
         ibcDenom: "eeur",
         fullDenomPath: "eeur",
       },
@@ -609,7 +609,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "WETH",
         assetName: "WETH",
-        minDepositAmt: 0.02,
+        minDepositAmt: 0.03,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
       },
