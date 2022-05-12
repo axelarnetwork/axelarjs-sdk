@@ -29,7 +29,6 @@ export class RestService {
   }
 
   private async execRest(endpoint: string, requestOptions: any) {
-    console.log("full url",this.host + endpoint);
     return fetch(this.host + endpoint, requestOptions)
       .then((response) => {
         if (!response.ok) throw response;

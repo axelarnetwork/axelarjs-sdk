@@ -49,11 +49,16 @@ describe("AxelarQueryAPI", () => {
 
   describe("getGasPrice", () => {
     test("It should get a gas price", async () => {
-      const [sourceChainName, destinationChainName, sourceChainTokenAddress, sourceChainTokenSymbol] = [
+      const [
+        sourceChainName,
+        destinationChainName,
+        sourceChainTokenAddress,
+        sourceChainTokenSymbol,
+      ] = [
         "avalanche",
         "polygon",
         "0x43F4600b552089655645f8c16D86A5a9Fa296bc3",
-        "uusd",
+        "UST",
       ];
       const response = await api.getGasPrice(
         sourceChainName,
@@ -61,10 +66,20 @@ describe("AxelarQueryAPI", () => {
         sourceChainTokenAddress,
         sourceChainTokenSymbol
       );
-
-      console.log("getGasPrice response",response);
-
       expect(response).toBeDefined();
+    });
+  });
+
+  describe("getDenomFromSymbol", () => {
+    test("It should get the denom for an asset given its symbol on a chain", async () => {
+      const response = await api.getDenomFromSymbol("UST","ethereum");
+      expect(response).toEqual("uusd");
+    });
+  });
+  describe("getSymbolFromDenom", () => {
+    test("It should get the symbol for an asset on a given chain given its denom", async () => {
+      const response = await api.getSymbolFromDenom("uusd","ethereum");
+      expect(response).toEqual("UST");
     });
   });
 });
