@@ -238,16 +238,16 @@ export const mainnet = {
         fullDenomPath: "uusdc",
       },
       cosmoshub: {
-        assetSymbol: "USDC",
-        assetName: "USDC",
+        assetSymbol: "axlUSDC",
+        assetName: "axlUSDC",
         minDepositAmt: 0.5,
         ibcDenom:
           "ibc/932D6003DA334ECBC5B23A071B4287D0A5CC97331197FE9F1C0689BA002A8421",
         fullDenomPath: "transfer/channel-293/uusdc",
       },
       osmosis: {
-        assetSymbol: "USDC",
-        assetName: "USDC",
+        assetSymbol: "axlUSDC",
+        assetName: "axlUSDC",
         minDepositAmt: 0.5,
         ibcDenom:
           "ibc/D189335C6E4A68B513C10AB227BF1C1D38C746766278BA3EEB4FB14124F1D858",
@@ -308,16 +308,16 @@ export const mainnet = {
         fullDenomPath: "frax-wei",
       },
       cosmoshub: {
-        assetSymbol: "FRAX",
-        assetName: "FRAX",
+        assetSymbol: "axlFRAX",
+        assetName: "axlFRAX",
         minDepositAmt: 0.5,
         ibcDenom:
           "ibc/3792246C7C422C037C603C955F8383B4E32E7555D693344F9A029A67FE221C57",
         fullDenomPath: "transfer/channel-293/frax-wei",
       },
       osmosis: {
-        assetSymbol: "FRAX",
-        assetName: "FRAX",
+        assetSymbol: "axlFRAX",
+        assetName: "axlFRAX",
         minDepositAmt: 0.5,
         ibcDenom:
           "ibc/0E43EDE2E2A3AFA36D0CD38BDDC0B49FECA64FA426A82E102F304E430ECF46EE",
@@ -378,16 +378,16 @@ export const mainnet = {
         fullDenomPath: "dai-wei",
       },
       cosmoshub: {
-        assetSymbol: "DAI",
-        assetName: "DAI",
+        assetSymbol: "axlDAI",
+        assetName: "axlDAI",
         minDepositAmt: 0.5,
         ibcDenom:
           "ibc/4A98C8AC2C35498162346F28EEBF3206CBEF81F44725FE62A3DB0CC10E88E695",
         fullDenomPath: "transfer/channel-293/dai-wei",
       },
       osmosis: {
-        assetSymbol: "DAI",
-        assetName: "DAI",
+        assetSymbol: "axlDAI",
+        assetName: "axlDAI",
         minDepositAmt: 0.5,
         ibcDenom:
           "ibc/0CD3A0285E1341859B5E86B6AB7682F023D03E97607CCC1DC95706411D866DF7",
@@ -448,16 +448,16 @@ export const mainnet = {
         fullDenomPath: "uusdt",
       },
       cosmoshub: {
-        assetSymbol: "USDT",
-        assetName: "USDT",
+        assetSymbol: "axlUSDT",
+        assetName: "axlUSDT",
         minDepositAmt: 0.5,
         ibcDenom:
           "ibc/5662412372381F56C5F83A0404DC7209E5143ABD32EF67B5705DBE8D9C2BF001",
         fullDenomPath: "transfer/channel-293/uusdt",
       },
       osmosis: {
-        assetSymbol: "USDT",
-        assetName: "USDT",
+        assetSymbol: "axlUSDT",
+        assetName: "axlUSDT",
         minDepositAmt: 0.5,
         ibcDenom:
           "ibc/8242AD24008032E457D2E12D46588FD39FB54FB29680C6C7663D296B383C37C4",
@@ -614,8 +614,8 @@ export const mainnet = {
         fullDenomPath: "weth-wei",
       },
       osmosis: {
-        assetSymbol: "WETH",
-        assetName: "WETH",
+        assetSymbol: "axlWETH",
+        assetName: "axlWETH",
         minDepositAmt: 0.0002,
         ibcDenom:
           "ibc/EA1D43981D5C9A1C4AAEA9C23BB1D4FA126BA9BC7020A25E0AE4AA841EA25DC5",
