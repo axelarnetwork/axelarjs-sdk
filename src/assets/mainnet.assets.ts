@@ -623,4 +623,38 @@ export const mainnet = {
       },
     },
   },
+  "wbtc-satoshi": {
+    common_key: {
+      devnet: "wbtc-satoshi",
+      testnet: "wbtc-satoshi",
+      mainnet: "wbtc-satoshi",
+    },
+    native_chain: "ethereum",
+    fully_supported: true,
+    decimals: 8,
+    chain_aliases: {
+      axelar: {
+        assetSymbol: "WBTC",
+        assetName: "WBTC",
+        minDepositAmt: 2e-5,
+        ibcDenom: "wbtc-satoshi",
+        fullDenomPath: "wbtc-satoshi",
+      },
+      ethereum: {
+        assetSymbol: "WBTC",
+        assetName: "WBTC",
+        minDepositAmt: 0.002,
+        ibcDenom: "wbtc-satoshi",
+        fullDenomPath: "wbtc-satoshi",
+      },
+      osmosis: {
+        assetSymbol: "axlWBTC",
+        assetName: "axlWBTC",
+        minDepositAmt: 2e-5,
+        ibcDenom:
+          "ibc/D1542AA8762DB13087D8364F3EA6509FD6F009A34F00426AF9E4F9FA85CBBF1F",
+        fullDenomPath: "transfer/channel-208/wbtc-satoshi",
+      },
+    },
+  },
 };

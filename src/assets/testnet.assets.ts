@@ -230,8 +230,8 @@ export const testnet = {
         fullDenomPath: "wmatic-wei",
       },
       osmosis: {
-        assetSymbol: "WMATIC",
-        assetName: "WMATIC",
+        assetSymbol: "axlWMATIC",
+        assetName: "axlWMATIC",
         minDepositAmt: 0.03,
         ibcDenom:
           "ibc/4E84944734F09DEAEC84882F5CF6ECD0F48CA9400F07ED355F6502C67930A3DD",
@@ -292,8 +292,8 @@ export const testnet = {
         fullDenomPath: "wftm-wei",
       },
       osmosis: {
-        assetSymbol: "WFTM",
-        assetName: "WFTM",
+        assetSymbol: "axlWFTM",
+        assetName: "axlWFTM",
         minDepositAmt: 0.04,
         ibcDenom:
           "ibc/6625132ACE6721012E7359AF2FF0F20B28E4122FB60673D17D4FC1D8D9D04559",
@@ -314,57 +314,57 @@ export const testnet = {
       axelar: {
         assetSymbol: "WETH",
         assetName: "WETH",
-        minDepositAmt: 0.00002,
+        minDepositAmt: 2e-5,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
       },
       moonbeam: {
         assetSymbol: "WETH",
         assetName: "WETH (Axelar-wrapped)",
-        minDepositAmt: 0.00004,
+        minDepositAmt: 4e-5,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
       },
       fantom: {
         assetSymbol: "WETH",
         assetName: "WETH (Axelar-wrapped)",
-        minDepositAmt: 0.00004,
+        minDepositAmt: 4e-5,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
       },
       ethereum: {
         assetSymbol: "WETH",
         assetName: "WETH",
-        minDepositAmt: 0.00004,
+        minDepositAmt: 4e-5,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
       },
       avalanche: {
         assetSymbol: "WETH",
         assetName: "WETH (Axelar-wrapped)",
-        minDepositAmt: 0.00004,
+        minDepositAmt: 4e-5,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
       },
       polygon: {
         assetSymbol: "WETH",
         assetName: "WETH (Axelar-wrapped)",
-        minDepositAmt: 0.00004,
+        minDepositAmt: 4e-5,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
       },
       osmosis: {
-        assetSymbol: "WETH",
-        assetName: "WETH",
-        minDepositAmt: 0.00002,
+        assetSymbol: "axlWETH",
+        assetName: "axlWETH",
+        minDepositAmt: 2e-5,
         ibcDenom:
           "ibc/E3BDEB883AA9A48F52E3677A1167E0C10D8F9FEF4F56CA7D065551BF00B24B84",
         fullDenomPath: "transfer/channel-240/weth-wei",
       },
       crescent: {
-        assetSymbol: "WETH",
-        assetName: "WETH",
-        minDepositAmt: 0.00002,
+        assetSymbol: "axlWETH",
+        assetName: "axlWETH",
+        minDepositAmt: 2e-5,
         ibcDenom:
           "ibc/AAD7136DD626569C3DDE7C5F764968BB2E939875EFC568AE5712B62081850814",
         fullDenomPath: "transfer/channel-3/weth-wei",
@@ -424,8 +424,8 @@ export const testnet = {
         fullDenomPath: "wavax-wei",
       },
       osmosis: {
-        assetSymbol: "WAVAX",
-        assetName: "WAVAX",
+        assetSymbol: "axlWAVAX",
+        assetName: "axlWAVAX",
         minDepositAmt: 0.0007,
         ibcDenom:
           "ibc/E49693D492828B1ACE243BBEC6FEC3ED036305CA06479DE8273FE9C7A94AADD6",
@@ -486,8 +486,8 @@ export const testnet = {
         fullDenomPath: "wdev-wei",
       },
       osmosis: {
-        assetSymbol: "WDEV",
-        assetName: "WDEV",
+        assetSymbol: "axlWDEV",
+        assetName: "axlWDEV",
         minDepositAmt: 0.02,
         ibcDenom:
           "ibc/BDEB81D8E81910D832AFCDEE9822923DB84ECD8981D10A2282D202EAAD2A6C0C",
@@ -548,12 +548,46 @@ export const testnet = {
         fullDenomPath: "uausdc",
       },
       osmosis: {
-        assetSymbol: "aUSDC",
-        assetName: "aUSDC",
+        assetSymbol: "axlaUSDC",
+        assetName: "axlaUSDC",
         minDepositAmt: 0.05,
         ibcDenom:
           "ibc/DB39478B7315836EB481DE311182D882BEC8E232E9586F1D4FF509079901B27E",
         fullDenomPath: "transfer/channel-240/uausdc",
+      },
+    },
+  },
+  "wbtc-satoshi": {
+    common_key: {
+      devnet: "wbtc-satoshi",
+      testnet: "wbtc-satoshi",
+      mainnet: "wbtc-satoshi",
+    },
+    native_chain: "ethereum",
+    fully_supported: true,
+    decimals: 8,
+    chain_aliases: {
+      axelar: {
+        assetSymbol: "WBTC",
+        assetName: "WBTC",
+        minDepositAmt: 2e-6,
+        ibcDenom: "wbtc-satoshi",
+        fullDenomPath: "wbtc-satoshi",
+      },
+      ethereum: {
+        assetSymbol: "WBTC",
+        assetName: "WBTC",
+        minDepositAmt: 3e-6,
+        ibcDenom: "wbtc-satoshi",
+        fullDenomPath: "wbtc-satoshi",
+      },
+      osmosis: {
+        assetSymbol: "axlWBTC",
+        assetName: "axlWBTC",
+        minDepositAmt: 2e-6,
+        ibcDenom:
+          "ibc/8DF7319B304D91E491408FAEECB205E6E7043E3FE759553EAD07566CE1822FE0",
+        fullDenomPath: "transfer/channel-240/wbtc-satoshi",
       },
     },
   },
