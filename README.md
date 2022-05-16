@@ -16,15 +16,13 @@ Deposit address workflow:
 
 #### Install the AxelarJS SDK
 
-We'll use the AxelarJS SDK, which is a `npm` dependency that empowers developers to make requests into the Axelar network from a frontend. The Axelar SDK provides a wrapper for API calls that you can use to generate a deposit address. (Alternately, see [Send UST to an EVM chain](../learn/cli/ust-to-evm) for an example of how to generate a deposit address using the CLI instead of the Axelar SDK.)
+We'll use the AxelarJS SDK, which is a `npm` dependency that empowers developers to make requests into the Axelar network from a frontend. The Axelar SDK provides a wrapper for API calls that you can use to generate a deposit address.
 
 Install the Axelar SDK:
 
 ```bash
-npm i @axelar-network/axelarjs-sdk@alpha
+npm i @axelar-network/axelarjs-sdk
 ```
-
-(We recommend installing the alpha version as the stable version is now legacy. The alpha version is scalable and uses websockets to wait for the deposit address generation.)
 
 #### Generate a deposit address using the SDK
 
