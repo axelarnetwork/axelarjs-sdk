@@ -2,205 +2,76 @@
 
 ## Overview
 
-The AxelarJS SDK empowers developers to make cross-chain transfers using the Axelar network from their frontend.
+The AxelarJS SDK can be used to make cross-chain token transfers using the Axelar network. You will use this method to send tokens across networks if you want to allow token transfers from wallets that don't know anything about Axelar. Example: Withdrawal from a centralized exchange.
 
-### Example use case: asset transfer
+### Get a deposit address
 
-AxelarJS enables the transfer of crypto assets across any blockchain supported by Axelar.
+A _deposit address_ is a special address created and monitored by Axelar relayer services. It is similar to how centralized exchanges generate a monitored one-time deposit address that facilitate your token transfers.
 
-Currently supported assets and chains [TODO link to the authoritative list]:
+Deposit address workflow:
 
-| Supported Assets                                                                                             | Supported Blockchain Networks                                                                                             |
-| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| <ul><li>AXL (Axelar native token)</li><li>LUNA (Terra native token)</li><li>UST (Terra stablecoin)</li></ul> | <ul><li>Avalanche</li><li>Axelar</li><li>Ethereum</li><li>Fantom</li><li>Moonbeam</li><li>Polygon</li><li>Terra</li></ul> |
+1. Generate a deposit address.
+2. User sends tokens to the deposit address. Examples: withdrawal from a centralized exchange, transaction from your favorite wallet software.
+3. Axelar relayers observe the transaction on the source chain and complete it on the destination chain.
 
-Axelar will continue to add support for new assets and chains in the future.
+#### Install the AxelarJS SDK
 
-## Technical overview
+We'll use the AxelarJS SDK, which is a `npm` dependency that empowers developers to make requests into the Axelar network from a frontend. The Axelar SDK provides a wrapper for API calls that you can use to generate a deposit address. (Alternately, see [Send UST to an EVM chain](../learn/cli/ust-to-evm) for an example of how to generate a deposit address using the CLI instead of the Axelar SDK.)
 
-The AxelarJS SDK is a `npm` dependency that includes libraries that make requests into the Axelar network.
-
-![Architecture diagram](sdk-diagram.png)
-
-Any request from the JS SDK is routed through a node REST server that redirects requests through a coordinated collection of microservices controlled by Axelar.
-
-These microservices facilitate the relay of cross-chain transactions that run on top of the Axelar network.
-
-## Security mesures
-
-AxelarJS employs security measures to protect our services from abuse. Currently every invocation of `getDepositAddress` requires frontend users to connect to a Web3 wallet and sign a message with a one-time code. Invocations to the API are also rate limited.
-
-## Installation
+Install the Axelar SDK:
 
 ```bash
-npm i --save @axelar-network/axelarjs-sdk
+npm i @axelar-network/axelarjs-sdk@alpha
 ```
 
-## Get started
+(We recommend installing the alpha version as the stable version is now legacy. The alpha version is scalable and uses websockets to wait for the deposit address generation.)
 
-Set up the library consumer:
+#### Generate a deposit address using the SDK
 
-```typescript
-import {
-  AssetInfoWithTrace,
-  AssetTransferObject,
-  CallbackStatus,
-  TransferAssetBridge,
-} from "@axelar-network/axelarjs-sdk";
+Call `getDepositAddress`:
 
-export class AxelarAPI {
-  private environment: string;
-  private axelarJsSDK: TransferAssetBridge;
-
-  constructor(environment: string) {
-    this.environment = environment;
-    this.axelarJsSDK = new TransferAssetBridge(environment);
+```tsx
+async getDepositAddress(
+  fromChain: string, // source chain
+  toChain: string, // destination chain
+  destinationAddress: string, // destination address to transfer the token to
+  asset: string, // common key of the asset
+  options?: {
+    _traceId: string;
   }
-
-  public async getOneTimeMessageToSign(
-    sigerAddress: string
-  ): Promise<{ validationMsg: string; otc: string }> {
-    try {
-      return await this.axelarJsSDK.getOneTimeCode(sigerAddress);
-    } catch (e: any) {
-      throw e;
-    }
-  }
-
-  public async getDepositAddress(
-    payload: AssetTransferObject,
-    showAlerts: boolean = true
-  ): Promise<AssetInfoWithTrace> {
-    try {
-      return this.axelarJsSDK.getDepositAddress(payload, showAlerts);
-    } catch (e: any) {
-      throw e;
-    }
-  }
-}
+): Promise<string> {}
 ```
 
-Instantiate and invoke the library consumer:
+Example: Cosmos-to-EVM (Terra to Avalanche):
 
-```typescript
-const environment: string =
-  "testnet"; /*environment should be one of local | devnet | testnet | mainnet*/
-
-const api: AxelarAPI = new AxelarAPI(environment);
-
-/*below is sample implementation using ethers.js, but you can use whatever you want*/
-const provider = new ethers.providers.Web3Provider(window.ethereum, "any"); //2nd param is network type
-const signerAuthority = provider.getSigner();
-const signerAuthorityAddress = signerAuthority.getAddress();
-
-const getNoncedMessageToSign = async () => {
-  const signerAuthorityAddress = await signerAuthority.getAddress();
-  const { validationMsg, otc } = await api.getOneTimeMessageToSign(
-    signerAuthorityAddress
-  );
-  return { validationMsg, otc };
-};
-
-const promptUserToSignMessage = async () => {
-  const { validationMsg, otc } = await getNoncedMessageToSign();
-  const signature = await signerAuthority.signMessage(validationMsg);
-
-  return {
-    otc,
-    publicAddr: await signerAuthority.getAddress(),
-    signature,
-  };
-};
-
-const getDepositAddress = async (destinationAddress?: string) => {
-  const { otc, publicAddr, signature } = await promptUserToSignMessage();
-  const parameters: AssetTransferObject = getParameters(
-    destinationAddress || publicAddr
-  ); // wherever you specify for the destination address on the destination chain
-  parameters.otc = otc;
-  parameters.publicAddr = publicAddr;
-  parameters.signature = signature;
-
-  const linkAddress = await api.getDepositAddress(parameters);
-
-  return linkAddress;
-};
+```tsx
+const sdk = new AxelarAssetTransfer({
+  environment: "testnet",
+  auth: "local",
+});
+const depositAddress = await sdk.getDepositAddress(
+  "terra", // source chain
+  "avalanche", // destination chain
+  "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD", // destination address
+  "uusd" // asset to transfer
+);
 ```
 
-## Usage details
+Example: EVM-to-Cosmos (Avalanche to Terra)
 
-The `getDepositAddress` method takes the following parameters:
-
-1. `requestPayload`: a complex struct of type `AssetTransferObject`
-2. optional parameter on whether you want error alerts to show on the UI or not
-
-Sample parameters:
-
-```typescript
-// getParameters.ts
-
-const getParameters = (
-  destinationAddress: string,
-  sourceChainName: string = "terra",
-  destinationChainName: string = "avalanche",
-  asset_common_key: string = "uusd"
-) => {
-  /*
-	info for sourceChainInfo and destinationChainInfo fetched from the ChainList module. 
-	* */
-  const terraChain: ChainInfo = ChainList.map(
-    (chain: Chain) => chain.chainInfo
-  ).find(
-    (chainInfo: ChainInfo) =>
-      chainInfo.chainName.toLowerCase() === sourceChainName.toLowerCase()
-  ) as ChainInfo;
-  const avalancheChain: ChainInfo = ChainList.map(
-    (chain: Chain) => chain.chainInfo
-  ).find(
-    (chainInfo: ChainInfo) =>
-      chainInfo.chainName.toLowerCase() === destinationChainName.toLowerCase()
-  ) as ChainInfo;
-  const assetObj = terraChain.assets?.find(
-    (asset: AssetInfo) => asset.common_key === asset_common_key
-  ) as AssetInfo;
-
-  let requestPayload: AssetTransferObject = {
-    sourceChainInfo: terraChain,
-    destinationChainInfo: avalancheChain,
-    selectedSourceAsset: assetObj,
-    selectedDestinationAsset: {
-      ...assetObj,
-      assetAddress: destinationAddress, //address on the destination chain where you want the tokens to arrive
-    },
-    signature: "SIGNATURE_FROM_METAMASK_SIGN",
-    otc: "OTC_RECEIVED_FROM_SERVER",
-    publicAddr: "SIGNER_OF_SIGNATURE",
-    transactionTraceId: "YOUR_OWN_UUID", //your own UUID, helpful for tracing purposes. optional.
-  };
-
-  return requestPayload;
-};
+```tsx
+const sdk = new AxelarAssetTransfer({
+  environment: "testnet",
+  auth: "local",
+});
+const depositAddress = await sdk.getDepositAddress(
+  "avalanche", // source chain
+  "terra", // destination chain
+  "terra1qem4njhac8azalrav7shvp06myhqldpmkk3p0t", // destination address
+  "uusd" // asset to transfer
+);
 ```
 
-## Demo
+Note: The destination address format is validated based on the destination chain. Make sure that the destination address is a valid address on the destination chain. For instance Terra addresses start with “terra,” Osmosis with “osmo,” etc.
 
-See AxelarJS in action: [deposit-address-demo](https://github.com/axelarnetwork/deposit-address-demo)
-
-## AxelarJS is under active development
-
-AxelarJS is under active development. The API might change. Please ensure you pull the latest from this repo post issues to Github.
-
-## Contribute
-
-Github issues and pull requests are welcome!
-
-## Run locally
-
-```bash
-git clone git@github.com:axelarnetwork/axelarjs-sdk.git
-cd axelarjs-sdk
-npm install
-npm run build
-npm link # link your local repo to your global packages
-npm run dev # build the files and watch for changes
-```
+Once the deposit address has been generated the user can make a token transfer (on blockchain) to the deposit address. The transfer will be picked up by the Axelar network and relayed to the destination chain.
