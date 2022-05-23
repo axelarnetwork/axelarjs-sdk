@@ -62,6 +62,10 @@ export type AxelarQueryAPIConfig = {
   environment: Environment;
 };
 
+export type AxelarRecoveryAPIConfig = {
+  environment: Environment;
+};
+
 export interface FeeInfoResponse {
   fee_info: {
     chain: string;

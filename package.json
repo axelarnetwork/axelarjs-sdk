@@ -32,6 +32,7 @@
   "author": "Axelar Network",
   "license": "MIT",
   "dependencies": {
+    "@cosmjs/stargate": "^0.28.4",
     "@terra-money/terra.js": "^3.0.0",
     "@types/lodash": "^4.14.176",
     "@types/uuid": "^8.3.1",
