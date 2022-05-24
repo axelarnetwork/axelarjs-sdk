@@ -2,11 +2,11 @@ import { AxelarRecoveryAPIConfig } from "../types";
 import { DeliverTxResponse } from "@cosmjs/stargate";
 import { AxelarRecoveryApi } from "./AxelarRecoveryApi";
 import { parseConfirmDepositCosmosResponse, parseConfirmDepositEvmResponse } from "./helpers/parseConfirmDepositEvent";
-import { ConfirmDepositRequest } from "./interface";
+import { AxelarRetryResponse, ConfirmDepositRequest, ConfirmDepositResponse } from "./interface";
 import { getConfirmedTx } from "./helpers/getConfirmedTx";
 import { broadcastCosmosTx } from "./client/helpers/cosmos";
-import { loadChains } from "src/chains";
-import { ChainInfo } from "src/chains/types";
+import { loadChains } from "../../chains";
+import { ChainInfo } from "../../chains/types";
 
 export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   private cacheBase64Tx = {
@@ -19,17 +19,17 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
     super(config);
   }
 
-  public async confirmDeposit(params: ConfirmDepositRequest, refetch = true) {
+  public async confirmDeposit(params: ConfirmDepositRequest, refetch = true): Promise<AxelarRetryResponse<ConfirmDepositResponse>> {
     const chain: ChainInfo | undefined = loadChains({
       environment: this.environment,
     }).find(
       (chain) =>
         chain.chainInfo.chainName.toLowerCase() === params.from.toLowerCase()
     )?.chainInfo;
-    if (!chain) return;
+    if (!chain) throw new Error("cannot find chain" + params.from);
 
     let base64Tx: string = "";
-    let tx: DeliverTxResponse = await getConfirmedTx(
+    let tx: DeliverTxResponse | null = await getConfirmedTx(
       params.hash,
       params.depositAddress,
       this.environment

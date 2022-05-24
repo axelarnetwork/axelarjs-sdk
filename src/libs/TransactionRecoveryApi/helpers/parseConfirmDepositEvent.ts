@@ -6,7 +6,7 @@ import { getSymbolFromAmountSymbol } from "./getSymbolFromAmountSymbol";
 
 export function parseConfirmDepositCosmosResponse(
   tx: DeliverTxResponse
-): AxelarRetryResponse<ConfirmDepositResponse> | AxelarRetryResponse<{}>{
+): AxelarRetryResponse<ConfirmDepositResponse> {
   const hash = tx.transactionHash;
   try {
     const log = JSON.parse(tx.rawLog || "");
@@ -36,9 +36,9 @@ export function parseConfirmDepositCosmosResponse(
         chain: "axelar",
         height: tx.height,
         depositTxHash: null,
-        amount: getAmountFromAmountSymbol(events["amount"].value),
-        depositAddress: events["depositAddress"].value,
-        depositToken: getSymbolFromAmountSymbol(events["amount"].value),
+        amount: getAmountFromAmountSymbol(events["amount"]?.value),
+        depositAddress: events["depositAddress"]?.value,
+        depositToken: getSymbolFromAmountSymbol(events["amount"]?.value),
         commandId,
       },
     };
@@ -73,12 +73,12 @@ export function parseConfirmDepositEvmResponse(
       error: null,
       data: {
         hash,
-        chain: (events["chain"] || events["module"]).value,
+        chain: (events["chain"] || events["module"])?.value,
         height: tx.height,
-        amount: events["amount"].value,
-        depositTxHash: events["txID"].value,
-        depositAddress: events["depositAddress"].value,
-        depositToken: events["tokenAddress"].value
+        amount: events["amount"]?.value,
+        depositTxHash: events["txID"]?.value,
+        depositAddress: events["depositAddress"]?.value,
+        depositToken: events["tokenAddress"]?.value
       }
     };
   } catch (e) {

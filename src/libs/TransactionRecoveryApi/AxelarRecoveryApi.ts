@@ -1,4 +1,4 @@
-import { EnvironmentConfigs, getConfigs } from "src/constants";
+import { EnvironmentConfigs, getConfigs } from "../../constants";
 import { AxelarRecoveryAPIConfig, Environment } from "../types";
 
 export abstract class AxelarRecoveryApi {
@@ -11,6 +11,7 @@ export abstract class AxelarRecoveryApi {
       const links: EnvironmentConfigs = getConfigs(environment);
       this.recoveryApiUrl = links.recoveryApiUrl;
       this.axelarRpcUrl = links.axelarRpcUrl;
+      this.environment = environment;
     }
 
     public async createPendingTransfers() {}

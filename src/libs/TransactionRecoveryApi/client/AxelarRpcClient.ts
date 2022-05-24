@@ -2,8 +2,8 @@ import { HttpClient } from "@cosmjs/tendermint-rpc";
 import { JsonRpcRequest } from "@cosmjs/json-rpc";
 import { retryRpc } from "./helpers/retryRpc";
 import { createRPCClient } from "./helpers/cosmos";
-import { Environment } from "src/libs/types";
-import { getConfigs } from "src/constants";
+import { Environment } from "../../types";
+import { getConfigs } from "../../../constants";
 
 let instance: AxelarRpcClient;
 export default class AxelarRpcClient {
