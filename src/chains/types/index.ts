@@ -50,8 +50,8 @@ export interface AssetInfoResponse extends AssetInfo {
 }
 
 export enum LinkType {
-  EVM = "/evm.v1beta1.LinkRequest",
-  COS = "/axelarnet.v1beta1.LinkRequest",
+  EVM = "/axelar.evm.v1beta1.LinkRequest",
+  COS = "/axelar.axelarnet.v1beta1.LinkRequest",
 }
 
 export interface LinkRequestBody {
