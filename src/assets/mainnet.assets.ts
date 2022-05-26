@@ -15,6 +15,7 @@ export const mainnet = {
         minDepositAmt: 0.5,
         ibcDenom: "uusdc",
         fullDenomPath: "uusdc",
+        tokenAddress: "uusdc",
       },
       moonbeam: {
         assetSymbol: "axlUSDC",
@@ -22,6 +23,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "uusdc",
         fullDenomPath: "uusdc",
+        tokenAddress: "0xCa01a1D0993565291051daFF390892518ACfAD3A",
       },
       fantom: {
         assetSymbol: "axlUSDC",
@@ -29,6 +31,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "uusdc",
         fullDenomPath: "uusdc",
+        tokenAddress: "0x1B6382DBDEa11d97f24495C9A90b7c88469134a4",
       },
       ethereum: {
         assetSymbol: "USDC",
@@ -36,6 +39,7 @@ export const mainnet = {
         minDepositAmt: 20,
         ibcDenom: "uusdc",
         fullDenomPath: "uusdc",
+        tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       },
       avalanche: {
         assetSymbol: "axlUSDC",
@@ -43,6 +47,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "uusdc",
         fullDenomPath: "uusdc",
+        tokenAddress: "0xfaB550568C688d5D8A52C7d794cb93Edc26eC0eC",
       },
       polygon: {
         assetSymbol: "axlUSDC",
@@ -50,6 +55,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "uusdc",
         fullDenomPath: "uusdc",
+        tokenAddress: "0x750e4C4984a9e0f12978eA6742Bc1c5D248f40ed",
       },
       cosmoshub: {
         assetSymbol: "axlUSDC",
@@ -58,6 +64,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/932D6003DA334ECBC5B23A071B4287D0A5CC97331197FE9F1C0689BA002A8421",
         fullDenomPath: "transfer/channel-293/uusdc",
+        tokenAddress: "uusdc",
       },
       osmosis: {
         assetSymbol: "axlUSDC",
@@ -66,6 +73,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/D189335C6E4A68B513C10AB227BF1C1D38C746766278BA3EEB4FB14124F1D858",
         fullDenomPath: "transfer/channel-208/uusdc",
+        tokenAddress: "uusdc",
       },
       juno: {
         assetSymbol: "axlUSDC",
@@ -74,6 +82,16 @@ export const mainnet = {
         ibcDenom:
           "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034",
         fullDenomPath: "transfer/channel-71/uusdc",
+        tokenAddress: "uusdc",
+      },
+      crescent: {
+        assetSymbol: "axlUSDC",
+        assetName: "axlUSDC",
+        minDepositAmt: 0.5,
+        ibcDenom:
+          "ibc/BFF0D3805B50D93E2FA5C0B2DDF7E0B30A631076CD80BC12A48C0E95404B4A41",
+        fullDenomPath: "transfer/channel-4/uusdc",
+        tokenAddress: "uusdc",
       },
     },
   },
@@ -93,6 +111,7 @@ export const mainnet = {
         minDepositAmt: 0.0002,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
+        tokenAddress: "weth-wei",
       },
       ethereum: {
         assetSymbol: "WETH",
@@ -100,6 +119,7 @@ export const mainnet = {
         minDepositAmt: 0.01,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
+        tokenAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       },
       osmosis: {
         assetSymbol: "axlWETH",
@@ -108,6 +128,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/EA1D43981D5C9A1C4AAEA9C23BB1D4FA126BA9BC7020A25E0AE4AA841EA25DC5",
         fullDenomPath: "transfer/channel-208/weth-wei",
+        tokenAddress: "weth-wei",
       },
       juno: {
         assetSymbol: "axlWETH",
@@ -116,6 +137,16 @@ export const mainnet = {
         ibcDenom:
           "ibc/95A45A81521EAFDBEDAEEB6DA975C02E55B414C95AD3CE50709272366A90CA17",
         fullDenomPath: "transfer/channel-71/weth-wei",
+        tokenAddress: "weth-wei",
+      },
+      crescent: {
+        assetSymbol: "axlWETH",
+        assetName: "axlWETH",
+        minDepositAmt: 0.0002,
+        ibcDenom:
+          "ibc/F1806958CA98757B91C3FA1573ECECD24F6FA3804F074A6977658914A49E65A3",
+        fullDenomPath: "transfer/channel-4/weth-wei",
+        tokenAddress: "weth-wei",
       },
     },
   },
@@ -135,6 +166,7 @@ export const mainnet = {
         minDepositAmt: 0.5,
         ibcDenom: "dai-wei",
         fullDenomPath: "dai-wei",
+        tokenAddress: "dai-wei",
       },
       moonbeam: {
         assetSymbol: "axlDAI",
@@ -142,6 +174,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "dai-wei",
         fullDenomPath: "dai-wei",
+        tokenAddress: "0x14dF360966a1c4582d2b18EDbdae432EA0A27575",
       },
       fantom: {
         assetSymbol: "axlDAI",
@@ -149,6 +182,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "dai-wei",
         fullDenomPath: "dai-wei",
+        tokenAddress: "0xD5d5350F42CB484036A1C1aF5F2DF77eAFadcAFF",
       },
       ethereum: {
         assetSymbol: "DAI",
@@ -156,6 +190,7 @@ export const mainnet = {
         minDepositAmt: 20,
         ibcDenom: "dai-wei",
         fullDenomPath: "dai-wei",
+        tokenAddress: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
       },
       avalanche: {
         assetSymbol: "axlDAI",
@@ -163,6 +198,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "dai-wei",
         fullDenomPath: "dai-wei",
+        tokenAddress: "0xC5Fa5669E326DA8B2C35540257cD48811F40a36B",
       },
       polygon: {
         assetSymbol: "axlDAI",
@@ -170,6 +206,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "dai-wei",
         fullDenomPath: "dai-wei",
+        tokenAddress: "0xDDc9E2891FA11a4CC5C223145e8d14B44f3077c9",
       },
       cosmoshub: {
         assetSymbol: "axlDAI",
@@ -178,6 +215,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/4A98C8AC2C35498162346F28EEBF3206CBEF81F44725FE62A3DB0CC10E88E695",
         fullDenomPath: "transfer/channel-293/dai-wei",
+        tokenAddress: "dai-wei",
       },
       osmosis: {
         assetSymbol: "axlDAI",
@@ -186,6 +224,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/0CD3A0285E1341859B5E86B6AB7682F023D03E97607CCC1DC95706411D866DF7",
         fullDenomPath: "transfer/channel-208/dai-wei",
+        tokenAddress: "dai-wei",
       },
       juno: {
         assetSymbol: "axlDAI",
@@ -194,6 +233,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/171E8F6687D290D378678310F9F15D367DCD245BF06184532B703A92054A8A4F",
         fullDenomPath: "transfer/channel-71/dai-wei",
+        tokenAddress: "dai-wei",
       },
     },
   },
@@ -213,6 +253,7 @@ export const mainnet = {
         minDepositAmt: 0.00002,
         ibcDenom: "wbtc-satoshi",
         fullDenomPath: "wbtc-satoshi",
+        tokenAddress: "wbtc-satoshi",
       },
       ethereum: {
         assetSymbol: "WBTC",
@@ -220,6 +261,7 @@ export const mainnet = {
         minDepositAmt: 0.0007,
         ibcDenom: "wbtc-satoshi",
         fullDenomPath: "wbtc-satoshi",
+        tokenAddress: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
       },
       osmosis: {
         assetSymbol: "axlWBTC",
@@ -228,6 +270,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/D1542AA8762DB13087D8364F3EA6509FD6F009A34F00426AF9E4F9FA85CBBF1F",
         fullDenomPath: "transfer/channel-208/wbtc-satoshi",
+        tokenAddress: "wbtc-satoshi",
       },
       juno: {
         assetSymbol: "axlWBTC",
@@ -236,6 +279,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/5EF597EA4E863132BFD3E051AC6BAA0175F00913D3256A41F11DC425C39527D6",
         fullDenomPath: "transfer/channel-71/wbtc-satoshi",
+        tokenAddress: "wbtc-satoshi",
       },
     },
   },
@@ -256,6 +300,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/9117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E",
         fullDenomPath: "transfer/channel-2/uatom",
+        tokenAddress: "uatom",
       },
       moonbeam: {
         assetSymbol: "axlATOM",
@@ -263,6 +308,7 @@ export const mainnet = {
         minDepositAmt: 0.1,
         ibcDenom: "uatom",
         fullDenomPath: "uatom",
+        tokenAddress: "0x27292cf0016E5dF1d8b37306B2A98588aCbD6fCA",
       },
       fantom: {
         assetSymbol: "axlATOM",
@@ -270,6 +316,7 @@ export const mainnet = {
         minDepositAmt: 0.1,
         ibcDenom: "uatom",
         fullDenomPath: "uatom",
+        tokenAddress: "0x3bB68cb55Fc9C22511467c18E42D14E8c959c4dA",
       },
       ethereum: {
         assetSymbol: "axlATOM",
@@ -277,6 +324,7 @@ export const mainnet = {
         minDepositAmt: 2,
         ibcDenom: "uatom",
         fullDenomPath: "uatom",
+        tokenAddress: "0x27292cf0016E5dF1d8b37306B2A98588aCbD6fCA",
       },
       avalanche: {
         assetSymbol: "axlATOM",
@@ -284,6 +332,7 @@ export const mainnet = {
         minDepositAmt: 0.1,
         ibcDenom: "uatom",
         fullDenomPath: "uatom",
+        tokenAddress: "0x80D18b1c9Ab0c9B5D6A6d5173575417457d00a12",
       },
       polygon: {
         assetSymbol: "axlATOM",
@@ -291,6 +340,7 @@ export const mainnet = {
         minDepositAmt: 0.1,
         ibcDenom: "uatom",
         fullDenomPath: "uatom",
+        tokenAddress: "0x33F8a5029264BcFB66e39157aF3FeA3E2a8a5067",
       },
       cosmoshub: {
         assetSymbol: "ATOM",
@@ -298,6 +348,7 @@ export const mainnet = {
         minDepositAmt: 0.05,
         ibcDenom: "uatom",
         fullDenomPath: "uatom",
+        tokenAddress: "uatom",
       },
     },
   },
@@ -318,6 +369,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/6F4968A73F90CF7DE6394BF937D6DF7C7D162D74D839C13F53B41157D315E05F",
         fullDenomPath: "transfer/channel-0/uusd",
+        tokenAddress: "uusd",
       },
       moonbeam: {
         assetSymbol: "UST",
@@ -325,6 +377,7 @@ export const mainnet = {
         minDepositAmt: 10,
         ibcDenom: "uusd",
         fullDenomPath: "uusd",
+        tokenAddress: "0x085416975fe14C2A731a97eC38B9bF8135231F62",
       },
       fantom: {
         assetSymbol: "UST",
@@ -332,6 +385,7 @@ export const mainnet = {
         minDepositAmt: 10,
         ibcDenom: "uusd",
         fullDenomPath: "uusd",
+        tokenAddress: "0x2B9d3F168905067D88d93F094C938BACEe02b0cB",
       },
       ethereum: {
         assetSymbol: "UST",
@@ -339,6 +393,7 @@ export const mainnet = {
         minDepositAmt: 200,
         ibcDenom: "uusd",
         fullDenomPath: "uusd",
+        tokenAddress: "0x085416975fe14C2A731a97eC38B9bF8135231F62",
       },
       avalanche: {
         assetSymbol: "UST",
@@ -346,6 +401,7 @@ export const mainnet = {
         minDepositAmt: 10,
         ibcDenom: "uusd",
         fullDenomPath: "uusd",
+        tokenAddress: "0x260Bbf5698121EB85e7a74f2E45E16Ce762EbE11",
       },
       polygon: {
         assetSymbol: "UST",
@@ -353,6 +409,7 @@ export const mainnet = {
         minDepositAmt: 10,
         ibcDenom: "uusd",
         fullDenomPath: "uusd",
+        tokenAddress: "0xeDDc6eDe8F3AF9B4971e1Fa9639314905458bE87",
       },
       terra: {
         assetSymbol: "UST",
@@ -360,6 +417,7 @@ export const mainnet = {
         minDepositAmt: 5,
         ibcDenom: "uusd",
         fullDenomPath: "uusd",
+        tokenAddress: "uusd",
       },
     },
   },
@@ -380,6 +438,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/4627AD2524E3E0523047E35BB76CC90E37D9D57ACF14F0FCBCEB2480705F3CB8",
         fullDenomPath: "transfer/channel-0/uluna",
+        tokenAddress: "uluna",
       },
       moonbeam: {
         assetSymbol: "LUNA",
@@ -387,6 +446,7 @@ export const mainnet = {
         minDepositAmt: 2000,
         ibcDenom: "uluna",
         fullDenomPath: "uluna",
+        tokenAddress: "0x31DAB3430f3081dfF3Ccd80F17AD98583437B213",
       },
       fantom: {
         assetSymbol: "LUNA",
@@ -394,6 +454,7 @@ export const mainnet = {
         minDepositAmt: 2000,
         ibcDenom: "uluna",
         fullDenomPath: "uluna",
+        tokenAddress: "0x5e3C572A97D898Fe359a2Cea31c7D46ba5386895",
       },
       ethereum: {
         assetSymbol: "LUNA",
@@ -401,6 +462,7 @@ export const mainnet = {
         minDepositAmt: 40000,
         ibcDenom: "uluna",
         fullDenomPath: "uluna",
+        tokenAddress: "0x31DAB3430f3081dfF3Ccd80F17AD98583437B213",
       },
       avalanche: {
         assetSymbol: "LUNA",
@@ -408,6 +470,7 @@ export const mainnet = {
         minDepositAmt: 2000,
         ibcDenom: "uluna",
         fullDenomPath: "uluna",
+        tokenAddress: "0x120AD3e5A7c796349e591F1570D9f7980F4eA9cb",
       },
       polygon: {
         assetSymbol: "LUNA",
@@ -415,6 +478,7 @@ export const mainnet = {
         minDepositAmt: 2000,
         ibcDenom: "uluna",
         fullDenomPath: "uluna",
+        tokenAddress: "0xa17927fB75E9faEA10C08259902d0468b3DEad88",
       },
       terra: {
         assetSymbol: "LUNA",
@@ -422,6 +486,7 @@ export const mainnet = {
         minDepositAmt: 1000,
         ibcDenom: "uluna",
         fullDenomPath: "uluna",
+        tokenAddress: "uluna",
       },
     },
   },
@@ -441,6 +506,7 @@ export const mainnet = {
         minDepositAmt: 0.5,
         ibcDenom: "frax-wei",
         fullDenomPath: "frax-wei",
+        tokenAddress: "frax-wei",
       },
       moonbeam: {
         assetSymbol: "axlFRAX",
@@ -448,6 +514,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "frax-wei",
         fullDenomPath: "frax-wei",
+        tokenAddress: "0x61C82805453a989E99B544DFB7031902e9bac448",
       },
       fantom: {
         assetSymbol: "axlFRAX",
@@ -455,6 +522,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "frax-wei",
         fullDenomPath: "frax-wei",
+        tokenAddress: "0xbE71e68fB36d14565F523C9c36ab2A8Be0c26D55",
       },
       ethereum: {
         assetSymbol: "FRAX",
@@ -462,6 +530,7 @@ export const mainnet = {
         minDepositAmt: 20,
         ibcDenom: "frax-wei",
         fullDenomPath: "frax-wei",
+        tokenAddress: "0x853d955aCEf822Db058eb8505911ED77F175b99e",
       },
       avalanche: {
         assetSymbol: "axlFRAX",
@@ -469,6 +538,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "frax-wei",
         fullDenomPath: "frax-wei",
+        tokenAddress: "0x4914886dBb8aAd7A7456D471EAab10b06d42348D",
       },
       polygon: {
         assetSymbol: "axlFRAX",
@@ -476,6 +546,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "frax-wei",
         fullDenomPath: "frax-wei",
+        tokenAddress: "0x53Adc464b488bE8C5d7269B9ABBCe8bA74195C3a",
       },
       cosmoshub: {
         assetSymbol: "axlFRAX",
@@ -484,6 +555,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/3792246C7C422C037C603C955F8383B4E32E7555D693344F9A029A67FE221C57",
         fullDenomPath: "transfer/channel-293/frax-wei",
+        tokenAddress: "frax-wei",
       },
       osmosis: {
         assetSymbol: "axlFRAX",
@@ -492,6 +564,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/0E43EDE2E2A3AFA36D0CD38BDDC0B49FECA64FA426A82E102F304E430ECF46EE",
         fullDenomPath: "transfer/channel-208/frax-wei",
+        tokenAddress: "frax-wei",
       },
       juno: {
         assetSymbol: "axlFRAX",
@@ -500,6 +573,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/1CE15165C83F70C7DB18B19C417321B02512A85BCB9FB8E553FC10070D122036",
         fullDenomPath: "transfer/channel-71/frax-wei",
+        tokenAddress: "frax-wei",
       },
     },
   },
@@ -519,6 +593,7 @@ export const mainnet = {
         minDepositAmt: 0.5,
         ibcDenom: "uusdt",
         fullDenomPath: "uusdt",
+        tokenAddress: "uusdt",
       },
       moonbeam: {
         assetSymbol: "axlUSDT",
@@ -526,6 +601,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "uusdt",
         fullDenomPath: "uusdt",
+        tokenAddress: "0xDFd74aF792bC6D45D1803F425CE62Dd16f8Ae038",
       },
       fantom: {
         assetSymbol: "axlUSDT",
@@ -533,6 +609,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "uusdt",
         fullDenomPath: "uusdt",
+        tokenAddress: "0xd226392C23fb3476274ED6759D4a478db3197d82",
       },
       ethereum: {
         assetSymbol: "USDT",
@@ -540,6 +617,7 @@ export const mainnet = {
         minDepositAmt: 20,
         ibcDenom: "uusdt",
         fullDenomPath: "uusdt",
+        tokenAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
       },
       avalanche: {
         assetSymbol: "axlUSDT",
@@ -547,6 +625,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "uusdt",
         fullDenomPath: "uusdt",
+        tokenAddress: "0xF976ba91b6bb3468C91E4f02E68B37bc64a57e66",
       },
       polygon: {
         assetSymbol: "axlUSDT",
@@ -554,6 +633,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "uusdt",
         fullDenomPath: "uusdt",
+        tokenAddress: "0xCeED2671d8634e3ee65000EDbbEe66139b132fBf",
       },
       cosmoshub: {
         assetSymbol: "axlUSDT",
@@ -562,6 +642,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/5662412372381F56C5F83A0404DC7209E5143ABD32EF67B5705DBE8D9C2BF001",
         fullDenomPath: "transfer/channel-293/uusdt",
+        tokenAddress: "uusdt",
       },
       osmosis: {
         assetSymbol: "axlUSDT",
@@ -570,6 +651,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/8242AD24008032E457D2E12D46588FD39FB54FB29680C6C7663D296B383C37C4",
         fullDenomPath: "transfer/channel-208/uusdt",
+        tokenAddress: "uusdt",
       },
       juno: {
         assetSymbol: "axlUSDT",
@@ -578,6 +660,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/B22D08F0E3D08968FB3CBEE2C1E993581A99AAAA60D0490C1AF7DCE567D5FDDA",
         fullDenomPath: "transfer/channel-71/uusdt",
+        tokenAddress: "uusdt",
       },
     },
   },
@@ -598,6 +681,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/ACD9A665DB6C19EC1D057A43D468E324CA9FB9C5ABF82235815F7B7745A15B80",
         fullDenomPath: "transfer/channel-6/ungm",
+        tokenAddress: "ungm",
       },
       moonbeam: {
         assetSymbol: "NGM",
@@ -605,6 +689,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
+        tokenAddress: "0x08fe7A0db575c2a08d76EEcA71763E48C6e60F45",
       },
       fantom: {
         assetSymbol: "NGM",
@@ -612,6 +697,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
+        tokenAddress: "0xE549Caf5f0c3e80b8738CB03ae4fBb4c15b0DD86",
       },
       ethereum: {
         assetSymbol: "NGM",
@@ -619,6 +705,7 @@ export const mainnet = {
         minDepositAmt: 20,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
+        tokenAddress: "0x08fe7A0db575c2a08d76EEcA71763E48C6e60F45",
       },
       avalanche: {
         assetSymbol: "NGM",
@@ -626,6 +713,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
+        tokenAddress: "0x5A44422beaAA38031f57720d88697105be6970BE",
       },
       polygon: {
         assetSymbol: "NGM",
@@ -633,6 +721,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
+        tokenAddress: "0xC8d5A4E04387EBdaa2c0FBB6858F246116431e9f",
       },
       "e-money": {
         assetSymbol: "NGM",
@@ -640,6 +729,7 @@ export const mainnet = {
         minDepositAmt: 0.5,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
+        tokenAddress: "ungm",
       },
     },
   },
@@ -660,6 +750,7 @@ export const mainnet = {
         ibcDenom:
           "ibc/373EF14936B38AC8F8A7E7024C0FB7099369FDDFDA3CDA9EFA73684B16249B64",
         fullDenomPath: "transfer/channel-6/eeur",
+        tokenAddress: "eeur",
       },
       moonbeam: {
         assetSymbol: "EEUR",
@@ -667,6 +758,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "eeur",
         fullDenomPath: "eeur",
+        tokenAddress: "0xDd26a5c8Ae5b60Bb14aEcED892A052CA48A2e915",
       },
       fantom: {
         assetSymbol: "EEUR",
@@ -674,6 +766,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "eeur",
         fullDenomPath: "eeur",
+        tokenAddress: "0x4000aB030f3615d1616b4C71E7129BbE3f1f9C55",
       },
       ethereum: {
         assetSymbol: "EEUR",
@@ -681,6 +774,7 @@ export const mainnet = {
         minDepositAmt: 20,
         ibcDenom: "eeur",
         fullDenomPath: "eeur",
+        tokenAddress: "0xDd26a5c8Ae5b60Bb14aEcED892A052CA48A2e915",
       },
       avalanche: {
         assetSymbol: "EEUR",
@@ -688,6 +782,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "eeur",
         fullDenomPath: "eeur",
+        tokenAddress: "0xE1d70994Be12b73E76889412b284A8F19b0DE56d",
       },
       polygon: {
         assetSymbol: "EEUR",
@@ -695,6 +790,7 @@ export const mainnet = {
         minDepositAmt: 1,
         ibcDenom: "eeur",
         fullDenomPath: "eeur",
+        tokenAddress: "0x8CD51880C0a5dbde37dDdFce8d5B772Fc9007495",
       },
       "e-money": {
         assetSymbol: "EEUR",
@@ -702,6 +798,7 @@ export const mainnet = {
         minDepositAmt: 0.5,
         ibcDenom: "eeur",
         fullDenomPath: "eeur",
+        tokenAddress: "eeur",
       },
     },
   },

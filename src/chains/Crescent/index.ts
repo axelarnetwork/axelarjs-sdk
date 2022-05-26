@@ -8,7 +8,7 @@ export default class Crescent extends Axelar implements Chain {
     chainSymbol: "CRE",
     chainName: "Crescent",
     estimatedWaitTime: 5,
-    fullySupported: false,
+    fullySupported: true,
     assets: [],
     txFeeInPercent: 0.1,
     module: "axelarnet",
