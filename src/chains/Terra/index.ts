@@ -7,7 +7,7 @@ export default class Terra extends Axelar implements Chain {
     chainSymbol: "Terra",
     chainName: "Terra",
     estimatedWaitTime: 5,
-    fullySupported: true,
+    fullySupported: false,
     assets: [],
     txFeeInPercent: 0.1,
     module: "axelarnet",
