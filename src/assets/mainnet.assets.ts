@@ -651,6 +651,43 @@ export const mainnet = {
       },
     },
   },
+  "rai-wei": {
+    common_key: {
+      devnet: "rai-wei",
+      testnet: "rai-wei",
+      mainnet: "rai-wei",
+    },
+    native_chain: "ethereum",
+    fully_supported: true,
+    decimals: 18,
+    chain_aliases: {
+      axelar: {
+        assetSymbol: "RAI",
+        assetName: "RAI",
+        minDepositAmt: 0.2,
+        ibcDenom: "rai-wei",
+        fullDenomPath: "rai-wei",
+        tokenAddress: "rai-wei",
+      },
+      ethereum: {
+        assetSymbol: "RAI",
+        assetName: "RAI",
+        minDepositAmt: 7,
+        ibcDenom: "rai-wei",
+        fullDenomPath: "rai-wei",
+        tokenAddress: "0x03ab458634910AaD20eF5f1C8ee96F1D6ac54919",
+      },
+      osmosis: {
+        assetSymbol: "axlRAI",
+        assetName: "axlRAI",
+        minDepositAmt: 0.2,
+        ibcDenom:
+          "ibc/BD796662F8825327D41C96355DF62045A5BA225BAE31C0A86289B9D88ED3F44E",
+        fullDenomPath: "transfer/channel-208/rai-wei",
+        tokenAddress: "rai-wei",
+      },
+    },
+  },
   "link-wei": {
     common_key: {
       devnet: "link-wei",
