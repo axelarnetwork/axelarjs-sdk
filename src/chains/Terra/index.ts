@@ -5,7 +5,7 @@ import { Chain, ChainInfo } from "../types";
 export default class Terra extends Axelar implements Chain {
   public chainInfo: ChainInfo = {
     chainSymbol: "Terra",
-    chainName: "Terra 2.0",
+    chainName: "Terra",
     estimatedWaitTime: 5,
     fullySupported: true,
     assets: [],
