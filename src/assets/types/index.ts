@@ -8,6 +8,8 @@ export interface AssetInfo {
   native_chain?: string;
   minDepositAmt?: number;
   decimals?: number;
+  ibcDenom?: string;
+  tokenAddress?: string;
 }
 
 export interface AssetInfoForChain extends AssetInfo {
