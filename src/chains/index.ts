@@ -7,6 +7,7 @@ import Polygon from "./Polygon";
 import Moonbeam from "./Moonbeam";
 import Osmosis from "./Osmosis";
 import Cosmoshub from "./Cosmoshub";
+import Injective from "./Injective";
 import Juno from "./Juno";
 import { loadAssets } from "../assets";
 import { AssetConfig, AssetInfo } from "../assets/types";
@@ -27,6 +28,7 @@ export function loadChains(config: LoadChainConfig) {
     new Ethereum(),
     new EMoney(),
     new Fantom(),
+    new Injective(),
     new Juno(),
     new Moonbeam(),
     new Osmosis(),
