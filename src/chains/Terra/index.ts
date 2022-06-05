@@ -12,9 +12,9 @@ export default class Terra extends Axelar implements Chain {
     txFeeInPercent: 0.1,
     module: "axelarnet",
     chainIdentifier: {
-      devnet: "terra",
-      testnet: "terra",
-      mainnet: "terra",
+      devnet: "terra-2",
+      testnet: "terra-2",
+      mainnet: "terra-2",
     },
   };
 
