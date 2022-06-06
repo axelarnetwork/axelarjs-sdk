@@ -2,11 +2,11 @@ import { EnvironmentConfigs, getConfigs } from "../../constants";
 import { RestService } from "../../services";
 import { AxelarSigningClientConfig } from "../types";
 import {
-  assertIsDeliverTxSuccess,
   SigningStargateClientOptions,
   SigningStargateClient,
   DeliverTxResponse,
   StdFee,
+  SignerData,
 } from "@cosmjs/stargate";
 import {
   DirectSecp256k1HdWallet,
@@ -16,11 +16,13 @@ import {
 } from "@cosmjs/proto-signing";
 import { registerTxTypes } from "./types/TxTypes";
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 
 let instance: AxelarSigningClient;
 
 interface IAxelarSigningClient extends SigningStargateClient {
   signThenBroadcast(messages: readonly EncodeObject[], fee: number | StdFee | "auto", memo?: string): Promise<DeliverTxResponse>
+  signAndGetTxBytes(messages: readonly EncodeObject[], fee: StdFee, memo: string, explicitSignerData?: SignerData): Promise<Uint8Array>
 }
 
 export class AxelarSigningClient extends SigningStargateClient implements IAxelarSigningClient {
@@ -62,4 +64,10 @@ export class AxelarSigningClient extends SigningStargateClient implements IAxela
   public signThenBroadcast(messages: readonly EncodeObject[], fee: number | StdFee | "auto", memo?: string): Promise<DeliverTxResponse> {
     return super.signAndBroadcast(this.signerAddress, messages, fee, memo)
   }
+
+  public async signAndGetTxBytes(messages: readonly EncodeObject[], fee: StdFee, memo: string, explicitSignerData?: SignerData): Promise<Uint8Array> {
+    const txRaw = await super.sign(this.signerAddress, messages, fee, memo, explicitSignerData);
+    return TxRaw.encode(txRaw).finish();
+  }
+
 }
