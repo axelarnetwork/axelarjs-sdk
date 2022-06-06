@@ -1,3 +1,5 @@
+import { SigningStargateClientOptions } from "@cosmjs/stargate";
+
 export enum Environment {
   DEVNET = "devnet",
   TESTNET = "testnet",
@@ -60,6 +62,13 @@ export type AxelarQueryAPIConfig = {
   axelarRpcUrl?: string;
   axelarLcdUrl?: string;
   environment: Environment;
+};
+
+export type AxelarSigningClientConfig = {
+  axelarRpcUrl?: string;
+  environment: Environment;
+  mnemonic: string;
+  options: SigningStargateClientOptions;
 };
 
 export type AxelarRecoveryAPIConfig = {
