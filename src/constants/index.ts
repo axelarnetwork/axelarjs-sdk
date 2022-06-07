@@ -27,7 +27,8 @@ const testnetConfigs: EnvironmentConfigs = {
   axelarRpcUrl: "https://axelartest-rpc.quickapi.com",
   axelarLcdUrl: "https://axelartest-lcd.quickapi.com",
   axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io",
-  recoveryApiUrl: "https://recovery-tool-api-testnet.axelar.dev"
+  recoveryApiUrl: "http://localhost:3000"
+  // recoveryApiUrl: "https://recovery-tool-api-testnet.axelar.dev"
 };
 const mainnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-mainnet.axelar.dev`,

@@ -9,7 +9,7 @@ import {
   SignerData,
 } from "@cosmjs/stargate";
 import {
-  DirectSecp256k1HdWallet,
+  DirectSecp256k1HdWallet as Wallet,
   EncodeObject,
   OfflineSigner,
   Registry,
@@ -22,8 +22,17 @@ import { registerEvmTxTypes } from "./types/EvmTxTypes";
 let instance: AxelarSigningClient;
 
 interface IAxelarSigningClient extends SigningStargateClient {
-  signThenBroadcast(messages: readonly EncodeObject[], fee: number | StdFee | "auto", memo?: string): Promise<DeliverTxResponse>
-  signAndGetTxBytes(messages: readonly EncodeObject[], fee: StdFee, memo: string, explicitSignerData?: SignerData): Promise<Uint8Array>
+  signThenBroadcast(
+    messages: readonly EncodeObject[],
+    fee: number | StdFee | "auto",
+    memo?: string
+  ): Promise<DeliverTxResponse>;
+  signAndGetTxBytes(
+    messages: readonly EncodeObject[],
+    fee: StdFee,
+    memo: string,
+    explicitSignerData?: SignerData
+  ): Promise<Uint8Array>;
 }
 
 export class AxelarSigningClient extends SigningStargateClient implements IAxelarSigningClient {
@@ -44,14 +53,19 @@ export class AxelarSigningClient extends SigningStargateClient implements IAxela
 
   static async initOrGetAxelarSigningClient(config: AxelarSigningClientConfig) {
     if (!instance) {
-      const { axelarRpcUrl, environment, options } = config;
+      const { axelarRpcUrl, environment, options, walletDetails } = config;
       const links: EnvironmentConfigs = getConfigs(environment);
       const rpc: string = axelarRpcUrl || links.axelarRpcUrl;
       const tmClient = await Tendermint34Client.connect(rpc);
-      const wallet = await DirectSecp256k1HdWallet.fromMnemonic(config.mnemonic, {
-        prefix: "axelar",
-      });
-      const [account] = await wallet.getAccounts()
+      const prefix: string = "axelar";
+
+      let wallet;
+      if (walletDetails.mnemonic)
+        wallet = await Wallet.fromMnemonic(walletDetails.mnemonic, { prefix });
+      else if (walletDetails.offlineSigner) wallet = walletDetails.offlineSigner;
+      else throw "you need to pass in either a wallet mnemonic string or offline signer";
+
+      const [account] = await wallet.getAccounts();
 
       let registry: Registry = options.registry || new Registry();
       registerAxelarnetTxTypes(registry);
@@ -63,15 +77,23 @@ export class AxelarSigningClient extends SigningStargateClient implements IAxela
     return instance;
   }
 
-  public signThenBroadcast(messages: readonly EncodeObject[], fee: number | StdFee | "auto", memo?: string): Promise<DeliverTxResponse> {
-    return super.signAndBroadcast(this.signerAddress, messages, fee, memo)
+  public signThenBroadcast(
+    messages: readonly EncodeObject[],
+    fee: number | StdFee | "auto",
+    memo?: string
+  ): Promise<DeliverTxResponse> {
+    return super.signAndBroadcast(this.signerAddress, messages, fee, memo);
   }
 
-  public async signAndGetTxBytes(messages: readonly EncodeObject[], fee: StdFee, memo: string, explicitSignerData?: SignerData): Promise<Uint8Array> {
+  public async signAndGetTxBytes(
+    messages: readonly EncodeObject[],
+    fee: StdFee,
+    memo: string,
+    explicitSignerData?: SignerData
+  ): Promise<Uint8Array> {
     const txRaw = await super.sign(this.signerAddress, messages, fee, memo, explicitSignerData);
     return TxRaw.encode(txRaw).finish();
   }
-
 }
 
 export * from "./const";

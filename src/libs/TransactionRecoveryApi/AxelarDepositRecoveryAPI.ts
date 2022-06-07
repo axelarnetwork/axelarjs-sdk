@@ -1,10 +1,16 @@
+import fetch from "cross-fetch";
 import { AxelarRecoveryAPIConfig } from "../types";
-import { DeliverTxResponse } from "@cosmjs/stargate";
+// import { DeliverTxResponse } from "@cosmjs/stargate";
 import { AxelarRecoveryApi } from "./AxelarRecoveryApi";
-import { parseConfirmDepositCosmosResponse, parseConfirmDepositEvmResponse } from "./helpers/parseConfirmDepositEvent";
-import { AxelarRetryResponse, ConfirmDepositRequest, ConfirmDepositResponse } from "./interface";
-import { getConfirmedTx } from "./helpers/getConfirmedTx";
-import { broadcastCosmosTx } from "./client/helpers/cosmos";
+import {
+  parseConfirmDepositCosmosResponse,
+  parseConfirmDepositEvmResponse,
+} from "./helpers/parseConfirmDepositEvent";
+import {
+  ConfirmDepositRequest,
+} from "./interface";
+// import { getConfirmedTx } from "./helpers/getConfirmedTx";
+import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import { loadChains } from "../../chains";
 import { ChainInfo } from "../../chains/types";
 
@@ -19,51 +25,35 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
     super(config);
   }
 
-  public async confirmDeposit(params: ConfirmDepositRequest, refetch = true): Promise<AxelarRetryResponse<ConfirmDepositResponse>> {
-    const chain: ChainInfo | undefined = loadChains({
+  public async confirmDeposit(params: ConfirmDepositRequest) {
+    const chain: ChainInfo = loadChains({
       environment: this.environment,
-    }).find(
-      (chain) =>
-        chain.chainInfo.chainName.toLowerCase() === params.from.toLowerCase()
-    )?.chainInfo;
+    }).find((chain) => chain.chainInfo.chainName.toLowerCase() === params.from.toLowerCase())
+      ?.chainInfo as ChainInfo;
     if (!chain) throw new Error("cannot find chain" + params.from);
 
-    let base64Tx: string = "";
-    let tx: DeliverTxResponse | null = await getConfirmedTx(
-      params.hash,
-      params.depositAddress,
-      this.environment
-    );
-    if (!tx) {
-      if (refetch || !this.cacheBase64Tx.confirmDeposit) {
-        const newParams = {
-          ...params,
-          from: chain.chainIdentifier[this.environment],
-        };
-        base64Tx = await fetch(this.recoveryApiUrl + "/confirm_deposit_tx", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newParams),
-        })
-          .then((res) => res.json())
-          .then((res) => res.data.base64Tx)
-          .then((base64Tx) => {
-            this.cacheBase64Tx.confirmDeposit = base64Tx;
-            return base64Tx;
-          });
-      } else {
-        base64Tx = this.cacheBase64Tx.confirmDeposit;
-      }
-      tx = await broadcastCosmosTx(base64Tx, this.axelarRpcUrl);
-    }
+    const newParams = {
+      ...params,
+      from: chain.chainIdentifier[this.environment],
+      module: chain.module
+    };
+    const txBytes = await fetch(this.recoveryApiUrl + "/confirm_deposit_tx", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newParams),
+    })
+      .then((res) => res.json())
+      .then((res) => res.data);
+
+    const tx = await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+
     if (chain.module === "evm") {
       return parseConfirmDepositEvmResponse(tx);
     } else {
       return parseConfirmDepositCosmosResponse(tx);
     }
   }
+
 }
 
 /**

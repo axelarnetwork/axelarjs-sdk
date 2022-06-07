@@ -1,4 +1,7 @@
 import { SigningStargateClientOptions } from "@cosmjs/stargate";
+import {
+  OfflineSigner,
+} from "@cosmjs/proto-signing";
 
 export enum Environment {
   DEVNET = "devnet",
@@ -64,10 +67,15 @@ export type AxelarQueryAPIConfig = {
   environment: Environment;
 };
 
+type WalletDetails = {
+  mnemonic?: string;
+  offlineSigner?: OfflineSigner;
+}
+
 export type AxelarSigningClientConfig = {
   axelarRpcUrl?: string;
   environment: Environment;
-  mnemonic: string;
+  walletDetails: WalletDetails;
   options: SigningStargateClientOptions;
 };
 
