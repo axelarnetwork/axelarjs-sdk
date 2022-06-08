@@ -10,8 +10,8 @@ export interface EnvironmentConfigs {
 
 const localConfigs: EnvironmentConfigs = {
   resourceUrl: `http://localhost:4000`,
-  axelarRpcUrl: "https://axelartest-rpc.quickapi.com",
-  axelarLcdUrl: "https://axelartest-lcd.quickapi.com",
+  axelarRpcUrl: "https://axelar-testnet-rpc.axelar-dev.workers.dev",
+  axelarLcdUrl: "https://axelar-testnet-lcd.axelar-dev.workers.dev",
   axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io",
   recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev"
 };
@@ -24,8 +24,8 @@ const devnetConfigs: EnvironmentConfigs = {
 };
 const testnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-testnet.axelar.dev`,
-  axelarRpcUrl: "https://axelartest-rpc.quickapi.com",
-  axelarLcdUrl: "https://axelartest-lcd.quickapi.com",
+  axelarRpcUrl: "https://axelar-testnet-rpc.axelar-dev.workers.dev",
+  axelarLcdUrl: "https://axelar-testnet-lcd.axelar-dev.workers.dev",
   axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io",
   recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev"
 };
