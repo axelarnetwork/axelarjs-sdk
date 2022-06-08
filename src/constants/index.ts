@@ -13,7 +13,7 @@ const localConfigs: EnvironmentConfigs = {
   axelarRpcUrl: "https://axelartest-rpc.quickapi.com",
   axelarLcdUrl: "https://axelartest-lcd.quickapi.com",
   axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io",
-  recoveryApiUrl: "https://recovery-tool-api-testnet.axelar.dev"
+  recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev"
 };
 const devnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-devnet.axelar.dev`,
@@ -27,15 +27,14 @@ const testnetConfigs: EnvironmentConfigs = {
   axelarRpcUrl: "https://axelartest-rpc.quickapi.com",
   axelarLcdUrl: "https://axelartest-lcd.quickapi.com",
   axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io",
-  recoveryApiUrl: "http://localhost:3000"
-  // recoveryApiUrl: "https://recovery-tool-api-testnet.axelar.dev"
+  recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev"
 };
 const mainnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-mainnet.axelar.dev`,
   axelarRpcUrl: "https://axelar-rpc.quickapi.com",
   axelarLcdUrl: "https://axelar-lcd.quickapi.com",
   axelarCachingServiceUrl: "https://mainnet.api.gmp.axelarscan.io",
-  recoveryApiUrl: "https://recovery-tool-api.axelar.dev"
+  recoveryApiUrl: "https://axelar-signing-relayer-mainnet.axelar.dev"
 };
 
 configsMap["local"] = localConfigs;
