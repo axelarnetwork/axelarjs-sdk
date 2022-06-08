@@ -1,4 +1,3 @@
-import fetch from "cross-fetch";
 import { AxelarRecoveryAPIConfig } from "../types";
 // import { DeliverTxResponse } from "@cosmjs/stargate";
 import { AxelarRecoveryApi } from "./AxelarRecoveryApi";
@@ -6,21 +5,13 @@ import {
   parseConfirmDepositCosmosResponse,
   parseConfirmDepositEvmResponse,
 } from "./helpers/parseConfirmDepositEvent";
-import {
-  ConfirmDepositRequest,
-} from "./interface";
+import { ConfirmDepositRequest } from "./interface";
 // import { getConfirmedTx } from "./helpers/getConfirmedTx";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import { loadChains } from "../../chains";
 import { ChainInfo } from "../../chains/types";
 
 export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
-  private cacheBase64Tx = {
-    confirmDeposit: null,
-    createPendingTransfer: null,
-    createSignTransfer: null,
-  };
-
   public constructor(config: AxelarRecoveryAPIConfig) {
     super(config);
   }
@@ -32,18 +23,11 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
       ?.chainInfo as ChainInfo;
     if (!chain) throw new Error("cannot find chain" + params.from);
 
-    const newParams = {
+    const txBytes = await this.execFetch("/confirm_deposit_tx", {
       ...params,
-      from: chain.chainIdentifier[this.environment],
-      module: chain.module
-    };
-    const txBytes = await fetch(this.recoveryApiUrl + "/confirm_deposit_tx", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newParams),
-    })
-      .then((res) => res.json())
-      .then((res) => res.data);
+      sourceChain: chain.chainIdentifier[this.environment],
+      module: chain.module,
+    });
 
     const tx = await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
 
@@ -54,6 +38,13 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
+  public async routeIBCTransfers() {
+    const txBytes = await this.execFetch("/route_ibc_transfers", {
+      module: "axelarnet",
+    });
+
+    return await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+  }
 }
 
 /**
