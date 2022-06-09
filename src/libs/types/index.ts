@@ -72,9 +72,11 @@ type WalletDetails = {
   offlineSigner?: OfflineSigner;
 }
 
-export type AxelarSigningClientConfig = {
+export interface AxelarQueryClientConfig {
   axelarRpcUrl?: string;
   environment: Environment;
+}
+export interface AxelarSigningClientConfig extends AxelarQueryClientConfig {
   walletDetails: WalletDetails;
   options: SigningStargateClientOptions;
 };
