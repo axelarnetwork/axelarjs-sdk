@@ -1,20 +1,20 @@
 import { isAddress as isValidEVMAddress } from "ethers/lib/utils";
 import { Chain, ChainInfo } from "../types";
 
-export default class Ethereum implements Chain {
+export default class Binance implements Chain {
   public chainInfo: ChainInfo = {
-    chainSymbol: "ETH",
-    chainName: "Ethereum",
+    chainSymbol: "BSC",
+    chainName: "Binance",
     estimatedWaitTime: 15,
-    fullySupported: true,
+    fullySupported: false,
     assets: [],
     txFeeInPercent: 0.1,
     module: "evm",
-    confirmLevel: 65,
+    confirmLevel: 25,
     chainIdentifier: {
-      devnet: "ethereum",
-      testnet: "ethereum",
-      mainnet: "ethereum",
+      devnet: "binance",
+      testnet: "binance",
+      mainnet: "binance",
     },
   };
 
