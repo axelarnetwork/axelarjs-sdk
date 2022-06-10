@@ -1,9 +1,10 @@
-import { sleep } from "../../utils";
+import { asyncRetry, sleep } from "../../utils";
 import { loadChains } from "../../chains";
 import { ChainInfo } from "../../chains/types";
-import { AxelarRecoveryAPIConfig, Environment } from "../types";
+import { AxelarRecoveryAPIConfig } from "../types";
 import { AxelarRecoveryApi } from "./AxelarRecoveryApi";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
+import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public constructor(config: AxelarRecoveryAPIConfig) {
@@ -28,7 +29,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return tx;
   }
 
-  public async recover(params: { txHash: string; src: string; dest: string; debug?: boolean }) {
+  public async forceRelayToDestChain(params: { txHash: string; src: string; dest: string; debug?: boolean }) {
     const { txHash, src, dest, debug } = params;
 
     try {
@@ -47,12 +48,19 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
       await sleep(2);
 
-      const batched = await this.queryBatchedCommands({ chain: dest, id: "" });
+      const batched = await asyncRetry(
+        () => this.queryBatchedCommands({ chain: dest, id: "" }),
+        (res: BatchedCommandsResponse) =>
+          res && res.executeData !== null && res.executeData.length > 0,
+        undefined,
+        30,
+        5
+      );
       if (debug) console.log("batched", batched);
 
       await sleep(2);
 
-      const broadcasted = await this.broadcastEvmTx(dest, batched.executeData);
+      const broadcasted = await this.sendEvmTxToRelayer(dest, batched.executeData);
       if (debug) console.log("broadcasted", broadcasted);
     } catch (e) {
       console.log(e);

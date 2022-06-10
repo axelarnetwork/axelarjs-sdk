@@ -6,6 +6,7 @@ import { AxelarRecoveryAPIConfig, Environment } from "../types";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
 import EVMClient from "./client/EVMClient";
+import { TransactionRequest } from "@ethersproject/providers";
 
 const rpcMap: { [key: string]: string } = {
   fantom: "https://rpc.testnet.fantom.network",
@@ -90,13 +91,45 @@ export class AxelarRecoveryApi {
     return await this.axelarQuerySvc.evm.GatewayAddress({ chain });
   }
 
-  public async broadcastEvmTx(chain: string, data: string) {
-    const gatewayInfo = await this.queryGatewayAddress({ chain })
+  public async getSignedTxAndBroadcast(chain: string, data: string) {
+    const gatewayInfo = await this.queryGatewayAddress({ chain });
+    const evmClient = new EVMClient({
+      rpcUrl: rpcMap[chain],
+      evmWalletDetails: { useWindowEthereum: true },
+    });
+    const txRequest: TransactionRequest = evmClient.buildUnsignedTx(gatewayInfo.address, { data });
+    const signedTx = await this.execFetch("/sign_evm_tx", {
+      chain,
+      gatewayAddress: gatewayInfo.address,
+      txRequest,
+    });
+    const tx = await evmClient.broadcastSignedTx(signedTx);
+    tx.wait(1);
+    return tx;
+  }
+
+  public async sendEvmTxToRelayer(chain: string, data: string) {
+    const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcMap[chain],
       evmWalletDetails: { useWindowEthereum: true },
     });
 
+    const txRequest: TransactionRequest = evmClient.buildUnsignedTx(gatewayInfo.address, { data });
+
+    return await this.execFetch("/send_evm_tx", {
+      chain,
+      gatewayAddress: gatewayInfo.address,
+      txRequest,
+    });
+  }
+
+  public async broadcastEvmTx(chain: string, data: string) {
+    const gatewayInfo = await this.queryGatewayAddress({ chain });
+    const evmClient = new EVMClient({
+      rpcUrl: rpcMap[chain],
+      evmWalletDetails: { useWindowEthereum: true },
+    });
     return await evmClient.broadcastToGateway(gatewayInfo.address, { data });
   }
 

@@ -35,7 +35,22 @@ export default class EVMClient {
     await this.signer.estimateGas(txRequest);
     const tx = await this.signer.sendTransaction(txRequest);
     await tx.wait(1);
-    console.log("transaction", tx);
     return tx;
+  }
+
+  public buildUnsignedTx(gatewayAddress: string, opts: TransactionRequest): TransactionRequest {
+    const { data, maxFeePerGas, maxPriorityFeePerGas } = opts;
+    const txRequest: TransactionRequest = {
+      ...opts,
+      to: gatewayAddress,
+      data: `0x${data}`,
+      maxPriorityFeePerGas: maxPriorityFeePerGas || ethers.utils.parseUnits("30", "gwei"),
+      maxFeePerGas: maxFeePerGas || ethers.utils.parseUnits("60", "gwei"),
+    };
+    return txRequest;
+  }
+
+  public async broadcastSignedTx(signedTx: string): Promise<ethers.providers.TransactionResponse> {
+    return await this.provider.sendTransaction(signedTx);
   }
 }
