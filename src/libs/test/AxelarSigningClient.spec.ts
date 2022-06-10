@@ -21,7 +21,7 @@ describe("AxelarSigningClient", () => {
   const mnemonic: string = "grape kitchen depend dolphin elegant field hair ice bracket shell hover cover";
   const config: AxelarSigningClientConfig = {
     environment: Environment.TESTNET,
-    walletDetails: { mnemonic },
+    cosmosBasedWalletDetails: { mnemonic },
     options: {},
   };
 

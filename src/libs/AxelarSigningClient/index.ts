@@ -53,7 +53,7 @@ export class AxelarSigningClient extends SigningStargateClient implements IAxela
 
   static async initOrGetAxelarSigningClient(config: AxelarSigningClientConfig) {
     if (!instance) {
-      const { axelarRpcUrl, environment, options, walletDetails } = config;
+      const { axelarRpcUrl, environment, options, cosmosBasedWalletDetails: walletDetails } = config;
       const links: EnvironmentConfigs = getConfigs(environment);
       const rpc: string = axelarRpcUrl || links.axelarRpcUrl;
       const tmClient = await Tendermint34Client.connect(rpc);

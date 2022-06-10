@@ -1,7 +1,10 @@
+import { Network } from "@ethersproject/networks";
+
 import { SigningStargateClientOptions } from "@cosmjs/stargate";
 import {
   OfflineSigner,
 } from "@cosmjs/proto-signing";
+import { ethers } from "ethers";
 
 export enum Environment {
   DEVNET = "devnet",
@@ -67,17 +70,26 @@ export type AxelarQueryAPIConfig = {
   environment: Environment;
 };
 
-type WalletDetails = {
+type CosmosBasedWalletDetails = {
   mnemonic?: string;
   offlineSigner?: OfflineSigner;
 }
-
+type EvmWalletDetails = {
+  mnemonic?: string;
+  useWindowEthereum?: boolean;
+}
 export interface AxelarQueryClientConfig {
   axelarRpcUrl?: string;
   environment: Environment;
 }
+
+export interface EVMClientConfig {
+  rpcUrl: string;
+  networkOptions?: Network;
+  evmWalletDetails: EvmWalletDetails;
+}
 export interface AxelarSigningClientConfig extends AxelarQueryClientConfig {
-  walletDetails: WalletDetails;
+  cosmosBasedWalletDetails: CosmosBasedWalletDetails;
   options: SigningStargateClientOptions;
 };
 
