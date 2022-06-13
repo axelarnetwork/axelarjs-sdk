@@ -16,9 +16,23 @@ const rpcMap: { [key: string]: string } = {
   ethereum: "https://ropsten.infura.io/v3/467477790bfa4b7684be1336e789a068",
 };
 
+export enum GMPStatus {
+  CALL = "call",
+  APPROVED = "approved",
+  EXECUTED = "executed",
+  ERROR = "error",
+  GAS_UNPAID = "gas_unpaid",
+}
+export interface GMPStatusResponse {
+  status: GMPStatus;
+  details: any;
+  call: any;
+}
+
 export class AxelarRecoveryApi {
   readonly environment: Environment;
   readonly recoveryApiUrl: string;
+  readonly axelarCachingServiceUrl: string;
   readonly axelarRpcUrl: string;
   readonly config: AxelarRecoveryAPIConfig;
   protected axelarQuerySvc: AxelarQueryClientType | null = null;
@@ -27,10 +41,48 @@ export class AxelarRecoveryApi {
   public constructor(config: AxelarRecoveryAPIConfig) {
     const { environment } = config;
     const links: EnvironmentConfigs = getConfigs(environment);
+    this.axelarCachingServiceUrl = links.axelarCachingServiceUrl;
     this.recoveryApiUrl = links.recoveryApiUrl;
     this.axelarRpcUrl = links.axelarRpcUrl;
     this.environment = environment;
     this.config = config;
+  }
+
+  public async queryTransactionStatus(txHash: string): Promise<GMPStatusResponse> {
+    const res = await this.execGet(this.axelarCachingServiceUrl, {
+      method: "searchGMP",
+      txHash,
+    });
+    if (res[0] && res[0].is_not_enough_gas)
+      return {
+        status: GMPStatus.GAS_UNPAID,
+        details: (res && res[0] && res[0].error) || "no valid response",
+        call: res[0]?.call,
+      };
+    else if (!res || res?.length < 1 || (res[0] && res[0].status === GMPStatus.ERROR))
+      return {
+        status: GMPStatus.ERROR,
+        details: (res && res[0] && res[0].error) || "no valid response",
+        call: res[0]?.call,
+      };
+    else if (res && res[0] && res[0].status === GMPStatus.EXECUTED)
+      return {
+        status: GMPStatus.EXECUTED,
+        details: res[0].executed,
+        call: res[0]?.call,
+      };
+    else if (res && res[0] && res[0].status === GMPStatus.APPROVED) {
+      return {
+        status: GMPStatus.APPROVED,
+        details: "",
+        call: res[0]?.call,
+      };
+    } else
+      return {
+        status: GMPStatus.CALL,
+        details: "",
+        call: res[0]?.call,
+      };
   }
 
   public async createPendingTransfers(params: { chain: string }) {
@@ -40,7 +92,7 @@ export class AxelarRecoveryApi {
       ?.chainInfo as ChainInfo;
     if (!chain) throw new Error("cannot find chain" + params.chain);
 
-    const txBytes = await this.execFetch("/create_pending_transfers", {
+    const txBytes = await this.execRecoveryUrlFetch("/create_pending_transfers", {
       ...params,
       chain: params.chain,
       module: chain.module,
@@ -56,7 +108,7 @@ export class AxelarRecoveryApi {
       ?.chainInfo as ChainInfo;
     if (!chain) throw new Error("cannot find chain" + params.chain);
 
-    const txBytes = await this.execFetch("/execute_pending_transfers", {
+    const txBytes = await this.execRecoveryUrlFetch("/execute_pending_transfers", {
       ...params,
       module: chain.module,
     });
@@ -71,7 +123,7 @@ export class AxelarRecoveryApi {
       ?.chainInfo as ChainInfo;
     if (!chain) throw new Error("cannot find chain" + params.chain);
 
-    const txBytes = await this.execFetch("/sign_commands", {
+    const txBytes = await this.execRecoveryUrlFetch("/sign_commands", {
       ...params,
       module: chain.module,
     });
@@ -98,7 +150,7 @@ export class AxelarRecoveryApi {
       evmWalletDetails: { useWindowEthereum: true },
     });
     const txRequest: TransactionRequest = evmClient.buildUnsignedTx(gatewayInfo.address, { data });
-    const signedTx = await this.execFetch("/sign_evm_tx", {
+    const signedTx = await this.execRecoveryUrlFetch("/sign_evm_tx", {
       chain,
       gatewayAddress: gatewayInfo.address,
       txRequest,
@@ -117,7 +169,7 @@ export class AxelarRecoveryApi {
 
     const txRequest: TransactionRequest = evmClient.buildUnsignedTx(gatewayInfo.address, { data });
 
-    return await this.execFetch("/send_evm_tx", {
+    return await this.execRecoveryUrlFetch("/send_evm_tx", {
       chain,
       gatewayAddress: gatewayInfo.address,
       txRequest,
@@ -133,11 +185,24 @@ export class AxelarRecoveryApi {
     return await evmClient.broadcastToGateway(gatewayInfo.address, { data });
   }
 
-  public async execFetch(endpoint: string, params: any) {
-    return await fetch(this.recoveryApiUrl + endpoint, {
+  public async execRecoveryUrlFetch(endpoint: string, params: any) {
+    return await this.execPost(this.recoveryApiUrl, endpoint, params);
+  }
+
+  public async execPost(base: string, endpoint: string, params: any) {
+    return await fetch(base + endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(params),
+    })
+      .then((res) => res.json())
+      .then((res) => res.data);
+  }
+
+  public async execGet(base: string, params?: any) {
+    return await fetch(base + "?" + new URLSearchParams(params).toString(), {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
     })
       .then((res) => res.json())
       .then((res) => res.data);

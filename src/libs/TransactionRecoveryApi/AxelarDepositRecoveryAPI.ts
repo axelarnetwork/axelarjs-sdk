@@ -23,7 +23,7 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
       ?.chainInfo as ChainInfo;
     if (!chain) throw new Error("cannot find chain" + params.from);
 
-    const txBytes = await this.execFetch("/confirm_deposit_tx", {
+    const txBytes = await this.execRecoveryUrlFetch("/confirm_deposit_tx", {
       ...params,
       sourceChain: chain.chainIdentifier[this.environment],
       module: chain.module,
@@ -39,7 +39,7 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async routeIBCTransfers() {
-    const txBytes = await this.execFetch("/route_ibc_transfers", {
+    const txBytes = await this.execRecoveryUrlFetch("/route_ibc_transfers", {
       module: "axelarnet",
     });
 
