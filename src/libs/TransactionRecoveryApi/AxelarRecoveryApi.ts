@@ -8,7 +8,7 @@ import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
 import EVMClient from "./client/EVMClient";
 import { TransactionRequest } from "@ethersproject/providers";
 
-const rpcMap: { [key: string]: string } = {
+export const rpcMap: { [key: string]: string } = {
   fantom: "https://rpc.testnet.fantom.network",
   polygon: "https://polygon-mumbai.infura.io/v3/467477790bfa4b7684be1336e789a068",
   moonbeam: "https://rpc.api.moonbase.moonbeam.network",
@@ -207,4 +207,8 @@ export class AxelarRecoveryApi {
       .then((res) => res.json())
       .then((res) => res.data);
   }
+  get getAxelarCachingServiceUrl(): string {
+    return this.axelarCachingServiceUrl;
+  }
+
 }
