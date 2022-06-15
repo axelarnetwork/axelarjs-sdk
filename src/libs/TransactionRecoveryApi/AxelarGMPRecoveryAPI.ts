@@ -87,7 +87,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       let tx;
       try {
         tx = await contract.addNativeGas(
-          keccak256(defaultAbiCoder.encode(['string'], [transactionHash])),
+          transactionHash,
           logIndex,
           refundAddress,
           {
