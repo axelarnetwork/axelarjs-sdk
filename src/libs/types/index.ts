@@ -70,11 +70,11 @@ export type AxelarQueryAPIConfig = {
   environment: Environment;
 };
 
-type CosmosBasedWalletDetails = {
+export type CosmosBasedWalletDetails = {
   mnemonic?: string;
   offlineSigner?: OfflineSigner;
 }
-type EvmWalletDetails = {
+export type EvmWalletDetails = {
   mnemonic?: string;
   useWindowEthereum?: boolean;
 }

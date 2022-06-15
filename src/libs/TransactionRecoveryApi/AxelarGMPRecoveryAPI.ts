@@ -1,13 +1,15 @@
 import fetch from "cross-fetch";
 import { loadChains } from "../../chains";
 import { ChainInfo } from "../../chains/types";
-import { AxelarRecoveryAPIConfig, EVMClientConfig } from "../types";
+import { AxelarRecoveryAPIConfig, EVMClientConfig, EvmWalletDetails } from "../types";
 import { AxelarRecoveryApi, rpcMap } from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import AxelarGMPRecoveryProcessor from "./processors";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { BigNumber, ContractFunction, ethers } from "ethers";
+import IAxelarGasService from "../abi/IAxelarGasService.json";
+import { defaultAbiCoder, keccak256, parseEther } from "ethers/lib/utils";
 
 declare const window: Window &
   typeof globalThis & {
@@ -63,12 +65,67 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return await this.processor.process(params);
   }
 
-  // TODO
-  public async increasePaymentToGasReceiver(params: {
-    src: string;
-    debug?: boolean;
-  }): Promise<unknown> {
-    return await new Promise(() => null);
+  public async addNativeGas(
+    { gas_paid }: { gas_paid: any },
+    cb: any,
+    evmWalletOverride?: EvmWalletDetails
+  ): Promise<void> {
+    try {
+      const { address: gasReceiverAddress, chain, logIndex, transactionHash } = gas_paid;
+      const { refundAddress } = gas_paid?.returnValues;
+
+      const evmClientConfig: EVMClientConfig = {
+        rpcUrl: rpcMap[chain?.toLowerCase()],
+        evmWalletDetails: evmWalletOverride || { useWindowEthereum: true },
+      };
+
+      const evmClient = new EVMClient(evmClientConfig);
+      const signer = evmClient.getSigner();
+      const signerAddress: string = await signer.getAddress();
+      const contract = new ethers.Contract(gasReceiverAddress, IAxelarGasService.abi, signer);
+
+      let tx;
+      try {
+        tx = await contract.addNativeGas(
+          keccak256(defaultAbiCoder.encode(['string'], [transactionHash])),
+          logIndex,
+          refundAddress,
+          {
+            value: parseEther("1.0")
+          }
+        );
+        console.log("tx",tx)
+        if (tx.hash) {
+          cb({
+            status: "pending",
+            message: "Wait for confirmation",
+            txHash: tx.hash,
+          });
+        }
+        await tx.wait(1);
+        if (tx.hash) {
+          cb({
+            status: "success",
+            message: "Execute successful",
+            txHash: tx.hash,
+          });
+          await this.saveGMP(gas_paid?.transactionHash, tx.hash, signerAddress);
+        }
+      } catch (error: any) {
+        await this.saveGMP(gas_paid?.transactionHash, tx?.hash, signerAddress, error);
+        cb({
+          status: "failed",
+          message: error?.reason || error?.data?.message || error?.message,
+          txHash: tx?.hash,
+        });
+      }
+    } catch (error: any) {
+      cb({
+        status: "failed",
+        message: error?.reason || error?.data?.message || error?.message,
+        txHash: "",
+      });
+    }
   }
 
   public async executeManually(
