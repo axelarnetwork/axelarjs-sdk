@@ -1,10 +1,7 @@
 import { Network } from "@ethersproject/networks";
 
 import { SigningStargateClientOptions } from "@cosmjs/stargate";
-import {
-  OfflineSigner,
-} from "@cosmjs/proto-signing";
-import { ethers } from "ethers";
+import { OfflineSigner } from "@cosmjs/proto-signing";
 
 export enum Environment {
   DEVNET = "devnet",
@@ -73,11 +70,11 @@ export type AxelarQueryAPIConfig = {
 export type CosmosBasedWalletDetails = {
   mnemonic?: string;
   offlineSigner?: OfflineSigner;
-}
+};
 export type EvmWalletDetails = {
   mnemonic?: string;
   useWindowEthereum?: boolean;
-}
+};
 export interface AxelarQueryClientConfig {
   axelarRpcUrl?: string;
   environment: Environment;
@@ -91,7 +88,7 @@ export interface EVMClientConfig {
 export interface AxelarSigningClientConfig extends AxelarQueryClientConfig {
   cosmosBasedWalletDetails: CosmosBasedWalletDetails;
   options: SigningStargateClientOptions;
-};
+}
 
 export type AxelarRecoveryAPIConfig = {
   environment: Environment;
@@ -104,12 +101,23 @@ export interface FeeInfoResponse {
     fee_rate: string;
     min_fee: string;
     max_fee: string;
-  }
+  };
 }
 
 export interface TransferFeeResponse {
   fee: {
     denom: string;
     amount: string;
-  }
+  };
+}
+
+// Includes all native tokens and stablecoins
+export enum GasToken {
+  ETH = "ETH",
+  AVAX = "AVAX",
+  GLMR = "GLMR",
+  FTM = "FTM",
+  MATIC = "MATIC",
+  UST = "UST",
+  USDC = "USDC",
 }

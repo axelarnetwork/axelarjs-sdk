@@ -1,5 +1,5 @@
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
-import { Environment, FeeInfoResponse, TransferFeeResponse } from "../types";
+import { Environment, EvmChain, FeeInfoResponse, GasToken, TransferFeeResponse } from "../types";
 
 describe("AxelarQueryAPI", () => {
   const api = new AxelarQueryAPI({ environment: Environment.TESTNET });
@@ -11,10 +11,7 @@ describe("AxelarQueryAPI", () => {
   describe("getFeeForChainAndAsset", () => {
     test("It should generate a fee response", async () => {
       const [chain, assetDenom] = ["avalanche", "uusd"];
-      const response: FeeInfoResponse = await api.getFeeForChainAndAsset(
-        chain,
-        assetDenom
-      );
+      const response: FeeInfoResponse = await api.getFeeForChainAndAsset(chain, assetDenom);
 
       expect(response.fee_info).toBeDefined();
       expect(response.fee_info.chain).toEqual(chain);
@@ -49,36 +46,45 @@ describe("AxelarQueryAPI", () => {
 
   describe("getGasPrice", () => {
     test("It should get a gas price", async () => {
-      const [
-        sourceChainName,
-        destinationChainName,
-        sourceChainTokenAddress,
-        sourceChainTokenSymbol,
-      ] = [
-        "avalanche",
-        "polygon",
-        "0x43F4600b552089655645f8c16D86A5a9Fa296bc3",
-        "UST",
+      const [sourceChainName, destinationChainName, sourceChainTokenSymbol] = [
+        EvmChain.AVALANCHE,
+        EvmChain.FANTOM,
+        GasToken.AVAX,
       ];
-      const response = await api.getGasPrice(
+      const response = await api.getGasInfo(
         sourceChainName,
         destinationChainName,
-        sourceChainTokenAddress,
         sourceChainTokenSymbol
       );
-      expect(response).toBeDefined();
+      expect(response.source_token).toBeDefined();
+      expect(response.destination_native_token).toBeDefined();
+    });
+
+    test("It should return estimated gas amount", async () => {
+      const [sourceChainName, destinationChainName, sourceChainTokenSymbol] = [
+        EvmChain.AVALANCHE,
+        EvmChain.FANTOM,
+        GasToken.UST,
+      ];
+      const gasAmount = await api.estimateGasRequired(
+        sourceChainName,
+        destinationChainName,
+        sourceChainTokenSymbol,
+        100000
+      );
+      expect(gasAmount).toBeDefined();
     });
   });
 
   describe("getDenomFromSymbol", () => {
     test("It should get the denom for an asset given its symbol on a chain", async () => {
-      const response = await api.getDenomFromSymbol("UST","ethereum");
+      const response = await api.getDenomFromSymbol("UST", "ethereum");
       expect(response).toEqual("uusd");
     });
   });
   describe("getSymbolFromDenom", () => {
     test("It should get the symbol for an asset on a given chain given its denom", async () => {
-      const response = await api.getSymbolFromDenom("uusd","ethereum");
+      const response = await api.getSymbolFromDenom("uusd", "ethereum");
       expect(response).toEqual("UST");
     });
   });
