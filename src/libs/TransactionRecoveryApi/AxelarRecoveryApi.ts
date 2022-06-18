@@ -2,18 +2,18 @@ import fetch from "cross-fetch";
 import { loadChains } from "../../chains";
 import { ChainInfo } from "../../chains/types";
 import { EnvironmentConfigs, getConfigs } from "../../constants";
-import { AxelarRecoveryAPIConfig, Environment } from "../types";
+import { AxelarRecoveryAPIConfig, Environment, EvmChain } from "../types";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
 import EVMClient from "./client/EVMClient";
 import { TransactionRequest } from "@ethersproject/providers";
 
-export const rpcMap: { [key: string]: string } = {
-  fantom: "https://rpc.testnet.fantom.network",
-  polygon: "https://polygon-mumbai.infura.io/v3/467477790bfa4b7684be1336e789a068",
-  moonbeam: "https://rpc.api.moonbase.moonbeam.network",
-  avalanche: "https://api.avax-test.network/ext/bc/C/rpc",
-  ethereum: "https://ropsten.infura.io/v3/467477790bfa4b7684be1336e789a068",
+export const rpcMap: Record<EvmChain, string> = {
+  [EvmChain.FANTOM]: "https://rpc.testnet.fantom.network",
+  [EvmChain.POLYGON]: "https://polygon-mumbai.infura.io/v3/467477790bfa4b7684be1336e789a068",
+  [EvmChain.MOONBEAM]: "https://rpc.api.moonbase.moonbeam.network",
+  [EvmChain.AVALANCHE]: "https://api.avax-test.network/ext/bc/C/rpc",
+  [EvmChain.ETHEREUM]: "https://ropsten.infura.io/v3/467477790bfa4b7684be1336e789a068",
 };
 
 export enum GMPStatus {
@@ -210,5 +210,4 @@ export class AxelarRecoveryApi {
   get getAxelarCachingServiceUrl(): string {
     return this.axelarCachingServiceUrl;
   }
-
 }
