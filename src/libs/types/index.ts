@@ -2,6 +2,8 @@ import { Network } from "@ethersproject/networks";
 
 import { SigningStargateClientOptions } from "@cosmjs/stargate";
 import { OfflineSigner } from "@cosmjs/proto-signing";
+import { LogDescription } from "ethers/lib/utils";
+import { Transaction } from "ethers";
 
 export enum Environment {
   DEVNET = "devnet",
@@ -120,4 +122,22 @@ export enum GasToken {
   MATIC = "MATIC",
   UST = "UST",
   USDC = "USDC",
+}
+
+export interface GasOptions {
+  amount?: string;
+  refundAddress?: string;
+  estimatedGasUsed: number;
+  evmWalletDetails: EvmWalletDetails;
+}
+
+export interface GatewayEventLog {
+  signature: string;
+  eventLog: LogDescription;
+}
+
+export interface TxResult {
+  success: boolean;
+  transaction?: Transaction;
+  error?: string;
 }
