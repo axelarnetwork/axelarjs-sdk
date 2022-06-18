@@ -11,6 +11,7 @@ import {
   TransferFeeResponse,
 } from "./types";
 import { ethers } from "hardhat";
+import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -76,7 +77,7 @@ export class AxelarQueryAPI {
       queryEndpoint += `?source_chain=${sourceChainName?.toLowerCase()}`;
       queryEndpoint += `&destination_chain=${destinationChainName?.toLowerCase()}`;
       queryEndpoint += `&amount=${amountInDenom?.toString()}${assetDenom}`;
-      return (await this.lcdApi.get(queryEndpoint)) as TransferFeeResponse;
+      return this.lcdApi.get(queryEndpoint);
     } catch (e: any) {
       throw e;
     }
@@ -108,28 +109,28 @@ export class AxelarQueryAPI {
 
   /**
    * Calculate estimated gas amount to pay for the gas receiver contract.
+   *
    * @param sourceChainName
    * @param destinationChainName
    * @param sourceChainTokenSymbol
-   * @param estimatedGasUsed
+   * @param estimatedGasUsed (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which sufficients for most transaction.
    * @returns
    */
-  public async estimateGasRequired(
+  public async estimateGasFee(
     sourceChainName: EvmChain,
     destinationChainName: EvmChain,
     sourceChainTokenSymbol: GasToken | string,
-    estimatedGas: number
+    estimatedGasUsed = DEFAULT_ESTIMATED_GAS
   ): Promise<string> {
     const response = await this.getGasInfo(
       sourceChainName,
       destinationChainName,
       sourceChainTokenSymbol
     );
-    console.log(response);
     const sourceToken = response.source_token;
 
     const { decimals, gas_price: gasPrice } = sourceToken;
-    return ethers.utils.parseUnits(gasPrice, decimals).mul(estimatedGas).toString();
+    return ethers.utils.parseUnits(gasPrice, decimals).mul(estimatedGasUsed).toString();
   }
 
   /**
