@@ -18,7 +18,7 @@ import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { BigNumber, ContractFunction, ethers } from "ethers";
 import IAxelarGasService from "../abi/IAxelarGasService.json";
 import AxelarGateway from "../abi/axelarGatewayAbi.json";
-import { Fragment, Interface } from "ethers/lib/utils";
+import { Interface } from "ethers/lib/utils";
 import { DEFAULT_ESTIMATED_GAS, GAS_RECEIVER, NATIVE_GAS_TOKEN_SYMBOL } from "./constants/contract";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 
@@ -103,7 +103,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async addNativeGas(
     chain: EvmChain,
     txHash: string,
-    logIndex: number,
     options?: AddGasOptions
   ): Promise<TxResult> {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
@@ -114,6 +113,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const receipt = await signer.provider.getTransactionReceipt(txHash);
     const destinationChain = this.getDestinationChainFromTxReceipt(receipt);
     const paidGasFee = this.getNativeGasAmountFromTxReceipt(receipt);
+    const logIndex = this.getLogIndexFromTxReceipt(receipt);
 
     // 1. Check if given txHash is valid
     if (!destinationChain || !paidGasFee) {
@@ -261,6 +261,22 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return event?.eventLog.args[1];
   }
 
+  public getLogIndexFromTxReceipt(receipt: ethers.providers.TransactionReceipt): Nullable<number> {
+    const signatureContractCallWithToken = ethers.utils.id(
+      "ContractCallWithToken(address,string,string,bytes32,bytes,string,uint256)"
+    );
+    const signatureContractCall = ethers.utils.id(
+      "ContractCall(address,string,string,bytes32,bytes)"
+    );
+
+    const event = this.findContractEvent(
+      receipt,
+      [signatureContractCall, signatureContractCallWithToken],
+      new Interface(AxelarGateway)
+    );
+    return event?.logIndex;
+  }
+
   public getNativeGasAmountFromTxReceipt(
     receipt: ethers.providers.TransactionReceipt
   ): Nullable<string> {
@@ -276,7 +292,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       [signatureGasPaidContractCall, signatureGasPaidContractCallWithToken],
       new Interface(IAxelarGasService)
     );
-    console.log(signatureGasPaidContractCallWithToken);
     return event?.eventLog.args.slice(-2)[0].toString();
   }
 
@@ -297,6 +312,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     eventSignatures: string[],
     abiInterface: Interface
   ): Nullable<GatewayEventLog> {
+    let index = 0;
     for (const log of receipt.logs) {
       const eventIndex = eventSignatures.indexOf(log.topics[0]);
       if (eventIndex > -1) {
@@ -304,8 +320,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         return {
           signature: eventSignatures[eventIndex],
           eventLog,
+          logIndex: index,
         };
       }
+      index++;
     }
   }
 }
