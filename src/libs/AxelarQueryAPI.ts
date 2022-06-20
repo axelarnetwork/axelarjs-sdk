@@ -10,7 +10,7 @@ import {
   GasToken,
   TransferFeeResponse,
 } from "./types";
-import { ethers } from "hardhat";
+import { ethers } from "ethers";
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 
 export class AxelarQueryAPI {
