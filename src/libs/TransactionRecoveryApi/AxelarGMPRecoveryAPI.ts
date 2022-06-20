@@ -1,4 +1,3 @@
-import fetch from "cross-fetch";
 import { loadChains } from "../../chains";
 import { ChainInfo } from "../../chains/types";
 import {
@@ -6,7 +5,7 @@ import {
   EvmChain,
   EVMClientConfig,
   EvmWalletDetails,
-  GasOptions,
+  AddGasOptions,
   GasToken,
   GatewayEventLog,
   TxResult,
@@ -19,7 +18,7 @@ import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { BigNumber, ContractFunction, ethers } from "ethers";
 import IAxelarGasService from "../abi/IAxelarGasService.json";
 import AxelarGateway from "../abi/axelarGatewayAbi.json";
-import { Interface } from "ethers/lib/utils";
+import { Fragment, Interface } from "ethers/lib/utils";
 import { DEFAULT_ESTIMATED_GAS, GAS_RECEIVER, NATIVE_GAS_TOKEN_SYMBOL } from "./constants/contract";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 
@@ -105,15 +104,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     chain: EvmChain,
     txHash: string,
     logIndex: number,
-    options: GasOptions
+    options?: AddGasOptions
   ): Promise<TxResult> {
-    const {
-      evmWalletDetails: _evmWalletDetails,
-      estimatedGasUsed: estimatedGas,
-      amount,
-      refundAddress: _refundAddress,
-    } = options;
-    const evmWalletDetails = _evmWalletDetails || { useWindowEthereum: true };
+    const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
     const signer = this.getSigner(chain, evmWalletDetails);
     const signerAddress = await signer.getAddress();
     const gasReceiverAddress = GAS_RECEIVER[this.environment][chain];
@@ -144,7 +137,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       chain,
       destinationChain,
       nativeGasTokenSymbol,
-      estimatedGas
+      options?.estimatedGasUsed
     );
 
     // 3. Check if gas fee is not already sufficiently paid.
@@ -155,10 +148,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
-    const gasFeeAmount = amount || wantedGasFee;
-    const refundAddress = _refundAddress || signerAddress;
+    const gasFeeAmount = options?.amount || wantedGasFee;
+    const refundAddress = options?.refundAddress || signerAddress;
 
-    const contract = new ethers.Contract(gasReceiverAddress, IAxelarGasService.abi, signer);
+    const contract = new ethers.Contract(gasReceiverAddress, IAxelarGasService, signer);
     const tx = await contract.addNativeGas(txHash, logIndex, refundAddress, {
       value: gasFeeAmount,
     });
@@ -250,6 +243,43 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
+  public getDestinationChainFromTxReceipt(
+    receipt: ethers.providers.TransactionReceipt
+  ): Nullable<EvmChain> {
+    const signatureContractCallWithToken = ethers.utils.id(
+      "ContractCallWithToken(address,string,string,bytes32,bytes,string,uint256)"
+    );
+    const signatureContractCall = ethers.utils.id(
+      "ContractCall(address,string,string,bytes32,bytes)"
+    );
+
+    const event = this.findContractEvent(
+      receipt,
+      [signatureContractCall, signatureContractCallWithToken],
+      new Interface(AxelarGateway)
+    );
+    return event?.eventLog.args[1];
+  }
+
+  public getNativeGasAmountFromTxReceipt(
+    receipt: ethers.providers.TransactionReceipt
+  ): Nullable<string> {
+    const signatureGasPaidContractCallWithToken = ethers.utils.id(
+      "NativeGasPaidForContractCallWithToken(address,string,string,bytes32,string,uint256,uint256,address)"
+    );
+    const signatureGasPaidContractCall = ethers.utils.id(
+      "NativeGasPaidForContractCall(address,string,string,bytes,address)"
+    );
+
+    const event = this.findContractEvent(
+      receipt,
+      [signatureGasPaidContractCall, signatureGasPaidContractCallWithToken],
+      new Interface(IAxelarGasService)
+    );
+    console.log(signatureGasPaidContractCallWithToken);
+    return event?.eventLog.args.slice(-2)[0].toString();
+  }
+
   private getSigner(
     chain: EvmChain,
     evmWalletDetails: EvmWalletDetails = { useWindowEthereum: true }
@@ -262,54 +292,20 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return evmClient.getSigner();
   }
 
-  private findGatewayEvent(
+  private findContractEvent(
     receipt: ethers.providers.TransactionReceipt,
-    eventSignatures: string[]
+    eventSignatures: string[],
+    abiInterface: Interface
   ): Nullable<GatewayEventLog> {
-    const gatewayInterface = new Interface(AxelarGateway);
     for (const log of receipt.logs) {
       const eventIndex = eventSignatures.indexOf(log.topics[0]);
       if (eventIndex > -1) {
-        const eventLog = gatewayInterface.parseLog(log);
+        const eventLog = abiInterface.parseLog(log);
         return {
           signature: eventSignatures[eventIndex],
           eventLog,
         };
       }
     }
-  }
-
-  private getDestinationChainFromTxReceipt(
-    receipt: ethers.providers.TransactionReceipt
-  ): Nullable<EvmChain> {
-    const signatureContractCallWithToken = ethers.utils.id(
-      "ContractCallWithToken(address,string,string,bytes32,bytes,string,uint256)"
-    );
-    const signatureContractCall = ethers.utils.id(
-      "ContractCall(address,string,string,bytes32,bytes)"
-    );
-
-    const event = this.findGatewayEvent(receipt, [
-      signatureContractCall,
-      signatureContractCallWithToken,
-    ]);
-    return event?.eventLog.args[1];
-  }
-
-  private getNativeGasAmountFromTxReceipt(
-    receipt: ethers.providers.TransactionReceipt
-  ): Nullable<string> {
-    const signatureGasPaidContractCallWithToken = ethers.utils.id(
-      "NativeGasPaidForContractCallWithToken(address,string,string,bytes,string,uint256,address)"
-    );
-    const signatureGasPaidContractCall = ethers.utils.id(
-      "NativeGasPaidForContractCall(address,string,string,bytes,address)"
-    );
-
-    const event = this.findGatewayEvent(receipt, [
-      signatureGasPaidContractCall,
-      signatureGasPaidContractCallWithToken,
-    ]);
-    return event?.eventLog.args.slice(-2)[0].toString();
   }
 }

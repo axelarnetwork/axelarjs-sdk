@@ -124,7 +124,7 @@ export enum GasToken {
   USDC = "USDC",
 }
 
-export interface GasOptions {
+export interface AddGasOptions {
   amount?: string;
   refundAddress?: string;
   estimatedGasUsed: number;
