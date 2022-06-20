@@ -15,7 +15,7 @@ import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import AxelarGMPRecoveryProcessor from "./processors";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
-import { BigNumber, ContractFunction, ethers } from "ethers";
+import { BigNumber, ContractFunction, ContractTransaction, ethers, Transaction } from "ethers";
 import IAxelarGasService from "../abi/IAxelarGasService.json";
 import AxelarGateway from "../abi/axelarGatewayAbi.json";
 import { Interface } from "ethers/lib/utils";
@@ -152,9 +152,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const refundAddress = options?.refundAddress || signerAddress;
 
     const contract = new ethers.Contract(gasReceiverAddress, IAxelarGasService, signer);
-    const tx = await contract.addNativeGas(txHash, logIndex, refundAddress, {
-      value: gasFeeAmount,
-    });
+    const tx = await contract
+      .addNativeGas(txHash, logIndex, refundAddress, {
+        value: gasFeeAmount,
+      })
+      .then((tx: ContractTransaction) => tx.wait());
 
     return {
       success: true,

@@ -3,7 +3,7 @@ import { Network } from "@ethersproject/networks";
 import { SigningStargateClientOptions } from "@cosmjs/stargate";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { LogDescription } from "ethers/lib/utils";
-import { Transaction } from "ethers";
+import { ContractReceipt, Transaction } from "ethers";
 
 export enum Environment {
   DEVNET = "devnet",
@@ -74,7 +74,7 @@ export type CosmosBasedWalletDetails = {
   offlineSigner?: OfflineSigner;
 };
 export type EvmWalletDetails = {
-  mnemonic?: string;
+  privateKey?: string;
   useWindowEthereum?: boolean;
 };
 export interface AxelarQueryClientConfig {
@@ -134,10 +134,11 @@ export interface AddGasOptions {
 export interface GatewayEventLog {
   signature: string;
   eventLog: LogDescription;
+  logIndex: number;
 }
 
 export interface TxResult {
   success: boolean;
-  transaction?: Transaction;
+  transaction?: ContractReceipt;
   error?: string;
 }

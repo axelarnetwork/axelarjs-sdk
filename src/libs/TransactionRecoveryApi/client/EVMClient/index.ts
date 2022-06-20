@@ -13,13 +13,13 @@ export default class EVMClient {
 
   constructor(config: EVMClientConfig) {
     const { rpcUrl, networkOptions, evmWalletDetails } = config;
-    const { mnemonic, useWindowEthereum } = evmWalletDetails;
+    const { privateKey, useWindowEthereum } = evmWalletDetails;
     this.provider =
       useWindowEthereum && window?.ethereum
         ? new ethers.providers.Web3Provider(window.ethereum, networkOptions)
         : new ethers.providers.JsonRpcProvider(rpcUrl, networkOptions);
-    this.signer = mnemonic
-      ? ethers.Wallet.fromMnemonic(mnemonic).connect(this.provider)
+    this.signer = privateKey
+      ? new ethers.Wallet(privateKey).connect(this.provider)
       : this.provider.getSigner();
   }
 
