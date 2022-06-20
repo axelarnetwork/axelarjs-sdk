@@ -16,23 +16,12 @@ import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import AxelarGMPRecoveryProcessor from "./processors";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
-import { BigNumber, ContractFunction, ethers, logger, Transaction } from "ethers";
+import { BigNumber, ContractFunction, ethers } from "ethers";
 import IAxelarGasService from "../abi/IAxelarGasService.json";
 import AxelarGateway from "../abi/axelarGatewayAbi.json";
-import {
-  defaultAbiCoder,
-  Interface,
-  keccak256,
-  LogDescription,
-  parseEther,
-} from "ethers/lib/utils";
+import { Interface } from "ethers/lib/utils";
 import { DEFAULT_ESTIMATED_GAS, GAS_RECEIVER, NATIVE_GAS_TOKEN_SYMBOL } from "./constants/contract";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
-
-declare const window: Window &
-  typeof globalThis & {
-    ethereum: any;
-  };
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private processor: AxelarGMPRecoveryProcessor;
@@ -80,8 +69,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   public async manualRelayToDestChain(params: {
     txHash: string;
-    src: string;
-    dest: string;
+    src: EvmChain;
+    dest: EvmChain;
     debug?: boolean;
   }): Promise<"triggered relay" | "approved but not executed" | "already executed" | unknown> {
     return await this.processor.process(params);

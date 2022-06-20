@@ -143,7 +143,7 @@ export class AxelarRecoveryApi {
     return await this.axelarQuerySvc.evm.GatewayAddress({ chain });
   }
 
-  public async getSignedTxAndBroadcast(chain: string, data: string) {
+  public async getSignedTxAndBroadcast(chain: EvmChain, data: string) {
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcMap[chain],
@@ -160,7 +160,7 @@ export class AxelarRecoveryApi {
     return tx;
   }
 
-  public async sendEvmTxToRelayer(chain: string, data: string) {
+  public async sendEvmTxToRelayer(chain: EvmChain, data: string) {
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcMap[chain],
@@ -176,7 +176,7 @@ export class AxelarRecoveryApi {
     });
   }
 
-  public async broadcastEvmTx(chain: string, data: string) {
+  public async broadcastEvmTx(chain: EvmChain, data: string) {
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcMap[chain],

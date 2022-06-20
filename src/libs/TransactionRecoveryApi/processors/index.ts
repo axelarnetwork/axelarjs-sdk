@@ -1,4 +1,5 @@
 import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
+import { EvmChain } from "src/libs/types";
 import { asyncRetry, sleep } from "../../../utils";
 import { AxelarGMPRecoveryAPI } from "../AxelarGMPRecoveryAPI";
 import { GMPStatus, GMPStatusResponse } from "../AxelarRecoveryApi";
@@ -7,8 +8,8 @@ export default class AxelarGMPRecoveryProcessor {
   constructor(private recoveryAPI: AxelarGMPRecoveryAPI) {}
   public async process(params: {
     txHash: string;
-    src: string;
-    dest: string;
+    src: EvmChain;
+    dest: EvmChain;
     debug?: boolean;
   }): Promise<"triggered relay" | "approved but not executed" | "already executed" | unknown> {
     const { txHash, src, dest, debug } = params;
