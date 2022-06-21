@@ -61,17 +61,12 @@ describe("AxelarQueryAPI", () => {
     });
 
     test("It should return estimated gas amount", async () => {
-      const [sourceChainName, destinationChainName, sourceChainTokenSymbol] = [
-        EvmChain.AVALANCHE,
-        EvmChain.FANTOM,
-        GasToken.USDC,
-      ];
       const gasAmount = await api.estimateGasFee(
-        sourceChainName,
-        destinationChainName,
-        sourceChainTokenSymbol,
-        100000
+        EvmChain.AVALANCHE,
+        EvmChain.ETHEREUM,
+        GasToken.AVAX
       );
+      console.log(gasAmount);
       expect(gasAmount).toBeDefined();
     });
   });

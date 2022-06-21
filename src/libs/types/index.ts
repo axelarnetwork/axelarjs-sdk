@@ -133,7 +133,7 @@ export interface AddGasOptions {
   evmWalletDetails?: EvmWalletDetails;
 }
 
-export interface GatewayEventLog {
+export interface EventLog {
   signature: string;
   eventLog: LogDescription;
   logIndex: number;
