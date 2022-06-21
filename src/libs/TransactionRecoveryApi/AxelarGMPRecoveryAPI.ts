@@ -11,17 +11,18 @@ import {
   TxResult,
   QueryGasFeeOptions,
 } from "../types";
-import { AxelarRecoveryApi, GMPStatus, rpcMap } from "./AxelarRecoveryApi";
+import { AxelarRecoveryApi, GMPStatus } from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import AxelarGMPRecoveryProcessor from "./processors";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
-import { BigNumber, ContractFunction, ContractTransaction, ethers, Transaction } from "ethers";
+import { BigNumber, ContractFunction, ContractReceipt, ContractTransaction, ethers } from "ethers";
 import IAxelarGasService from "../abi/IAxelarGasService.json";
 import AxelarGateway from "../abi/axelarGatewayAbi.json";
 import { Interface } from "ethers/lib/utils";
-import { DEFAULT_ESTIMATED_GAS, GAS_RECEIVER, NATIVE_GAS_TOKEN_SYMBOL } from "./constants/contract";
+import { GAS_RECEIVER, NATIVE_GAS_TOKEN_SYMBOL } from "./constants/contract";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
+import { networkInfo, rpcMap } from "./constants/chain";
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private processor: AxelarGMPRecoveryProcessor;
@@ -94,7 +95,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       gasTokenSymbol,
       options.estimatedGas
     );
-    const _provider = options.provider || new ethers.providers.JsonRpcProvider(rpcMap[sourceChain]);
+    const _provider =
+      options.provider ||
+      new ethers.providers.JsonRpcProvider(rpcMap[sourceChain], networkInfo[sourceChain]);
     const receipt = await _provider.getTransactionReceipt(txHash);
     const paidGasFee = this.getNativeGasAmountFromTxReceipt(receipt) || "0";
     const topupGasAmount = ethers.BigNumber.from(totalGasFee).sub(paidGasFee);
@@ -139,9 +142,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       destinationChain,
       nativeGasTokenSymbol,
       { estimatedGas: options?.estimatedGasUsed, provider: evmWalletDetails.provider }
-    );
+    ).catch(() => null);
 
-    // 3. Check if gas fee is not already sufficiently paid.
+    // 3. Check if gas price is queried successfully.
+    if (!wantedGasFee) {
+      return {
+        success: false,
+        error: "Couldn't query the gas price.",
+      };
+    }
+
+    // 4. Check if gas fee is not already sufficiently paid.
     if (wantedGasFee === "0") {
       return {
         success: false,
@@ -153,16 +164,20 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const refundAddress = options?.refundAddress || signerAddress;
 
     const contract = new ethers.Contract(gasReceiverAddress, IAxelarGasService, signer);
-    const tx = await contract
+
+    return contract
       .addNativeGas(txHash, logIndex, refundAddress, {
         value: gasFeeAmount,
       })
-      .then((tx: ContractTransaction) => tx.wait());
-
-    return {
-      success: true,
-      transaction: tx,
-    };
+      .then((tx: ContractTransaction) => tx.wait())
+      .then((tx: ContractReceipt) => ({
+        success: true,
+        transaction: tx,
+      }))
+      .catch((e: any) => ({
+        success: false,
+        error: e.message,
+      }));
   }
 
   public async executeManually(
@@ -261,7 +276,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       [signatureContractCall, signatureContractCallWithToken],
       new Interface(AxelarGateway)
     );
-    return event?.eventLog.args[1];
+    return event?.eventLog.args[1].toLowerCase();
   }
 
   public getLogIndexFromTxReceipt(receipt: ethers.providers.TransactionReceipt): Nullable<number> {
@@ -304,6 +319,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   ) {
     const evmClientConfig: EVMClientConfig = {
       rpcUrl: rpcMap[chain],
+      networkOptions: networkInfo[chain],
       evmWalletDetails,
     };
     const evmClient = new EVMClient(evmClientConfig);

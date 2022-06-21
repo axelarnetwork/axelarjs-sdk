@@ -7,14 +7,7 @@ import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
 import EVMClient from "./client/EVMClient";
 import { TransactionRequest } from "@ethersproject/providers";
-
-export const rpcMap: Record<EvmChain, string> = {
-  [EvmChain.FANTOM]: "https://rpc.testnet.fantom.network",
-  [EvmChain.POLYGON]: "https://polygon-mumbai.infura.io/v3/467477790bfa4b7684be1336e789a068",
-  [EvmChain.MOONBEAM]: "https://rpc.api.moonbase.moonbeam.network",
-  [EvmChain.AVALANCHE]: "https://api.avax-test.network/ext/bc/C/rpc",
-  [EvmChain.ETHEREUM]: "https://ropsten.infura.io/v3/467477790bfa4b7684be1336e789a068",
-};
+import { rpcMap } from "./constants/chain";
 
 export enum GMPStatus {
   CALL = "call",
