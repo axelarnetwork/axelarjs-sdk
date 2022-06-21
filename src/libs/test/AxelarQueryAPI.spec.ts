@@ -64,7 +64,7 @@ describe("AxelarQueryAPI", () => {
       const [sourceChainName, destinationChainName, sourceChainTokenSymbol] = [
         EvmChain.AVALANCHE,
         EvmChain.FANTOM,
-        GasToken.UST,
+        GasToken.USDC,
       ];
       const gasAmount = await api.estimateGasFee(
         sourceChainName,

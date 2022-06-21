@@ -127,10 +127,8 @@ export class AxelarQueryAPI {
       destinationChainName,
       sourceChainTokenSymbol
     );
-    const sourceToken = response.source_token;
-
-    const { decimals, gas_price: gasPrice } = sourceToken;
-    return ethers.utils.parseUnits(gasPrice, decimals).mul(estimatedGasUsed).toString();
+    const { gas_price: gasPrice } = response.source_token;
+    return ethers.utils.parseEther(gasPrice).mul(estimatedGasUsed).toString();
   }
 
   /**
