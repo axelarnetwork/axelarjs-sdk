@@ -1,15 +1,13 @@
 import { AxelarRecoveryAPIConfig } from "../types";
-// import { DeliverTxResponse } from "@cosmjs/stargate";
 import { AxelarRecoveryApi } from "./AxelarRecoveryApi";
-import {
-  parseConfirmDepositCosmosResponse,
-  parseConfirmDepositEvmResponse,
-} from "./helpers/parseConfirmDepositEvent";
 import { ConfirmDepositRequest } from "./interface";
-// import { getConfirmedTx } from "./helpers/getConfirmedTx";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import { loadChains } from "../../chains";
 import { ChainInfo } from "../../chains/types";
+import {
+  parseConfirmDepositCosmosResponse,
+  parseConfirmDepositEvmResponse,
+} from "./helpers/axelarHelper";
 
 export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   public constructor(config: AxelarRecoveryAPIConfig) {
@@ -48,7 +46,7 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
 }
 
 /**
- * 
+ *
  * TERRA >> AVALANCHE
 
 echo $KEYRING_PASSWORD | axelard tx axelarnet link avalanche 0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d uusd --from validator
@@ -77,7 +75,7 @@ axelard tx evm link ethereum terra terra1d5umjr4j0k8c8qtd500mzw2f99kptqqxw2rzph 
 BURNER ETHEREUM ADDR: 0xC74137D1a1Bd05BD06FE2239D9F01eC420AF817e
 (NOW DO STUFF ON ETHEREUM)
 
-txId from ropsten: 0xb6916d034510fef318dff8ac2ec84a45a67e0c061c9d774eed1bdde05a30d1ed         
+txId from ropsten: 0xb6916d034510fef318dff8ac2ec84a45a67e0c061c9d774eed1bdde05a30d1ed
 
 echo $KEYRING_PASSWORD | axelard tx evm confirm-erc20-deposit ethereum 0xb7b5b570c92d6bbb302428158ed121a492d476c4c28871d586318f22e0afb99f 1598000000 0x62253325aee3b7f43358b3cfcb974589e6109e38 --from validator
 
