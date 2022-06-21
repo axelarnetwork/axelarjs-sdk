@@ -373,7 +373,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(response.success).toBe(true);
     });
 
-    test("it should call addNativeGas successfully", async () => {
+    test("it should call 'addNativeGas' successfully", async () => {
       // Override the provider and wallet to use data from the local network
       const addNativeGasOptions = {
         evmWalletDetails: {
