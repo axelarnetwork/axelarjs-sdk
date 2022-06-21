@@ -1,1 +1,5 @@
-type Nullable<T> = T | undefined;
+declare type Nullable<T> = T | undefined;
+
+interface Window {
+  ethereum: any;
+}
