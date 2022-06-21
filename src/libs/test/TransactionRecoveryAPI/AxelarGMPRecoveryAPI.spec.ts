@@ -11,7 +11,6 @@ import { Interface } from "ethers/lib/utils";
 import { GAS_RECEIVER } from "../../TransactionRecoveryApi/constants/contract";
 
 describe("AxelarDepositRecoveryAPI", () => {
-  const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
   const { setLogger } = utils;
   setLogger(() => null);
 
@@ -20,6 +19,8 @@ describe("AxelarDepositRecoveryAPI", () => {
   });
 
   describe("confirmGatewayTx", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+
     test("It should confirm a gateway tx", async () => {
       const testParamsAxelarnet = {
         txHash: "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
@@ -32,6 +33,8 @@ describe("AxelarDepositRecoveryAPI", () => {
   });
 
   describe("calculateWantedGasFee", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+
     let contract: Contract;
     let userWallet: Wallet;
     let provider: ethers.providers.Web3Provider;
@@ -127,6 +130,7 @@ describe("AxelarDepositRecoveryAPI", () => {
   });
 
   describe("addNativeGas", () => {
+    let api: AxelarGMPRecoveryAPI;
     let contract: Contract;
     let userWallet: Wallet;
     let provider: ethers.providers.Web3Provider;
@@ -136,6 +140,8 @@ describe("AxelarDepositRecoveryAPI", () => {
     const tokenSymbol = "aUSDC";
 
     beforeEach(async () => {
+      jest.clearAllMocks();
+      api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
       // Create a source chain network
       const srcChain = await createNetwork({ name: chain });
       gasReceiverContract = srcChain.gasReceiver;
@@ -367,7 +373,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(response.success).toBe(true);
     });
 
-    test("it should call 'addNativeGas' successfully", async () => {
+    test("it should call addNativeGas successfully", async () => {
       // Override the provider and wallet to use data from the local network
       const addNativeGasOptions = {
         evmWalletDetails: {
