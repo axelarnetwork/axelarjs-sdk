@@ -28,7 +28,7 @@ import {
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private processor: AxelarGMPRecoveryProcessor;
-  private axelarQueryApi: AxelarQueryAPI;
+  axelarQueryApi: AxelarQueryAPI;
   public constructor(config: AxelarRecoveryAPIConfig) {
     super(config);
     this.processor = new AxelarGMPRecoveryProcessor(this);
@@ -117,6 +117,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const gasReceiverAddress = GAS_RECEIVER[this.environment][chain];
     const nativeGasTokenSymbol = NATIVE_GAS_TOKEN_SYMBOL[chain];
     const receipt = await signer.provider.getTransactionReceipt(txHash);
+
+    if (!receipt) {
+      return {
+        success: false,
+        error: `Couldn't find a transaction on ${chain}`,
+      };
+    }
+
     const destinationChain = getDestinationChainFromTxReceipt(receipt);
     const paidGasFee = getNativeGasAmountFromTxReceipt(receipt);
     const logIndex = getLogIndexFromTxReceipt(receipt);
@@ -138,38 +146,41 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
-    const wantedGasFee = await this.calculateWantedGasFee(
-      txHash,
-      chain,
-      destinationChain,
-      nativeGasTokenSymbol,
-      { estimatedGas: options?.estimatedGasUsed, provider: evmWalletDetails.provider }
-    ).catch(() => null);
+    let gasFeeToAdd = options?.amount;
+
+    if (!gasFeeToAdd) {
+      gasFeeToAdd = await this.calculateWantedGasFee(
+        txHash,
+        chain,
+        destinationChain,
+        nativeGasTokenSymbol,
+        { estimatedGas: options?.estimatedGasUsed, provider: evmWalletDetails.provider }
+      ).catch(() => undefined);
+    }
 
     // 3. Check if gas price is queried successfully.
-    if (!wantedGasFee) {
+    if (!gasFeeToAdd) {
       return {
         success: false,
-        error: "Couldn't query the gas price.",
+        error: "Couldn't query the gas price",
       };
     }
 
     // 4. Check if gas fee is not already sufficiently paid.
-    if (wantedGasFee === "0") {
+    if (gasFeeToAdd === "0") {
       return {
         success: false,
         error: "Already paid sufficient gas fee",
       };
     }
 
-    const gasFeeAmount = options?.amount || wantedGasFee;
     const refundAddress = options?.refundAddress || signerAddress;
 
     const contract = new ethers.Contract(gasReceiverAddress, IAxelarGasService, signer);
 
     return contract
       .addNativeGas(txHash, logIndex, refundAddress, {
-        value: gasFeeAmount,
+        value: gasFeeToAdd,
       })
       .then((tx: ContractTransaction) => tx.wait())
       .then((tx: ContractReceipt) => ({
