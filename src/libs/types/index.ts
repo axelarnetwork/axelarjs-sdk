@@ -3,7 +3,7 @@ import { Network } from "@ethersproject/networks";
 import { SigningStargateClientOptions } from "@cosmjs/stargate";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { LogDescription } from "ethers/lib/utils";
-import { ContractReceipt, Transaction } from "ethers";
+import { ContractReceipt, ethers, Transaction } from "ethers";
 
 export enum Environment {
   DEVNET = "devnet",
@@ -76,6 +76,7 @@ export type CosmosBasedWalletDetails = {
 export type EvmWalletDetails = {
   privateKey?: string;
   useWindowEthereum?: boolean;
+  provider?: ethers.providers.JsonRpcProvider;
 };
 export interface AxelarQueryClientConfig {
   axelarRpcUrl?: string;
@@ -87,6 +88,7 @@ export interface EVMClientConfig {
   networkOptions?: Network;
   evmWalletDetails: EvmWalletDetails;
 }
+
 export interface AxelarSigningClientConfig extends AxelarQueryClientConfig {
   cosmosBasedWalletDetails: CosmosBasedWalletDetails;
   options: SigningStargateClientOptions;
@@ -127,8 +129,8 @@ export enum GasToken {
 export interface AddGasOptions {
   amount?: string;
   refundAddress?: string;
-  estimatedGasUsed: number;
-  evmWalletDetails: EvmWalletDetails;
+  estimatedGasUsed?: number;
+  evmWalletDetails?: EvmWalletDetails;
 }
 
 export interface GatewayEventLog {
@@ -141,4 +143,9 @@ export interface TxResult {
   success: boolean;
   transaction?: ContractReceipt;
   error?: string;
+}
+
+export interface QueryGasFeeOptions {
+  provider?: ethers.providers.JsonRpcProvider;
+  estimatedGas?: number;
 }

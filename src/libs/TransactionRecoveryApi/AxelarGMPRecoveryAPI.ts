@@ -9,6 +9,7 @@ import {
   GasToken,
   GatewayEventLog,
   TxResult,
+  QueryGasFeeOptions,
 } from "../types";
 import { AxelarRecoveryApi, GMPStatus, rpcMap } from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
@@ -85,16 +86,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     sourceChain: EvmChain,
     destinationChain: EvmChain,
     gasTokenSymbol: GasToken | string,
-    estimatedGas = DEFAULT_ESTIMATED_GAS
+    options: QueryGasFeeOptions
   ): Promise<string> {
     const totalGasFee = await this.axelarQueryApi.estimateGasFee(
       sourceChain,
       destinationChain,
       gasTokenSymbol,
-      estimatedGas
+      options.estimatedGas
     );
-    const provider = new ethers.providers.JsonRpcProvider(rpcMap[sourceChain]);
-    const receipt = await provider.getTransactionReceipt(txHash);
+    const _provider = options.provider || new ethers.providers.JsonRpcProvider(rpcMap[sourceChain]);
+    const receipt = await _provider.getTransactionReceipt(txHash);
     const paidGasFee = this.getNativeGasAmountFromTxReceipt(receipt) || "0";
     const topupGasAmount = ethers.BigNumber.from(totalGasFee).sub(paidGasFee);
     return topupGasAmount.gt(0) ? topupGasAmount.toString() : "0";
@@ -137,7 +138,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       chain,
       destinationChain,
       nativeGasTokenSymbol,
-      options?.estimatedGasUsed
+      { estimatedGas: options?.estimatedGasUsed, provider: evmWalletDetails.provider }
     );
 
     // 3. Check if gas fee is not already sufficiently paid.
@@ -286,7 +287,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       "NativeGasPaidForContractCallWithToken(address,string,string,bytes32,string,uint256,uint256,address)"
     );
     const signatureGasPaidContractCall = ethers.utils.id(
-      "NativeGasPaidForContractCall(address,string,string,bytes,address)"
+      "NativeGasPaidForContractCall(address,string,string,bytes32,uint256,address)"
     );
 
     const event = this.findContractEvent(
