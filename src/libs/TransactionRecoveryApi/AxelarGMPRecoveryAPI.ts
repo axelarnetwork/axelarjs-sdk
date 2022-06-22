@@ -202,7 +202,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const gatewayGasTokenAddress = await axelarGateway.getTokenAddress(gasTokenSymbol);
 
     // Check if given `gasTokenAddress` is supported by Axelar.
-    if (!gatewayGasTokenAddress) return UnsupportedGasTokenError(gasTokenAddress);
+    if (gatewayGasTokenAddress === ethers.constants.AddressZero)
+      return UnsupportedGasTokenError(gasTokenAddress);
 
     const receipt = await signer.provider.getTransactionReceipt(txHash);
 

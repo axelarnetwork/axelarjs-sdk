@@ -6,6 +6,7 @@ import { deployContract } from "@axelar-network/axelar-local-dev/dist/utils";
 import DistributionExecutable from "../abi/DistributionExecutable.json";
 import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGasToken.json";
 import GasServiceAbi from "../../abi/IAxelarGasService.json";
+import TestToken from "../abi/TestToken.json";
 import { AxelarQueryAPI } from "../../AxelarQueryAPI";
 import { findContractEvent, getLogIndexFromTxReceipt } from "../../TransactionRecoveryApi/helpers";
 import { Interface } from "ethers/lib/utils";
@@ -14,8 +15,10 @@ import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
   GasPriceAPIError,
+  InvalidGasTokenError,
   InvalidTransactionError,
   NotGMPTransactionError,
+  UnsupportedGasTokenError,
 } from "../../TransactionRecoveryApi/constants/error";
 import { AXELAR_GATEWAY } from "../../AxelarGateway";
 
@@ -655,6 +658,74 @@ describe("AxelarDepositRecoveryAPI", () => {
       const response = await api.addGas(chain, tx.transactionHash, usdc.address, addGasOptions);
 
       expect(response.success).toBe(true);
+    });
+
+    test("it shouldn't call 'addGas' given 'gasTokenAddress' does not exist", async () => {
+      const gasPaid = ethers.utils.parseEther("0.00001");
+
+      // Send transaction at the source chain with overpaid gas
+      const tx: ContractReceipt = await contract
+        .sendToMany(
+          EvmChain.MOONBEAM,
+          ethers.constants.AddressZero,
+          [ethers.constants.AddressZero],
+          tokenSymbol,
+          "10000",
+          usdc.address,
+          gasPaid
+        )
+        .then((tx: ContractTransaction) => tx.wait());
+
+      // Simulate gasPrice api error
+      jest
+        .spyOn(api.axelarQueryApi, "estimateGasFee")
+        .mockRejectedValueOnce(() => Promise.reject());
+
+      // Call addGas function
+      const response = await api.addGas(
+        chain,
+        tx.transactionHash,
+        ethers.constants.AddressZero,
+        addGasOptions
+      );
+
+      expect(response).toEqual(InvalidGasTokenError());
+    });
+
+    test("it shouldn't call 'addGas' given `gasTokenAddress` is not supported by Axelar", async () => {
+      const testToken = await deployContract(userWallet, TestToken, ["100000000000"] as any).then(
+        (contract) => contract.connect(userWallet)
+      );
+
+      const gasPaid = ethers.utils.parseEther("0.00001");
+
+      // Send transaction at the source chain with overpaid gas
+      const tx: ContractReceipt = await contract
+        .sendToMany(
+          EvmChain.MOONBEAM,
+          ethers.constants.AddressZero,
+          [ethers.constants.AddressZero],
+          tokenSymbol,
+          "10000",
+          usdc.address,
+          gasPaid
+        )
+        .then((tx: ContractTransaction) => tx.wait());
+
+      // Simulate gasPrice api error
+      jest
+        .spyOn(api.axelarQueryApi, "estimateGasFee")
+        .mockRejectedValueOnce(() => Promise.reject());
+
+      // Call addGas function
+      const response = await api.addGas(
+        chain,
+        tx.transactionHash,
+        testToken.address,
+        addGasOptions
+      );
+
+      expect(response).toEqual(UnsupportedGasTokenError(testToken.address));
     });
 
     test("it should call 'addGas' successfully", async () => {
