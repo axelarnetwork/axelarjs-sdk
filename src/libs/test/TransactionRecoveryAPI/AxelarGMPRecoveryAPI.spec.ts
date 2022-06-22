@@ -1,14 +1,23 @@
 import { AxelarGMPRecoveryAPI } from "../../TransactionRecoveryApi/AxelarGMPRecoveryAPI";
-import { Environment, EvmChain, GasToken } from "../../types";
+import { AddGasOptions, Environment, EvmChain, GasToken } from "../../types";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
 import { Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
 import { deployContract } from "@axelar-network/axelar-local-dev/dist/utils";
 import DistributionExecutable from "../abi/DistributionExecutable.json";
+import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGasToken.json";
 import GasServiceAbi from "../../abi/IAxelarGasService.json";
 import { AxelarQueryAPI } from "../../AxelarQueryAPI";
 import { findContractEvent, getLogIndexFromTxReceipt } from "../../TransactionRecoveryApi/helpers";
 import { Interface } from "ethers/lib/utils";
 import { GAS_RECEIVER } from "../../TransactionRecoveryApi/constants/contract";
+import {
+  AlreadyExecutedError,
+  AlreadyPaidGasFeeError,
+  GasPriceAPIError,
+  InvalidTransactionError,
+  NotGMPTransactionError,
+} from "../../TransactionRecoveryApi/constants/error";
+import { AXELAR_GATEWAY } from "../../AxelarGateway";
 
 describe("AxelarDepositRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -428,6 +437,276 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       // Validate event data
       const args = nativeGasAddedEvent?.eventLog.args;
+      const eventGasFeeAmount = parseFloat(ethers.utils.formatEther(args?.gasFeeAmount)).toFixed(2);
+      const expectedGasFee = parseFloat(ethers.utils.formatEther(_expectedGasFee)).toFixed(2);
+
+      expect(args?.logIndex?.toNumber()).toBe(expectedLogIndex);
+      expect(eventGasFeeAmount).toBe(expectedGasFee);
+      expect(args?.refundAddress).toBe(userWallet.address);
+    });
+  });
+
+  describe("addGas", () => {
+    let api: AxelarGMPRecoveryAPI;
+    let contract: Contract;
+    let userWallet: Wallet;
+    let provider: ethers.providers.Web3Provider;
+    let gasReceiverContract: Contract;
+    let usdc: Contract;
+    const chain = EvmChain.AVALANCHE;
+    const tokenSymbol = "aUSDC";
+    // Override the provider and wallet to use data from the local network
+    let addGasOptions: AddGasOptions;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+      // Create a source chain network
+      const srcChain = await createNetwork({ name: chain });
+      gasReceiverContract = srcChain.gasReceiver;
+      userWallet = srcChain.adminWallets[0];
+      provider = srcChain.provider as ethers.providers.Web3Provider;
+      usdc = srcChain.usdc.connect(userWallet);
+      addGasOptions = {
+        evmWalletDetails: {
+          useWindowEthereum: false,
+          privateKey: userWallet.privateKey,
+          provider,
+        },
+      };
+      const args = [srcChain.gateway.address, srcChain.gasReceiver.address];
+
+      // Deploy test contract
+      contract = await deployContract(
+        userWallet,
+        DistributionExecutableWithGasToken,
+        args as any
+      ).then((contract) => contract.connect(userWallet));
+
+      // Send USDC to the user wallet for testing
+      await srcChain.giveToken(
+        userWallet.address,
+        tokenSymbol,
+        BigInt(ethers.utils.parseEther("1000000").toString())
+      );
+
+      // Approve token before running any test
+      await usdc
+        .approve(contract.address, ethers.constants.MaxUint256)
+        .then((tx: ContractTransaction) => tx.wait(1));
+
+      await usdc
+        .approve(gasReceiverContract.address, ethers.constants.MaxUint256)
+        .then((tx: ContractTransaction) => tx.wait(1));
+
+      // This is a hacky way to set the gas receiver constant object to local gas receiver contract address
+      GAS_RECEIVER[Environment.TESTNET][chain] = gasReceiverContract.address;
+      AXELAR_GATEWAY[Environment.TESTNET][chain] = srcChain.gateway.address;
+    });
+
+    test("it shouldn't call 'addGas' given tx is already executed", async () => {
+      const amount = ethers.utils.parseEther("0.0001");
+      const gasPaid = ethers.utils.parseEther("0.000001");
+
+      // Send transaction at the source chain with some gas.
+      const tx: ContractReceipt = await contract
+        .sendToMany(
+          EvmChain.MOONBEAM,
+          ethers.constants.AddressZero,
+          [ethers.constants.AddressZero],
+          tokenSymbol,
+          amount,
+          usdc.address,
+          gasPaid
+        )
+        .then((tx: ContractTransaction) => tx.wait());
+
+      // Mock that this transaction is already executed.
+      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(true));
+
+      // Call addGas function
+      const response = await api.addGas(
+        EvmChain.AVALANCHE,
+        tx.transactionHash,
+        usdc.address,
+        addGasOptions
+      );
+
+      expect(response).toEqual(AlreadyExecutedError());
+    });
+
+    test("it shouldn't call 'addGas' given tx doesn't exist", async () => {
+      // Call addNativeGas function by passing non-existing tx hash
+      const response = await api.addGas(
+        chain,
+        "0xcd1edb36c37caadf852c4614e3bed1082528d7c6a8d2de3fff3c596f8e675b90", // random tx hash
+        usdc.address,
+        addGasOptions
+      );
+
+      // Validate response
+      expect(response).toEqual(InvalidTransactionError(chain));
+    });
+
+    test("it shouldn't call 'addGas' given tx is not gmp call", async () => {
+      // Sending non-gmp transaction
+      const notGmpTx = await usdc
+        .transfer("0x0000000000000000000000000000000000000001", "1")
+        .then((tx: ContractTransaction) => tx.wait());
+
+      // Call addNativeGas function and passing non-gmp tx hash
+      const response = await api.addGas(
+        chain,
+        notGmpTx.transactionHash, // random tx hash
+        usdc.address,
+        addGasOptions
+      );
+
+      // Validate response
+      expect(response).toEqual(NotGMPTransactionError());
+    });
+
+    test("it shouldn't call 'addGas' given gas is already overpaid", async () => {
+      const decimals = await usdc.decimals();
+      const gasPaid = ethers.utils.parseUnits("100", decimals);
+
+      // Send transaction at the source chain with overpaid gas
+      const tx: ContractReceipt = await contract
+        .connect(userWallet)
+        .sendToMany(
+          EvmChain.MOONBEAM,
+          ethers.constants.AddressZero,
+          [ethers.constants.AddressZero],
+          tokenSymbol,
+          "10000",
+          usdc.address,
+          gasPaid
+        )
+        .then((tx: ContractTransaction) => tx.wait());
+
+      // Mock total gas fee is 0.1 USDC
+      jest
+        .spyOn(api.axelarQueryApi, "estimateGasFee")
+        .mockResolvedValue(ethers.utils.parseUnits("0.1", decimals).toString());
+
+      // Call addGas function
+      const response = await api.addGas(chain, tx.transactionHash, usdc.address, addGasOptions);
+
+      expect(response).toEqual(AlreadyPaidGasFeeError());
+    });
+
+    test("it shouldn't call 'addGas' given gasPrice api is not available and gas amount is not specified", async () => {
+      const gasPaid = ethers.utils.parseEther("10");
+
+      // Send transaction at the source chain with overpaid gas
+      const tx: ContractReceipt = await contract
+        .sendToMany(
+          EvmChain.MOONBEAM,
+          ethers.constants.AddressZero,
+          [ethers.constants.AddressZero],
+          tokenSymbol,
+          "10000",
+          usdc.address,
+          gasPaid
+        )
+        .then((tx: ContractTransaction) => tx.wait());
+
+      // Simulate gasPrice api error
+      jest
+        .spyOn(api.axelarQueryApi, "estimateGasFee")
+        .mockRejectedValueOnce(() => Promise.reject());
+
+      // Call addNativeGas function
+      const response = await api.addGas(
+        chain, // Passing wrong value here will cause the gas price api to return error
+        tx.transactionHash,
+        usdc.address,
+        addGasOptions
+      );
+
+      expect(response).toEqual(GasPriceAPIError());
+    });
+
+    test("it should call 'addGas' given gasPrice api is not available but gas amount is specified", async () => {
+      const gasPaid = ethers.utils.parseEther("0.00001");
+
+      // Send transaction at the source chain with overpaid gas
+      const tx: ContractReceipt = await contract
+        .sendToMany(
+          EvmChain.MOONBEAM,
+          ethers.constants.AddressZero,
+          [ethers.constants.AddressZero],
+          tokenSymbol,
+          "10000",
+          usdc.address,
+          gasPaid
+        )
+        .then((tx: ContractTransaction) => tx.wait());
+
+      // Simulate gasPrice api error
+      jest
+        .spyOn(api.axelarQueryApi, "estimateGasFee")
+        .mockRejectedValueOnce(() => Promise.reject());
+
+      // Override the amount, so it should call contract's addGas even the gas price api returns error
+      addGasOptions.amount = ethers.utils.parseEther("10").toString();
+
+      // Call addGas function
+      const response = await api.addGas(chain, tx.transactionHash, usdc.address, addGasOptions);
+
+      expect(response.success).toBe(true);
+    });
+
+    test("it should call 'addGas' successfully", async () => {
+      const gasPaid = ethers.utils.parseEther("0.000001");
+
+      // Send transaction at the source chain with some gas.
+      const tx: ContractReceipt = await contract
+        .sendToMany(
+          EvmChain.MOONBEAM,
+          ethers.constants.AddressZero,
+          [ethers.constants.AddressZero],
+          tokenSymbol,
+          "10000",
+          usdc.address,
+          gasPaid
+        )
+        .then((tx: ContractTransaction) => tx.wait());
+
+      // Mock total gas fee is 0.1 USDC
+      jest
+        .spyOn(api.axelarQueryApi, "estimateGasFee")
+        .mockResolvedValue(ethers.utils.parseEther("0.1").toString());
+
+      // Call addGas function
+      const response = await api.addGas(chain, tx.transactionHash, usdc.address, addGasOptions);
+      console.log(response);
+
+      // Validate response structure
+      expect(response.success).toBe(true);
+      expect(response.transaction).toBeDefined();
+
+      const signatureGasAdded = ethers.utils.id(
+        "GasAdded(bytes32,uint256,address,uint256,address)"
+      );
+      const gasAddedEvent = findContractEvent(
+        response.transaction as ContractReceipt,
+        [signatureGasAdded],
+        new Interface(GasServiceAbi)
+      );
+
+      // Calculate how many gas we need to add more.
+      const _expectedGasFee = await api.calculateGasFee(
+        tx.transactionHash,
+        chain,
+        EvmChain.MOONBEAM,
+        GasToken.USDC,
+        { provider }
+      );
+      const expectedLogIndex = getLogIndexFromTxReceipt(tx);
+
+      // Validate event data
+      const args = gasAddedEvent?.eventLog.args;
       const eventGasFeeAmount = parseFloat(ethers.utils.formatEther(args?.gasFeeAmount)).toFixed(2);
       const expectedGasFee = parseFloat(ethers.utils.formatEther(_expectedGasFee)).toFixed(2);
 

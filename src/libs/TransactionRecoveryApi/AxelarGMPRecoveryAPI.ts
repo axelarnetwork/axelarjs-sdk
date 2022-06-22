@@ -94,8 +94,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async isExecuted(txHash: string): Promise<boolean> {
-    const txStatus = await this.queryTransactionStatus(txHash);
-    return txStatus.status === GMPStatus.EXECUTED;
+    const txStatus = await this.queryTransactionStatus(txHash).catch(() => undefined);
+    return txStatus?.status === GMPStatus.EXECUTED;
   }
 
   public async calculateNativeGasFee(
@@ -153,7 +153,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     let gasFeeToAdd = options?.amount;
 
     if (!gasFeeToAdd) {
-      gasFeeToAdd = await this.calculateGasFee(
+      gasFeeToAdd = await this.calculateNativeGasFee(
         txHash,
         chain,
         destinationChain,
@@ -222,20 +222,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     let gasFeeToAdd = options?.amount;
 
     if (!gasFeeToAdd) {
-      gasFeeToAdd = await this.calculateNativeGasFee(
-        txHash,
-        chain,
-        destinationChain,
-        gasTokenSymbol,
-        { estimatedGas: options?.estimatedGasUsed, provider: evmWalletDetails.provider }
-      ).catch(() => undefined);
+      gasFeeToAdd = await this.calculateGasFee(txHash, chain, destinationChain, gasTokenSymbol, {
+        estimatedGas: options?.estimatedGasUsed,
+        provider: evmWalletDetails.provider,
+      }).catch(() => undefined);
     }
 
     // Check if gas price is queried successfully.
     if (!gasFeeToAdd) return GasPriceAPIError();
 
     // Check if gas fee is not already sufficiently paid.
-    if (gasFeeToAdd === "0") AlreadyPaidGasFeeError();
+    if (gasFeeToAdd === "0") return AlreadyPaidGasFeeError();
 
     const refundAddress = options?.refundAddress || signerAddress;
     const contract = new ethers.Contract(gasReceiverAddress, IAxelarGasService, signer);
