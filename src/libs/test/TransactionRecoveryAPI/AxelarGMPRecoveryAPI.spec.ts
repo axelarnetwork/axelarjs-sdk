@@ -148,6 +148,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     let provider: ethers.providers.Web3Provider;
     let gasReceiverContract: Contract;
     let usdc: Contract;
+    let addNativeGasOptions: AddGasOptions;
     const chain = EvmChain.AVALANCHE;
     const tokenSymbol = "aUSDC";
 
@@ -159,11 +160,23 @@ describe("AxelarDepositRecoveryAPI", () => {
       gasReceiverContract = srcChain.gasReceiver;
       userWallet = srcChain.adminWallets[0];
       provider = srcChain.provider as ethers.providers.Web3Provider;
-      usdc = srcChain.usdc;
+      usdc = srcChain.usdc.connect(userWallet);
+
+      // Override the provider and wallet to use data from the local network
+      addNativeGasOptions = {
+        evmWalletDetails: {
+          useWindowEthereum: false,
+          privateKey: userWallet.privateKey,
+          provider,
+        },
+      };
+
       const args = [srcChain.gateway.address, srcChain.gasReceiver.address];
 
       // Deploy test contract
-      contract = await deployContract(userWallet, DistributionExecutable, args as any);
+      contract = await deployContract(userWallet, DistributionExecutable, args as any).then(
+        (contract) => contract.connect(userWallet)
+      );
 
       // Send USDC to the user wallet for testing
       await srcChain.giveToken(userWallet.address, tokenSymbol, BigInt("10000000"));
@@ -179,20 +192,10 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
 
     test("it shouldn't call 'addNativeGas' given tx is already executed", async () => {
-      // Override the provider and wallet to use data from the local network
-      const addNativeGasOptions = {
-        evmWalletDetails: {
-          useWindowEthereum: false,
-          privateKey: userWallet.privateKey,
-          provider,
-        },
-      };
-
       const gasPaid = ethers.utils.parseEther("0.000001");
 
       // Send transaction at the source chain with some gas.
       const tx: ContractReceipt = await contract
-        .connect(userWallet)
         .sendToMany(
           EvmChain.MOONBEAM,
           ethers.constants.AddressZero,
@@ -215,8 +218,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         addNativeGasOptions
       );
 
-      expect(response.success).toBe(false);
-      expect(response.error).toBe("Already executed");
+      expect(response).toEqual(AlreadyExecutedError());
     });
 
     test("it shouldn't call 'addNativeGas' given tx doesn't exist", async () => {
@@ -237,23 +239,12 @@ describe("AxelarDepositRecoveryAPI", () => {
       );
 
       // Validate response
-      expect(response.success).toBe(false);
-      expect(response.error).toBe(`Couldn't find a transaction on ${chain}`);
+      expect(response).toEqual(InvalidTransactionError(chain));
     });
 
     test("it shouldn't call 'addNativeGas' given tx is not gmp call", async () => {
-      // Override the provider and wallet to use data from the local network
-      const addNativeGasOptions = {
-        evmWalletDetails: {
-          useWindowEthereum: false,
-          privateKey: userWallet.privateKey,
-          provider,
-        },
-      };
-
       // Sending non-gmp transaction
       const notGmpTx = await usdc
-        .connect(userWallet)
         .transfer("0x0000000000000000000000000000000000000001", "1")
         .then((tx: ContractTransaction) => tx.wait());
 
@@ -265,25 +256,14 @@ describe("AxelarDepositRecoveryAPI", () => {
       );
 
       // Validate response
-      expect(response.success).toBe(false);
-      expect(response.error).toBe("Not GMP transaction");
+      expect(response).toEqual(NotGMPTransactionError());
     });
 
     test("it shouldn't call 'addNativeGas' given gas is already overpaid", async () => {
-      // Override the provider and wallet to use data from the local network
-      const addNativeGasOptions = {
-        evmWalletDetails: {
-          useWindowEthereum: false,
-          privateKey: userWallet.privateKey,
-          provider,
-        },
-      };
-
       const gasPaid = ethers.utils.parseEther("10");
 
       // Send transaction at the source chain with overpaid gas
       const tx: ContractReceipt = await contract
-        .connect(userWallet)
         .sendToMany(
           EvmChain.MOONBEAM,
           ethers.constants.AddressZero,
@@ -299,8 +279,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       // Call addNativeGas function
       const response = await api.addNativeGas(chain, tx.transactionHash, addNativeGasOptions);
 
-      expect(response.success).toBe(false);
-      expect(response.error).toBe("Already paid sufficient gas fee");
+      expect(response).toEqual(AlreadyPaidGasFeeError());
     });
 
     test("it shouldn't call 'addNativeGas' given gasPrice api is not available and gas amount is not specified", async () => {
@@ -349,19 +328,10 @@ describe("AxelarDepositRecoveryAPI", () => {
     test("it should call 'addNativeGas' given gasPrice api is not available but gas amount is specified", async () => {
       const gasPaid = ethers.utils.parseEther("0.00001");
 
-      // Override the provider and wallet to use data from the local network
-      const addNativeGasOptions = {
-        evmWalletDetails: {
-          useWindowEthereum: false,
-          privateKey: userWallet.privateKey,
-          provider,
-        },
-        amount: gasPaid.toString(),
-      };
-
       // Send transaction at the source chain with overpaid gas
+      addNativeGasOptions.amount = gasPaid.toString();
+
       const tx: ContractReceipt = await contract
-        .connect(userWallet)
         .sendToMany(
           EvmChain.MOONBEAM,
           ethers.constants.AddressZero,
@@ -386,20 +356,10 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
 
     test("it should call 'addNativeGas' successfully", async () => {
-      // Override the provider and wallet to use data from the local network
-      const addNativeGasOptions = {
-        evmWalletDetails: {
-          useWindowEthereum: false,
-          privateKey: userWallet.privateKey,
-          provider,
-        },
-      };
-
       const gasPaid = ethers.utils.parseEther("0.000001");
 
       // Send transaction at the source chain with some gas.
       const tx: ContractReceipt = await contract
-        .connect(userWallet)
         .sendToMany(
           EvmChain.MOONBEAM,
           ethers.constants.AddressZero,
@@ -751,7 +711,6 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       // Call addGas function
       const response = await api.addGas(chain, tx.transactionHash, usdc.address, addGasOptions);
-      console.log(response);
 
       // Validate response structure
       expect(response.success).toBe(true);
