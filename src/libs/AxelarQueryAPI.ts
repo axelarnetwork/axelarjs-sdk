@@ -5,9 +5,13 @@ import { RestService } from "../services";
 import {
   AxelarQueryAPIConfig,
   Environment,
+  EvmChain,
   FeeInfoResponse,
+  GasToken,
   TransferFeeResponse,
 } from "./types";
+import { ethers } from "ethers";
+import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -29,9 +33,7 @@ export class AxelarQueryAPI {
 
     this.lcdApi = new RestService(this.axelarLcdUrl);
     this.rpcApi = new RestService(this.axelarRpcUrl);
-    this.axelarCachingServiceApi = new RestService(
-      this.axelarCachingServiceUrl
-    );
+    this.axelarCachingServiceApi = new RestService(this.axelarCachingServiceUrl);
   }
 
   /**
@@ -75,65 +77,80 @@ export class AxelarQueryAPI {
       queryEndpoint += `?source_chain=${sourceChainName?.toLowerCase()}`;
       queryEndpoint += `&destination_chain=${destinationChainName?.toLowerCase()}`;
       queryEndpoint += `&amount=${amountInDenom?.toString()}${assetDenom}`;
-      return (await this.lcdApi.get(queryEndpoint)) as TransferFeeResponse;
-    } catch (e: any) {
-      throw e;
-    }
-  }
-
-  /** 
-   * Gets the gas price for a destination chain to be paid to the gas receiver on a source chain
-   * example testnet query: https://testnet.api.gmp.axelarscan.io/?method=getGasPrice&destinationChain=ethereum&sourceChain=avalanche&sourceTokenAddress=0x43F4600b552089655645f8c16D86A5a9Fa296bc3&sourceTokenSymbol=UST
-   * @param sourceChainName
-   * @param destinationChainName
-   * @param sourceChainTokenAddress
-   * @param sourceChainTokenSymbol
-   * @returns
-   */
-  public async getGasPrice(
-    sourceChainName: string,
-    destinationChainName: string,
-    sourceChainTokenAddress: string,
-    sourceChainTokenSymbol: string
-  ): Promise<number> {
-    try {
-      let queryEndpoint = "";
-      queryEndpoint += "?method=getGasPrice";
-      queryEndpoint += `&destinationChain=${destinationChainName}`;
-      queryEndpoint += `&sourceChain=${sourceChainName}`;
-      queryEndpoint += `&sourceTokenAddress=${sourceChainTokenAddress}`;
-      queryEndpoint += `&sourceTokenSymbol=${sourceChainTokenSymbol}`;
-
-      const response = await this.axelarCachingServiceApi.get(queryEndpoint);
-
-      const result = response.result;
-      const dest = result.destination_native_token;
-      const exponent = 1e18;
-      const destPrice = exponent * dest.gas_price * dest.token_price.usd;
-      return destPrice / result.source_token.token_price.usd;
+      return this.lcdApi.get(queryEndpoint);
     } catch (e: any) {
       throw e;
     }
   }
 
   /**
+   * Gets the gas price for a destination chain to be paid to the gas receiver on a source chain
+   * example testnet query: https://testnet.api.gmp.axelarscan.io/?method=getGasPrice&destinationChain=ethereum&sourceChain=avalanche&sourceTokenAddress=0x43F4600b552089655645f8c16D86A5a9Fa296bc3&sourceTokenSymbol=UST
+   * @param sourceChainName
+   * @param destinationChainName
+   * @param sourceChainTokenSymbol
+   * @param estimatedGasUsed
+   * @returns
+   */
+  public async getGasInfo(
+    sourceChainName: EvmChain,
+    destinationChainName: EvmChain,
+    sourceChainTokenSymbol: GasToken | string
+  ): Promise<any> {
+    const params = new URLSearchParams({
+      method: "getGasPrice",
+      destinationChain: destinationChainName,
+      sourceChain: sourceChainName,
+      sourceTokenSymbol: sourceChainTokenSymbol,
+    });
+
+    return this.axelarCachingServiceApi.get(`?${params}`).then((resp) => resp.result);
+  }
+
+  /**
+   * Calculate estimated gas amount to pay for the gas receiver contract.
+   *
+   * @param sourceChainName
+   * @param destinationChainName
+   * @param sourceChainTokenSymbol
+   * @param estimatedGasUsed (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which sufficients for most transaction.
+   * @returns
+   */
+  public async estimateGasFee(
+    sourceChainName: EvmChain,
+    destinationChainName: EvmChain,
+    sourceChainTokenSymbol: GasToken | string,
+    estimatedGasUsed = DEFAULT_ESTIMATED_GAS
+  ): Promise<string> {
+    const response = await this.getGasInfo(
+      sourceChainName,
+      destinationChainName,
+      sourceChainTokenSymbol
+    );
+    const { gas_price: gasPrice } = response.source_token;
+    return ethers.utils.parseEther(gasPrice).mul(estimatedGasUsed).toString();
+  }
+
+  /**
    * Get the denom for an asset given its symbol on a chain
-   * @param symbol 
-   * @param chainName 
-   * @returns 
+   * @param symbol
+   * @param chainName
+   * @returns
    */
   public getDenomFromSymbol(symbol: string, chainName: string) {
     const allAssets = loadAssets({ environment: this.environment });
-    const assetConfig: AssetConfig | undefined = allAssets.find(assetConfig => assetConfig.chain_aliases[chainName]?.assetSymbol === symbol);
+    const assetConfig: AssetConfig | undefined = allAssets.find(
+      (assetConfig) => assetConfig.chain_aliases[chainName]?.assetSymbol === symbol
+    );
     if (!assetConfig) return null;
     return assetConfig?.common_key[this.environment];
   }
 
   /**
    * Get the symbol for an asset on a given chain given its denom
-   * @param denom 
-   * @param chainName 
-   * @returns 
+   * @param denom
+   * @param chainName
+   * @returns
    */
   public getSymbolFromDenom(denom: string, chainName: string) {
     const allAssets = loadAssets({ environment: this.environment });

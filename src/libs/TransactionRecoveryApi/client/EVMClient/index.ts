@@ -2,24 +2,23 @@ import { ethers } from "ethers";
 import { TransactionRequest } from "@ethersproject/providers";
 import { EVMClientConfig } from "src/libs/types";
 
-declare const window: Window &
-  typeof globalThis & {
-    ethereum: any;
-  };
-
 export default class EVMClient {
-  private provider!: ethers.providers.JsonRpcProvider;
-  private signer!: ethers.providers.JsonRpcSigner | ethers.Wallet;
+  private provider: ethers.providers.JsonRpcProvider;
+  private signer: ethers.providers.JsonRpcSigner | ethers.Wallet;
 
   constructor(config: EVMClientConfig) {
     const { rpcUrl, networkOptions, evmWalletDetails } = config;
-    const { mnemonic, useWindowEthereum } = evmWalletDetails;
-    this.provider =
-      useWindowEthereum && window?.ethereum
-        ? new ethers.providers.Web3Provider(window.ethereum, networkOptions)
-        : new ethers.providers.JsonRpcProvider(rpcUrl, networkOptions);
-    this.signer = mnemonic
-      ? ethers.Wallet.fromMnemonic(mnemonic).connect(this.provider)
+    const { privateKey, useWindowEthereum, provider } = evmWalletDetails;
+    if (provider) {
+      this.provider = provider;
+    } else {
+      this.provider =
+        useWindowEthereum && window?.ethereum
+          ? new ethers.providers.Web3Provider(window.ethereum, networkOptions)
+          : new ethers.providers.JsonRpcProvider(rpcUrl, networkOptions);
+    }
+    this.signer = privateKey
+      ? new ethers.Wallet(privateKey).connect(this.provider)
       : this.provider.getSigner();
   }
 

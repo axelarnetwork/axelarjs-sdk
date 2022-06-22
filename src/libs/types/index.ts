@@ -1,10 +1,9 @@
 import { Network } from "@ethersproject/networks";
 
 import { SigningStargateClientOptions } from "@cosmjs/stargate";
-import {
-  OfflineSigner,
-} from "@cosmjs/proto-signing";
-import { ethers } from "ethers";
+import { OfflineSigner } from "@cosmjs/proto-signing";
+import { LogDescription } from "ethers/lib/utils";
+import { ContractReceipt, ethers, Transaction } from "ethers";
 
 export enum Environment {
   DEVNET = "devnet",
@@ -70,14 +69,15 @@ export type AxelarQueryAPIConfig = {
   environment: Environment;
 };
 
-type CosmosBasedWalletDetails = {
+export type CosmosBasedWalletDetails = {
   mnemonic?: string;
   offlineSigner?: OfflineSigner;
-}
-type EvmWalletDetails = {
-  mnemonic?: string;
+};
+export type EvmWalletDetails = {
+  privateKey?: string;
   useWindowEthereum?: boolean;
-}
+  provider?: ethers.providers.JsonRpcProvider;
+};
 export interface AxelarQueryClientConfig {
   axelarRpcUrl?: string;
   environment: Environment;
@@ -88,10 +88,11 @@ export interface EVMClientConfig {
   networkOptions?: Network;
   evmWalletDetails: EvmWalletDetails;
 }
+
 export interface AxelarSigningClientConfig extends AxelarQueryClientConfig {
   cosmosBasedWalletDetails: CosmosBasedWalletDetails;
   options: SigningStargateClientOptions;
-};
+}
 
 export type AxelarRecoveryAPIConfig = {
   environment: Environment;
@@ -104,12 +105,47 @@ export interface FeeInfoResponse {
     fee_rate: string;
     min_fee: string;
     max_fee: string;
-  }
+  };
 }
 
 export interface TransferFeeResponse {
   fee: {
     denom: string;
     amount: string;
-  }
+  };
+}
+
+// Includes all native tokens and stablecoins
+export enum GasToken {
+  ETH = "ETH",
+  AVAX = "AVAX",
+  GLMR = "GLMR",
+  FTM = "FTM",
+  MATIC = "MATIC",
+  UST = "UST",
+  USDC = "USDC",
+}
+
+export interface AddGasOptions {
+  amount?: string;
+  refundAddress?: string;
+  estimatedGasUsed?: number;
+  evmWalletDetails?: EvmWalletDetails;
+}
+
+export interface EventLog {
+  signature: string;
+  eventLog: LogDescription;
+  logIndex: number;
+}
+
+export interface TxResult {
+  success: boolean;
+  transaction?: ContractReceipt;
+  error?: string;
+}
+
+export interface QueryGasFeeOptions {
+  provider?: ethers.providers.JsonRpcProvider;
+  estimatedGas?: number;
 }
