@@ -80,7 +80,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         .then((tx: ContractTransaction) => tx.wait());
 
       // Calculate how many gas we need to add more.
-      const wantedGasFee = await api.calculateWantedGasFee(
+      const wantedGasFee = await api.calculateNativeGasFee(
         tx.transactionHash,
         EvmChain.AVALANCHE,
         EvmChain.MOONBEAM,
@@ -117,7 +117,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         .then((tx: ContractTransaction) => tx.wait());
 
       // Calculate how many gas we need to add more.
-      const wantedGasFee = await api.calculateWantedGasFee(
+      const wantedGasFee = await api.calculateNativeGasFee(
         tx.transactionHash,
         EvmChain.AVALANCHE,
         EvmChain.MOONBEAM,
@@ -254,7 +254,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       // Validate response
       expect(response.success).toBe(false);
-      expect(response.error).toBe("Invalid GMP transaction");
+      expect(response.error).toBe("Not GMP transaction");
     });
 
     test("it shouldn't call 'addNativeGas' given gas is already overpaid", async () => {
@@ -417,7 +417,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       );
 
       // Calculate how many gas we need to add more.
-      const _expectedGasFee = await api.calculateWantedGasFee(
+      const _expectedGasFee = await api.calculateNativeGasFee(
         tx.transactionHash,
         chain,
         EvmChain.MOONBEAM,
