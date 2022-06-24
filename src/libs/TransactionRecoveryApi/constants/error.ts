@@ -39,3 +39,13 @@ export const UnsupportedGasTokenError = (gasTokenAddress: string) => ({
   success: false,
   error: `Token address ${gasTokenAddress} is not supported`,
 });
+
+export const NotApprovedError = () => ({
+  success: false,
+  error: "Transaction has not approved yet",
+});
+
+export const GMPQueryError = () => ({
+  success: false,
+  error: "Couldn't query the transaction details",
+});

@@ -10,7 +10,7 @@ import {
   TxResult,
   QueryGasFeeOptions,
 } from "../types";
-import { AxelarRecoveryApi, GMPStatus } from "./AxelarRecoveryApi";
+import { AxelarRecoveryApi, ExecuteParams, GMPStatus } from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import AxelarGMPRecoveryProcessor from "./processors";
@@ -34,8 +34,10 @@ import {
   AlreadyPaidGasFeeError,
   ContractCallError,
   GasPriceAPIError,
+  GMPQueryError,
   InvalidGasTokenError,
   InvalidTransactionError,
+  NotApprovedError,
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "./constants/error";
@@ -187,7 +189,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txHash: string,
     gasTokenAddress: string,
     options?: AddGasOptions
-  ) {
+  ): Promise<TxResult> {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
     const signer = this.getSigner(chain, evmWalletDetails);
     const signerAddress = await signer.getAddress();
@@ -247,85 +249,69 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       .catch(ContractCallError);
   }
 
-  public async executeManually(
-    data: {
-      call: any;
-      approved: any;
-    },
-    cb: any
-  ): Promise<void> {
-    try {
-      const { call, approved } = data;
-      const { event } = call;
-      const { destinationChain, destinationContractAddress, payload } = call?.returnValues;
-      const { commandId, sourceChain, sourceAddress, symbol, amount } = approved?.returnValues;
+  public async execute(srcTxHash: string, evmWalletDetails?: EvmWalletDetails): Promise<TxResult> {
+    const executeParamsResponse = await this.queryExecuteParams(srcTxHash);
 
-      const evmClientConfig: EVMClientConfig = {
-        rpcUrl: rpcMap[destinationChain as EvmChain],
-        evmWalletDetails: { useWindowEthereum: true },
-      };
-
-      const evmClient = new EVMClient(evmClientConfig);
-      const signer = evmClient.getSigner();
-      const address: string = await signer.getAddress();
-
-      const contract = new ethers.Contract(
-        destinationContractAddress,
-        IAxelarExecutable.abi,
-        signer
-      );
-
-      const methods: { [key: string]: ContractFunction } = {
-        ContractCall: () => contract.execute(commandId, sourceChain, sourceAddress, payload),
-        ContractCallWithToken: () =>
-          contract.executeWithToken(
-            commandId,
-            sourceChain,
-            sourceAddress,
-            payload,
-            symbol,
-            BigNumber.from(amount).toString()
-          ),
-      };
-
-      if (methods[event]) {
-        let tx;
-        try {
-          tx = await methods[event]();
-          if (tx.hash) {
-            cb({
-              status: "pending",
-              message: "Wait for confirmation",
-              txHash: tx.hash,
-            });
-          }
-          await tx.wait(1);
-          if (tx.hash) {
-            cb({
-              status: "success",
-              message: "Execute successful",
-              txHash: tx.hash,
-            });
-            await this.saveGMP(call?.transactionHash, tx.hash, address);
-          }
-        } catch (error: any) {
-          await this.saveGMP(call?.transactionHash, tx?.hash, address, error);
-          cb({
-            status: "failed",
-            message: error?.reason || error?.data?.message || error?.message,
-            txHash: tx?.hash,
-          });
-        }
-      } else {
-        console.warn(`method ${event} does not exist!`);
-      }
-    } catch (error: any) {
-      cb({
-        status: "failed",
-        message: error?.reason || error?.data?.message || error?.message,
-        txHash: "",
-      });
+    // Couldn't query the transaction details
+    if (!executeParamsResponse) {
+      return GMPQueryError();
     }
+
+    // Already executed
+    if (executeParamsResponse?.status === GMPStatus.EXECUTED) {
+      return AlreadyExecutedError();
+    }
+
+    // Not Approved yet
+    if (executeParamsResponse?.status !== GMPStatus.APPROVED) {
+      return NotApprovedError();
+    }
+
+    const {
+      commandId,
+      destinationChain,
+      destinationContractAddress,
+      isContractCallWithToken,
+      payload,
+      sourceAddress,
+      sourceChain,
+      amount,
+      symbol,
+    } = executeParamsResponse.data as ExecuteParams;
+
+    const signer = this.getSigner(destinationChain, evmWalletDetails);
+    const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
+
+    let txResult: TxResult;
+    if (isContractCallWithToken) {
+      txResult = await contract
+        .executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount)
+        .then((tx: ContractTransaction) => tx.wait())
+        .then((tx: ContractReceipt) => ({
+          status: true,
+          transaction: tx,
+        }))
+        .catch(ContractCallError);
+    } else {
+      txResult = await contract
+        .execute(commandId, sourceChain, sourceAddress, payload)
+        .then((tx: ContractTransaction) => tx.wait())
+        .then((tx: ContractReceipt) => ({
+          status: true,
+          transaction: tx,
+        }))
+        .catch(ContractCallError);
+    }
+
+    const signerAddress = await signer.getAddress();
+    const executeTxHash = txResult.transaction?.transactionHash;
+
+    // Submit execute data to axelarscan
+    if (executeTxHash) {
+      await this.saveGMP(srcTxHash, executeTxHash, signerAddress).catch();
+    }
+
+    return txResult;
   }
 
   private async subtractGasFee(
