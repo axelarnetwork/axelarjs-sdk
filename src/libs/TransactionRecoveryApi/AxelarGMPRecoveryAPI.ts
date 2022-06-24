@@ -283,7 +283,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const signerAddress = await signer.getAddress();
     const executeTxHash = txResult.transaction?.transactionHash;
     if (executeTxHash) {
-      await this.saveGMP(srcTxHash, executeTxHash, signerAddress).catch();
+      await this.saveGMP(srcTxHash, executeTxHash, signerAddress).catch(() => undefined);
     }
 
     return txResult;
