@@ -15,7 +15,14 @@ import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import AxelarGMPRecoveryProcessor from "./processors";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
-import { BigNumber, ContractFunction, ContractReceipt, ContractTransaction, ethers } from "ethers";
+import {
+  BigNumber,
+  Contract,
+  ContractFunction,
+  ContractReceipt,
+  ContractTransaction,
+  ethers,
+} from "ethers";
 import IAxelarGasService from "../abi/IAxelarGasService.json";
 import { GAS_RECEIVER, NATIVE_GAS_TOKEN_SYMBOL } from "./constants/contract";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
@@ -251,67 +258,56 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   public async execute(srcTxHash: string, evmWalletDetails?: EvmWalletDetails): Promise<TxResult> {
     const executeParamsResponse = await this.queryExecuteParams(srcTxHash);
-
     // Couldn't query the transaction details
-    if (!executeParamsResponse) {
-      return GMPQueryError();
-    }
-
+    if (!executeParamsResponse) return GMPQueryError();
     // Already executed
-    if (executeParamsResponse?.status === GMPStatus.EXECUTED) {
-      return AlreadyExecutedError();
-    }
-
+    if (executeParamsResponse?.status === GMPStatus.EXECUTED) return AlreadyExecutedError();
     // Not Approved yet
-    if (executeParamsResponse?.status !== GMPStatus.APPROVED) {
-      return NotApprovedError();
+    if (executeParamsResponse?.status !== GMPStatus.APPROVED) return NotApprovedError();
+
+    const executeParams = executeParamsResponse.data as ExecuteParams;
+    const { destinationChain, destinationContractAddress } = executeParams;
+
+    const signer = this.getSigner(destinationChain, evmWalletDetails);
+    const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
+
+    const txResult: TxResult = await this._execute(executeParams, contract)
+      .then((tx: ContractReceipt) => ({
+        success: true,
+        transaction: tx,
+      }))
+      .catch(ContractCallError);
+
+    // Submit execute data to axelarscan if contract execution is success.
+    const signerAddress = await signer.getAddress();
+    const executeTxHash = txResult.transaction?.transactionHash;
+    if (executeTxHash) {
+      await this.saveGMP(srcTxHash, executeTxHash, signerAddress).catch();
     }
 
+    return txResult;
+  }
+
+  private async _execute(params: ExecuteParams, contract: Contract): Promise<ContractReceipt> {
     const {
       commandId,
-      destinationChain,
-      destinationContractAddress,
       isContractCallWithToken,
       payload,
       sourceAddress,
       sourceChain,
       amount,
       symbol,
-    } = executeParamsResponse.data as ExecuteParams;
+    } = params;
 
-    const signer = this.getSigner(destinationChain, evmWalletDetails);
-    const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
-
-    let txResult: TxResult;
     if (isContractCallWithToken) {
-      txResult = await contract
+      return contract
         .executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount)
-        .then((tx: ContractTransaction) => tx.wait())
-        .then((tx: ContractReceipt) => ({
-          status: true,
-          transaction: tx,
-        }))
-        .catch(ContractCallError);
+        .then((tx: ContractTransaction) => tx.wait());
     } else {
-      txResult = await contract
+      return contract
         .execute(commandId, sourceChain, sourceAddress, payload)
-        .then((tx: ContractTransaction) => tx.wait())
-        .then((tx: ContractReceipt) => ({
-          status: true,
-          transaction: tx,
-        }))
-        .catch(ContractCallError);
+        .then((tx: ContractTransaction) => tx.wait());
     }
-
-    const signerAddress = await signer.getAddress();
-    const executeTxHash = txResult.transaction?.transactionHash;
-
-    // Submit execute data to axelarscan
-    if (executeTxHash) {
-      await this.saveGMP(srcTxHash, executeTxHash, signerAddress).catch();
-    }
-
-    return txResult;
   }
 
   private async subtractGasFee(
