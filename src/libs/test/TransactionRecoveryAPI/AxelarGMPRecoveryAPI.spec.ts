@@ -1,7 +1,7 @@
 import { AxelarGMPRecoveryAPI } from "../../TransactionRecoveryApi/AxelarGMPRecoveryAPI";
-import { AddGasOptions, Environment, EvmChain, GasToken } from "../../types";
+import { AddGasOptions, Environment, EvmChain, EvmWalletDetails, GasToken } from "../../types";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
-import { Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
+import { BigNumber, Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
 import { deployContract } from "@axelar-network/axelar-local-dev/dist/utils";
 import DistributionExecutable from "../abi/DistributionExecutable.json";
 import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGasToken.json";
@@ -14,13 +14,18 @@ import { GAS_RECEIVER } from "../../TransactionRecoveryApi/constants/contract";
 import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
+  ContractCallError,
   GasPriceAPIError,
+  GMPQueryError,
   InvalidGasTokenError,
   InvalidTransactionError,
+  NotApprovedError,
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "../../TransactionRecoveryApi/constants/error";
 import { AXELAR_GATEWAY } from "../../AxelarGateway";
+import { GMPStatus } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
+import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contractCallHelper";
 
 describe("AxelarDepositRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -743,6 +748,139 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(args?.logIndex?.toNumber()).toBe(expectedLogIndex);
       expect(eventGasFeeAmount).toBe(expectedGasFee);
       expect(args?.refundAddress).toBe(userWallet.address);
+    });
+  });
+
+  describe("execute", () => {
+    let api: AxelarGMPRecoveryAPI;
+    const wallet = Wallet.createRandom();
+    const evmWalletDetails: EvmWalletDetails = {
+      privateKey: wallet.privateKey,
+    };
+    const mockExecuteParams = {
+      commandId: "0xdfeb4a182f0f1d262e82ed36968eaa636fd52de400c886b05060255c57b32d6f",
+      destinationChain: EvmChain.AVALANCHE,
+      destinationContractAddress: wallet.address,
+      isContractCallWithToken: true,
+      payload: "0x",
+      sourceAddress: wallet.address,
+      sourceChain: EvmChain.FANTOM,
+      amount: "1",
+      symbol: "WAVAX",
+    };
+    const mockContractReceipt: ContractReceipt = {
+      transactionHash: "0x739024d5cae44f63669beb1df9512348c2c4b19caf827de66d74c32fe24ee2a0",
+      blockHash: "0x4f5018f52584d798e6145f6998ea1fc9b7716d89653db25960188f9437189620",
+      from: wallet.address,
+      to: wallet.address,
+      confirmations: 1,
+      gasUsed: BigNumber.from("1"),
+      effectiveGasPrice: BigNumber.from("1"),
+      cumulativeGasUsed: BigNumber.from("1"),
+      logs: [],
+      logsBloom: "",
+      contractAddress: wallet.address,
+      byzantium: true,
+      blockNumber: 1,
+      type: 0,
+      transactionIndex: 1,
+    };
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+    });
+
+    test("it shouldn't call 'execute' given tx is already executed", async () => {
+      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      mockApi.mockResolvedValueOnce({ status: GMPStatus.EXECUTED });
+
+      const response = await api.execute(
+        "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
+        evmWalletDetails
+      );
+
+      expect(response).toEqual(AlreadyExecutedError());
+    });
+
+    test("it shouldn't call 'execute' given tx has not approved yet", async () => {
+      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      mockApi.mockResolvedValueOnce({ status: GMPStatus.CALL });
+
+      const response = await api.execute(
+        "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
+        evmWalletDetails
+      );
+
+      expect(response).toEqual(NotApprovedError());
+    });
+
+    test("it shouldn't call 'execute' given gmp api error", async () => {
+      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      mockApi.mockResolvedValueOnce(undefined);
+
+      const response = await api.execute(
+        "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
+        evmWalletDetails
+      );
+
+      expect(response).toEqual(GMPQueryError());
+    });
+
+    test("it shouldn't call 'saveGMP' given contract call failed", async () => {
+      // mock query api
+      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      mockApi.mockResolvedValueOnce({
+        status: GMPStatus.APPROVED,
+        data: mockExecuteParams,
+      });
+
+      // Mock contract call is failed
+      const error = new Error("reverted");
+      jest.spyOn(ContractCallHelper, "callExecute").mockRejectedValueOnce(error);
+
+      // Mock private saveGMP
+      const mockGMPApi = jest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
+      mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
+
+      const response = await api.execute(
+        "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
+        evmWalletDetails
+      );
+
+      // Expect returns error
+      expect(response).toEqual(ContractCallError(error));
+
+      // Expect we don't call saveGMP api
+      expect(mockGMPApi).not.toHaveBeenCalled();
+    });
+
+    test("it should call 'execute' and return success = true", async () => {
+      // mock query api
+      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      mockApi.mockResolvedValueOnce({
+        status: GMPStatus.APPROVED,
+        data: mockExecuteParams,
+      });
+
+      // Mock contract call is successful
+      jest.spyOn(ContractCallHelper, "callExecute").mockResolvedValueOnce(mockContractReceipt);
+
+      // Mock private saveGMP
+      const mockGMPApi = jest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
+      mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
+
+      const response = await api.execute(
+        "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
+        evmWalletDetails
+      );
+
+      expect(response).toEqual({
+        success: true,
+        transaction: mockContractReceipt,
+      });
+
+      expect(mockGMPApi).toHaveBeenCalledTimes(1);
     });
   });
 });

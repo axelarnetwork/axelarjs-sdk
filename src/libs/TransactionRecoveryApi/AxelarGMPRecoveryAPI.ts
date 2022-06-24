@@ -48,6 +48,7 @@ import {
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "./constants/error";
+import { callExecute } from "./helpers";
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private processor: AxelarGMPRecoveryProcessor;
@@ -60,7 +61,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
   }
 
-  public async saveGMP(
+  private async saveGMP(
     sourceTransactionHash: string,
     transactionHash: string,
     relayerAddress: string,
@@ -257,28 +258,28 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async execute(srcTxHash: string, evmWalletDetails?: EvmWalletDetails): Promise<TxResult> {
-    const executeParamsResponse = await this.queryExecuteParams(srcTxHash);
+    const response = await this.queryExecuteParams(srcTxHash);
     // Couldn't query the transaction details
-    if (!executeParamsResponse) return GMPQueryError();
+    if (!response) return GMPQueryError();
     // Already executed
-    if (executeParamsResponse?.status === GMPStatus.EXECUTED) return AlreadyExecutedError();
+    if (response?.status === GMPStatus.EXECUTED) return AlreadyExecutedError();
     // Not Approved yet
-    if (executeParamsResponse?.status !== GMPStatus.APPROVED) return NotApprovedError();
+    if (response?.status !== GMPStatus.APPROVED) return NotApprovedError();
 
-    const executeParams = executeParamsResponse.data as ExecuteParams;
+    const executeParams = response.data as ExecuteParams;
     const { destinationChain, destinationContractAddress } = executeParams;
 
     const signer = this.getSigner(destinationChain, evmWalletDetails);
     const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
 
-    const txResult: TxResult = await this._execute(executeParams, contract)
+    const txResult: TxResult = await callExecute(executeParams, contract)
       .then((tx: ContractReceipt) => ({
         success: true,
         transaction: tx,
       }))
       .catch(ContractCallError);
 
-    // Submit execute data to axelarscan if contract execution is success.
+    // Submit execute data to axelarscan if the contract execution is success.
     const signerAddress = await signer.getAddress();
     const executeTxHash = txResult.transaction?.transactionHash;
     if (executeTxHash) {
@@ -286,28 +287,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     return txResult;
-  }
-
-  private async _execute(params: ExecuteParams, contract: Contract): Promise<ContractReceipt> {
-    const {
-      commandId,
-      isContractCallWithToken,
-      payload,
-      sourceAddress,
-      sourceChain,
-      amount,
-      symbol,
-    } = params;
-
-    if (isContractCallWithToken) {
-      return contract
-        .executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount)
-        .then((tx: ContractTransaction) => tx.wait());
-    } else {
-      return contract
-        .execute(commandId, sourceChain, sourceAddress, payload)
-        .then((tx: ContractTransaction) => tx.wait());
-    }
   }
 
   private async subtractGasFee(
