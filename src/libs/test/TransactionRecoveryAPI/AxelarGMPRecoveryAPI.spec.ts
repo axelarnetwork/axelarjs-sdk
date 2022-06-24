@@ -26,6 +26,7 @@ import {
 import { AXELAR_GATEWAY } from "../../AxelarGateway";
 import { GMPStatus } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
 import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contractCallHelper";
+import { contractReceiptStub, executeParamsStub } from "../stubs";
 
 describe("AxelarDepositRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -757,34 +758,6 @@ describe("AxelarDepositRecoveryAPI", () => {
     const evmWalletDetails: EvmWalletDetails = {
       privateKey: wallet.privateKey,
     };
-    const mockExecuteParams = {
-      commandId: "0xdfeb4a182f0f1d262e82ed36968eaa636fd52de400c886b05060255c57b32d6f",
-      destinationChain: EvmChain.AVALANCHE,
-      destinationContractAddress: wallet.address,
-      isContractCallWithToken: true,
-      payload: "0x",
-      sourceAddress: wallet.address,
-      sourceChain: EvmChain.FANTOM,
-      amount: "1",
-      symbol: "WAVAX",
-    };
-    const mockContractReceipt: ContractReceipt = {
-      transactionHash: "0x739024d5cae44f63669beb1df9512348c2c4b19caf827de66d74c32fe24ee2a0",
-      blockHash: "0x4f5018f52584d798e6145f6998ea1fc9b7716d89653db25960188f9437189620",
-      from: wallet.address,
-      to: wallet.address,
-      confirmations: 1,
-      gasUsed: BigNumber.from("1"),
-      effectiveGasPrice: BigNumber.from("1"),
-      cumulativeGasUsed: BigNumber.from("1"),
-      logs: [],
-      logsBloom: "",
-      contractAddress: wallet.address,
-      byzantium: true,
-      blockNumber: 1,
-      type: 0,
-      transactionIndex: 1,
-    };
 
     beforeEach(async () => {
       jest.clearAllMocks();
@@ -832,7 +805,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockApi = jest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce({
         status: GMPStatus.APPROVED,
-        data: mockExecuteParams,
+        data: executeParamsStub(),
       });
 
       // Mock contract call is failed
@@ -860,11 +833,11 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockApi = jest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce({
         status: GMPStatus.APPROVED,
-        data: mockExecuteParams,
+        data: executeParamsStub(),
       });
 
       // Mock contract call is successful
-      jest.spyOn(ContractCallHelper, "callExecute").mockResolvedValueOnce(mockContractReceipt);
+      jest.spyOn(ContractCallHelper, "callExecute").mockResolvedValueOnce(contractReceiptStub());
 
       // Mock private saveGMP
       const mockGMPApi = jest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
@@ -877,7 +850,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       expect(response).toEqual({
         success: true,
-        transaction: mockContractReceipt,
+        transaction: contractReceiptStub(),
       });
 
       expect(mockGMPApi).toHaveBeenCalledTimes(1);
