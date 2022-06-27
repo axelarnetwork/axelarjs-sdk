@@ -133,7 +133,9 @@ export class AxelarRecoveryApi {
         sourceAddress: approvalTx.returnValues.sourceAddress,
         sourceChain: callTx.chain.toLowerCase() as EvmChain,
         symbol: approvalTx.returnValues.symbol,
-        amount: BigNumber.from(approvalTx.returnValues.amount).toString(),
+        amount:
+          approvalTx.returnValues.amount &&
+          BigNumber.from(approvalTx.returnValues.amount).toString(),
       },
     };
   }

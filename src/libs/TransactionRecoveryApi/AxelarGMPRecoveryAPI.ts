@@ -298,7 +298,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * @returns The result of executing the transaction.
    */
   public async execute(srcTxHash: string, evmWalletDetails?: EvmWalletDetails): Promise<TxResult> {
-    const response = await this.queryExecuteParams(srcTxHash);
+    const response = await this.queryExecuteParams(srcTxHash).catch(() => undefined);
     // Couldn't query the transaction details
     if (!response) return GMPQueryError();
     // Already executed
