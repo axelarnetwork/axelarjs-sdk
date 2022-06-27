@@ -103,11 +103,25 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return await this.processor.process(params);
   }
 
+  /**
+   * Check if given transaction is already executed.
+   * @param txHash string - transaction hash
+   * @returns Promise<boolean> - true if transaction is already executed
+   */
   public async isExecuted(txHash: string): Promise<boolean> {
     const txStatus = await this.queryTransactionStatus(txHash).catch(() => undefined);
     return txStatus?.status === GMPStatus.EXECUTED;
   }
 
+  /**
+   * Calculate the gas fee in native token for executing a transaction at the destination chain using the source chain's gas price.
+   * @param txHash string - transaction hash
+   * @param sourceChain EVMChain - source chain
+   * @param destinationChain EVMChain - destination chain
+   * @param gasTokenSymbol string - gas token symbol
+   * @param options QueryGasFeeOptions - options
+   * @returns Promise<string> - The gas fee to be paid at source chain
+   */
   public async calculateNativeGasFee(
     txHash: string,
     sourceChain: EvmChain,
@@ -122,6 +136,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return this.subtractGasFee(sourceChain, destinationChain, gasTokenSymbol, paidGasFee, options);
   }
 
+  /**
+   * Calculate the gas fee in an ERC-20 tokens for executing a transaction at the destination chain using the source chain's gas price.
+   * @param txHash string - transaction hash
+   * @param sourceChain EVMChain - source chain
+   * @param destinationChain EVMChain - destination chain
+   * @param gasTokenSymbol string - gas token symbol
+   * @param options QueryGasFeeOptions - options
+   * @returns Promise<string> - The gas fee to be paid at source chain
+   */
   public async calculateGasFee(
     txHash: string,
     sourceChain: EvmChain,
@@ -136,6 +159,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return this.subtractGasFee(sourceChain, destinationChain, gasTokenSymbol, paidGasFee, options);
   }
 
+  /**
+   * Pay native token as gas fee for the given transaction hash.
+   * If the transaction details is not valid, it will return an error with reason.
+   * @param chain - source chain
+   * @param txHash - transaction hash
+   * @param options - options
+   * @returns
+   */
   public async addNativeGas(
     chain: EvmChain,
     txHash: string,
@@ -192,6 +223,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       .catch(ContractCallError);
   }
 
+  /**
+   * Pay ERC20 token as gas fee for the given transaction hash.
+   * If the transaction details or `gasTokenAddress` is not valid, it will return an error with reason.
+   *
+   * @param chain EvmChain - The source chain of the transaction hash.
+   * @param txHash string - The transaction hash.
+   * @param gasTokenAddress string - The address of the ERC20 token to pay as gas fee.
+   * @param options AddGasOptions - The options to pay gas fee.
+   * @returns
+   */
   public async addGas(
     chain: EvmChain,
     txHash: string,
@@ -257,6 +298,12 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       .catch(ContractCallError);
   }
 
+  /**
+   * Execute a transaction on the destination chain associated with given `srcTxHash`.
+   * @param srcTxHash - The transaction hash on the source chain.
+   * @param evmWalletDetails - The wallet details to use for executing the transaction.
+   * @returns The result of executing the transaction.
+   */
   public async execute(srcTxHash: string, evmWalletDetails?: EvmWalletDetails): Promise<TxResult> {
     const response = await this.queryExecuteParams(srcTxHash);
     // Couldn't query the transaction details
