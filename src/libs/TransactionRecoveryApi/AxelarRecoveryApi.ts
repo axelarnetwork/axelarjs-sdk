@@ -8,6 +8,7 @@ import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
 import EVMClient from "./client/EVMClient";
 import { TransactionRequest } from "@ethersproject/providers";
 import { rpcMap } from "./constants/chain";
+import { BigNumber } from "ethers";
 
 export enum GMPStatus {
   CALL = "call",
@@ -20,6 +21,23 @@ export interface GMPStatusResponse {
   status: GMPStatus;
   details: any;
   call: any;
+}
+
+export interface ExecuteParams {
+  commandId: string;
+  sourceChain: string;
+  destinationChain: EvmChain;
+  sourceAddress: string;
+  destinationContractAddress: string;
+  payload: string;
+  symbol?: string;
+  amount?: string;
+  isContractCallWithToken: boolean;
+}
+
+export interface ExecuteParamsResponse {
+  status: GMPStatus;
+  data?: ExecuteParams;
 }
 
 export class AxelarRecoveryApi {
@@ -76,6 +94,50 @@ export class AxelarRecoveryApi {
         details: "",
         call: res[0]?.call,
       };
+  }
+
+  public async queryExecuteParams(txHash: string): Promise<Nullable<ExecuteParamsResponse>> {
+    const res = await this.execGet(this.axelarCachingServiceUrl, {
+      method: "searchGMP",
+      txHash,
+    });
+    if (!res) return;
+    if (!res[0]) return;
+    const data = res[0];
+
+    // Return if approve tx doesn't not exist
+    const approvalTx = data.approved;
+    if (!approvalTx?.transactionHash) {
+      return {
+        status: GMPStatus.CALL,
+      };
+    }
+
+    // Return if it's already executed
+    const executeTx = data.executed;
+    if (executeTx?.transactionHash) {
+      return {
+        status: GMPStatus.EXECUTED,
+      };
+    }
+    const callTx = data.call;
+
+    return {
+      status: GMPStatus.APPROVED,
+      data: {
+        commandId: approvalTx.returnValues.commandId,
+        destinationChain: approvalTx.chain.toLowerCase() as EvmChain,
+        destinationContractAddress: callTx.returnValues.destinationContractAddress,
+        isContractCallWithToken: callTx.event === "ContractCallWithToken",
+        payload: callTx.returnValues.payload,
+        sourceAddress: approvalTx.returnValues.sourceAddress,
+        sourceChain: approvalTx.returnValues.sourceChain,
+        symbol: approvalTx.returnValues.symbol,
+        amount:
+          approvalTx.returnValues.amount &&
+          BigNumber.from(approvalTx.returnValues.amount).toString(),
+      },
+    };
   }
 
   public async createPendingTransfers(params: { chain: string }) {

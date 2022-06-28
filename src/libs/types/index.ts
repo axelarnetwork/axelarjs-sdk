@@ -3,7 +3,7 @@ import { Network } from "@ethersproject/networks";
 import { SigningStargateClientOptions } from "@cosmjs/stargate";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { LogDescription } from "ethers/lib/utils";
-import { ContractReceipt, ethers, Transaction } from "ethers";
+import { ContractReceipt, ethers } from "ethers";
 
 export enum Environment {
   DEVNET = "devnet",
