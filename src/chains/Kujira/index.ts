@@ -2,19 +2,19 @@ import { Chain, ChainInfo } from "../types";
 import Axelar from "../Axelar";
 import { bech32 } from "bech32";
 
-export default class Osmosis extends Axelar implements Chain {
+export default class Kujira extends Axelar implements Chain {
   public chainInfo: ChainInfo = {
-    chainSymbol: "OSMO",
-    chainName: "Osmosis",
+    chainSymbol: "KUJI",
+    chainName: "Kujira",
     estimatedWaitTime: 5,
     fullySupported: true,
     assets: [],
     txFeeInPercent: 0.1,
     module: "axelarnet",
     chainIdentifier: {
-      devnet: "osmosis",
-      testnet: "osmosis-4",
-      mainnet: "osmosis",
+      devnet: "kujira",
+      testnet: "kujira",
+      mainnet: "kujira",
     },
   };
 

@@ -16,6 +16,8 @@ import { cloneDeep } from "lodash";
 import Crescent from "./Crescent";
 import EMoney from "./EMoney";
 import Binance from "./Binance";
+import Kujira from "./Kujira";
+import Sei from "./Sei";
 
 export function loadChains(config: LoadChainConfig) {
   const allAssets = loadAssets(config);
@@ -32,9 +34,11 @@ export function loadChains(config: LoadChainConfig) {
     new Fantom(),
     new Injective(),
     new Juno(),
+    new Kujira(),
     new Moonbeam(),
     new Osmosis(),
     new Polygon(),
+    new Sei(),
     new Terra(),
   ];
 
@@ -45,10 +49,6 @@ export function loadChains(config: LoadChainConfig) {
         Object.keys(chain_aliases).indexOf(chainInfo.chainName.toLowerCase()) >
         -1
     );
-
-    if (chainInfo.chainName.toLowerCase() === "ethereum") {
-      console.log("fiteedList",filteredAssetList)
-    }
 
     const assetsList: AssetInfo[] = [];
 
