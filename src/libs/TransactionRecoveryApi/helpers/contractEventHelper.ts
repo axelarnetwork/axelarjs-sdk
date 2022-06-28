@@ -58,6 +58,24 @@ export function getNativeGasAmountFromTxReceipt(
   return event?.eventLog.args.slice(-2)[0].toString();
 }
 
+export function getGasAmountFromTxReceipt(
+  receipt: ethers.providers.TransactionReceipt
+): Nullable<string> {
+  const signatureGasPaidContractCallWithToken = ethers.utils.id(
+    "GasPaidForContractCallWithToken(address,string,string,bytes32,string,uint256,address,uint256,address)"
+  );
+  const signatureGasPaidContractCall = ethers.utils.id(
+    "GasPaidForContractCall(address,string,string,bytes32,uint256,uint256,address)"
+  );
+
+  const event = findContractEvent(
+    receipt,
+    [signatureGasPaidContractCall, signatureGasPaidContractCallWithToken],
+    new Interface(IAxelarGasService)
+  );
+  return event?.eventLog.args.slice(-2)[0].toString();
+}
+
 export function findContractEvent(
   receipt: ethers.providers.TransactionReceipt,
   eventSignatures: string[],
