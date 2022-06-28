@@ -25,7 +25,7 @@ export interface GMPStatusResponse {
 
 export interface ExecuteParams {
   commandId: string;
-  sourceChain: EvmChain;
+  sourceChain: string;
   destinationChain: EvmChain;
   sourceAddress: string;
   destinationContractAddress: string;
@@ -131,7 +131,7 @@ export class AxelarRecoveryApi {
         isContractCallWithToken: callTx.event === "ContractCallWithToken",
         payload: callTx.returnValues.payload,
         sourceAddress: approvalTx.returnValues.sourceAddress,
-        sourceChain: callTx.chain.toLowerCase() as EvmChain,
+        sourceChain: approvalTx.returnValues.sourceChain,
         symbol: approvalTx.returnValues.symbol,
         amount:
           approvalTx.returnValues.amount &&
