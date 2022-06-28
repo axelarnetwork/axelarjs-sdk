@@ -5,12 +5,12 @@ export default class Binance implements Chain {
   public chainInfo: ChainInfo = {
     chainSymbol: "BSC",
     chainName: "Binance",
-    estimatedWaitTime: 15,
-    fullySupported: false,
+    estimatedWaitTime: 2,
+    fullySupported: true,
     assets: [],
-    txFeeInPercent: 0.1,
+    txFeeInPercent: 0,
     module: "evm",
-    confirmLevel: 25,
+    confirmLevel: 20,
     chainIdentifier: {
       devnet: "binance",
       testnet: "binance",
