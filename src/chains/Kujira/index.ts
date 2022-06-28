@@ -4,7 +4,7 @@ import { bech32 } from "bech32";
 
 export default class Kujira extends Axelar implements Chain {
   public chainInfo: ChainInfo = {
-    chainSymbol: "KUJI",
+    chainSymbol: "KUJIRA",
     chainName: "Kujira",
     estimatedWaitTime: 5,
     fullySupported: true,
