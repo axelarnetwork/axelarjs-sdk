@@ -51,7 +51,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     }, 60000);
   });
 
-  describe("query execute params", () => {
+  xdescribe("query execute params", () => {
     test("It should return null when the response is undefined", async () => {
       jest.spyOn(api, "execGet").mockResolvedValueOnce(undefined);
 

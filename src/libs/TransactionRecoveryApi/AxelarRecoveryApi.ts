@@ -17,10 +17,21 @@ export enum GMPStatus {
   ERROR = "error",
   GAS_UNPAID = "gas_unpaid",
 }
+
+export interface GMPStatusDetails {
+  srcGatewayCalled: boolean;
+  destGatewayApproved: boolean;
+  destExecuted: boolean;
+  destAppError?: string;
+  gasPaidInfo: GasPaidInfo;
+}
+export interface GasPaidInfo {
+  status: "gas_unpaid" | "gas_paid" | "gas_paid_not_enough_gas" | "gas_paid_enough_gas";
+  details?: any;
+}
 export interface GMPStatusResponse {
-  status: GMPStatus;
-  details: any;
-  call: any;
+  status: GMPStatusDetails | "error_fetching_status";
+  call_data?: any;
 }
 
 export interface ExecuteParams {
@@ -60,40 +71,34 @@ export class AxelarRecoveryApi {
   }
 
   public async queryTransactionStatus(txHash: string): Promise<GMPStatusResponse> {
-    const res = await this.execGet(this.axelarCachingServiceUrl, {
+
+    const txDetails = await this.execGet(this.axelarCachingServiceUrl, {
       method: "searchGMP",
       txHash,
-    });
-    if (res[0] && res[0].is_not_enough_gas)
-      return {
-        status: GMPStatus.GAS_UNPAID,
-        details: (res && res[0] && res[0].error) || "no valid response",
-        call: res[0]?.call,
-      };
-    else if (!res || res?.length < 1 || (res[0] && res[0].status === GMPStatus.ERROR))
-      return {
-        status: GMPStatus.ERROR,
-        details: (res && res[0] && res[0].error) || "no valid response",
-        call: res[0]?.call,
-      };
-    else if (res && res[0] && res[0].status === GMPStatus.EXECUTED)
-      return {
-        status: GMPStatus.EXECUTED,
-        details: res[0].executed,
-        call: res[0]?.call,
-      };
-    else if (res && res[0] && res[0].status === GMPStatus.APPROVED) {
-      return {
-        status: GMPStatus.APPROVED,
-        details: "",
-        call: res[0]?.call,
-      };
-    } else
-      return {
-        status: GMPStatus.CALL,
-        details: "",
-        call: res[0]?.call,
-      };
+    }).then(res => res[0]);
+
+    if (!txDetails) return { status: "error_fetching_status" }
+
+    const { approved, call, gas_status, gas_paid, is_executed, error } = txDetails;
+
+    const gasPaidInfo: GasPaidInfo = {
+      status: gas_status,
+      details: gas_paid
+    };
+
+    const gmpStatusDetails: GMPStatusDetails = {
+      srcGatewayCalled: !!call,
+      destGatewayApproved: !!approved,
+      destExecuted: is_executed,
+      destAppError: error,
+      gasPaidInfo
+    }
+
+    return {
+      status: gmpStatusDetails,
+      call_data: txDetails[0]?.call
+    }
+
   }
 
   public async queryExecuteParams(txHash: string): Promise<Nullable<ExecuteParamsResponse>> {

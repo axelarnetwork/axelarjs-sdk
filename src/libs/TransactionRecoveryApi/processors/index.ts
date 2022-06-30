@@ -11,13 +11,14 @@ export default class AxelarGMPRecoveryProcessor {
     src: EvmChain;
     dest: EvmChain;
     debug?: boolean;
-  }): Promise<"triggered relay" | "approved but not executed" | "already executed" | unknown> {
+  }): Promise<"triggered relay" | "approved but not executed" | "already executed" | "error_fetching_status"> {
     const { txHash, src, dest, debug } = params;
 
     const res: GMPStatusResponse = await this.recoveryAPI.queryTransactionStatus(txHash);
 
-    if (res.status === GMPStatus.EXECUTED) return "already executed";
-    if (res.status === GMPStatus.APPROVED) return "approved but not executed";
+    if (res.status === "error_fetching_status") return res.status;
+    if (res.status.destExecuted) return "already executed";
+    if (res.status.destGatewayApproved) return "approved but not executed";
 
     try {
       const confirmTx = await this.recoveryAPI.confirmGatewayTx({ txHash, chain: src });
