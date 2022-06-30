@@ -1,8 +1,7 @@
 import { AxelarGMPRecoveryAPI } from "../../TransactionRecoveryApi/AxelarGMPRecoveryAPI";
 import { AddGasOptions, Environment, EvmChain, EvmWalletDetails, GasToken } from "../../types";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
-import { BigNumber, Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
-import { deployContract } from "@axelar-network/axelar-local-dev/dist/utils";
+import { Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
 import DistributionExecutable from "../abi/DistributionExecutable.json";
 import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGasToken.json";
 import GasServiceAbi from "../../abi/IAxelarGasService.json";
@@ -180,9 +179,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       const args = [srcChain.gateway.address, srcChain.gasReceiver.address];
 
       // Deploy test contract
-      contract = await deployContract(userWallet, DistributionExecutable, args as any).then(
-        (contract) => contract.connect(userWallet)
-      );
+      contract = await utils
+        .deployContract(userWallet, DistributionExecutable, args as any)
+        .then((contract: Contract) => contract.connect(userWallet));
 
       // Send USDC to the user wallet for testing
       await srcChain.giveToken(userWallet.address, tokenSymbol, BigInt("10000000"));
@@ -446,11 +445,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       const args = [srcChain.gateway.address, srcChain.gasReceiver.address];
 
       // Deploy test contract
-      contract = await deployContract(
-        userWallet,
-        DistributionExecutableWithGasToken,
-        args as any
-      ).then((contract) => contract.connect(userWallet));
+      contract = await utils
+        .deployContract(userWallet, DistributionExecutableWithGasToken, args as any)
+        .then((contract: Contract) => contract.connect(userWallet));
 
       // Send USDC to the user wallet for testing
       await srcChain.giveToken(
@@ -659,9 +656,9 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
 
     test("it shouldn't call 'addGas' given `gasTokenAddress` is not supported by Axelar", async () => {
-      const testToken = await deployContract(userWallet, TestToken, ["100000000000"] as any).then(
-        (contract) => contract.connect(userWallet)
-      );
+      const testToken = await utils
+        .deployContract(userWallet, TestToken, ["100000000000"] as any)
+        .then((contract: Contract) => contract.connect(userWallet));
 
       const gasPaid = ethers.utils.parseEther("0.00001");
 
