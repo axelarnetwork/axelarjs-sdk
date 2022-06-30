@@ -9,7 +9,6 @@
   ],
   "scripts": {
     "build": "rimraf dist && tsc",
-    "prepare": "npm run build",
     "dev:tsc": "tsc --watch -p .",
     "dev:serve": "nodemon -e js -w dist dist/index.js",
     "dev": "run-p dev:*",
@@ -27,15 +26,14 @@
     "sdk",
     "cryptocurrency",
     "interoperability",
-    "smart-contracts"
+    "smart-contracts",
+    "cross-chain"
   ],
   "author": "Axelar Network",
   "license": "MIT",
   "dependencies": {
-    "@axelar-network/axelar-local-dev": "git+https://github.com/axelarnetwork/axelar-local-dev.git",
     "@axelar-network/axelarjs-types": "^0.0.3",
     "@cosmjs/stargate": "^0.28.4",
-    "@terra-money/terra.js": "^3.0.0",
     "@types/lodash": "^4.14.176",
     "@types/uuid": "^8.3.1",
     "bech32": "^2.0.0",
@@ -43,7 +41,6 @@
     "cross-fetch": "^3.1.5",
     "eslint-plugin-import": "^2.25.4",
     "ethers": "^5.4.7",
-    "jest-fetch-mock": "^3.0.3",
     "lodash": "^4.17.21",
     "nodemon": "^2.0.12",
     "npm-run-all": "^4.1.5",
@@ -51,13 +48,14 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@axelar-network/axelar-local-dev": "git+https://github.com/axelarnetwork/axelar-local-dev.git",
     "@babel/preset-env": "^7.16.4",
     "@babel/preset-typescript": "^7.16.0",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@types/jest": "^27.4.1",
-    "@typescript-eslint/eslint-plugin": "^5.12.1-alpha.14",
-    "@typescript-eslint/parser": "^5.12.1-alpha.14",
+    "@typescript-eslint/eslint-plugin": "^5.30.0",
+    "@typescript-eslint/parser": "^5.30.0",
     "eslint": "^8.9.0",
     "hardhat": "^2.9.1",
     "jest": "^27.5.1",

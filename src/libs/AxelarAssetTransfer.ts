@@ -1,10 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import {
-  CLIENT_API_GET_FEE,
-  CLIENT_API_GET_OTC,
-  CLIENT_API_POST_TRANSFER_ASSET,
-  OTC,
-} from "../services/types";
+import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET, OTC } from "../services/types";
 
 import { RestService, SocketService } from "../services";
 import { createWallet, validateDestinationAddressByChainName } from "../utils";
@@ -26,8 +21,7 @@ export class AxelarAssetTransfer {
     this.resourceUrl = configs.resourceUrl;
 
     // handle resource url overwrite (for tests)
-    if (config.overwriteResourceUrl)
-      this.resourceUrl = config.overwriteResourceUrl;
+    if (config.overwriteResourceUrl) this.resourceUrl = config.overwriteResourceUrl;
 
     this.api = new RestService(this.resourceUrl);
     this.socket = new SocketService(this.resourceUrl);
@@ -58,10 +52,7 @@ export class AxelarAssetTransfer {
     const wallet = createWallet();
 
     // sign validation message
-    const { validationMsg } = await this.getOneTimeCode(
-      wallet.address,
-      traceId
-    );
+    const { validationMsg } = await this.getOneTimeCode(wallet.address, traceId);
     const signature = await wallet.signMessage(validationMsg);
 
     // get room id to listen for deposit address (to be extracted from link event)
@@ -82,10 +73,7 @@ export class AxelarAssetTransfer {
     return depositAddress;
   }
 
-  public async getOneTimeCode(
-    signerAddress: string,
-    traceId: string
-  ): Promise<OTC> {
+  public async getOneTimeCode(signerAddress: string, traceId: string): Promise<OTC> {
     const otc: OTC = await this.api
       .get(`${CLIENT_API_GET_OTC}?publicAddress=${signerAddress}`, traceId)
       .then((response) => response)
@@ -128,11 +116,9 @@ export class AxelarAssetTransfer {
   }
 
   async getLinkEvent(roomId: string): Promise<string> {
-    const { newRoomId } = await this.socket
-      .joinRoomAndWaitForEvent(roomId)
-      .catch((error) => {
-        throw error;
-      });
+    const { newRoomId } = await this.socket.joinRoomAndWaitForEvent(roomId).catch((error) => {
+      throw error;
+    });
 
     return newRoomId;
   }

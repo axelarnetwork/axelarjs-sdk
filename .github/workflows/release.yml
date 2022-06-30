@@ -1,0 +1,51 @@
+name: "release"
+
+on:
+  push:
+    branches:
+      - "feat/automate-publish-npm"
+      - "main"
+
+jobs:
+  bump-version:
+    name: "Bump version"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout source code"
+        uses: "actions/checkout@v3"
+      - uses: "actions/setup-node@v2"
+        with:
+          node-version: 16
+          registry-url: "https://registry.npmjs.org"
+      - name: "Current version in package.json"
+        run: cat ./package.json | grep version
+      - name: "Automated Version Bump"
+        id: version-bump
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: "phips28/gh-action-bump-version@master"
+        with:
+          tag-prefix: "v"
+      - name: "Updated version in package.json"
+        run: cat ./package.json | grep version
+    outputs:
+      newTag: ${{ steps.version-bump.outputs.newTag }}
+  publish-npm:
+    name: "Publish npm"
+    runs-on: ubuntu-latest
+    needs: "bump-version"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.bump-version.outputs.newTag }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: "https://registry.npmjs.org"
+      - name: "Check new tag"
+        run: echo "${{ needs.bump-version.outputs.newTag }}"
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npm publish --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

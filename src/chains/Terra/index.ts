@@ -1,5 +1,5 @@
 import Axelar from "../Axelar";
-import { AccAddress } from "@terra-money/terra.js";
+import { bech32 } from "bech32";
 import { Chain, ChainInfo } from "../types";
 
 export default class Terra extends Axelar implements Chain {
@@ -22,5 +22,15 @@ export default class Terra extends Axelar implements Chain {
     super();
   }
 
-  public validateAddress = (address: string) => AccAddress.validate(address);
+  public validateAddress = (address: string) =>
+    checkPrefixAndLength("terra", address, 44) || checkPrefixAndLength("terra", address, 64);
+}
+
+function checkPrefixAndLength(prefix: string, data: string, length: number): boolean {
+  try {
+    const vals = bech32.decode(data);
+    return vals.prefix === prefix && data.length == length;
+  } catch (e) {
+    return false;
+  }
 }

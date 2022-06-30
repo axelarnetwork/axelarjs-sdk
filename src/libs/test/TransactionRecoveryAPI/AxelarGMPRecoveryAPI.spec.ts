@@ -66,7 +66,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const args = [srcChain.gateway.address, srcChain.gasReceiver.address];
 
       // Deploy test contract
-      contract = await deployContract(userWallet, DistributionExecutable, args as any);
+      contract = await utils.deployContract(userWallet, DistributionExecutable, args as any);
 
       // Send USDC to the user wallet for testing
       await srcChain.giveToken(userWallet.address, tokenSymbol, BigInt("10000000"));
