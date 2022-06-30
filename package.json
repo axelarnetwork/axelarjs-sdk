@@ -1,6 +1,6 @@
 {
   "name": "@axelar-network/axelarjs-sdk",
-  "version": "0.6.1",
+  "version": "0.6.5",
   "description": "The JavaScript SDK for Axelar Network",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -32,6 +32,9 @@
   "author": "Axelar Network",
   "license": "MIT",
   "dependencies": {
+    "@axelar-network/axelar-local-dev": "git+https://github.com/axelarnetwork/axelar-local-dev.git",
+    "@axelar-network/axelarjs-types": "^0.0.3",
+    "@cosmjs/stargate": "^0.28.4",
     "@terra-money/terra.js": "^3.0.0",
     "@types/lodash": "^4.14.176",
     "@types/uuid": "^8.3.1",

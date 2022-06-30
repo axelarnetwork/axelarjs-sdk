@@ -11,7 +11,7 @@ import axelarGatewayAbi from "./abi/axelarGatewayAbi.json";
 import erc20Abi from "./abi/erc20Abi.json";
 import { GatewayTx } from "./GatewayTx";
 
-const config: Record<Environment, Partial<Record<EvmChain, string>>> = {
+export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string>>> = {
   [Environment.MAINNET]: {
     [EvmChain.ETHEREUM]: "0x4F4495243837681061C4743b74B3eEdf548D56A5",
     [EvmChain.AVALANCHE]: "0x5029C0EFf6C34351a0CEc334542cDb22c7928f78",
@@ -43,11 +43,7 @@ export class AxelarGateway {
    */
   constructor(contractAddress: string, provider: ethers.providers.Provider) {
     this.provider = provider;
-    this.contract = new ethers.Contract(
-      contractAddress,
-      axelarGatewayAbi,
-      provider
-    );
+    this.contract = new ethers.Contract(contractAddress, axelarGatewayAbi, provider);
   }
 
   /**
@@ -63,7 +59,7 @@ export class AxelarGateway {
     chain: EvmChain,
     provider: ethers.providers.Provider
   ): AxelarGateway {
-    return new AxelarGateway(config[env][chain] as string, provider);
+    return new AxelarGateway(AXELAR_GATEWAY[env][chain] as string, provider);
   }
 
   async createCallContractTx(args: CallContractTxArgs): Promise<GatewayTx> {
@@ -76,17 +72,14 @@ export class AxelarGateway {
     return new GatewayTx(unsignedTx, this.provider);
   }
 
-  async createCallContractWithTokenTx(
-    args: CallContractWithTokenTxArgs
-  ): Promise<GatewayTx> {
-    const unsignedTx =
-      await this.contract.populateTransaction.callContractWithToken(
-        args.destinationChain,
-        args.destinationContractAddress,
-        args.payload,
-        args.symbol,
-        args.amount
-      );
+  async createCallContractWithTokenTx(args: CallContractWithTokenTxArgs): Promise<GatewayTx> {
+    const unsignedTx = await this.contract.populateTransaction.callContractWithToken(
+      args.destinationChain,
+      args.destinationContractAddress,
+      args.payload,
+      args.symbol,
+      args.amount
+    );
 
     return new GatewayTx(unsignedTx, this.provider);
   }
@@ -104,11 +97,7 @@ export class AxelarGateway {
 
   async createApproveTx(args: ApproveTxArgs): Promise<GatewayTx> {
     const tokenAddress = args.tokenAddress;
-    const erc20Contract = new ethers.Contract(
-      tokenAddress,
-      erc20Abi,
-      this.provider
-    );
+    const erc20Contract = new ethers.Contract(tokenAddress, erc20Abi, this.provider);
     const unsignedTx = await erc20Contract.populateTransaction.approve(
       this.contract.address,
       args.amount || ethers.constants.MaxUint256
@@ -118,11 +107,7 @@ export class AxelarGateway {
   }
 
   getAllowance(tokenAddress: string, signerAddress: string): Promise<number> {
-    const erc20Contract = new ethers.Contract(
-      tokenAddress,
-      erc20Abi,
-      this.provider
-    );
+    const erc20Contract = new ethers.Contract(tokenAddress, erc20Abi, this.provider);
     return erc20Contract.allowance(signerAddress, this.contract.address);
   }
 
@@ -139,11 +124,7 @@ export class AxelarGateway {
   }
 
   async getERC20TokenContract(tokenSymbol: string): Promise<ethers.Contract> {
-    return new ethers.Contract(
-      await this.getTokenAddress(tokenSymbol),
-      erc20Abi,
-      this.provider
-    );
+    return new ethers.Contract(await this.getTokenAddress(tokenSymbol), erc20Abi, this.provider);
   }
 
   getContract(): ethers.Contract {

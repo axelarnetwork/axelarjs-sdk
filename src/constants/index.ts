@@ -5,31 +5,36 @@ export interface EnvironmentConfigs {
   axelarRpcUrl: string;
   axelarLcdUrl: string;
   axelarCachingServiceUrl: string;
+  recoveryApiUrl: string;
 }
 
 const localConfigs: EnvironmentConfigs = {
   resourceUrl: `http://localhost:4000`,
-  axelarRpcUrl: "https://axelartest-rpc.quickapi.com",
-  axelarLcdUrl: "https://axelartest-lcd.quickapi.com",
-  axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io"
+  axelarRpcUrl: "https://axelar-testnet-rpc.axelar-dev.workers.dev",
+  axelarLcdUrl: "https://axelar-testnet-lcd.axelar-dev.workers.dev",
+  axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io",
+  recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev"
 };
 const devnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-devnet.axelar.dev`,
   axelarRpcUrl: "",
   axelarLcdUrl: "",
-  axelarCachingServiceUrl: "https://devnet.api.gmp.axelarscan.io"
+  axelarCachingServiceUrl: "https://devnet.api.gmp.axelarscan.io",
+  recoveryApiUrl: ""
 };
 const testnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-testnet.axelar.dev`,
-  axelarRpcUrl: "https://axelartest-rpc.quickapi.com",
-  axelarLcdUrl: "https://axelartest-lcd.quickapi.com",
-  axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io"
+  axelarRpcUrl: "https://axelar-testnet-rpc.axelar-dev.workers.dev",
+  axelarLcdUrl: "https://axelar-testnet-lcd.axelar-dev.workers.dev",
+  axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io",
+  recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev"
 };
 const mainnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-mainnet.axelar.dev`,
   axelarRpcUrl: "https://axelar-rpc.quickapi.com",
   axelarLcdUrl: "https://axelar-lcd.quickapi.com",
-  axelarCachingServiceUrl: "https://mainnet.api.gmp.axelarscan.io"
+  axelarCachingServiceUrl: "https://mainnet.api.gmp.axelarscan.io",
+  recoveryApiUrl: "https://axelar-signing-relayer-mainnet.axelar.dev"
 };
 
 configsMap["local"] = localConfigs;

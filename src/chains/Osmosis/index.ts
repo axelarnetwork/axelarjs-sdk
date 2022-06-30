@@ -13,7 +13,7 @@ export default class Osmosis extends Axelar implements Chain {
     module: "axelarnet",
     chainIdentifier: {
       devnet: "osmosis",
-      testnet: "osmosis-3",
+      testnet: "osmosis-4",
       mainnet: "osmosis",
     },
   };

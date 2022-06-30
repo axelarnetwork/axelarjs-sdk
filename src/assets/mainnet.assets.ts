@@ -61,8 +61,7 @@ export const mainnet = {
         assetSymbol: "axlUSDC",
         assetName: "axlUSDC",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/932D6003DA334ECBC5B23A071B4287D0A5CC97331197FE9F1C0689BA002A8421",
+        ibcDenom: "ibc/932D6003DA334ECBC5B23A071B4287D0A5CC97331197FE9F1C0689BA002A8421",
         fullDenomPath: "transfer/channel-293/uusdc",
         tokenAddress: "uusdc",
       },
@@ -70,8 +69,7 @@ export const mainnet = {
         assetSymbol: "axlUSDC",
         assetName: "axlUSDC",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/D189335C6E4A68B513C10AB227BF1C1D38C746766278BA3EEB4FB14124F1D858",
+        ibcDenom: "ibc/D189335C6E4A68B513C10AB227BF1C1D38C746766278BA3EEB4FB14124F1D858",
         fullDenomPath: "transfer/channel-208/uusdc",
         tokenAddress: "uusdc",
       },
@@ -79,8 +77,7 @@ export const mainnet = {
         assetSymbol: "axlUSDC",
         assetName: "axlUSDC",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034",
+        ibcDenom: "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034",
         fullDenomPath: "transfer/channel-71/uusdc",
         tokenAddress: "uusdc",
       },
@@ -88,8 +85,7 @@ export const mainnet = {
         assetSymbol: "axlUSDC",
         assetName: "axlUSDC",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/BFF0D3805B50D93E2FA5C0B2DDF7E0B30A631076CD80BC12A48C0E95404B4A41",
+        ibcDenom: "ibc/BFF0D3805B50D93E2FA5C0B2DDF7E0B30A631076CD80BC12A48C0E95404B4A41",
         fullDenomPath: "transfer/channel-4/uusdc",
         tokenAddress: "uusdc",
       },
@@ -97,8 +93,7 @@ export const mainnet = {
         assetSymbol: "axlUSDC",
         assetName: "axlUSDC",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/B3504E092456BA618CC28AC671A71FB08C6CA0FD0BE7C8A5B5A3E2DD933CC9E4",
+        ibcDenom: "ibc/B3504E092456BA618CC28AC671A71FB08C6CA0FD0BE7C8A5B5A3E2DD933CC9E4",
         fullDenomPath: "transfer/channel-6/uusdc",
         tokenAddress: "uusdc",
       },
@@ -117,7 +112,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "WETH",
         assetName: "WETH",
-        minDepositAmt: 0.0002,
+        minDepositAmt: 0.0004,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
         tokenAddress: "weth-wei",
@@ -125,7 +120,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "WETH",
         assetName: "WETH",
-        minDepositAmt: 0.01,
+        minDepositAmt: 0.02,
         ibcDenom: "weth-wei",
         fullDenomPath: "weth-wei",
         tokenAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -133,45 +128,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlWETH",
         assetName: "axlWETH",
-        minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/3C168643B15498A2F8BA843649D7CF207EA2F5A7C8AE77BC175EC2FBF21B1BAA",
+        minDepositAmt: 0.0004,
+        ibcDenom: "ibc/3C168643B15498A2F8BA843649D7CF207EA2F5A7C8AE77BC175EC2FBF21B1BAA",
         fullDenomPath: "transfer/channel-293/weth-wei",
         tokenAddress: "weth-wei",
       },
       osmosis: {
         assetSymbol: "axlWETH",
         assetName: "axlWETH",
-        minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/EA1D43981D5C9A1C4AAEA9C23BB1D4FA126BA9BC7020A25E0AE4AA841EA25DC5",
+        minDepositAmt: 0.0004,
+        ibcDenom: "ibc/EA1D43981D5C9A1C4AAEA9C23BB1D4FA126BA9BC7020A25E0AE4AA841EA25DC5",
         fullDenomPath: "transfer/channel-208/weth-wei",
         tokenAddress: "weth-wei",
       },
       juno: {
         assetSymbol: "axlWETH",
         assetName: "axlWETH",
-        minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/95A45A81521EAFDBEDAEEB6DA975C02E55B414C95AD3CE50709272366A90CA17",
+        minDepositAmt: 0.0004,
+        ibcDenom: "ibc/95A45A81521EAFDBEDAEEB6DA975C02E55B414C95AD3CE50709272366A90CA17",
         fullDenomPath: "transfer/channel-71/weth-wei",
         tokenAddress: "weth-wei",
       },
       crescent: {
         assetSymbol: "axlWETH",
         assetName: "axlWETH",
-        minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/F1806958CA98757B91C3FA1573ECECD24F6FA3804F074A6977658914A49E65A3",
+        minDepositAmt: 0.0004,
+        ibcDenom: "ibc/F1806958CA98757B91C3FA1573ECECD24F6FA3804F074A6977658914A49E65A3",
         fullDenomPath: "transfer/channel-4/weth-wei",
         tokenAddress: "weth-wei",
       },
       terra: {
         assetSymbol: "axlWETH",
         assetName: "axlWETH",
-        minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/BC8A77AFBD872FDC32A348D3FB10CC09277C266CFE52081DE341C7EC6752E674",
+        minDepositAmt: 0.0004,
+        ibcDenom: "ibc/BC8A77AFBD872FDC32A348D3FB10CC09277C266CFE52081DE341C7EC6752E674",
         fullDenomPath: "transfer/channel-6/weth-wei",
         tokenAddress: "weth-wei",
       },
@@ -239,8 +229,7 @@ export const mainnet = {
         assetSymbol: "axlDAI",
         assetName: "axlDAI",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/4A98C8AC2C35498162346F28EEBF3206CBEF81F44725FE62A3DB0CC10E88E695",
+        ibcDenom: "ibc/4A98C8AC2C35498162346F28EEBF3206CBEF81F44725FE62A3DB0CC10E88E695",
         fullDenomPath: "transfer/channel-293/dai-wei",
         tokenAddress: "dai-wei",
       },
@@ -248,8 +237,7 @@ export const mainnet = {
         assetSymbol: "axlDAI",
         assetName: "axlDAI",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/0CD3A0285E1341859B5E86B6AB7682F023D03E97607CCC1DC95706411D866DF7",
+        ibcDenom: "ibc/0CD3A0285E1341859B5E86B6AB7682F023D03E97607CCC1DC95706411D866DF7",
         fullDenomPath: "transfer/channel-208/dai-wei",
         tokenAddress: "dai-wei",
       },
@@ -257,8 +245,7 @@ export const mainnet = {
         assetSymbol: "axlDAI",
         assetName: "axlDAI",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/171E8F6687D290D378678310F9F15D367DCD245BF06184532B703A92054A8A4F",
+        ibcDenom: "ibc/171E8F6687D290D378678310F9F15D367DCD245BF06184532B703A92054A8A4F",
         fullDenomPath: "transfer/channel-71/dai-wei",
         tokenAddress: "dai-wei",
       },
@@ -266,8 +253,7 @@ export const mainnet = {
         assetSymbol: "axlDAI",
         assetName: "axlDAI",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/2017AFA149C1C42DBF54EC910DA168E9E4F928DF0D3A8E841189994A9339FED9",
+        ibcDenom: "ibc/2017AFA149C1C42DBF54EC910DA168E9E4F928DF0D3A8E841189994A9339FED9",
         fullDenomPath: "transfer/channel-4/dai-wei",
         tokenAddress: "dai-wei",
       },
@@ -275,8 +261,7 @@ export const mainnet = {
         assetSymbol: "axlDAI",
         assetName: "axlDAI",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/E46EF5449878F6B81219163F211E7329CC0729AA99DA8A589A865F82F754ADE8",
+        ibcDenom: "ibc/E46EF5449878F6B81219163F211E7329CC0729AA99DA8A589A865F82F754ADE8",
         fullDenomPath: "transfer/channel-6/dai-wei",
         tokenAddress: "dai-wei",
       },
@@ -295,7 +280,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "DOT",
         assetName: "DOT",
-        minDepositAmt: 0.05,
+        minDepositAmt: 0.07,
         ibcDenom: "dot-planck",
         fullDenomPath: "dot-planck",
         tokenAddress: "dot-planck",
@@ -311,54 +296,48 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlDOT",
         assetName: "axlDOT",
-        minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/0D33E2077E140784912451ED189B11D78A4CD10C480C39E0CD91C67B1406B69F",
+        minDepositAmt: 0.07,
+        ibcDenom: "ibc/0D33E2077E140784912451ED189B11D78A4CD10C480C39E0CD91C67B1406B69F",
         fullDenomPath: "transfer/channel-293/dot-planck",
         tokenAddress: "dot-planck",
       },
       osmosis: {
         assetSymbol: "axlDOT",
         assetName: "axlDOT",
-        minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/3FF92D26B407FD61AE95D975712A7C319CDE28DE4D80BDC9978D935932B991D7",
+        minDepositAmt: 0.07,
+        ibcDenom: "ibc/3FF92D26B407FD61AE95D975712A7C319CDE28DE4D80BDC9978D935932B991D7",
         fullDenomPath: "transfer/channel-208/dot-planck",
         tokenAddress: "dot-planck",
       },
       juno: {
         assetSymbol: "axlDOT",
         assetName: "axlDOT",
-        minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/5D681936B803C055E34687752EE1AA3117EACCA98260F98CC1706E040DCBAC4D",
+        minDepositAmt: 0.07,
+        ibcDenom: "ibc/5D681936B803C055E34687752EE1AA3117EACCA98260F98CC1706E040DCBAC4D",
         fullDenomPath: "transfer/channel-71/dot-planck",
         tokenAddress: "dot-planck",
       },
       crescent: {
         assetSymbol: "axlDOT",
         assetName: "axlDOT",
-        minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/3208C8E45C27903988E437162134A172880BE112C0530B86117FB5DA7A5DF8B9",
+        minDepositAmt: 0.07,
+        ibcDenom: "ibc/3208C8E45C27903988E437162134A172880BE112C0530B86117FB5DA7A5DF8B9",
         fullDenomPath: "transfer/channel-4/dot-planck",
         tokenAddress: "dot-planck",
       },
       injective: {
         assetSymbol: "axlDOT",
         assetName: "axlDOT",
-        minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/624BA9DD171915A2B9EA70F69638B2CEA179959850C1A586F6C485498F29EDD4",
+        minDepositAmt: 0.07,
+        ibcDenom: "ibc/624BA9DD171915A2B9EA70F69638B2CEA179959850C1A586F6C485498F29EDD4",
         fullDenomPath: "transfer/channel-84/dot-planck",
         tokenAddress: "dot-planck",
       },
       terra: {
         assetSymbol: "axlDOT",
         assetName: "axlDOT",
-        minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/5B01781626783C316A22ACBB55ECA8C6C57AA92C1565C69128C192FA36680AFB",
+        minDepositAmt: 0.07,
+        ibcDenom: "ibc/5B01781626783C316A22ACBB55ECA8C6C57AA92C1565C69128C192FA36680AFB",
         fullDenomPath: "transfer/channel-6/dot-planck",
         tokenAddress: "dot-planck",
       },
@@ -377,7 +356,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "WAVAX",
         assetName: "WAVAX",
-        minDepositAmt: 0.02,
+        minDepositAmt: 0.03,
         ibcDenom: "wavax-wei",
         fullDenomPath: "wavax-wei",
         tokenAddress: "wavax-wei",
@@ -385,7 +364,7 @@ export const mainnet = {
       avalanche: {
         assetSymbol: "WAVAX",
         assetName: "WAVAX",
-        minDepositAmt: 0.04,
+        minDepositAmt: 0.06,
         ibcDenom: "wavax-wei",
         fullDenomPath: "wavax-wei",
         tokenAddress: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
@@ -393,45 +372,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlWAVAX",
         assetName: "axlWAVAX",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/E8F578B93A25BAE12A8BAD4C6973CF6D3BEB9AC019C8C77E566CE1FFB8F010F3",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/E8F578B93A25BAE12A8BAD4C6973CF6D3BEB9AC019C8C77E566CE1FFB8F010F3",
         fullDenomPath: "transfer/channel-293/wavax-wei",
         tokenAddress: "wavax-wei",
       },
       osmosis: {
         assetSymbol: "axlWAVAX",
         assetName: "axlWAVAX",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/6F62F01D913E3FFE472A38C78235B8F021B511BC6596ADFF02615C8F83D3B373",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/6F62F01D913E3FFE472A38C78235B8F021B511BC6596ADFF02615C8F83D3B373",
         fullDenomPath: "transfer/channel-208/wavax-wei",
         tokenAddress: "wavax-wei",
       },
       juno: {
         assetSymbol: "axlWAVAX",
         assetName: "axlWAVAX",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/02B88E41C96FCADA33F15642CEE961EE17A63866EDCA4098EDDB6F9C6671EB92",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/02B88E41C96FCADA33F15642CEE961EE17A63866EDCA4098EDDB6F9C6671EB92",
         fullDenomPath: "transfer/channel-71/wavax-wei",
         tokenAddress: "wavax-wei",
       },
       crescent: {
         assetSymbol: "axlWAVAX",
         assetName: "axlWAVAX",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/0886E3462B7DD438353781848DBDF90E58BB7DE90266E3F95E41B3FA8ED1B453",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/0886E3462B7DD438353781848DBDF90E58BB7DE90266E3F95E41B3FA8ED1B453",
         fullDenomPath: "transfer/channel-4/wavax-wei",
         tokenAddress: "wavax-wei",
       },
       terra: {
         assetSymbol: "axlWAVAX",
         assetName: "axlWAVAX",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/F992067A054C819B42D2DAB57F5CCE347D38352EB90453E59D566BFE64F1614B",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/F992067A054C819B42D2DAB57F5CCE347D38352EB90453E59D566BFE64F1614B",
         fullDenomPath: "transfer/channel-6/wavax-wei",
         tokenAddress: "wavax-wei",
       },
@@ -450,7 +424,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "WGLMR",
         assetName: "WGLMR",
-        minDepositAmt: 0.4,
+        minDepositAmt: 0.8,
         ibcDenom: "wglmr-wei",
         fullDenomPath: "wglmr-wei",
         tokenAddress: "wglmr-wei",
@@ -458,7 +432,7 @@ export const mainnet = {
       moonbeam: {
         assetSymbol: "WGLMR",
         assetName: "WGLMR",
-        minDepositAmt: 0.8,
+        minDepositAmt: 2,
         ibcDenom: "wglmr-wei",
         fullDenomPath: "wglmr-wei",
         tokenAddress: "0xAcc15dC74880C9944775448304B263D191c6077F",
@@ -466,54 +440,48 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlWGLMR",
         assetName: "axlWGLMR",
-        minDepositAmt: 0.4,
-        ibcDenom:
-          "ibc/6CB279447A96B991FA8986DC4C22C866D215DE1DCDF5F833B81180329FE8001A",
+        minDepositAmt: 0.8,
+        ibcDenom: "ibc/6CB279447A96B991FA8986DC4C22C866D215DE1DCDF5F833B81180329FE8001A",
         fullDenomPath: "transfer/channel-293/wglmr-wei",
         tokenAddress: "wglmr-wei",
       },
       osmosis: {
         assetSymbol: "axlWGLMR",
         assetName: "axlWGLMR",
-        minDepositAmt: 0.4,
-        ibcDenom:
-          "ibc/1E26DB0E5122AED464D98462BD384FCCB595732A66B3970AE6CE0B58BAE0FC49",
+        minDepositAmt: 0.8,
+        ibcDenom: "ibc/1E26DB0E5122AED464D98462BD384FCCB595732A66B3970AE6CE0B58BAE0FC49",
         fullDenomPath: "transfer/channel-208/wglmr-wei",
         tokenAddress: "wglmr-wei",
       },
       juno: {
         assetSymbol: "axlWGLMR",
         assetName: "axlWGLMR",
-        minDepositAmt: 0.4,
-        ibcDenom:
-          "ibc/5539E7CB6FF8FDA12AE6BF20E8862513D787BF1712296EB4AA06DD86920FFBC1",
+        minDepositAmt: 0.8,
+        ibcDenom: "ibc/5539E7CB6FF8FDA12AE6BF20E8862513D787BF1712296EB4AA06DD86920FFBC1",
         fullDenomPath: "transfer/channel-71/wglmr-wei",
         tokenAddress: "wglmr-wei",
       },
       crescent: {
         assetSymbol: "axlWGLMR",
         assetName: "axlWGLMR",
-        minDepositAmt: 0.4,
-        ibcDenom:
-          "ibc/A7C06A800850847DBCC36213185EC5AAD3C719D42D1F0623F9C1F9EFF456F673",
+        minDepositAmt: 0.8,
+        ibcDenom: "ibc/A7C06A800850847DBCC36213185EC5AAD3C719D42D1F0623F9C1F9EFF456F673",
         fullDenomPath: "transfer/channel-4/wglmr-wei",
         tokenAddress: "wglmr-wei",
       },
       injective: {
         assetSymbol: "axlWGLMR",
         assetName: "axlWGLMR",
-        minDepositAmt: 0.4,
-        ibcDenom:
-          "ibc/8FF72FB47F07B4AFA8649500A168683BEFCB9EE164BD331FA597D26224D51055",
+        minDepositAmt: 0.8,
+        ibcDenom: "ibc/8FF72FB47F07B4AFA8649500A168683BEFCB9EE164BD331FA597D26224D51055",
         fullDenomPath: "transfer/channel-84/wglmr-wei",
         tokenAddress: "wglmr-wei",
       },
       terra: {
         assetSymbol: "axlWGLMR",
         assetName: "axlWGLMR",
-        minDepositAmt: 0.4,
-        ibcDenom:
-          "ibc/D54CE4CD2927F744CDCA844DD0E1A5DF88762274C55CD9AAB13E504A29BE8933",
+        minDepositAmt: 0.8,
+        ibcDenom: "ibc/D54CE4CD2927F744CDCA844DD0E1A5DF88762274C55CD9AAB13E504A29BE8933",
         fullDenomPath: "transfer/channel-6/wglmr-wei",
         tokenAddress: "wglmr-wei",
       },
@@ -532,7 +500,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "WMATIC",
         assetName: "WMATIC",
-        minDepositAmt: 0.8,
+        minDepositAmt: 1,
         ibcDenom: "wmatic-wei",
         fullDenomPath: "wmatic-wei",
         tokenAddress: "wmatic-wei",
@@ -548,45 +516,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlWMATIC",
         assetName: "axlWMATIC",
-        minDepositAmt: 0.8,
-        ibcDenom:
-          "ibc/BB5D7FBBA895E6E43EAD8D49E084319663139CA438E41796A0ACB657AE64E8F3",
+        minDepositAmt: 1,
+        ibcDenom: "ibc/BB5D7FBBA895E6E43EAD8D49E084319663139CA438E41796A0ACB657AE64E8F3",
         fullDenomPath: "transfer/channel-293/wmatic-wei",
         tokenAddress: "wmatic-wei",
       },
       osmosis: {
         assetSymbol: "axlWMATIC",
         assetName: "axlWMATIC",
-        minDepositAmt: 0.8,
-        ibcDenom:
-          "ibc/AB589511ED0DD5FA56171A39978AFBF1371DB986EC1C3526CE138A16377E39BB",
+        minDepositAmt: 1,
+        ibcDenom: "ibc/AB589511ED0DD5FA56171A39978AFBF1371DB986EC1C3526CE138A16377E39BB",
         fullDenomPath: "transfer/channel-208/wmatic-wei",
         tokenAddress: "wmatic-wei",
       },
       juno: {
         assetSymbol: "axlWMATIC",
         assetName: "axlWMATIC",
-        minDepositAmt: 0.8,
-        ibcDenom:
-          "ibc/C3A8C0BA97F3CD808F828E422CCBB39A5206644DF0A65FA79160E4413684EE14",
+        minDepositAmt: 1,
+        ibcDenom: "ibc/C3A8C0BA97F3CD808F828E422CCBB39A5206644DF0A65FA79160E4413684EE14",
         fullDenomPath: "transfer/channel-71/wmatic-wei",
         tokenAddress: "wmatic-wei",
       },
       crescent: {
         assetSymbol: "axlWMATIC",
         assetName: "axlWMATIC",
-        minDepositAmt: 0.8,
-        ibcDenom:
-          "ibc/C322C7D0867CC3EE6FA3495DC9685E5A0F49B506369341287FDA1E110841A950",
+        minDepositAmt: 1,
+        ibcDenom: "ibc/C322C7D0867CC3EE6FA3495DC9685E5A0F49B506369341287FDA1E110841A950",
         fullDenomPath: "transfer/channel-4/wmatic-wei",
         tokenAddress: "wmatic-wei",
       },
       terra: {
         assetSymbol: "axlWMATIC",
         assetName: "axlWMATIC",
-        minDepositAmt: 0.8,
-        ibcDenom:
-          "ibc/14E4FD1AB72DE9BF1D6725CBA18373C406CB9A7DA17955299F3F4DC5C6131A4E",
+        minDepositAmt: 1,
+        ibcDenom: "ibc/14E4FD1AB72DE9BF1D6725CBA18373C406CB9A7DA17955299F3F4DC5C6131A4E",
         fullDenomPath: "transfer/channel-6/wmatic-wei",
         tokenAddress: "wmatic-wei",
       },
@@ -613,7 +576,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "WBTC",
         assetName: "WBTC",
-        minDepositAmt: 0.0007,
+        minDepositAmt: 0.001,
         ibcDenom: "wbtc-satoshi",
         fullDenomPath: "wbtc-satoshi",
         tokenAddress: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
@@ -622,8 +585,7 @@ export const mainnet = {
         assetSymbol: "axlWBTC",
         assetName: "axlWBTC",
         minDepositAmt: 0.00002,
-        ibcDenom:
-          "ibc/97F15E1BC69D4AAD938CAAA6CA5C963F6159C93059481246A8A26A113BC6BD2C",
+        ibcDenom: "ibc/97F15E1BC69D4AAD938CAAA6CA5C963F6159C93059481246A8A26A113BC6BD2C",
         fullDenomPath: "transfer/channel-293/wbtc-satoshi",
         tokenAddress: "wbtc-satoshi",
       },
@@ -631,8 +593,7 @@ export const mainnet = {
         assetSymbol: "axlWBTC",
         assetName: "axlWBTC",
         minDepositAmt: 0.00002,
-        ibcDenom:
-          "ibc/D1542AA8762DB13087D8364F3EA6509FD6F009A34F00426AF9E4F9FA85CBBF1F",
+        ibcDenom: "ibc/D1542AA8762DB13087D8364F3EA6509FD6F009A34F00426AF9E4F9FA85CBBF1F",
         fullDenomPath: "transfer/channel-208/wbtc-satoshi",
         tokenAddress: "wbtc-satoshi",
       },
@@ -640,8 +601,7 @@ export const mainnet = {
         assetSymbol: "axlWBTC",
         assetName: "axlWBTC",
         minDepositAmt: 0.00002,
-        ibcDenom:
-          "ibc/5EF597EA4E863132BFD3E051AC6BAA0175F00913D3256A41F11DC425C39527D6",
+        ibcDenom: "ibc/5EF597EA4E863132BFD3E051AC6BAA0175F00913D3256A41F11DC425C39527D6",
         fullDenomPath: "transfer/channel-71/wbtc-satoshi",
         tokenAddress: "wbtc-satoshi",
       },
@@ -649,8 +609,7 @@ export const mainnet = {
         assetSymbol: "axlWBTC",
         assetName: "axlWBTC",
         minDepositAmt: 0.00002,
-        ibcDenom:
-          "ibc/7FFC60524C4513A3A8E0A407CC89BFF5A861EC624209D72EB26FC10ADAEBA70E",
+        ibcDenom: "ibc/7FFC60524C4513A3A8E0A407CC89BFF5A861EC624209D72EB26FC10ADAEBA70E",
         fullDenomPath: "transfer/channel-4/wbtc-satoshi",
         tokenAddress: "wbtc-satoshi",
       },
@@ -658,8 +617,7 @@ export const mainnet = {
         assetSymbol: "axlWBTC",
         assetName: "axlWBTC",
         minDepositAmt: 0.00002,
-        ibcDenom:
-          "ibc/05D299885B07905B6886F554B39346EA6761246076A1120B1950049B92B922DD",
+        ibcDenom: "ibc/05D299885B07905B6886F554B39346EA6761246076A1120B1950049B92B922DD",
         fullDenomPath: "transfer/channel-6/wbtc-satoshi",
         tokenAddress: "wbtc-satoshi",
       },
@@ -678,7 +636,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "WFTM",
         assetName: "WFTM",
-        minDepositAmt: 1,
+        minDepositAmt: 2,
         ibcDenom: "wftm-wei",
         fullDenomPath: "wftm-wei",
         tokenAddress: "wftm-wei",
@@ -686,7 +644,7 @@ export const mainnet = {
       fantom: {
         assetSymbol: "WFTM",
         assetName: "WFTM",
-        minDepositAmt: 2,
+        minDepositAmt: 4,
         ibcDenom: "wftm-wei",
         fullDenomPath: "wftm-wei",
         tokenAddress: "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
@@ -694,45 +652,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlWFTM",
         assetName: "axlWFTM",
-        minDepositAmt: 1,
-        ibcDenom:
-          "ibc/80A8DBDCDC0AD1CF1781110E8438D894199BA2E4240A65DBB833A665E41620CB",
+        minDepositAmt: 2,
+        ibcDenom: "ibc/80A8DBDCDC0AD1CF1781110E8438D894199BA2E4240A65DBB833A665E41620CB",
         fullDenomPath: "transfer/channel-293/wftm-wei",
         tokenAddress: "wftm-wei",
       },
       osmosis: {
         assetSymbol: "axlWFTM",
         assetName: "axlWFTM",
-        minDepositAmt: 1,
-        ibcDenom:
-          "ibc/5E2DFDF1734137302129EA1C1BA21A580F96F778D4F021815EA4F6DB378DA1A4",
+        minDepositAmt: 2,
+        ibcDenom: "ibc/5E2DFDF1734137302129EA1C1BA21A580F96F778D4F021815EA4F6DB378DA1A4",
         fullDenomPath: "transfer/channel-208/wftm-wei",
         tokenAddress: "wftm-wei",
       },
       juno: {
         assetSymbol: "axlWFTM",
         assetName: "axlWFTM",
-        minDepositAmt: 1,
-        ibcDenom:
-          "ibc/BCA8E085B8D4D9D89D5316165E51545B826C5E034EACD6C00A7464C58F318379",
+        minDepositAmt: 2,
+        ibcDenom: "ibc/BCA8E085B8D4D9D89D5316165E51545B826C5E034EACD6C00A7464C58F318379",
         fullDenomPath: "transfer/channel-71/wftm-wei",
         tokenAddress: "wftm-wei",
       },
       crescent: {
         assetSymbol: "axlWFTM",
         assetName: "axlWFTM",
-        minDepositAmt: 1,
-        ibcDenom:
-          "ibc/23B62EFD1B9444733889B42362570C774801430A1C656A0A3F8D6D69AE93ED8B",
+        minDepositAmt: 2,
+        ibcDenom: "ibc/23B62EFD1B9444733889B42362570C774801430A1C656A0A3F8D6D69AE93ED8B",
         fullDenomPath: "transfer/channel-4/wftm-wei",
         tokenAddress: "wftm-wei",
       },
       terra: {
         assetSymbol: "axlWFTM",
         assetName: "axlWFTM",
-        minDepositAmt: 1,
-        ibcDenom:
-          "ibc/19E687E77D1AE3CADBB3DE487277AFEC0E340A84334D6ED3F216EF25A7075746",
+        minDepositAmt: 2,
+        ibcDenom: "ibc/19E687E77D1AE3CADBB3DE487277AFEC0E340A84334D6ED3F216EF25A7075746",
         fullDenomPath: "transfer/channel-6/wftm-wei",
         tokenAddress: "wftm-wei",
       },
@@ -751,9 +704,8 @@ export const mainnet = {
       axelar: {
         assetSymbol: "ATOM",
         assetName: "ATOM",
-        minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/9117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E",
+        minDepositAmt: 0.07,
+        ibcDenom: "ibc/9117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E",
         fullDenomPath: "transfer/channel-2/uatom",
         tokenAddress: "uatom",
       },
@@ -776,7 +728,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "axlATOM",
         assetName: "axlATOM",
-        minDepositAmt: 2,
+        minDepositAmt: 3,
         ibcDenom: "uatom",
         fullDenomPath: "uatom",
         tokenAddress: "0x27292cf0016E5dF1d8b37306B2A98588aCbD6fCA",
@@ -800,7 +752,7 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "ATOM",
         assetName: "ATOM",
-        minDepositAmt: 0.05,
+        minDepositAmt: 0.07,
         ibcDenom: "uatom",
         fullDenomPath: "uatom",
         tokenAddress: "uatom",
@@ -869,8 +821,7 @@ export const mainnet = {
         assetSymbol: "axlUSDT",
         assetName: "axlUSDT",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/5662412372381F56C5F83A0404DC7209E5143ABD32EF67B5705DBE8D9C2BF001",
+        ibcDenom: "ibc/5662412372381F56C5F83A0404DC7209E5143ABD32EF67B5705DBE8D9C2BF001",
         fullDenomPath: "transfer/channel-293/uusdt",
         tokenAddress: "uusdt",
       },
@@ -878,8 +829,7 @@ export const mainnet = {
         assetSymbol: "axlUSDT",
         assetName: "axlUSDT",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/8242AD24008032E457D2E12D46588FD39FB54FB29680C6C7663D296B383C37C4",
+        ibcDenom: "ibc/8242AD24008032E457D2E12D46588FD39FB54FB29680C6C7663D296B383C37C4",
         fullDenomPath: "transfer/channel-208/uusdt",
         tokenAddress: "uusdt",
       },
@@ -887,8 +837,7 @@ export const mainnet = {
         assetSymbol: "axlUSDT",
         assetName: "axlUSDT",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/B22D08F0E3D08968FB3CBEE2C1E993581A99AAAA60D0490C1AF7DCE567D5FDDA",
+        ibcDenom: "ibc/B22D08F0E3D08968FB3CBEE2C1E993581A99AAAA60D0490C1AF7DCE567D5FDDA",
         fullDenomPath: "transfer/channel-71/uusdt",
         tokenAddress: "uusdt",
       },
@@ -896,8 +845,7 @@ export const mainnet = {
         assetSymbol: "axlUSDT",
         assetName: "axlUSDT",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/11FB4C0BC2FCCFF2B01976C0070F468D82DAE8D1F565F80E64063BFDBEE4A5BD",
+        ibcDenom: "ibc/11FB4C0BC2FCCFF2B01976C0070F468D82DAE8D1F565F80E64063BFDBEE4A5BD",
         fullDenomPath: "transfer/channel-4/uusdt",
         tokenAddress: "uusdt",
       },
@@ -905,8 +853,7 @@ export const mainnet = {
         assetSymbol: "axlUSDT",
         assetName: "axlUSDT",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/CBF67A2BCF6CAE343FDF251E510C8E18C361FC02B23430C121116E0811835DEF",
+        ibcDenom: "ibc/CBF67A2BCF6CAE343FDF251E510C8E18C361FC02B23430C121116E0811835DEF",
         fullDenomPath: "transfer/channel-6/uusdt",
         tokenAddress: "uusdt",
       },
@@ -925,16 +872,15 @@ export const mainnet = {
       axelar: {
         assetSymbol: "NGM",
         assetName: "NGM",
-        minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/ACD9A665DB6C19EC1D057A43D468E324CA9FB9C5ABF82235815F7B7745A15B80",
+        minDepositAmt: 0.8,
+        ibcDenom: "ibc/ACD9A665DB6C19EC1D057A43D468E324CA9FB9C5ABF82235815F7B7745A15B80",
         fullDenomPath: "transfer/channel-6/ungm",
         tokenAddress: "ungm",
       },
       moonbeam: {
         assetSymbol: "NGM",
         assetName: "NGM",
-        minDepositAmt: 1,
+        minDepositAmt: 2,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
         tokenAddress: "0x08fe7A0db575c2a08d76EEcA71763E48C6e60F45",
@@ -942,7 +888,7 @@ export const mainnet = {
       fantom: {
         assetSymbol: "NGM",
         assetName: "NGM",
-        minDepositAmt: 1,
+        minDepositAmt: 2,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
         tokenAddress: "0xE549Caf5f0c3e80b8738CB03ae4fBb4c15b0DD86",
@@ -950,7 +896,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "NGM",
         assetName: "NGM",
-        minDepositAmt: 20,
+        minDepositAmt: 30,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
         tokenAddress: "0x08fe7A0db575c2a08d76EEcA71763E48C6e60F45",
@@ -958,7 +904,7 @@ export const mainnet = {
       avalanche: {
         assetSymbol: "NGM",
         assetName: "NGM",
-        minDepositAmt: 1,
+        minDepositAmt: 2,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
         tokenAddress: "0x5A44422beaAA38031f57720d88697105be6970BE",
@@ -966,7 +912,7 @@ export const mainnet = {
       polygon: {
         assetSymbol: "NGM",
         assetName: "NGM",
-        minDepositAmt: 1,
+        minDepositAmt: 2,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
         tokenAddress: "0xC8d5A4E04387EBdaa2c0FBB6858F246116431e9f",
@@ -974,7 +920,7 @@ export const mainnet = {
       "e-money": {
         assetSymbol: "NGM",
         assetName: "NGM",
-        minDepositAmt: 0.5,
+        minDepositAmt: 0.8,
         ibcDenom: "ungm",
         fullDenomPath: "ungm",
         tokenAddress: "ungm",
@@ -995,8 +941,7 @@ export const mainnet = {
         assetSymbol: "EEUR",
         assetName: "EEUR",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/373EF14936B38AC8F8A7E7024C0FB7099369FDDFDA3CDA9EFA73684B16249B64",
+        ibcDenom: "ibc/373EF14936B38AC8F8A7E7024C0FB7099369FDDFDA3CDA9EFA73684B16249B64",
         fullDenomPath: "transfer/channel-6/eeur",
         tokenAddress: "eeur",
       },
@@ -1080,8 +1025,7 @@ export const mainnet = {
         assetSymbol: "axlRAI",
         assetName: "axlRAI",
         minDepositAmt: 0.2,
-        ibcDenom:
-          "ibc/C2B86F0F77B3293EAB92C516CF249BD4CD5A168E5AC3BA5997F07A8D660CDEF2",
+        ibcDenom: "ibc/C2B86F0F77B3293EAB92C516CF249BD4CD5A168E5AC3BA5997F07A8D660CDEF2",
         fullDenomPath: "transfer/channel-293/rai-wei",
         tokenAddress: "rai-wei",
       },
@@ -1089,8 +1033,7 @@ export const mainnet = {
         assetSymbol: "axlRAI",
         assetName: "axlRAI",
         minDepositAmt: 0.2,
-        ibcDenom:
-          "ibc/BD796662F8825327D41C96355DF62045A5BA225BAE31C0A86289B9D88ED3F44E",
+        ibcDenom: "ibc/BD796662F8825327D41C96355DF62045A5BA225BAE31C0A86289B9D88ED3F44E",
         fullDenomPath: "transfer/channel-208/rai-wei",
         tokenAddress: "rai-wei",
       },
@@ -1098,8 +1041,7 @@ export const mainnet = {
         assetSymbol: "axlRAI",
         assetName: "axlRAI",
         minDepositAmt: 0.2,
-        ibcDenom:
-          "ibc/4AA19294AE89888CE7DB64CA76781EE2FE9A0B703B8A5F156AD258428F7A77C4",
+        ibcDenom: "ibc/4AA19294AE89888CE7DB64CA76781EE2FE9A0B703B8A5F156AD258428F7A77C4",
         fullDenomPath: "transfer/channel-71/rai-wei",
         tokenAddress: "rai-wei",
       },
@@ -1107,8 +1049,7 @@ export const mainnet = {
         assetSymbol: "axlRAI",
         assetName: "axlRAI",
         minDepositAmt: 0.2,
-        ibcDenom:
-          "ibc/A1F1BAE8D0CF9F8080C22FE2B0C60DFD25E96F4F985AC27C7E11F5A597CEE83D",
+        ibcDenom: "ibc/A1F1BAE8D0CF9F8080C22FE2B0C60DFD25E96F4F985AC27C7E11F5A597CEE83D",
         fullDenomPath: "transfer/channel-4/rai-wei",
         tokenAddress: "rai-wei",
       },
@@ -1116,8 +1057,7 @@ export const mainnet = {
         assetSymbol: "axlRAI",
         assetName: "axlRAI",
         minDepositAmt: 0.2,
-        ibcDenom:
-          "ibc/88C5B3E62FD8ECC8825107D86C4AC8CDECDC7B44135DD757D1D83E27203B6C9D",
+        ibcDenom: "ibc/88C5B3E62FD8ECC8825107D86C4AC8CDECDC7B44135DD757D1D83E27203B6C9D",
         fullDenomPath: "transfer/channel-6/rai-wei",
         tokenAddress: "rai-wei",
       },
@@ -1136,7 +1076,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "LINK",
         assetName: "LINK",
-        minDepositAmt: 0.07,
+        minDepositAmt: 0.08,
         ibcDenom: "link-wei",
         fullDenomPath: "link-wei",
         tokenAddress: "link-wei",
@@ -1152,45 +1092,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlLINK",
         assetName: "axlLINK",
-        minDepositAmt: 0.07,
-        ibcDenom:
-          "ibc/501C5C52E5D83DB2BA46067694AEEA51C4DC7BF56AA47BD34B12655BAF8B0DF1",
+        minDepositAmt: 0.08,
+        ibcDenom: "ibc/501C5C52E5D83DB2BA46067694AEEA51C4DC7BF56AA47BD34B12655BAF8B0DF1",
         fullDenomPath: "transfer/channel-293/link-wei",
         tokenAddress: "link-wei",
       },
       osmosis: {
         assetSymbol: "axlLINK",
         assetName: "axlLINK",
-        minDepositAmt: 0.07,
-        ibcDenom:
-          "ibc/D3327A763C23F01EC43D1F0DB3CEFEC390C362569B6FD191F40A5192F8960049",
+        minDepositAmt: 0.08,
+        ibcDenom: "ibc/D3327A763C23F01EC43D1F0DB3CEFEC390C362569B6FD191F40A5192F8960049",
         fullDenomPath: "transfer/channel-208/link-wei",
         tokenAddress: "link-wei",
       },
       juno: {
         assetSymbol: "axlLINK",
         assetName: "axlLINK",
-        minDepositAmt: 0.07,
-        ibcDenom:
-          "ibc/0409596DFE559E1B05D821CA3A5F8E290A7C2C3408B4872595CA0E22F13A09FE",
+        minDepositAmt: 0.08,
+        ibcDenom: "ibc/0409596DFE559E1B05D821CA3A5F8E290A7C2C3408B4872595CA0E22F13A09FE",
         fullDenomPath: "transfer/channel-71/link-wei",
         tokenAddress: "link-wei",
       },
       crescent: {
         assetSymbol: "axlLINK",
         assetName: "axlLINK",
-        minDepositAmt: 0.07,
-        ibcDenom:
-          "ibc/1AD2DD08D1AADAE7F667F82767425FEC119BAFEA5F514FCEA22E6E4E446BEADA",
+        minDepositAmt: 0.08,
+        ibcDenom: "ibc/1AD2DD08D1AADAE7F667F82767425FEC119BAFEA5F514FCEA22E6E4E446BEADA",
         fullDenomPath: "transfer/channel-4/link-wei",
         tokenAddress: "link-wei",
       },
       terra: {
         assetSymbol: "axlLINK",
         assetName: "axlLINK",
-        minDepositAmt: 0.07,
-        ibcDenom:
-          "ibc/1FD62537E1FBE67DF7574E0234112B4FE417B20AADC2F574026CB664EA9492C7",
+        minDepositAmt: 0.08,
+        ibcDenom: "ibc/1FD62537E1FBE67DF7574E0234112B4FE417B20AADC2F574026CB664EA9492C7",
         fullDenomPath: "transfer/channel-6/link-wei",
         tokenAddress: "link-wei",
       },
@@ -1209,7 +1144,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "AAVE",
         assetName: "AAVE",
-        minDepositAmt: 0.005,
+        minDepositAmt: 0.008,
         ibcDenom: "aave-wei",
         fullDenomPath: "aave-wei",
         tokenAddress: "aave-wei",
@@ -1217,7 +1152,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "AAVE",
         assetName: "AAVE",
-        minDepositAmt: 0.2,
+        minDepositAmt: 0.3,
         ibcDenom: "aave-wei",
         fullDenomPath: "aave-wei",
         tokenAddress: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
@@ -1225,45 +1160,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlAAVE",
         assetName: "axlAAVE",
-        minDepositAmt: 0.005,
-        ibcDenom:
-          "ibc/12A2A9EBFEED1D5511D613E0480FBBD80D8493A5A21ABFB6A7767F0984D8941B",
+        minDepositAmt: 0.008,
+        ibcDenom: "ibc/12A2A9EBFEED1D5511D613E0480FBBD80D8493A5A21ABFB6A7767F0984D8941B",
         fullDenomPath: "transfer/channel-293/aave-wei",
         tokenAddress: "aave-wei",
       },
       osmosis: {
         assetSymbol: "axlAAVE",
         assetName: "axlAAVE",
-        minDepositAmt: 0.005,
-        ibcDenom:
-          "ibc/384E5DD50BDE042E1AAF51F312B55F08F95BC985C503880189258B4D9374CBBE",
+        minDepositAmt: 0.008,
+        ibcDenom: "ibc/384E5DD50BDE042E1AAF51F312B55F08F95BC985C503880189258B4D9374CBBE",
         fullDenomPath: "transfer/channel-208/aave-wei",
         tokenAddress: "aave-wei",
       },
       juno: {
         assetSymbol: "axlAAVE",
         assetName: "axlAAVE",
-        minDepositAmt: 0.005,
-        ibcDenom:
-          "ibc/686AF664CCC44119B3DED5267CCA02CE6FA877A4C3EF71408FCA7B30EBD505C4",
+        minDepositAmt: 0.008,
+        ibcDenom: "ibc/686AF664CCC44119B3DED5267CCA02CE6FA877A4C3EF71408FCA7B30EBD505C4",
         fullDenomPath: "transfer/channel-71/aave-wei",
         tokenAddress: "aave-wei",
       },
       crescent: {
         assetSymbol: "axlAAVE",
         assetName: "axlAAVE",
-        minDepositAmt: 0.005,
-        ibcDenom:
-          "ibc/84303A70A7808C9FE1F53CC7480CBD42D888F8643671E6E7C43701B1D866D04A",
+        minDepositAmt: 0.008,
+        ibcDenom: "ibc/84303A70A7808C9FE1F53CC7480CBD42D888F8643671E6E7C43701B1D866D04A",
         fullDenomPath: "transfer/channel-4/aave-wei",
         tokenAddress: "aave-wei",
       },
       terra: {
         assetSymbol: "axlAAVE",
         assetName: "axlAAVE",
-        minDepositAmt: 0.005,
-        ibcDenom:
-          "ibc/2E9CD07D7A6572A4CDAABBF0FBB89F69A9A362818132221182654819E277220A",
+        minDepositAmt: 0.008,
+        ibcDenom: "ibc/2E9CD07D7A6572A4CDAABBF0FBB89F69A9A362818132221182654819E277220A",
         fullDenomPath: "transfer/channel-6/aave-wei",
         tokenAddress: "aave-wei",
       },
@@ -1282,7 +1212,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "stETH",
         assetName: "stETH",
-        minDepositAmt: 0.0002,
+        minDepositAmt: 0.0005,
         ibcDenom: "steth-wei",
         fullDenomPath: "steth-wei",
         tokenAddress: "steth-wei",
@@ -1290,7 +1220,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "stETH",
         assetName: "stETH",
-        minDepositAmt: 0.01,
+        minDepositAmt: 0.02,
         ibcDenom: "steth-wei",
         fullDenomPath: "steth-wei",
         tokenAddress: "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
@@ -1298,45 +1228,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlstETH",
         assetName: "axlstETH",
-        minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/63B1B80C5F6742F68B5BEA04ED255B0865E5649EF311B2A131936180A0ADC119",
+        minDepositAmt: 0.0005,
+        ibcDenom: "ibc/63B1B80C5F6742F68B5BEA04ED255B0865E5649EF311B2A131936180A0ADC119",
         fullDenomPath: "transfer/channel-293/steth-wei",
         tokenAddress: "steth-wei",
       },
       osmosis: {
         assetSymbol: "axlstETH",
         assetName: "axlstETH",
-        minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/129F401C84FCD5B0183472ED83745193B0B3A69855635A56B9056EEF8D3C241C",
+        minDepositAmt: 0.0005,
+        ibcDenom: "ibc/129F401C84FCD5B0183472ED83745193B0B3A69855635A56B9056EEF8D3C241C",
         fullDenomPath: "transfer/channel-208/steth-wei",
         tokenAddress: "steth-wei",
       },
       juno: {
         assetSymbol: "axlstETH",
         assetName: "axlstETH",
-        minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/C740EF04C154165820688D9438AD90EA1E6B59BFF3715197AA570E928A44A937",
+        minDepositAmt: 0.0005,
+        ibcDenom: "ibc/C740EF04C154165820688D9438AD90EA1E6B59BFF3715197AA570E928A44A937",
         fullDenomPath: "transfer/channel-71/steth-wei",
         tokenAddress: "steth-wei",
       },
       crescent: {
         assetSymbol: "axlstETH",
         assetName: "axlstETH",
-        minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/B74E78325EB51CABBA812618947F04941B564F137C6A9C19E2626CE3EB5E1F8D",
+        minDepositAmt: 0.0005,
+        ibcDenom: "ibc/B74E78325EB51CABBA812618947F04941B564F137C6A9C19E2626CE3EB5E1F8D",
         fullDenomPath: "transfer/channel-4/steth-wei",
         tokenAddress: "steth-wei",
       },
       terra: {
         assetSymbol: "axlstETH",
         assetName: "axlstETH",
-        minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/DBA10CEE0874A76DA817F4BA19D611F08910EF213D1698AF06F10D7096A0F3E9",
+        minDepositAmt: 0.0005,
+        ibcDenom: "ibc/DBA10CEE0874A76DA817F4BA19D611F08910EF213D1698AF06F10D7096A0F3E9",
         fullDenomPath: "transfer/channel-6/steth-wei",
         tokenAddress: "steth-wei",
       },
@@ -1404,8 +1329,7 @@ export const mainnet = {
         assetSymbol: "axlFRAX",
         assetName: "axlFRAX",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/3792246C7C422C037C603C955F8383B4E32E7555D693344F9A029A67FE221C57",
+        ibcDenom: "ibc/3792246C7C422C037C603C955F8383B4E32E7555D693344F9A029A67FE221C57",
         fullDenomPath: "transfer/channel-293/frax-wei",
         tokenAddress: "frax-wei",
       },
@@ -1413,8 +1337,7 @@ export const mainnet = {
         assetSymbol: "axlFRAX",
         assetName: "axlFRAX",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/0E43EDE2E2A3AFA36D0CD38BDDC0B49FECA64FA426A82E102F304E430ECF46EE",
+        ibcDenom: "ibc/0E43EDE2E2A3AFA36D0CD38BDDC0B49FECA64FA426A82E102F304E430ECF46EE",
         fullDenomPath: "transfer/channel-208/frax-wei",
         tokenAddress: "frax-wei",
       },
@@ -1422,8 +1345,7 @@ export const mainnet = {
         assetSymbol: "axlFRAX",
         assetName: "axlFRAX",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/1CE15165C83F70C7DB18B19C417321B02512A85BCB9FB8E553FC10070D122036",
+        ibcDenom: "ibc/1CE15165C83F70C7DB18B19C417321B02512A85BCB9FB8E553FC10070D122036",
         fullDenomPath: "transfer/channel-71/frax-wei",
         tokenAddress: "frax-wei",
       },
@@ -1431,8 +1353,7 @@ export const mainnet = {
         assetSymbol: "axlFRAX",
         assetName: "axlFRAX",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/21DB3093824F38A29399E7466B5870559AEC683D0D09D746F9EC47BB8505CBF7",
+        ibcDenom: "ibc/21DB3093824F38A29399E7466B5870559AEC683D0D09D746F9EC47BB8505CBF7",
         fullDenomPath: "transfer/channel-4/frax-wei",
         tokenAddress: "frax-wei",
       },
@@ -1440,8 +1361,7 @@ export const mainnet = {
         assetSymbol: "axlFRAX",
         assetName: "axlFRAX",
         minDepositAmt: 0.5,
-        ibcDenom:
-          "ibc/2E435CEEEBA18CCB2719E0182BC5D142A364D6CCE9957DE6E1AC4D62127D2913",
+        ibcDenom: "ibc/2E435CEEEBA18CCB2719E0182BC5D142A364D6CCE9957DE6E1AC4D62127D2913",
         fullDenomPath: "transfer/channel-6/frax-wei",
         tokenAddress: "frax-wei",
       },
@@ -1460,7 +1380,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "APE",
         assetName: "APE",
-        minDepositAmt: 0.07,
+        minDepositAmt: 0.1,
         ibcDenom: "ape-wei",
         fullDenomPath: "ape-wei",
         tokenAddress: "ape-wei",
@@ -1468,7 +1388,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "APE",
         assetName: "APE",
-        minDepositAmt: 3,
+        minDepositAmt: 4,
         ibcDenom: "ape-wei",
         fullDenomPath: "ape-wei",
         tokenAddress: "0x4d224452801ACEd8B2F0aebE155379bb5D594381",
@@ -1476,45 +1396,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlAPE",
         assetName: "axlAPE",
-        minDepositAmt: 0.07,
-        ibcDenom:
-          "ibc/56B7E889E2DBB57CA8EC1823B000AF66F555E809B9F2B956AD0A1554B35D0B40",
+        minDepositAmt: 0.1,
+        ibcDenom: "ibc/56B7E889E2DBB57CA8EC1823B000AF66F555E809B9F2B956AD0A1554B35D0B40",
         fullDenomPath: "transfer/channel-293/ape-wei",
         tokenAddress: "ape-wei",
       },
       osmosis: {
         assetSymbol: "axlAPE",
         assetName: "axlAPE",
-        minDepositAmt: 0.07,
-        ibcDenom:
-          "ibc/F83CC6471DA4D4B508F437244F10B9E4C68975344E551A2DEB6B8617AB08F0D4",
+        minDepositAmt: 0.1,
+        ibcDenom: "ibc/F83CC6471DA4D4B508F437244F10B9E4C68975344E551A2DEB6B8617AB08F0D4",
         fullDenomPath: "transfer/channel-208/ape-wei",
         tokenAddress: "ape-wei",
       },
       juno: {
         assetSymbol: "axlAPE",
         assetName: "axlAPE",
-        minDepositAmt: 0.07,
-        ibcDenom:
-          "ibc/9D4421F8337456349864798C4928500797AF09C002A288041F1748F7846EFA19",
+        minDepositAmt: 0.1,
+        ibcDenom: "ibc/9D4421F8337456349864798C4928500797AF09C002A288041F1748F7846EFA19",
         fullDenomPath: "transfer/channel-71/ape-wei",
         tokenAddress: "ape-wei",
       },
       crescent: {
         assetSymbol: "axlAPE",
         assetName: "axlAPE",
-        minDepositAmt: 0.07,
-        ibcDenom:
-          "ibc/F5B57795805E9F11B06F0B12BF016980093A97F0782A5700EFE4DAE89A0DB9B7",
+        minDepositAmt: 0.1,
+        ibcDenom: "ibc/F5B57795805E9F11B06F0B12BF016980093A97F0782A5700EFE4DAE89A0DB9B7",
         fullDenomPath: "transfer/channel-4/ape-wei",
         tokenAddress: "ape-wei",
       },
       terra: {
         assetSymbol: "axlAPE",
         assetName: "axlAPE",
-        minDepositAmt: 0.07,
-        ibcDenom:
-          "ibc/5D36185CDE12E13DA9832315D2A35F07D52D952E3A242496C9A634808D86DC07",
+        minDepositAmt: 0.1,
+        ibcDenom: "ibc/5D36185CDE12E13DA9832315D2A35F07D52D952E3A242496C9A634808D86DC07",
         fullDenomPath: "transfer/channel-6/ape-wei",
         tokenAddress: "ape-wei",
       },
@@ -1533,7 +1448,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "UNI",
         assetName: "UNI",
-        minDepositAmt: 0.09,
+        minDepositAmt: 0.1,
         ibcDenom: "uni-wei",
         fullDenomPath: "uni-wei",
         tokenAddress: "uni-wei",
@@ -1549,45 +1464,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlUNI",
         assetName: "axlUNI",
-        minDepositAmt: 0.09,
-        ibcDenom:
-          "ibc/A912768BDDAC10A4337F50D91A033DA13EE41285732E82F929EF34E1B2FB3630",
+        minDepositAmt: 0.1,
+        ibcDenom: "ibc/A912768BDDAC10A4337F50D91A033DA13EE41285732E82F929EF34E1B2FB3630",
         fullDenomPath: "transfer/channel-293/uni-wei",
         tokenAddress: "uni-wei",
       },
       osmosis: {
         assetSymbol: "axlUNI",
         assetName: "axlUNI",
-        minDepositAmt: 0.09,
-        ibcDenom:
-          "ibc/AE2719773D6FCDD05AC17B1ED63F672F5F9D84144A61965F348C86C2A83AD161",
+        minDepositAmt: 0.1,
+        ibcDenom: "ibc/AE2719773D6FCDD05AC17B1ED63F672F5F9D84144A61965F348C86C2A83AD161",
         fullDenomPath: "transfer/channel-208/uni-wei",
         tokenAddress: "uni-wei",
       },
       juno: {
         assetSymbol: "axlUNI",
         assetName: "axlUNI",
-        minDepositAmt: 0.09,
-        ibcDenom:
-          "ibc/0313AD311FA169EC5A130DB2EF0840CBA4B300ADB6B85A79FBA952FBD3E7B107",
+        minDepositAmt: 0.1,
+        ibcDenom: "ibc/0313AD311FA169EC5A130DB2EF0840CBA4B300ADB6B85A79FBA952FBD3E7B107",
         fullDenomPath: "transfer/channel-71/uni-wei",
         tokenAddress: "uni-wei",
       },
       crescent: {
         assetSymbol: "axlUNI",
         assetName: "axlUNI",
-        minDepositAmt: 0.09,
-        ibcDenom:
-          "ibc/392F7936508B675F7F794504F4829D6F459C0E7488EDE6B2C4E9192037E3F03F",
+        minDepositAmt: 0.1,
+        ibcDenom: "ibc/392F7936508B675F7F794504F4829D6F459C0E7488EDE6B2C4E9192037E3F03F",
         fullDenomPath: "transfer/channel-4/uni-wei",
         tokenAddress: "uni-wei",
       },
       terra: {
         assetSymbol: "axlUNI",
         assetName: "axlUNI",
-        minDepositAmt: 0.09,
-        ibcDenom:
-          "ibc/6EFF21F9E65C9101370C38AA53049E4D1FF2B206A7C350B45F0ED3660E57AC75",
+        minDepositAmt: 0.1,
+        ibcDenom: "ibc/6EFF21F9E65C9101370C38AA53049E4D1FF2B206A7C350B45F0ED3660E57AC75",
         fullDenomPath: "transfer/channel-6/uni-wei",
         tokenAddress: "uni-wei",
       },
@@ -1606,7 +1516,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "SHIB",
         assetName: "SHIB",
-        minDepositAmt: 40000,
+        minDepositAmt: 50000,
         ibcDenom: "shib-wei",
         fullDenomPath: "shib-wei",
         tokenAddress: "shib-wei",
@@ -1614,7 +1524,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "SHIB",
         assetName: "SHIB",
-        minDepositAmt: 1000000,
+        minDepositAmt: 2000000,
         ibcDenom: "shib-wei",
         fullDenomPath: "shib-wei",
         tokenAddress: "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
@@ -1622,45 +1532,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlSHIB",
         assetName: "axlSHIB",
-        minDepositAmt: 40000,
-        ibcDenom:
-          "ibc/30A1266CA3CEC8347C2FB57E70041A484FD14BE06A089DBAFCD8F7FE8F2D36B3",
+        minDepositAmt: 50000,
+        ibcDenom: "ibc/30A1266CA3CEC8347C2FB57E70041A484FD14BE06A089DBAFCD8F7FE8F2D36B3",
         fullDenomPath: "transfer/channel-293/shib-wei",
         tokenAddress: "shib-wei",
       },
       osmosis: {
         assetSymbol: "axlSHIB",
         assetName: "axlSHIB",
-        minDepositAmt: 40000,
-        ibcDenom:
-          "ibc/19305E20681911F14D1FB275E538CDE524C3BF88CF9AE5D5F78F4D4DA05E85B2",
+        minDepositAmt: 50000,
+        ibcDenom: "ibc/19305E20681911F14D1FB275E538CDE524C3BF88CF9AE5D5F78F4D4DA05E85B2",
         fullDenomPath: "transfer/channel-208/shib-wei",
         tokenAddress: "shib-wei",
       },
       juno: {
         assetSymbol: "axlSHIB",
         assetName: "axlSHIB",
-        minDepositAmt: 40000,
-        ibcDenom:
-          "ibc/D66D0A82177FF29CBB8A83705C26C28D45A14678579E350B10493D359ECFD851",
+        minDepositAmt: 50000,
+        ibcDenom: "ibc/D66D0A82177FF29CBB8A83705C26C28D45A14678579E350B10493D359ECFD851",
         fullDenomPath: "transfer/channel-71/shib-wei",
         tokenAddress: "shib-wei",
       },
       crescent: {
         assetSymbol: "axlSHIB",
         assetName: "axlSHIB",
-        minDepositAmt: 40000,
-        ibcDenom:
-          "ibc/D1F6A3A1A3C2E25A7039B4537E8D1B08490B6A3F57D758AB8C08AA512CE3E51A",
+        minDepositAmt: 50000,
+        ibcDenom: "ibc/D1F6A3A1A3C2E25A7039B4537E8D1B08490B6A3F57D758AB8C08AA512CE3E51A",
         fullDenomPath: "transfer/channel-4/shib-wei",
         tokenAddress: "shib-wei",
       },
       terra: {
         assetSymbol: "axlSHIB",
         assetName: "axlSHIB",
-        minDepositAmt: 40000,
-        ibcDenom:
-          "ibc/62CC85ED0F0C43C453B1A059BF5A147498550C2A7ADDEE6324A0B4E9E371C9C7",
+        minDepositAmt: 50000,
+        ibcDenom: "ibc/62CC85ED0F0C43C453B1A059BF5A147498550C2A7ADDEE6324A0B4E9E371C9C7",
         fullDenomPath: "transfer/channel-6/shib-wei",
         tokenAddress: "shib-wei",
       },
@@ -1679,7 +1584,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "AXS",
         assetName: "AXS",
-        minDepositAmt: 0.02,
+        minDepositAmt: 0.03,
         ibcDenom: "axs-wei",
         fullDenomPath: "axs-wei",
         tokenAddress: "axs-wei",
@@ -1687,7 +1592,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "AXS",
         assetName: "AXS",
-        minDepositAmt: 0.8,
+        minDepositAmt: 1,
         ibcDenom: "axs-wei",
         fullDenomPath: "axs-wei",
         tokenAddress: "0xBB0E17EF65F82Ab018d8EDd776e8DD940327B28b",
@@ -1695,45 +1600,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlAXS",
         assetName: "axlAXS",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/C1B7AD237AAD68A93186F08FFA5DA687F80B05618217E6E36847B7E85D92B55A",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/C1B7AD237AAD68A93186F08FFA5DA687F80B05618217E6E36847B7E85D92B55A",
         fullDenomPath: "transfer/channel-293/axs-wei",
         tokenAddress: "axs-wei",
       },
       osmosis: {
         assetSymbol: "axlAXS",
         assetName: "axlAXS",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/6C0CB8653012DC2BC1820FD0B6B3AFF8A07D18630BDAEE066FEFB2D92F477C24",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/6C0CB8653012DC2BC1820FD0B6B3AFF8A07D18630BDAEE066FEFB2D92F477C24",
         fullDenomPath: "transfer/channel-208/axs-wei",
         tokenAddress: "axs-wei",
       },
       juno: {
         assetSymbol: "axlAXS",
         assetName: "axlAXS",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/424DD4BE67F6ADD52BA9A810B0B4157694A962B96BC676E4A22EB1E50679677F",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/424DD4BE67F6ADD52BA9A810B0B4157694A962B96BC676E4A22EB1E50679677F",
         fullDenomPath: "transfer/channel-71/axs-wei",
         tokenAddress: "axs-wei",
       },
       crescent: {
         assetSymbol: "axlAXS",
         assetName: "axlAXS",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/D34DC22F291BC5E508968530D0E5DA46A694C1515FA940533858CB9470E8A846",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/D34DC22F291BC5E508968530D0E5DA46A694C1515FA940533858CB9470E8A846",
         fullDenomPath: "transfer/channel-4/axs-wei",
         tokenAddress: "axs-wei",
       },
       terra: {
         assetSymbol: "axlAXS",
         assetName: "axlAXS",
-        minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/2C6CDA86FA7F45A39C053584422C5B76C287DB9E3746CAF623C3EC7717D4EC5B",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/2C6CDA86FA7F45A39C053584422C5B76C287DB9E3746CAF623C3EC7717D4EC5B",
         fullDenomPath: "transfer/channel-6/axs-wei",
         tokenAddress: "axs-wei",
       },
@@ -1752,7 +1652,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "XCN",
         assetName: "XCN",
-        minDepositAmt: 3,
+        minDepositAmt: 6,
         ibcDenom: "xcn-wei",
         fullDenomPath: "xcn-wei",
         tokenAddress: "xcn-wei",
@@ -1760,7 +1660,7 @@ export const mainnet = {
       ethereum: {
         assetSymbol: "XCN",
         assetName: "XCN",
-        minDepositAmt: 100,
+        minDepositAmt: 200,
         ibcDenom: "xcn-wei",
         fullDenomPath: "xcn-wei",
         tokenAddress: "0xA2cd3D43c775978A96BdBf12d733D5A1ED94fb18",
@@ -1768,45 +1668,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlXCN",
         assetName: "axlXCN",
-        minDepositAmt: 3,
-        ibcDenom:
-          "ibc/C8E482E1095EB99EB30B4717DE2DA94997D0582B7A2F6A699A2CA288CA845C03",
+        minDepositAmt: 6,
+        ibcDenom: "ibc/C8E482E1095EB99EB30B4717DE2DA94997D0582B7A2F6A699A2CA288CA845C03",
         fullDenomPath: "transfer/channel-293/xcn-wei",
         tokenAddress: "xcn-wei",
       },
       osmosis: {
         assetSymbol: "axlXCN",
         assetName: "axlXCN",
-        minDepositAmt: 3,
-        ibcDenom:
-          "ibc/B901BEC1B71D0573E6EE874FEC39E2DF4C2BDB1DB74CB3DA0A9CACC4A435B0EC",
+        minDepositAmt: 6,
+        ibcDenom: "ibc/B901BEC1B71D0573E6EE874FEC39E2DF4C2BDB1DB74CB3DA0A9CACC4A435B0EC",
         fullDenomPath: "transfer/channel-208/xcn-wei",
         tokenAddress: "xcn-wei",
       },
       juno: {
         assetSymbol: "axlXCN",
         assetName: "axlXCN",
-        minDepositAmt: 3,
-        ibcDenom:
-          "ibc/30B50C044D1074F0DC1916D9DA79B9F26434632609C3ED0158E22A5D40890D81",
+        minDepositAmt: 6,
+        ibcDenom: "ibc/30B50C044D1074F0DC1916D9DA79B9F26434632609C3ED0158E22A5D40890D81",
         fullDenomPath: "transfer/channel-71/xcn-wei",
         tokenAddress: "xcn-wei",
       },
       crescent: {
         assetSymbol: "axlXCN",
         assetName: "axlXCN",
-        minDepositAmt: 3,
-        ibcDenom:
-          "ibc/40EDD0D8ECA8053AAEA9FCE600817E701F9BD7DB429DF99CD3C49B12F691DB03",
+        minDepositAmt: 6,
+        ibcDenom: "ibc/40EDD0D8ECA8053AAEA9FCE600817E701F9BD7DB429DF99CD3C49B12F691DB03",
         fullDenomPath: "transfer/channel-4/xcn-wei",
         tokenAddress: "xcn-wei",
       },
       terra: {
         assetSymbol: "axlXCN",
         assetName: "axlXCN",
-        minDepositAmt: 3,
-        ibcDenom:
-          "ibc/C22747737204871040AE896E7CA7791CF541AC269BF1D521870891E67AC83DA4",
+        minDepositAmt: 6,
+        ibcDenom: "ibc/C22747737204871040AE896E7CA7791CF541AC269BF1D521870891E67AC83DA4",
         fullDenomPath: "transfer/channel-6/xcn-wei",
         tokenAddress: "xcn-wei",
       },
@@ -1825,7 +1720,7 @@ export const mainnet = {
       axelar: {
         assetSymbol: "MKR",
         assetName: "MKR",
-        minDepositAmt: 0.0004,
+        minDepositAmt: 0.0005,
         ibcDenom: "mkr-wei",
         fullDenomPath: "mkr-wei",
         tokenAddress: "mkr-wei",
@@ -1841,45 +1736,40 @@ export const mainnet = {
       cosmoshub: {
         assetSymbol: "axlMKR",
         assetName: "axlMKR",
-        minDepositAmt: 0.0004,
-        ibcDenom:
-          "ibc/61AC3A1AED345729B29DA6EC644431B70C1EEA3FFE95DAF2ED241F84EEA37638",
+        minDepositAmt: 0.0005,
+        ibcDenom: "ibc/61AC3A1AED345729B29DA6EC644431B70C1EEA3FFE95DAF2ED241F84EEA37638",
         fullDenomPath: "transfer/channel-293/mkr-wei",
         tokenAddress: "mkr-wei",
       },
       osmosis: {
         assetSymbol: "axlMKR",
         assetName: "axlMKR",
-        minDepositAmt: 0.0004,
-        ibcDenom:
-          "ibc/D27DDDF34BB47E5D5A570742CC667DE53277867116CCCA341F27785E899A70F3",
+        minDepositAmt: 0.0005,
+        ibcDenom: "ibc/D27DDDF34BB47E5D5A570742CC667DE53277867116CCCA341F27785E899A70F3",
         fullDenomPath: "transfer/channel-208/mkr-wei",
         tokenAddress: "mkr-wei",
       },
       juno: {
         assetSymbol: "axlMKR",
         assetName: "axlMKR",
-        minDepositAmt: 0.0004,
-        ibcDenom:
-          "ibc/4A59932EAD8A140F66554E8E2B5CB80DCA5314A75A889F0AA2E648D96B69847F",
+        minDepositAmt: 0.0005,
+        ibcDenom: "ibc/4A59932EAD8A140F66554E8E2B5CB80DCA5314A75A889F0AA2E648D96B69847F",
         fullDenomPath: "transfer/channel-71/mkr-wei",
         tokenAddress: "mkr-wei",
       },
       crescent: {
         assetSymbol: "axlMKR",
         assetName: "axlMKR",
-        minDepositAmt: 0.0004,
-        ibcDenom:
-          "ibc/1E8149AC74041CF61448A57858887B2D2C221B9B194509120BD3AD6E4278AAB0",
+        minDepositAmt: 0.0005,
+        ibcDenom: "ibc/1E8149AC74041CF61448A57858887B2D2C221B9B194509120BD3AD6E4278AAB0",
         fullDenomPath: "transfer/channel-4/mkr-wei",
         tokenAddress: "mkr-wei",
       },
       terra: {
         assetSymbol: "axlMKR",
         assetName: "axlMKR",
-        minDepositAmt: 0.0004,
-        ibcDenom:
-          "ibc/EF21BC562B7EB4D22BBF467D011E3118B7E3AD6D095000A672A9FCECA5ABCF15",
+        minDepositAmt: 0.0005,
+        ibcDenom: "ibc/EF21BC562B7EB4D22BBF467D011E3118B7E3AD6D095000A672A9FCECA5ABCF15",
         fullDenomPath: "transfer/channel-6/mkr-wei",
         tokenAddress: "mkr-wei",
       },

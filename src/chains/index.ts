@@ -15,6 +15,9 @@ import { Chain, LoadChainConfig } from "./types";
 import { cloneDeep } from "lodash";
 import Crescent from "./Crescent";
 import EMoney from "./EMoney";
+import Binance from "./Binance";
+import Kujira from "./Kujira";
+import Sei from "./Sei";
 
 export function loadChains(config: LoadChainConfig) {
   const allAssets = loadAssets(config);
@@ -23,6 +26,7 @@ export function loadChains(config: LoadChainConfig) {
   const rawChains: Chain[] = [
     new Axelar(),
     new Avalanche(),
+    new Binance(),
     new Cosmoshub(),
     new Crescent(),
     new Ethereum(),
@@ -30,9 +34,11 @@ export function loadChains(config: LoadChainConfig) {
     new Fantom(),
     new Injective(),
     new Juno(),
+    new Kujira(),
     new Moonbeam(),
     new Osmosis(),
     new Polygon(),
+    new Sei(),
     new Terra(),
   ];
 
