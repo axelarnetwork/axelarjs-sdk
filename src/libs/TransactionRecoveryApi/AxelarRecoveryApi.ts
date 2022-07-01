@@ -11,26 +11,27 @@ import { rpcMap } from "./constants/chain";
 import { BigNumber } from "ethers";
 
 export enum GMPStatus {
-  CALL = "call",
-  APPROVED = "approved",
-  EXECUTED = "executed",
-  ERROR = "error",
-  GAS_UNPAID = "gas_unpaid",
+  SRC_GATEWAY_CALLED = "source_gateway_called",
+  DEST_GATEWAY_APPROVED = "destination_gateway_approved",
+  DEST_EXECUTED = "destination_executed",
+  DEST_ERROR = "error",
+  ERROR_FETCHING_STATUS = "error_fetching_status"
 }
+export enum GasPaidStatus {
+  GAS_UNPAID = "gas_unpaid",
+  GAS_PAID = "gas_paid",
+  GAS_PAID_NOT_ENOUGH_GAS = "gas_paid_not_enough_gas",
+  GAS_PAID_ENOUGH_GAS = "gas_paid_enough_gas",
 
-export interface GMPStatusDetails {
-  srcGatewayCalled: boolean;
-  destGatewayApproved: boolean;
-  destExecuted: boolean;
-  destAppError?: string;
-  gasPaidInfo: GasPaidInfo;
 }
 export interface GasPaidInfo {
-  status: "gas_unpaid" | "gas_paid" | "gas_paid_not_enough_gas" | "gas_paid_enough_gas";
+  status: GasPaidStatus;
   details?: any;
 }
 export interface GMPStatusResponse {
-  status: GMPStatusDetails | "error_fetching_status";
+  status: GMPStatus;
+  gasPaidInfo?: GasPaidInfo;
+  errors?: any;
   call_data?: any;
 }
 
@@ -71,34 +72,37 @@ export class AxelarRecoveryApi {
   }
 
   public async queryTransactionStatus(txHash: string): Promise<GMPStatusResponse> {
+    let isError = false;
+    let status = GMPStatus.ERROR_FETCHING_STATUS;
 
     const txDetails = await this.execGet(this.axelarCachingServiceUrl, {
       method: "searchGMP",
       txHash,
-    }).then(res => res[0]);
+    })
+      .then((res) => res[0])
+      .catch((e) => {
+        isError = true;
+      });
 
-    if (!txDetails) return { status: "error_fetching_status" }
+    if (!txDetails || isError) return { status };
 
     const { approved, call, gas_status, gas_paid, is_executed, error } = txDetails;
 
     const gasPaidInfo: GasPaidInfo = {
       status: gas_status,
-      details: gas_paid
+      details: gas_paid,
     };
 
-    const gmpStatusDetails: GMPStatusDetails = {
-      srcGatewayCalled: !!call,
-      destGatewayApproved: !!approved,
-      destExecuted: is_executed,
-      destAppError: error,
-      gasPaidInfo
-    }
+    if (is_executed) status = GMPStatus.DEST_EXECUTED
+    else if (approved) status = GMPStatus.DEST_GATEWAY_APPROVED
+    else if (call) status = GMPStatus.SRC_GATEWAY_CALLED
 
     return {
-      status: gmpStatusDetails,
-      call_data: txDetails[0]?.call
-    }
-
+      status,
+      errors: error,
+      gasPaidInfo,
+      call_data: call,
+    };
   }
 
   public async queryExecuteParams(txHash: string): Promise<Nullable<ExecuteParamsResponse>> {
@@ -114,7 +118,7 @@ export class AxelarRecoveryApi {
     const approvalTx = data.approved;
     if (!approvalTx?.transactionHash) {
       return {
-        status: GMPStatus.CALL,
+        status: GMPStatus.SRC_GATEWAY_CALLED,
       };
     }
 
@@ -122,13 +126,13 @@ export class AxelarRecoveryApi {
     const executeTx = data.executed;
     if (executeTx?.transactionHash) {
       return {
-        status: GMPStatus.EXECUTED,
+        status: GMPStatus.DEST_EXECUTED,
       };
     }
     const callTx = data.call;
 
     return {
-      status: GMPStatus.APPROVED,
+      status: GMPStatus.DEST_GATEWAY_APPROVED,
       data: {
         commandId: approvalTx.returnValues.commandId,
         destinationChain: approvalTx.chain.toLowerCase() as EvmChain,

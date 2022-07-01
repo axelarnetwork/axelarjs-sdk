@@ -102,9 +102,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * @returns Promise<boolean> - true if transaction is already executed
    */
   public async isExecuted(txHash: string): Promise<boolean> {
-    const txStatus: GMPStatusResponse = await this.queryTransactionStatus(txHash);
-    const { status } = txStatus;
-    return status !== "error_fetching_status" && status.destExecuted;
+    const txStatus: GMPStatusResponse | undefined = await this.queryTransactionStatus(txHash).catch(() => undefined);
+    return txStatus?.status === GMPStatus.DEST_EXECUTED;
   }
 
   /**
@@ -303,9 +302,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     // Couldn't query the transaction details
     if (!response) return GMPQueryError();
     // Already executed
-    if (response?.status === GMPStatus.EXECUTED) return AlreadyExecutedError();
+    if (response?.status === GMPStatus.DEST_EXECUTED) return AlreadyExecutedError();
     // Not Approved yet
-    if (response?.status !== GMPStatus.APPROVED) return NotApprovedError();
+    if (response?.status !== GMPStatus.DEST_GATEWAY_APPROVED) return NotApprovedError();
 
     const executeParams = response.data as ExecuteParams;
     const { destinationChain, destinationContractAddress } = executeParams;

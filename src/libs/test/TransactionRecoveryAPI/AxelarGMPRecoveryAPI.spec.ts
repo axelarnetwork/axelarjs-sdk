@@ -766,7 +766,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
     test("it shouldn't call 'execute' given tx is already executed", async () => {
       const mockApi = jest.spyOn(api, "queryExecuteParams");
-      mockApi.mockResolvedValueOnce({ status: GMPStatus.EXECUTED });
+      mockApi.mockResolvedValueOnce({ status: GMPStatus.DEST_EXECUTED });
 
       const response = await api.execute(
         "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
@@ -778,7 +778,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
     test("it shouldn't call 'execute' given tx has not approved yet", async () => {
       const mockApi = jest.spyOn(api, "queryExecuteParams");
-      mockApi.mockResolvedValueOnce({ status: GMPStatus.CALL });
+      mockApi.mockResolvedValueOnce({ status: GMPStatus.SRC_GATEWAY_CALLED });
 
       const response = await api.execute(
         "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
@@ -804,7 +804,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       // mock query api
       const mockApi = jest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce({
-        status: GMPStatus.APPROVED,
+        status: GMPStatus.DEST_GATEWAY_APPROVED,
         data: executeParamsStub(),
       });
 
@@ -832,7 +832,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       // mock query api
       const mockApi = jest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce({
-        status: GMPStatus.APPROVED,
+        status: GMPStatus.DEST_GATEWAY_APPROVED,
         data: executeParamsStub(),
       });
 

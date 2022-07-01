@@ -4,6 +4,14 @@ import { asyncRetry, sleep } from "../../../utils";
 import { AxelarGMPRecoveryAPI } from "../AxelarGMPRecoveryAPI";
 import { GMPStatus, GMPStatusResponse } from "../AxelarRecoveryApi";
 
+enum AxelarGMPRecoveryProcessorResponse {
+  TRIGGERED_RELAY = "triggered relay",
+  APPROVED_BUT_NOT_EXECUTED = "approved but not executed",
+  ALREADY_EXECUTED = "already executed",
+  ERROR_FETCHING_STATUS = "error fetching status",
+  ERROR_INVOKING_RECOVERY = "eror invoking recovery"
+}
+
 export default class AxelarGMPRecoveryProcessor {
   constructor(private recoveryAPI: AxelarGMPRecoveryAPI) {}
   public async process(params: {
@@ -11,14 +19,14 @@ export default class AxelarGMPRecoveryProcessor {
     src: EvmChain;
     dest: EvmChain;
     debug?: boolean;
-  }): Promise<"triggered relay" | "approved but not executed" | "already executed" | "error_fetching_status"> {
+  }): Promise<AxelarGMPRecoveryProcessorResponse> {
     const { txHash, src, dest, debug } = params;
 
     const res: GMPStatusResponse = await this.recoveryAPI.queryTransactionStatus(txHash);
 
-    if (res.status === "error_fetching_status") return res.status;
-    if (res.status.destExecuted) return "already executed";
-    if (res.status.destGatewayApproved) return "approved but not executed";
+    if (!res || res.status === GMPStatus.ERROR_FETCHING_STATUS) return AxelarGMPRecoveryProcessorResponse.ERROR_FETCHING_STATUS;
+    if (res.status === GMPStatus.DEST_EXECUTED) return AxelarGMPRecoveryProcessorResponse.ALREADY_EXECUTED;
+    if (res.status === GMPStatus.DEST_GATEWAY_APPROVED) return AxelarGMPRecoveryProcessorResponse.APPROVED_BUT_NOT_EXECUTED;
 
     try {
       const confirmTx = await this.recoveryAPI.confirmGatewayTx({ txHash, chain: src });
@@ -47,10 +55,10 @@ export default class AxelarGMPRecoveryProcessor {
       const broadcasted = await this.recoveryAPI.sendEvmTxToRelayer(dest, batched.executeData);
       if (debug) console.log("broadcastedMsg", broadcasted);
 
-      return "triggered relay";
+      return AxelarGMPRecoveryProcessorResponse.TRIGGERED_RELAY;
     } catch (e) {
-      console.log(e);
-      return e;
+      console.error(e);
+      return AxelarGMPRecoveryProcessorResponse.ERROR_INVOKING_RECOVERY;
     }
   }
 }
