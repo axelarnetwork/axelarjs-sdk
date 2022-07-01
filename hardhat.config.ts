@@ -1,5 +1,4 @@
-import "@nomiclabs/hardhat-ethers";
-module.exports = {
+export default {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {},
