@@ -4,25 +4,25 @@
 
 Run linter using https://github.com/wearerequired/lint-action
 
-Trigger events: `push to a pull request branch`
+**Trigger events**: `push to a pull request branch`
 
-Effect: Reports lint result in the pull request
+**Effect**: Reports lint result in the pull request
 
 ## Test
 
 Run tests
 
-Trigger events: `push to a pull request branch`
+**Trigger events**: `push to a pull request branch`
 
-Effect: Reports test result in the pull request
+**Effect**: Reports test result in the pull request
 
 ## Release
 
 Bump version and publish to npm.
 
-Trigger events: `push to main`, `merge a pull request to main`
+**Trigger events**: `push to main`, `merge a pull request to main`
 
-Effect: Bump the version based on the commit message -> commit and push updated version in `package.json` -> add tag -> publish to npm
+**Effect**: Bump the version based on the commit message -> commit and push updated version in `package.json` -> add tag -> publish to npm
 
 | Keyword       | Action                                                                            | Example version changes                                |
 | ------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -37,6 +37,6 @@ Note that we may not want to increase major version soon, so the keyword to do t
 
 Bump alpha version in specified branch and publish it to npm
 
-Trigger events: Manually trigger in [Actions](https://github.com/axelarnetwork/axelarjs-sdk/actions).
+**Trigger events**: Manually trigger in [Actions](https://github.com/axelarnetwork/axelarjs-sdk/actions).
 
-Effect: Bump the alpha version -> commit and push updated version in `package.json` -> publish to npm
+**Effect**: Bump the alpha version -> commit and push updated version in `package.json` -> publish to npm
