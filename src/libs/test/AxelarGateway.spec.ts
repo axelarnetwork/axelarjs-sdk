@@ -2,7 +2,7 @@ import hre, { ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import { Contract, Signer } from "ethers";
 import { AxelarGateway } from "../AxelarGateway";
-import { Environment, EvmChain } from "../types";
+import { EvmChain } from "../types";
 import { GatewayTx } from "../GatewayTx";
 
 // Deploying contract takes longer than jest's default value (5s)

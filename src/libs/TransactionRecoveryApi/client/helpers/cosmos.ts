@@ -1,6 +1,6 @@
 import { HttpClient } from "@cosmjs/tendermint-rpc";
 import { DeliverTxResponse, StargateClient } from "@cosmjs/stargate";
-import { fromBase64, toHex } from "@cosmjs/encoding";
+import { fromBase64 } from "@cosmjs/encoding";
 
 export function createRPCClient(rpcUrl: string) {
   return new HttpClient(rpcUrl);
@@ -11,7 +11,7 @@ export async function broadcastCosmosTx(
   rpcUrl: string
 ): Promise<DeliverTxResponse> {
   const txBytes = fromBase64(base64Tx);
-  console.log(txBytes)
+  console.log(txBytes);
   const cosmjs = await StargateClient.connect(rpcUrl);
   return await cosmjs.broadcastTx(txBytes);
 }

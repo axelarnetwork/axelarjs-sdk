@@ -1,4 +1,3 @@
-import { AssetInfo } from "../../assets/types";
 import { Chain, ChainInfo } from "../types";
 import { bech32 } from "bech32";
 import Axelar from "../Axelar";
@@ -18,7 +17,6 @@ export default class Crescent extends Axelar implements Chain {
       mainnet: "crescent",
     },
   };
-
 
   public validateAddress = (address: string): boolean => {
     if (!address) return false;
