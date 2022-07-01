@@ -10,7 +10,7 @@ import {
   TxResult,
   QueryGasFeeOptions,
 } from "../types";
-import { AxelarRecoveryApi, ExecuteParams, GMPStatus } from "./AxelarRecoveryApi";
+import { AxelarRecoveryApi, ExecuteParams, GMPStatus, GMPStatusResponse } from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import AxelarGMPRecoveryProcessor from "./processors";
@@ -102,8 +102,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * @returns Promise<boolean> - true if transaction is already executed
    */
   public async isExecuted(txHash: string): Promise<boolean> {
-    const txStatus = await this.queryTransactionStatus(txHash).catch(() => undefined);
-    return txStatus?.status === GMPStatus.EXECUTED;
+    const txStatus: GMPStatusResponse | undefined = await this.queryTransactionStatus(txHash).catch(() => undefined);
+    return txStatus?.status === GMPStatus.DEST_EXECUTED;
   }
 
   /**
@@ -302,9 +302,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     // Couldn't query the transaction details
     if (!response) return GMPQueryError();
     // Already executed
-    if (response?.status === GMPStatus.EXECUTED) return AlreadyExecutedError();
+    if (response?.status === GMPStatus.DEST_EXECUTED) return AlreadyExecutedError();
     // Not Approved yet
-    if (response?.status !== GMPStatus.APPROVED) return NotApprovedError();
+    if (response?.status !== GMPStatus.DEST_GATEWAY_APPROVED) return NotApprovedError();
 
     const executeParams = response.data as ExecuteParams;
     const { destinationChain, destinationContractAddress } = executeParams;
