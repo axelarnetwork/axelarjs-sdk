@@ -1,3 +1,5 @@
+import { Environment } from "src/libs";
+
 export interface AssetInfo {
   assetSymbol?: string;
   assetName?: string;
@@ -25,5 +27,5 @@ export interface AssetConfig {
 }
 
 export type LoadAssetConfig = {
-  environment: string | undefined;
+  environment: Environment;
 };
