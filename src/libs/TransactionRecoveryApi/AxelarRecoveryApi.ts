@@ -32,7 +32,7 @@ export interface GMPStatusResponse {
   status: GMPStatus;
   gasPaidInfo?: GasPaidInfo;
   errors?: any;
-  call_data?: any;
+  callData?: any;
 }
 
 export interface ExecuteParams {
@@ -101,7 +101,7 @@ export class AxelarRecoveryApi {
       status,
       errors: error,
       gasPaidInfo,
-      call_data: call,
+      callData: call,
     };
   }
 
