@@ -1,5 +1,5 @@
 import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
-import { EvmChain } from "src/libs/types";
+import { EvmChain } from "../../types";
 import { asyncRetry, sleep } from "../../../utils";
 import { AxelarGMPRecoveryAPI } from "../AxelarGMPRecoveryAPI";
 import { GMPStatus, GMPStatusResponse } from "../AxelarRecoveryApi";

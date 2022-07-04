@@ -1,3 +1,4 @@
+import { Environment } from "../../libs";
 import { AssetInfo } from "../../assets/types";
 
 import { SourceOrDestination } from "../../services/types";
@@ -82,5 +83,5 @@ export interface SocketListenerTopic {
 }
 
 export type LoadChainConfig = {
-  environment: string | undefined;
+  environment: Environment;
 };

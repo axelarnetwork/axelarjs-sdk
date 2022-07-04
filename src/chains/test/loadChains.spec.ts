@@ -1,3 +1,4 @@
+import { Environment } from "../../libs";
 import { loadChains } from "..";
 
 const mock = {
@@ -13,12 +14,12 @@ describe("loadChains()", () => {
   describe("when loadChains is called with known env, but not mainnet", () => {
     beforeEach(() => {
       mock.loadChains({
-        environment: "testnet",
+        environment: Environment.TESTNET,
       });
     });
 
     test("then it should call loadChains", () => {
-      expect(mock.loadChains).toHaveBeenCalledWith({ environment: "testnet" });
+      expect(mock.loadChains).toHaveBeenCalledWith({ environment: Environment.TESTNET });
     });
 
     test("then it should return assets", () => {
@@ -29,7 +30,7 @@ describe("loadChains()", () => {
   describe("when loadChains is called with mainnet", () => {
     beforeEach(() => {
       mock.loadChains({
-        environment: "mainnet",
+        environment: Environment.MAINNET,
       });
     });
 
@@ -39,56 +40,6 @@ describe("loadChains()", () => {
 
     test("then it should return assets", () => {
       expect(mock.loadChains).toHaveReturned();
-    });
-  });
-
-  describe("when loadChains is called with unknown envs", () => {
-    let error: Error;
-
-    beforeEach(() => {
-      try {
-        mock.loadChains({
-          environment: "axelar",
-        });
-      } catch (_error: any) {
-        error = _error;
-      }
-    });
-
-    test("then it should call loadChains", () => {
-      expect(mock.loadChains).toHaveBeenCalledWith({ environment: "axelar" });
-    });
-
-    test("then it should return assets", () => {
-      expect(error.name).toBe("Environment not allowed");
-      expect(error.message).toBe(
-        "Provided environment axelar not in local|devnet|testnet|mainnet"
-      );
-    });
-  });
-
-  describe("when loadChains is called with empty env", () => {
-    let error: Error;
-
-    beforeEach(() => {
-      try {
-        mock.loadChains({
-          environment: "",
-        });
-      } catch (_error: any) {
-        error = _error;
-      }
-    });
-
-    test("then it should call loadChains", () => {
-      expect(mock.loadChains).toHaveBeenCalledWith({ environment: "" });
-    });
-
-    test("then it should return assets", () => {
-      expect(error.name).toBe("Environment not allowed");
-      expect(error.message).toBe(
-        "Provided environment undefined not in local|devnet|testnet|mainnet"
-      );
     });
   });
 });

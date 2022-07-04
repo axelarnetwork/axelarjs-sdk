@@ -1,4 +1,4 @@
-import { Environment } from "src/libs";
+import { Environment } from "../../libs";
 
 export interface AssetInfo {
   assetSymbol?: string;

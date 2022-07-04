@@ -35,7 +35,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     jest.clearAllMocks();
   });
 
-  describe("confirmGatewayTx", () => {
+  xdescribe("confirmGatewayTx", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     test("It should confirm a gateway tx", async () => {
@@ -44,7 +44,6 @@ describe("AxelarDepositRecoveryAPI", () => {
         chain: "Avalanche",
       };
       const confirmation = await api.confirmGatewayTx(testParamsAxelarnet);
-      console.log("confirmation", confirmation);
       expect(confirmation).toBeTruthy();
     }, 60000);
   });

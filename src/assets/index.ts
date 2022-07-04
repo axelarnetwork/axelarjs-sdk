@@ -2,7 +2,7 @@ import { AssetConfig, LoadAssetConfig } from "./types";
 import { mainnet } from "./mainnet.assets";
 import { testnet } from "./testnet.assets";
 import { devnet } from "./devnet.assets";
-import { Environment } from "src/libs";
+import { Environment } from "../libs";
 
 const assetMap: Record<Environment, any> = { devnet, testnet, mainnet };
 

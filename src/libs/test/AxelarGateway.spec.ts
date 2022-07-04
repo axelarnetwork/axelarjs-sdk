@@ -1,12 +1,12 @@
-import hre, { ethers } from "hardhat";
-import "@nomiclabs/hardhat-ethers";
+import { ethers } from "ethers";
 import { Contract, Signer } from "ethers";
 import { AxelarGateway } from "../AxelarGateway";
 import { EvmChain } from "../types";
 import { GatewayTx } from "../GatewayTx";
+import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
 
-// Deploying contract takes longer than jest's default value (5s)
-jest.setTimeout(30000);
+const { setLogger } = utils;
+setLogger(() => null);
 
 describe("AxelarGateway", () => {
   const MOCK_DESTINATION_CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -15,20 +15,19 @@ describe("AxelarGateway", () => {
   let erc20Contract: Contract;
   let axelarGateway: AxelarGateway;
   let signer: Signer;
+  const chain = EvmChain.AVALANCHE;
 
   beforeAll(async () => {
-    const AxelarGatewayContract = await hre.ethers.getContractFactory("MinimalAxelarGateway");
-    const ERC20Contract = await hre.ethers.getContractFactory("ERC20");
-
-    gatewayContract = await AxelarGatewayContract.deploy();
-    erc20Contract = await ERC20Contract.deploy("Panty", "PNT");
-
-    await gatewayContract.deployed();
-    await erc20Contract.deployed();
-
-    axelarGateway = new AxelarGateway(gatewayContract.address, ethers.provider);
-
-    signer = await hre.ethers.getSigners().then((signers) => signers[0]);
+    const network = await createNetwork({ name: chain });
+    signer = network.ownerWallet;
+    gatewayContract = network.gateway.connect(signer);
+    erc20Contract = network.usdc.connect(signer);
+    axelarGateway = new AxelarGateway(gatewayContract.address, network.provider);
+    await network.giveToken(
+      await signer.getAddress(),
+      await erc20Contract.symbol(),
+      BigInt("10000000")
+    );
   });
 
   it("should call `createCallContractTx` function without revert and `CallContract` event is emitted correctly", async () => {
@@ -55,18 +54,25 @@ describe("AxelarGateway", () => {
     expect(eventLogs).toEqual([
       eventId,
       ethers.utils.hexZeroPad(signerAddress, 32),
-      ethers.utils.id(EvmChain.AVALANCHE),
       hashedBytesPayload,
     ]);
   });
 
   it("should call `createCallContractWithTokenTx` function without revert and `CallContractWithToken` event is emitted correctly", async () => {
     const bytesPayload = ethers.utils.formatBytes32String("test");
+    const symbol = await erc20Contract.symbol();
+
+    await axelarGateway
+      .createApproveTx({
+        tokenAddress: erc20Contract.address,
+        amount: "1",
+      })
+      .then((tx) => tx.send(signer));
     const gatewayTx = await axelarGateway.createCallContractWithTokenTx({
       destinationContractAddress: MOCK_DESTINATION_CONTRACT_ADDRESS,
-      destinationChain: EvmChain.AVALANCHE,
+      destinationChain: EvmChain.MOONBEAM,
       payload: bytesPayload,
-      symbol: "PNT",
+      symbol: symbol,
       amount: "1",
     });
 
@@ -78,7 +84,7 @@ describe("AxelarGateway", () => {
 
     expect(receipt.transactionHash).toBeDefined();
 
-    const eventLogs = receipt.logs[0].topics;
+    const eventLogs = receipt.logs.slice(-1)[0].topics;
     const signerAddress = await signer.getAddress().then((address) => address.toLowerCase());
 
     const eventId = ethers.utils.id(
@@ -89,17 +95,23 @@ describe("AxelarGateway", () => {
     expect(eventLogs).toEqual([
       eventId,
       ethers.utils.hexZeroPad(signerAddress, 32),
-      ethers.utils.id(EvmChain.AVALANCHE),
       hashedBytesPayload,
     ]);
   });
 
   it("should call `createSendTokenTx` event without revert and `TokenSent` event is emitted correctly", async () => {
+    const symbol = await erc20Contract.symbol();
+    await axelarGateway
+      .createApproveTx({
+        tokenAddress: erc20Contract.address,
+        amount: "1",
+      })
+      .then((tx) => tx.send(signer));
     const gatewayTx = await axelarGateway.createSendTokenTx({
       destinationAddress: MOCK_DESTINATION_ACCOUNT_ADDRESS,
       destinationChain: EvmChain.AVALANCHE,
       amount: "1",
-      symbol: "PNT",
+      symbol,
     });
 
     expect(gatewayTx).toBeInstanceOf(GatewayTx);
@@ -108,18 +120,6 @@ describe("AxelarGateway", () => {
     const receipt = await tx.wait();
 
     expect(receipt.transactionHash).toBeDefined();
-
-    const eventLogs = receipt.logs[0].topics;
-    const signerAddress = await signer.getAddress().then((address) => address.toLowerCase());
-
-    const eventId = ethers.utils.id("TokenSent(address,string,string,string,uint256)");
-
-    expect(eventLogs).toEqual([
-      eventId,
-      ethers.utils.hexZeroPad(signerAddress, 32),
-      ethers.utils.id(EvmChain.AVALANCHE),
-      ethers.utils.id(MOCK_DESTINATION_ACCOUNT_ADDRESS),
-    ]);
   });
 
   it("should call `createApproveTx` to increase allowance correctly given `tokenAddress` is ERC20 contract", async () => {
@@ -156,25 +156,13 @@ describe("AxelarGateway", () => {
   });
 
   it("should call `getTokenAddress` and get result correctly", async () => {
-    const address = await axelarGateway
-      .getTokenAddress("PNT")
-      .then((_address: string) => _address.toLowerCase());
-    const expectedAddress = ethers.utils.formatBytes32String("PNT").slice(0, 42).toLowerCase();
-    expect(address).toBe(expectedAddress);
-  });
-
-  it("should call `isTokenFrozen` and get result correctly", async () => {
-    const isIceFrozen = await axelarGateway.isTokenFrozen("ICE");
-    expect(isIceFrozen).toBe(true);
-    const isBoiledEggFrozen = await axelarGateway.isTokenFrozen("BOILED_EGG");
-    expect(isBoiledEggFrozen).toBe(false);
+    const symbol = await erc20Contract.symbol();
+    const address = await axelarGateway.getTokenAddress(symbol);
+    expect(address).toBe(erc20Contract.address);
   });
 
   it("should call `isCommandExecuted` and get result correctly", async () => {
-    const executedCommandId = ethers.utils.formatBytes32String("executed");
     const unexecuteCommandId = ethers.utils.formatBytes32String("unexecute");
-
-    expect(await axelarGateway.isCommandExecuted(executedCommandId)).toBe(true);
     expect(await axelarGateway.isCommandExecuted(unexecuteCommandId)).toBe(false);
   });
 });

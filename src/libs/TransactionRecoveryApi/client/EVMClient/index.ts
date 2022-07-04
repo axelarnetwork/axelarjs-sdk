@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { TransactionRequest } from "@ethersproject/providers";
-import { EVMClientConfig } from "src/libs/types";
+import { EVMClientConfig } from "../../../../libs/types";
 
 export default class EVMClient {
   private provider: ethers.providers.JsonRpcProvider;

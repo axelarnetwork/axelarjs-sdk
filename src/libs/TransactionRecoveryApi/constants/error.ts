@@ -1,4 +1,4 @@
-import { EvmChain } from "src/libs/types";
+import { EvmChain } from "../../../libs";
 
 export const InvalidTransactionError = (chain: EvmChain) => ({
   success: false,
