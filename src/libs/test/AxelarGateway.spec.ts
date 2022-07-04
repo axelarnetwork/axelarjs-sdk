@@ -9,19 +9,15 @@ import { GatewayTx } from "../GatewayTx";
 jest.setTimeout(30000);
 
 describe("AxelarGateway", () => {
-  const MOCK_DESTINATION_CONTRACT_ADDRESS =
-    "0x0000000000000000000000000000000000000001";
-  const MOCK_DESTINATION_ACCOUNT_ADDRESS =
-    "0x0000000000000000000000000000000000000002";
+  const MOCK_DESTINATION_CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000001";
+  const MOCK_DESTINATION_ACCOUNT_ADDRESS = "0x0000000000000000000000000000000000000002";
   let gatewayContract: Contract;
   let erc20Contract: Contract;
   let axelarGateway: AxelarGateway;
   let signer: Signer;
 
   beforeAll(async () => {
-    const AxelarGatewayContract = await hre.ethers.getContractFactory(
-      "MinimalAxelarGateway"
-    );
+    const AxelarGatewayContract = await hre.ethers.getContractFactory("MinimalAxelarGateway");
     const ERC20Contract = await hre.ethers.getContractFactory("ERC20");
 
     gatewayContract = await AxelarGatewayContract.deploy();
@@ -51,13 +47,9 @@ describe("AxelarGateway", () => {
     expect(receipt.transactionHash).toBeDefined();
 
     const eventLogs = receipt.logs[0].topics;
-    const signerAddress = await signer
-      .getAddress()
-      .then((address) => address.toLowerCase());
+    const signerAddress = await signer.getAddress().then((address) => address.toLowerCase());
 
-    const eventId = ethers.utils.id(
-      "ContractCall(address,string,string,bytes32,bytes)"
-    );
+    const eventId = ethers.utils.id("ContractCall(address,string,string,bytes32,bytes)");
     const hashedBytesPayload = ethers.utils.keccak256(bytesPayload);
 
     expect(eventLogs).toEqual([
@@ -87,9 +79,7 @@ describe("AxelarGateway", () => {
     expect(receipt.transactionHash).toBeDefined();
 
     const eventLogs = receipt.logs[0].topics;
-    const signerAddress = await signer
-      .getAddress()
-      .then((address) => address.toLowerCase());
+    const signerAddress = await signer.getAddress().then((address) => address.toLowerCase());
 
     const eventId = ethers.utils.id(
       "ContractCallWithToken(address,string,string,bytes32,bytes,string,uint256)"
@@ -120,13 +110,9 @@ describe("AxelarGateway", () => {
     expect(receipt.transactionHash).toBeDefined();
 
     const eventLogs = receipt.logs[0].topics;
-    const signerAddress = await signer
-      .getAddress()
-      .then((address) => address.toLowerCase());
+    const signerAddress = await signer.getAddress().then((address) => address.toLowerCase());
 
-    const eventId = ethers.utils.id(
-      "TokenSent(address,string,string,string,uint256)"
-    );
+    const eventId = ethers.utils.id("TokenSent(address,string,string,string,uint256)");
 
     expect(eventLogs).toEqual([
       eventId,
@@ -147,10 +133,7 @@ describe("AxelarGateway", () => {
     const receipt = await tx.send(signer).then((tx) => tx.wait());
 
     const signerAddress = await signer.getAddress();
-    const allowance = await axelarGateway.getAllowance(
-      erc20Contract.address,
-      signerAddress
-    );
+    const allowance = await axelarGateway.getAllowance(erc20Contract.address, signerAddress);
 
     expect(receipt.transactionHash).toBeDefined();
     expect(allowance.toString()).toBe("1");
@@ -166,10 +149,7 @@ describe("AxelarGateway", () => {
     const receipt = await tx.send(signer).then((tx) => tx.wait());
 
     const signerAddress = await signer.getAddress();
-    const allowance = await axelarGateway.getAllowance(
-      erc20Contract.address,
-      signerAddress
-    );
+    const allowance = await axelarGateway.getAllowance(erc20Contract.address, signerAddress);
 
     expect(receipt.transactionHash).toBeDefined();
     expect(allowance.toString()).toBe(ethers.constants.MaxUint256.toString());
@@ -179,10 +159,7 @@ describe("AxelarGateway", () => {
     const address = await axelarGateway
       .getTokenAddress("PNT")
       .then((_address: string) => _address.toLowerCase());
-    const expectedAddress = ethers.utils
-      .formatBytes32String("PNT")
-      .slice(0, 42)
-      .toLowerCase();
+    const expectedAddress = ethers.utils.formatBytes32String("PNT").slice(0, 42).toLowerCase();
     expect(address).toBe(expectedAddress);
   });
 
@@ -198,8 +175,6 @@ describe("AxelarGateway", () => {
     const unexecuteCommandId = ethers.utils.formatBytes32String("unexecute");
 
     expect(await axelarGateway.isCommandExecuted(executedCommandId)).toBe(true);
-    expect(await axelarGateway.isCommandExecuted(unexecuteCommandId)).toBe(
-      false
-    );
+    expect(await axelarGateway.isCommandExecuted(unexecuteCommandId)).toBe(false);
   });
 });
