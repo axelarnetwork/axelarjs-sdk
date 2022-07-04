@@ -44,18 +44,16 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: "Check new tag"
         run: echo "${{ needs.bump-version.outputs.newTag }}"
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v3
-        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
+        id: npm-cache
         with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          path: ./node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - run: npm i --ignore-scripts
+      - name: Install dependencies for .
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm i --ignore-scripts
       - run: npm run build
       - run: npm publish
         env:
