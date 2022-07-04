@@ -13,10 +13,8 @@ test("destination address validation", () => {
   const addressMap: { [key: string]: string } = {
     validAddr45: "axelar1cupayrv3fzgzn3mjg38d6qxqey64rw9fmkkp5f",
     invalidAddr45: "axelar1cupayrv3fzgzn3mjg38d6qxqey64rw9fmkkp5d",
-    validAddr65:
-      "axelar1386l7f7uyjejklmnzvsnkhffus625pj7eve85gx6z7696d7ujlss3ras55",
-    invalidAddr65:
-      "axelar1386l7f7uyjejklmnzvsnkhffus625pj7eve85gx6z7696d7ujlss3ras54",
+    validAddr65: "axelar1386l7f7uyjejklmnzvsnkhffus625pj7eve85gx6z7696d7ujlss3ras55",
+    invalidAddr65: "axelar1386l7f7uyjejklmnzvsnkhffus625pj7eve85gx6z7696d7ujlss3ras54",
   };
 
   asset.assetAddress = addressMap.validAddr45;
