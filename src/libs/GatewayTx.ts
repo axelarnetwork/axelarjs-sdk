@@ -6,10 +6,7 @@ export class GatewayTx {
   public txRequest: TransactionRequest;
   private provider: Provider;
 
-  constructor(
-    unsignedTx: UnsignedTransaction,
-    provider: ethers.providers.Provider
-  ) {
+  constructor(unsignedTx: UnsignedTransaction, provider: ethers.providers.Provider) {
     this.txRequest = {
       to: unsignedTx.to,
       data: unsignedTx.data,

@@ -29,6 +29,6 @@ export function setupQueryExtension(base: QueryClient): AxelarQueryService {
     evm: new EVMQSCI(client),
     axelarnet: new AxelarnetQSCI(client),
     nexus: new NexusQSCI(client),
-    tss: new TSSQSCI(client)
+    tss: new TSSQSCI(client),
   };
 }

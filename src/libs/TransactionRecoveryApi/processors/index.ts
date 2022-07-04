@@ -9,7 +9,7 @@ enum AxelarGMPRecoveryProcessorResponse {
   APPROVED_BUT_NOT_EXECUTED = "approved but not executed",
   ALREADY_EXECUTED = "already executed",
   ERROR_FETCHING_STATUS = "error fetching status",
-  ERROR_INVOKING_RECOVERY = "eror invoking recovery"
+  ERROR_INVOKING_RECOVERY = "eror invoking recovery",
 }
 
 export default class AxelarGMPRecoveryProcessor {
@@ -24,9 +24,12 @@ export default class AxelarGMPRecoveryProcessor {
 
     const res: GMPStatusResponse = await this.recoveryAPI.queryTransactionStatus(txHash);
 
-    if (!res || res.status === GMPStatus.ERROR_FETCHING_STATUS) return AxelarGMPRecoveryProcessorResponse.ERROR_FETCHING_STATUS;
-    if (res.status === GMPStatus.DEST_EXECUTED) return AxelarGMPRecoveryProcessorResponse.ALREADY_EXECUTED;
-    if (res.status === GMPStatus.DEST_GATEWAY_APPROVED) return AxelarGMPRecoveryProcessorResponse.APPROVED_BUT_NOT_EXECUTED;
+    if (!res || res.status === GMPStatus.ERROR_FETCHING_STATUS)
+      return AxelarGMPRecoveryProcessorResponse.ERROR_FETCHING_STATUS;
+    if (res.status === GMPStatus.DEST_EXECUTED)
+      return AxelarGMPRecoveryProcessorResponse.ALREADY_EXECUTED;
+    if (res.status === GMPStatus.DEST_GATEWAY_APPROVED)
+      return AxelarGMPRecoveryProcessorResponse.APPROVED_BUT_NOT_EXECUTED;
 
     try {
       const confirmTx = await this.recoveryAPI.confirmGatewayTx({ txHash, chain: src });

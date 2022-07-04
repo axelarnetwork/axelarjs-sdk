@@ -15,14 +15,13 @@ export enum GMPStatus {
   DEST_GATEWAY_APPROVED = "destination_gateway_approved",
   DEST_EXECUTED = "destination_executed",
   DEST_ERROR = "error",
-  ERROR_FETCHING_STATUS = "error_fetching_status"
+  ERROR_FETCHING_STATUS = "error_fetching_status",
 }
 export enum GasPaidStatus {
   GAS_UNPAID = "gas_unpaid",
   GAS_PAID = "gas_paid",
   GAS_PAID_NOT_ENOUGH_GAS = "gas_paid_not_enough_gas",
   GAS_PAID_ENOUGH_GAS = "gas_paid_enough_gas",
-
 }
 export interface GasPaidInfo {
   status: GasPaidStatus;
@@ -80,7 +79,7 @@ export class AxelarRecoveryApi {
       txHash,
     })
       .then((res) => res[0])
-      .catch((e) => {
+      .catch(() => {
         isError = true;
       });
 
@@ -93,9 +92,9 @@ export class AxelarRecoveryApi {
       details: gas_paid,
     };
 
-    if (is_executed) status = GMPStatus.DEST_EXECUTED
-    else if (approved) status = GMPStatus.DEST_GATEWAY_APPROVED
-    else if (call) status = GMPStatus.SRC_GATEWAY_CALLED
+    if (is_executed) status = GMPStatus.DEST_EXECUTED;
+    else if (approved) status = GMPStatus.DEST_GATEWAY_APPROVED;
+    else if (call) status = GMPStatus.SRC_GATEWAY_CALLED;
 
     return {
       status,

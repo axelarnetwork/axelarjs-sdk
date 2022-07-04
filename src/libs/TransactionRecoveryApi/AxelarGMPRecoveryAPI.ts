@@ -10,7 +10,12 @@ import {
   TxResult,
   QueryGasFeeOptions,
 } from "../types";
-import { AxelarRecoveryApi, ExecuteParams, GMPStatus, GMPStatusResponse } from "./AxelarRecoveryApi";
+import {
+  AxelarRecoveryApi,
+  ExecuteParams,
+  GMPStatus,
+  GMPStatusResponse,
+} from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import AxelarGMPRecoveryProcessor from "./processors";
@@ -102,7 +107,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * @returns Promise<boolean> - true if transaction is already executed
    */
   public async isExecuted(txHash: string): Promise<boolean> {
-    const txStatus: GMPStatusResponse | undefined = await this.queryTransactionStatus(txHash).catch(() => undefined);
+    const txStatus: GMPStatusResponse | undefined = await this.queryTransactionStatus(txHash).catch(
+      () => undefined
+    );
     return txStatus?.status === GMPStatus.DEST_EXECUTED;
   }
 

@@ -25,7 +25,10 @@ const TxTypeUrlMap = {
 export const registerAxelarnetTxTypes = (registry: Registry) => {
   registry.register(TxTypeUrlMap.AxelarnetLinkRequest, LinkRequest);
   registry.register(TxTypeUrlMap.AxelarnetConfirmDepositRequest, ConfirmDepositRequest);
-  registry.register(TxTypeUrlMap.AxelarnetExecutePendingTransfersRequest, ExecutePendingTransfersRequest);
+  registry.register(
+    TxTypeUrlMap.AxelarnetExecutePendingTransfersRequest,
+    ExecutePendingTransfersRequest
+  );
   registry.register(TxTypeUrlMap.AxelarnetRegisterIBCPathRequest, RegisterIBCPathRequest);
   registry.register(TxTypeUrlMap.AxelarnetAddCosmosBasedChainRequest, AddCosmosBasedChainRequest);
   registry.register(TxTypeUrlMap.AxelarnetRegisterAssetRequest, RegisterAssetRequest);

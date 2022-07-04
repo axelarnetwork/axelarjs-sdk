@@ -27,9 +27,9 @@ export interface ConfirmDepositResponse {
   commandId?: string;
 }
 
-  export interface ConfirmDepositRequest {
-    hash: string;
-    from: string; //chain name
-    depositAddress: string;
-    denom: string; //asset common key
-  }
+export interface ConfirmDepositRequest {
+  hash: string;
+  from: string; //chain name
+  depositAddress: string;
+  denom: string; //asset common key
+}

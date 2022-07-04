@@ -70,11 +70,9 @@ describe("AxelarAssetTransfer", () => {
         beforeEach(async () => {
           jest.spyOn(bridge.api, "get").mockRejectedValue(apiErrorStub());
 
-          otc = await bridge
-            .getOneTimeCode(ethAddressStub(), uuidStub())
-            .catch((_error) => {
-              error = _error;
-            });
+          otc = await bridge.getOneTimeCode(ethAddressStub(), uuidStub()).catch((_error) => {
+            error = _error;
+          });
         });
 
         describe("api", () => {
@@ -234,22 +232,16 @@ describe("AxelarAssetTransfer", () => {
         let error: any;
 
         beforeEach(async () => {
-          jest
-            .spyOn(bridge.socket, "joinRoomAndWaitForEvent")
-            .mockRejectedValue(apiErrorStub());
+          jest.spyOn(bridge.socket, "joinRoomAndWaitForEvent").mockRejectedValue(apiErrorStub());
 
-          roomId = await bridge
-            .getLinkEvent(roomIdStub().roomId)
-            .catch((_error) => {
-              error = _error;
-            });
+          roomId = await bridge.getLinkEvent(roomIdStub().roomId).catch((_error) => {
+            error = _error;
+          });
         });
 
         describe("api", () => {
           it("should be called", () => {
-            expect(bridge.socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(
-              roomIdStub().roomId
-            );
+            expect(bridge.socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(roomIdStub().roomId);
           });
         });
 
@@ -269,18 +261,14 @@ describe("AxelarAssetTransfer", () => {
       describe("when called", () => {
         let roomId: any;
         beforeEach(async () => {
-          jest
-            .spyOn(bridge.socket, "joinRoomAndWaitForEvent")
-            .mockResolvedValue(linkEventStub());
+          jest.spyOn(bridge.socket, "joinRoomAndWaitForEvent").mockResolvedValue(linkEventStub());
 
           roomId = await bridge.getLinkEvent(roomIdStub().roomId);
         });
 
         describe("api", () => {
           it("should be called", () => {
-            expect(bridge.socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(
-              roomIdStub().roomId
-            );
+            expect(bridge.socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(roomIdStub().roomId);
           });
         });
 
@@ -310,18 +298,9 @@ describe("AxelarAssetTransfer", () => {
       let response: any;
       beforeEach(async () => {
         jest.spyOn(bridge, "getOneTimeCode").mockResolvedValue(otcStub());
-        jest
-          .spyOn(bridge, "getInitRoomId")
-          .mockResolvedValue(roomIdStub().roomId);
-        jest
-          .spyOn(bridge, "getLinkEvent")
-          .mockResolvedValue(linkEventStub().newRoomId);
-        response = await bridge.getDepositAddress(
-          fromChain,
-          toChain,
-          depositAddress,
-          asset
-        );
+        jest.spyOn(bridge, "getInitRoomId").mockResolvedValue(roomIdStub().roomId);
+        jest.spyOn(bridge, "getLinkEvent").mockResolvedValue(linkEventStub().newRoomId);
+        response = await bridge.getDepositAddress(fromChain, toChain, depositAddress, asset);
       });
 
       it("should return deposit address", () => {

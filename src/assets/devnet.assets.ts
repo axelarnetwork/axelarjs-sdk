@@ -53,8 +53,7 @@ export const devnet = {
         assetSymbol: "UST",
         assetName: "UST",
         minDepositAmt: 0.01,
-        ibcDenom:
-          "ibc/6F4968A73F90CF7DE6394BF937D6DF7C7D162D74D839C13F53B41157D315E05F",
+        ibcDenom: "ibc/6F4968A73F90CF7DE6394BF937D6DF7C7D162D74D839C13F53B41157D315E05F",
         fullDenomPath: "transfer/channel-0/uusd",
       },
       moonbeam: {
@@ -101,8 +100,7 @@ export const devnet = {
         assetSymbol: "LUNA",
         assetName: "LUNA",
         minDepositAmt: 0.0001,
-        ibcDenom:
-          "ibc/4627AD2524E3E0523047E35BB76CC90E37D9D57ACF14F0FCBCEB2480705F3CB8",
+        ibcDenom: "ibc/4627AD2524E3E0523047E35BB76CC90E37D9D57ACF14F0FCBCEB2480705F3CB8",
         fullDenomPath: "transfer/channel-0/uluna",
       },
       moonbeam: {

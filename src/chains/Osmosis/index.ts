@@ -26,10 +26,7 @@ export default class Osmosis extends Axelar implements Chain {
     if (!address) return false;
 
     try {
-      return (
-        bech32.decode(address).prefix ===
-        this.chainInfo.chainSymbol.toLowerCase()
-      );
+      return bech32.decode(address).prefix === this.chainInfo.chainSymbol.toLowerCase();
     } catch (e) {
       return false;
     }
