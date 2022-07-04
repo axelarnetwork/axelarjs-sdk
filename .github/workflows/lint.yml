@@ -28,6 +28,5 @@ jobs:
         uses: wearerequired/lint-action@v2
         with:
           eslint: true
-          prettier: true
           eslint_extensions: "ts"
           prettier_extensions: "ts"
