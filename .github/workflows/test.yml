@@ -18,7 +18,5 @@ jobs:
           node-version: 16
       - name: Install dependencies for .
         run: npm ci
-      - name: Compile smart contracts for testing
-        run: npm run compile
       - name: Running tests
         run: npm run test
