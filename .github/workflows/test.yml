@@ -28,6 +28,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - name: Install dependencies for .
-        run: npm ci
+        run: npm i --ignore-scripts
       - name: Running tests
         run: npm run test

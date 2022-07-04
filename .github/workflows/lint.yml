@@ -34,7 +34,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - name: Install dependencies for .
-        run: npm ci
+        run: npm i --ignore-scripts
       - name: Run linters
         uses: wearerequired/lint-action@v2
         with:
