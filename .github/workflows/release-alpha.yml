@@ -7,6 +7,8 @@ jobs:
   bump-version:
     name: "Bump version and publish alpha version"
     runs-on: ubuntu-latest
+    outputs:
+      commit-sha: ${{ steps.latest-commit.outputs.SHA }}
     steps:
       - name: "Checkout source code"
         uses: "actions/checkout@v3"
@@ -25,18 +27,29 @@ jobs:
           default: prerelease
           preid: "alpha"
           skip-tag: true
-          patchWords: "patch"
-          preReleaseWords: ""
+          patch-wording: "patch"
+          rc-wording: ""
           bump-policy: "last-commit"
           commit-message: "Publish pre-alpha version to {{version}}"
       - name: "Updated version in package.json"
         run: cat ./package.json | grep version
+      - name: "Get latest commit"
+        id: latest-commit
+        run: |
+          sha_new=$(git rev-parse HEAD)
+          echo $sha_new
+          echo "::set-output name=SHA::$sha_new"
+      # - run: echo ${{ steps.latest-commit.outputs.SHA }}
+
   publish-npm:
     name: "Publish npm"
     runs-on: ubuntu-latest
     needs: "bump-version"
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.bump-version.outputs.commit-sha }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16

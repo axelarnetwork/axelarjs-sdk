@@ -1,5 +1,3 @@
-import { loadChains } from "../../chains";
-import { ChainInfo } from "../../chains/types";
 import {
   AxelarRecoveryAPIConfig,
   EvmChain,
@@ -75,7 +73,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
   }
 
-  public async approveGatewayTx(
+  public async manualRelayToDestChain(
     txHash: string,
     evmWalletDetails?: EvmWalletDetails
   ): Promise<ApproveGatewayResponse> {

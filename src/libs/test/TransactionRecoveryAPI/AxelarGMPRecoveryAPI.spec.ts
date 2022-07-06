@@ -73,7 +73,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.ERROR_FETCHING_STATUS });
 
-      const response = await api.approveGatewayTx("0x");
+      const response = await api.manualRelayToDestChain("0x");
 
       expect(response).toEqual({
         success: false,
@@ -114,7 +114,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockQueryBatchedCommand = jest.spyOn(api, "queryBatchedCommands");
       mockQueryBatchedCommand.mockResolvedValueOnce(batchedCommandResponseStub());
 
-      const response = await api.approveGatewayTx("0x");
+      const response = await api.manualRelayToDestChain("0x");
 
       expect(response).toEqual({
         success: false,
@@ -128,7 +128,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.DEST_EXECUTED });
 
-      const response = await api.approveGatewayTx("0x");
+      const response = await api.manualRelayToDestChain("0x");
 
       expect(response).toEqual({
         success: false,
@@ -140,7 +140,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.DEST_GATEWAY_APPROVED });
 
-      const response = await api.approveGatewayTx("0x");
+      const response = await api.manualRelayToDestChain("0x");
 
       expect(response).toEqual({
         success: false,
@@ -169,7 +169,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       ]);
       mockSignCommandTx.mockResolvedValueOnce(signCommandStub);
 
-      const response = await api.approveGatewayTx("0x");
+      const response = await api.manualRelayToDestChain("0x");
 
       expect(response).toEqual({
         success: false,
@@ -191,7 +191,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
       mockConfirmGatewayTx.mockRejectedValueOnce(new Error("account sequence mismatch"));
 
-      const response = await api.approveGatewayTx("0x");
+      const response = await api.manualRelayToDestChain("0x");
 
       expect(response).toEqual({
         success: false,
@@ -210,7 +210,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
       mockConfirmGatewayTx.mockRejectedValueOnce(new Error("unknown error"));
 
-      const response = await api.approveGatewayTx("0x");
+      const response = await api.manualRelayToDestChain("0x");
 
       expect(response).toEqual({
         success: false,
@@ -254,7 +254,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockTransaction = { transactionHash: "0x123456" };
       mockApproveTx.mockResolvedValueOnce(mockTransaction);
 
-      const response = await api.approveGatewayTx("0x");
+      const response = await api.manualRelayToDestChain("0x");
 
       expect(response).toEqual({
         success: true,

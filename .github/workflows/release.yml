@@ -37,6 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          fetch-depth: 0
           ref: ${{ needs.bump-version.outputs.newTag }}
       - uses: actions/setup-node@v3
         with:
