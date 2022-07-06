@@ -4,6 +4,7 @@ import { DeliverTxResponse, SigningStargateClientOptions } from "@cosmjs/stargat
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { LogDescription } from "ethers/lib/utils";
 import { ContractReceipt, ethers } from "ethers";
+import { Any } from "@axelar-network/axelarjs-types/google/protobuf/any";
 
 export enum Environment {
   DEVNET = "devnet",
@@ -155,10 +156,11 @@ export interface AxelarTxResponse extends DeliverTxResponse {
 }
 
 export enum ApproveGatewayError {
-  APPROVED_BUT_NOT_EXECUTED = "approved but not executed",
+  ALREADY_APPROVED = "already approved",
   ALREADY_EXECUTED = "already executed",
   SIGN_COMMAND_FAILED = "cannot sign command",
-  ERROR_FETCHING_STATUS = "cannot fetching status",
+  FETCHING_STATUS_FAILED = "cannot fetching status",
+  ERROR_BATCHED_COMMAND = "cannot find batch command",
   ERROR_UNKNOWN = "unknown error",
   ERROR_ACCOUNT_SEQUENCE_MISMATCH = "account sequence mismatch",
 }
@@ -169,4 +171,5 @@ export interface ApproveGatewayResponse {
   confirmTx?: AxelarTxResponse;
   createPendingTransferTx?: AxelarTxResponse;
   signCommandTx?: AxelarTxResponse;
+  approveTx?: any;
 }

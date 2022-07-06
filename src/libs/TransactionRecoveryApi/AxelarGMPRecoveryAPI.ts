@@ -99,11 +99,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
 
     if (status === GMPStatus.ERROR_FETCHING_STATUS)
-      return errorResponse(ApproveGatewayError.ERROR_FETCHING_STATUS);
+      return errorResponse(ApproveGatewayError.FETCHING_STATUS_FAILED);
     if (status === GMPStatus.DEST_EXECUTED)
       return errorResponse(ApproveGatewayError.ALREADY_EXECUTED);
     if (status === GMPStatus.DEST_GATEWAY_APPROVED)
-      return errorResponse(ApproveGatewayError.APPROVED_BUT_NOT_EXECUTED);
+      return errorResponse(ApproveGatewayError.ALREADY_APPROVED);
 
     try {
       confirmTx = await this.confirmGatewayTx(txHash, srcChain);
@@ -118,30 +118,32 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       if (!signEvent) return errorResponse(ApproveGatewayError.SIGN_COMMAND_FAILED);
 
       await sleep(2);
+      const batchedCommandId = signEvent.attributes.find(
+        (attr: any) => attr.key === "batchedCommandId"
+      )?.value;
 
-      const batched = await asyncRetry(
-        () => this.queryBatchedCommands(destChain),
-        (res: BatchedCommandsResponse) =>
-          res && res.executeData !== null && res.executeData.length > 0,
-        undefined,
-        30,
-        5
+      const batchedCommand = await asyncRetry(
+        () => this.queryBatchedCommands(destChain, batchedCommandId),
+        (res?: BatchedCommandsResponse) => !!res && res.executeData?.length > 0
       );
-      console.log("batchedCommand", batched);
+      console.log("batchedCommand", batchedCommand);
+      if (!batchedCommand) return errorResponse(ApproveGatewayError.ERROR_BATCHED_COMMAND);
+
       await sleep(2);
 
-      const broadcasted = await this.sendEvmTxToRelayer(
+      const approveTx = await this.sendApproveTx(
         destChain,
-        batched.executeData,
+        batchedCommand.executeData,
         _evmWalletDetails
       );
-      console.log("broadcastedMsg", broadcasted);
+      console.log("approveTx", approveTx);
 
       return {
         success: true,
         confirmTx,
         createPendingTransferTx,
         signCommandTx,
+        approveTx,
       };
     } catch (e: any) {
       console.error(e);

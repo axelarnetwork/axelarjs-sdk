@@ -229,11 +229,7 @@ export class AxelarRecoveryApi {
     return tx;
   }
 
-  public async sendEvmTxToRelayer(
-    chain: EvmChain,
-    data: string,
-    evmWalletDetails: EvmWalletDetails
-  ) {
+  public async sendApproveTx(chain: EvmChain, data: string, evmWalletDetails: EvmWalletDetails) {
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcMap[chain],
