@@ -25,6 +25,9 @@ jobs:
           default: prerelease
           preid: "alpha"
           skip-tag: true
+          patchWords: "patch"
+          preReleaseWords: ""
+          bump-policy: "last-commit"
           commit-message: "Publish pre-alpha version to {{version}}"
       - name: "Updated version in package.json"
         run: cat ./package.json | grep version
@@ -38,8 +41,6 @@ jobs:
         with:
           node-version: 16
           registry-url: "https://registry.npmjs.org"
-      - name: "Check new tag"
-        run: echo "${{ needs.bump-version.outputs.newTag }}"
       - uses: actions/cache@v3
         id: npm-cache
         with:
