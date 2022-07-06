@@ -1,4 +1,4 @@
-import { Environment } from "src/libs/types";
+import { Environment } from "../../../libs/types";
 import AxelarRpcClient from "../client/AxelarRpcClient";
 import { JsonRpcRequest } from "@cosmjs/json-rpc";
 import { DeliverTxResponse } from "@cosmjs/stargate";

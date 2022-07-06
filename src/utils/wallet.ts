@@ -8,10 +8,7 @@ export function createWallet() {
       return wallet;
     } else {
       const wallet = ethers.Wallet.createRandom();
-      globalThis.localStorage.setItem(
-        "axelar-wallet",
-        wallet._mnemonic().phrase
-      );
+      globalThis.localStorage.setItem("axelar-wallet", wallet._mnemonic().phrase);
       return wallet;
     }
   } else {

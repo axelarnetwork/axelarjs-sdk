@@ -48,14 +48,15 @@ export function loadChains(config: LoadChainConfig) {
   rawChains.forEach(({ chainInfo }) => {
     const filteredAssetList: AssetConfig[] = allAssets.filter(
       ({ chain_aliases }) =>
-        Object.keys(chain_aliases).indexOf(chainInfo.chainName.toLowerCase()) >
-        -1
+        Object.keys(chain_aliases).indexOf(chainInfo.chainName.toLowerCase()) > -1
     );
 
     const assetsList: AssetInfo[] = [];
 
     filteredAssetList.forEach((asset) => {
-      const assetToPush: AssetInfo = cloneDeep(asset.chain_aliases[chainInfo.chainName.toLowerCase()]);
+      const assetToPush: AssetInfo = cloneDeep(
+        asset.chain_aliases[chainInfo.chainName.toLowerCase()]
+      );
       assetToPush.common_key =
         asset.common_key[_environment === "local" ? "testnet" : _environment];
       assetToPush.native_chain = asset.native_chain;

@@ -1,5 +1,4 @@
 import { bech32 } from "bech32";
-import { AssetInfo } from "../../assets/types";
 import { Chain, ChainInfo } from "../types";
 
 export default class Axelar implements Chain {
@@ -22,9 +21,7 @@ export default class Axelar implements Chain {
     if (!address) return false;
 
     try {
-      return (
-        bech32.decode(address).prefix === this.chainInfo.chainName.toLowerCase()
-      );
+      return bech32.decode(address).prefix === this.chainInfo.chainName.toLowerCase();
     } catch (e) {
       return false;
     }

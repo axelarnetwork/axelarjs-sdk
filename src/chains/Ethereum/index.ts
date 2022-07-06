@@ -18,7 +18,5 @@ export default class Ethereum implements Chain {
     },
   };
 
-  constructor() {}
-
   public validateAddress = (address: string) => isValidEVMAddress(address);
 }

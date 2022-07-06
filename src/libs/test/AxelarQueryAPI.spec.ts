@@ -66,18 +66,18 @@ describe("AxelarQueryAPI", () => {
         EvmChain.ETHEREUM,
         GasToken.AVAX
       );
-      console.log(gasAmount);
       expect(gasAmount).toBeDefined();
     });
   });
 
-  describe("getDenomFromSymbol", () => {
+  xdescribe("getDenomFromSymbol", () => {
     test("It should get the denom for an asset given its symbol on a chain", async () => {
       const response = await api.getDenomFromSymbol("UST", "ethereum");
       expect(response).toEqual("uusd");
     });
   });
-  describe("getSymbolFromDenom", () => {
+
+  xdescribe("getSymbolFromDenom", () => {
     test("It should get the symbol for an asset on a given chain given its denom", async () => {
       const response = await api.getSymbolFromDenom("uusd", "ethereum");
       expect(response).toEqual("UST");

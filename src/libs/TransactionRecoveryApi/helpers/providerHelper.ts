@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { EvmChain } from "src/libs/types";
+import { EvmChain } from "../../../libs";
 import { networkInfo, rpcMap } from "../constants/chain";
 
 export function getDefaultProvider(chain: EvmChain) {

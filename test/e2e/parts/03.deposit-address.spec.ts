@@ -17,12 +17,7 @@ export default () => {
       const destinationAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
 
       beforeAll(async () => {
-        response = await axelar.getDepositAddress(
-          "Terra",
-          "Avalanche",
-          destinationAddress,
-          "uusd"
-        );
+        response = await axelar.getDepositAddress("Terra", "Avalanche", destinationAddress, "uusd");
       });
 
       it("should get response", () => {
@@ -37,12 +32,7 @@ export default () => {
       const destinationAddress = "terra1qem4njhac8azalrav7shvp06myhqldpmkk3p0t";
 
       beforeAll(async () => {
-        response = await axelar.getDepositAddress(
-          "Avalanche",
-          "Terra",
-          destinationAddress,
-          "uusd"
-        );
+        response = await axelar.getDepositAddress("Avalanche", "Terra", destinationAddress, "uusd");
       });
 
       it("should get response", () => {

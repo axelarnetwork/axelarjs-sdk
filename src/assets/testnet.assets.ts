@@ -137,8 +137,7 @@ export const testnet = {
         assetSymbol: "WMATIC",
         assetName: "axlWMATIC",
         minDepositAmt: 0.03,
-        ibcDenom:
-          "ibc/528CE04E9CA727529411F4E6D1080C59C4ACFEAEECC453E4250639A8F6648496",
+        ibcDenom: "ibc/528CE04E9CA727529411F4E6D1080C59C4ACFEAEECC453E4250639A8F6648496",
         fullDenomPath: "transfer/channel-312/wmatic-wei",
         tokenAddress: "wmatic-wei",
       },
@@ -146,8 +145,7 @@ export const testnet = {
         assetSymbol: "WMATIC",
         assetName: "axlWMATIC",
         minDepositAmt: 0.03,
-        ibcDenom:
-          "ibc/91C6798C23EE6AD5B8336C247371546FFA0026854162612EA4EBC80C62A2841C",
+        ibcDenom: "ibc/91C6798C23EE6AD5B8336C247371546FFA0026854162612EA4EBC80C62A2841C",
         fullDenomPath: "transfer/channel-8/wmatic-wei",
         tokenAddress: "wmatic-wei",
       },
@@ -155,8 +153,7 @@ export const testnet = {
         assetSymbol: "WMATIC",
         assetName: "axlWMATIC",
         minDepositAmt: 0.03,
-        ibcDenom:
-          "ibc/91C6798C23EE6AD5B8336C247371546FFA0026854162612EA4EBC80C62A2841C",
+        ibcDenom: "ibc/91C6798C23EE6AD5B8336C247371546FFA0026854162612EA4EBC80C62A2841C",
         fullDenomPath: "transfer/channel-8/wmatic-wei",
         tokenAddress: "wmatic-wei",
       },
@@ -232,8 +229,7 @@ export const testnet = {
         assetSymbol: "WFTM",
         assetName: "axlWFTM",
         minDepositAmt: 0.04,
-        ibcDenom:
-          "ibc/DBD032174320882A939AD78C20A29F98EBAC9F83C28127A387B2D2657C7EC21F",
+        ibcDenom: "ibc/DBD032174320882A939AD78C20A29F98EBAC9F83C28127A387B2D2657C7EC21F",
         fullDenomPath: "transfer/channel-312/wftm-wei",
         tokenAddress: "wftm-wei",
       },
@@ -241,8 +237,7 @@ export const testnet = {
         assetSymbol: "WFTM",
         assetName: "axlWFTM",
         minDepositAmt: 0.04,
-        ibcDenom:
-          "ibc/C2BA0743260DDCD9B2E5464860584E2F0826E7C021E19B16A9F5CEF29D225CD3",
+        ibcDenom: "ibc/C2BA0743260DDCD9B2E5464860584E2F0826E7C021E19B16A9F5CEF29D225CD3",
         fullDenomPath: "transfer/channel-8/wftm-wei",
         tokenAddress: "wftm-wei",
       },
@@ -250,8 +245,7 @@ export const testnet = {
         assetSymbol: "WFTM",
         assetName: "axlWFTM",
         minDepositAmt: 0.04,
-        ibcDenom:
-          "ibc/C2BA0743260DDCD9B2E5464860584E2F0826E7C021E19B16A9F5CEF29D225CD3",
+        ibcDenom: "ibc/C2BA0743260DDCD9B2E5464860584E2F0826E7C021E19B16A9F5CEF29D225CD3",
         fullDenomPath: "transfer/channel-8/wftm-wei",
         tokenAddress: "wftm-wei",
       },
@@ -327,8 +321,7 @@ export const testnet = {
         assetSymbol: "WETH",
         assetName: "axlWETH",
         minDepositAmt: 2e-5,
-        ibcDenom:
-          "ibc/5D52572B5E1278AC0F5EAAA5D595F7F583981CE403FB8D3850EAA771269575FB",
+        ibcDenom: "ibc/5D52572B5E1278AC0F5EAAA5D595F7F583981CE403FB8D3850EAA771269575FB",
         fullDenomPath: "transfer/channel-312/weth-wei",
         tokenAddress: "weth-wei",
       },
@@ -336,8 +329,7 @@ export const testnet = {
         assetSymbol: "WETH",
         assetName: "axlWETH",
         minDepositAmt: 2e-5,
-        ibcDenom:
-          "ibc/C567713C9D0904098C14BA0FBEB9192C5B68B590757EE6913DC292710C8926E6",
+        ibcDenom: "ibc/C567713C9D0904098C14BA0FBEB9192C5B68B590757EE6913DC292710C8926E6",
         fullDenomPath: "transfer/channel-8/weth-wei",
         tokenAddress: "weth-wei",
       },
@@ -345,8 +337,7 @@ export const testnet = {
         assetSymbol: "WETH",
         assetName: "axlWETH",
         minDepositAmt: 2e-5,
-        ibcDenom:
-          "ibc/C567713C9D0904098C14BA0FBEB9192C5B68B590757EE6913DC292710C8926E6",
+        ibcDenom: "ibc/C567713C9D0904098C14BA0FBEB9192C5B68B590757EE6913DC292710C8926E6",
         fullDenomPath: "transfer/channel-8/weth-wei",
         tokenAddress: "weth-wei",
       },
@@ -422,8 +413,7 @@ export const testnet = {
         assetSymbol: "WAVAX",
         assetName: "axlWAVAX",
         minDepositAmt: 0.0007,
-        ibcDenom:
-          "ibc/AC114FA5B91B5696ACD80CE7D740E3DEF2C6E76817A9F57754E9423325321220",
+        ibcDenom: "ibc/AC114FA5B91B5696ACD80CE7D740E3DEF2C6E76817A9F57754E9423325321220",
         fullDenomPath: "transfer/channel-312/wavax-wei",
         tokenAddress: "wavax-wei",
       },
@@ -431,8 +421,7 @@ export const testnet = {
         assetSymbol: "WAVAX",
         assetName: "axlWAVAX",
         minDepositAmt: 0.0007,
-        ibcDenom:
-          "ibc/C74D5A562B2D54AF03198E5BC6693D16EF978EBA0BD3BA22A7098511B43249CA",
+        ibcDenom: "ibc/C74D5A562B2D54AF03198E5BC6693D16EF978EBA0BD3BA22A7098511B43249CA",
         fullDenomPath: "transfer/channel-8/wavax-wei",
         tokenAddress: "wavax-wei",
       },
@@ -440,8 +429,7 @@ export const testnet = {
         assetSymbol: "WAVAX",
         assetName: "axlWAVAX",
         minDepositAmt: 0.0007,
-        ibcDenom:
-          "ibc/C74D5A562B2D54AF03198E5BC6693D16EF978EBA0BD3BA22A7098511B43249CA",
+        ibcDenom: "ibc/C74D5A562B2D54AF03198E5BC6693D16EF978EBA0BD3BA22A7098511B43249CA",
         fullDenomPath: "transfer/channel-8/wavax-wei",
         tokenAddress: "wavax-wei",
       },
@@ -517,8 +505,7 @@ export const testnet = {
         assetSymbol: "WDEV",
         assetName: "axlWDEV",
         minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/400AF92417EE60F72C56B8E128A19AAC991DC46FF3A00F198FB47FB93D93AF2D",
+        ibcDenom: "ibc/400AF92417EE60F72C56B8E128A19AAC991DC46FF3A00F198FB47FB93D93AF2D",
         fullDenomPath: "transfer/channel-312/wdev-wei",
         tokenAddress: "wdev-wei",
       },
@@ -526,8 +513,7 @@ export const testnet = {
         assetSymbol: "WDEV",
         assetName: "axlWDEV",
         minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/25C4852211900E04B162241362DB1F1D9B7939875A038913E56C9FEF66EA9AD6",
+        ibcDenom: "ibc/25C4852211900E04B162241362DB1F1D9B7939875A038913E56C9FEF66EA9AD6",
         fullDenomPath: "transfer/channel-8/wdev-wei",
         tokenAddress: "wdev-wei",
       },
@@ -535,8 +521,7 @@ export const testnet = {
         assetSymbol: "WDEV",
         assetName: "axlWDEV",
         minDepositAmt: 0.02,
-        ibcDenom:
-          "ibc/25C4852211900E04B162241362DB1F1D9B7939875A038913E56C9FEF66EA9AD6",
+        ibcDenom: "ibc/25C4852211900E04B162241362DB1F1D9B7939875A038913E56C9FEF66EA9AD6",
         fullDenomPath: "transfer/channel-8/wdev-wei",
         tokenAddress: "wdev-wei",
       },
@@ -612,8 +597,7 @@ export const testnet = {
         assetSymbol: "aUSDC",
         assetName: "axlaUSDC",
         minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/75C8E3091D507A5A111C652F9C76C2E53059E24759A98B523723E02FA33EEF51",
+        ibcDenom: "ibc/75C8E3091D507A5A111C652F9C76C2E53059E24759A98B523723E02FA33EEF51",
         fullDenomPath: "transfer/channel-312/uausdc",
         tokenAddress: "uausdc",
       },
@@ -621,8 +605,7 @@ export const testnet = {
         assetSymbol: "aUSDC",
         assetName: "axlaUSDC",
         minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/F91EA2C0A23697A1048E08C2F787E3A58AC6F706A1CD2257A504925158CFC0F3",
+        ibcDenom: "ibc/F91EA2C0A23697A1048E08C2F787E3A58AC6F706A1CD2257A504925158CFC0F3",
         fullDenomPath: "transfer/channel-8/uausdc",
         tokenAddress: "uausdc",
       },
@@ -630,8 +613,7 @@ export const testnet = {
         assetSymbol: "aUSDC",
         assetName: "axlaUSDC",
         minDepositAmt: 0.05,
-        ibcDenom:
-          "ibc/F91EA2C0A23697A1048E08C2F787E3A58AC6F706A1CD2257A504925158CFC0F3",
+        ibcDenom: "ibc/F91EA2C0A23697A1048E08C2F787E3A58AC6F706A1CD2257A504925158CFC0F3",
         fullDenomPath: "transfer/channel-8/uausdc",
         tokenAddress: "uausdc",
       },
@@ -667,8 +649,7 @@ export const testnet = {
         assetSymbol: "WBTC",
         assetName: "axlWBTC",
         minDepositAmt: 2e-6,
-        ibcDenom:
-          "ibc/3DB163A2D579C6EA5AF18312436373DE7D637ACDE8FC3CB61A7747854F9994BA",
+        ibcDenom: "ibc/3DB163A2D579C6EA5AF18312436373DE7D637ACDE8FC3CB61A7747854F9994BA",
         fullDenomPath: "transfer/channel-312/wbtc-satoshi",
         tokenAddress: "wbtc-satoshi",
       },
@@ -676,8 +657,7 @@ export const testnet = {
         assetSymbol: "WBTC",
         assetName: "axlWBTC",
         minDepositAmt: 2e-6,
-        ibcDenom:
-          "ibc/9172E8B854F0E25A9D075272CE71A9534B91A0A2C581B747BB4CCD35F77E4C76",
+        ibcDenom: "ibc/9172E8B854F0E25A9D075272CE71A9534B91A0A2C581B747BB4CCD35F77E4C76",
         fullDenomPath: "transfer/channel-8/wbtc-satoshi",
         tokenAddress: "wbtc-satoshi",
       },
@@ -685,8 +665,7 @@ export const testnet = {
         assetSymbol: "WBTC",
         assetName: "axlWBTC",
         minDepositAmt: 2e-6,
-        ibcDenom:
-          "ibc/9172E8B854F0E25A9D075272CE71A9534B91A0A2C581B747BB4CCD35F77E4C76",
+        ibcDenom: "ibc/9172E8B854F0E25A9D075272CE71A9534B91A0A2C581B747BB4CCD35F77E4C76",
         fullDenomPath: "transfer/channel-8/wbtc-satoshi",
         tokenAddress: "wbtc-satoshi",
       },
@@ -762,8 +741,7 @@ export const testnet = {
         assetSymbol: "WBNB",
         assetName: "axlWBNB",
         minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/DF2C5FC2C96CFE255FE0B0F8DD2E7C3E91C49D03964D4078EE77C1474ECAF94B",
+        ibcDenom: "ibc/DF2C5FC2C96CFE255FE0B0F8DD2E7C3E91C49D03964D4078EE77C1474ECAF94B",
         fullDenomPath: "transfer/channel-312/wbnb-wei",
         tokenAddress: "wbnb-wei",
       },
@@ -771,8 +749,7 @@ export const testnet = {
         assetSymbol: "WBNB",
         assetName: "axlWBNB",
         minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/E09D271B56568F9C4E4B6A32D877F4E904C35FF3B8A4503AD8547A95F6D9925C",
+        ibcDenom: "ibc/E09D271B56568F9C4E4B6A32D877F4E904C35FF3B8A4503AD8547A95F6D9925C",
         fullDenomPath: "transfer/channel-8/wbnb-wei",
         tokenAddress: "wbnb-wei",
       },
@@ -780,8 +757,7 @@ export const testnet = {
         assetSymbol: "WBNB",
         assetName: "axlWBNB",
         minDepositAmt: 0.0002,
-        ibcDenom:
-          "ibc/E09D271B56568F9C4E4B6A32D877F4E904C35FF3B8A4503AD8547A95F6D9925C",
+        ibcDenom: "ibc/E09D271B56568F9C4E4B6A32D877F4E904C35FF3B8A4503AD8547A95F6D9925C",
         fullDenomPath: "transfer/channel-8/wbnb-wei",
         tokenAddress: "wbnb-wei",
       },

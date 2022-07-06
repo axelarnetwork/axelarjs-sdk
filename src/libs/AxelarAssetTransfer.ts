@@ -5,10 +5,10 @@ import { RestService, SocketService } from "../services";
 import { createWallet, validateDestinationAddressByChainName } from "../utils";
 
 import { getConfigs } from "../constants";
-import { AxelarAssetTransferConfig } from "./types";
+import { AxelarAssetTransferConfig, Environment } from "./types";
 
 export class AxelarAssetTransfer {
-  readonly environment: string;
+  readonly environment: Environment;
   readonly resourceUrl: string;
 
   readonly api: RestService;

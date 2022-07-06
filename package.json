@@ -17,8 +17,7 @@
     "test:e2e": "jest --config test/e2e/jest.e2e.json",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "format": "prettier --write \"./**/*.{ts,json}\"",
-    "compile": "hardhat compile"
+    "format": "prettier --write \"./**/*.{ts,json}\""
   },
   "keywords": [
     "axelar",
@@ -57,7 +56,9 @@
     "@typescript-eslint/eslint-plugin": "^5.30.0",
     "@typescript-eslint/parser": "^5.30.0",
     "eslint": "^8.9.0",
-    "hardhat": "^2.9.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "ganache": "^7.3.2",
     "jest": "^27.5.1",
     "prettier": "2.5.1",
     "rimraf": "^3.0.2",

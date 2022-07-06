@@ -1,4 +1,3 @@
-import { AssetInfo } from "../../assets/types";
 import { Chain, ChainInfo } from "../types";
 import { bech32 } from "bech32";
 import Axelar from "../Axelar";

@@ -16,9 +16,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+      - uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - name: Install dependencies for .
-        run: npm ci
-      - name: Compile smart contracts for testing
-        run: npm run compile
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm i --ignore-scripts
       - name: Running tests
         run: npm run test

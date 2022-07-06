@@ -18,7 +18,5 @@ export default class Binance implements Chain {
     },
   };
 
-  constructor() {}
-
   public validateAddress = (address: string) => isValidEVMAddress(address);
 }

@@ -1,8 +1,8 @@
-import { ethers } from "hardhat";
+import { ethers } from "ethers";
 import { AxelarRecoveryApi, GMPStatus } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
 import { Environment, EvmChain } from "../../types";
 
-describe("AxelarDepositRecoveryAPI", () => {
+xdescribe("AxelarDepositRecoveryAPI", () => {
   const api = new AxelarRecoveryApi({ environment: Environment.TESTNET });
 
   beforeEach(() => {

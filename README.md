@@ -44,7 +44,7 @@ Example: Cosmos-to-EVM (Terra to Avalanche):
 
 ```tsx
 const sdk = new AxelarAssetTransfer({
-  environment: "testnet",
+  environment: Environment.TESTNET,
   auth: "local",
 });
 const depositAddress = await sdk.getDepositAddress(
