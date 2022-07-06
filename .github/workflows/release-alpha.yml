@@ -16,23 +16,18 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: "Current version in package.json"
         run: cat ./package.json | grep version
-      - name: Bump Versions
-        uses: michmich112/version-bumper@master
+      - name: "Automated Version Bump"
+        id: version-bump
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: "phips28/gh-action-bump-version@master"
         with:
-          scheme: semantic
-          version-file: "./package.json"
-          files: >
-            [
-              "./package-lock.json"
-            ]
-          rules: >
-            [{
-              "trigger":"commit",
-              "suffix": "-alpha",
-              "bump":"build"
-              "tag": false
-            }]
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          default: prerelease
+          preid: "alpha"
+          skip-tag: true
+          commit-message: "Publish pre-alpha version to {{version}}"
+      - name: "Updated version in package.json"
+        run: cat ./package.json | grep version
   publish-npm:
     name: "Publish npm"
     runs-on: ubuntu-latest
