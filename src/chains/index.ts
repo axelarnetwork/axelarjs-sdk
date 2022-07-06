@@ -18,6 +18,7 @@ import EMoney from "./EMoney";
 import Binance from "./Binance";
 import Kujira from "./Kujira";
 import Sei from "./Sei";
+import Secret from "./Secret";
 
 export function loadChains(config: LoadChainConfig) {
   const allAssets = loadAssets(config);
@@ -38,6 +39,7 @@ export function loadChains(config: LoadChainConfig) {
     new Moonbeam(),
     new Osmosis(),
     new Polygon(),
+    new Secret(),
     new Sei(),
     new Terra(),
   ];
