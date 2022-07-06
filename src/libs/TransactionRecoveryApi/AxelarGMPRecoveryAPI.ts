@@ -146,7 +146,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         approveTx,
       };
     } catch (e: any) {
-      console.error(e);
       if (e.message.includes("account sequence mismatch")) {
         return errorResponse(ApproveGatewayError.ERROR_ACCOUNT_SEQUENCE_MISMATCH);
       }
