@@ -1,6 +1,6 @@
 import { Network } from "@ethersproject/networks";
 
-import { SigningStargateClientOptions } from "@cosmjs/stargate";
+import { DeliverTxResponse, SigningStargateClientOptions } from "@cosmjs/stargate";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { LogDescription } from "ethers/lib/utils";
 import { ContractReceipt, ethers } from "ethers";
@@ -150,11 +150,23 @@ export interface QueryGasFeeOptions {
   estimatedGas?: number;
 }
 
-export enum AxelarGMPRecoveryProcessorResponse {
-  TRIGGERED_RELAY = "triggered relay",
+export interface AxelarTxResponse extends DeliverTxResponse {
+  rawLog: any;
+}
+
+export enum ApproveGatewayError {
   APPROVED_BUT_NOT_EXECUTED = "approved but not executed",
   ALREADY_EXECUTED = "already executed",
-  ERROR_FETCHING_STATUS = "error fetching status",
-  ERROR_INVOKING_RECOVERY = "error invoking recovery",
-  ACCOUNT_SEQUENCE_MISMATCH = "account sequence mismatch",
+  SIGN_COMMAND_FAILED = "cannot sign command",
+  ERROR_FETCHING_STATUS = "cannot fetching status",
+  ERROR_UNKNOWN = "unknown error",
+  ERROR_ACCOUNT_SEQUENCE_MISMATCH = "account sequence mismatch",
+}
+
+export interface ApproveGatewayResponse {
+  success: boolean;
+  error?: ApproveGatewayError;
+  confirmTx?: AxelarTxResponse;
+  createPendingTransferTx?: AxelarTxResponse;
+  signCommandTx?: AxelarTxResponse;
 }

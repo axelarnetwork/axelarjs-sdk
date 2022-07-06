@@ -165,9 +165,7 @@ export class AxelarRecoveryApi {
       chain: chainIdentifier[this.environment],
     });
 
-    const tx = await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
-
-    return tx;
+    return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
   public async createPendingTransfers(chain: string) {
@@ -178,7 +176,7 @@ export class AxelarRecoveryApi {
       module,
     });
 
-    return await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+    return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
   public async executePendingTransfers(chain: string) {
@@ -188,7 +186,7 @@ export class AxelarRecoveryApi {
       module,
     });
 
-    return await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+    return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
   public async signCommands(chain: string) {
@@ -199,7 +197,7 @@ export class AxelarRecoveryApi {
       module,
     });
 
-    return await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+    return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
   public async queryBatchedCommands(chain: string, commandId?: string) {

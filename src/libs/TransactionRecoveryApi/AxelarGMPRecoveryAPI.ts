@@ -9,7 +9,9 @@ import {
   GasToken,
   TxResult,
   QueryGasFeeOptions,
-  AxelarGMPRecoveryProcessorResponse,
+  ApproveGatewayError,
+  ApproveGatewayResponse,
+  AxelarTxResponse,
 } from "../types";
 import {
   AxelarRecoveryApi,
@@ -77,31 +79,44 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async approveGatewayTx(
     txHash: string,
     evmWalletDetails?: EvmWalletDetails
-  ): Promise<"triggered relay" | "approved but not executed" | "already executed" | unknown> {
+  ): Promise<ApproveGatewayResponse> {
     const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
     const { callTx, status } = await this.queryTransactionStatus(txHash);
     const srcChain = callTx.chain;
     const destChain = callTx.returnValues.destinationChain;
 
+    let confirmTx: Nullable<AxelarTxResponse>;
+    let createPendingTransferTx: Nullable<AxelarTxResponse>;
+    let signCommandTx: Nullable<AxelarTxResponse>;
+
+    const errorResponse = (error: ApproveGatewayError) => ({
+      success: false,
+      error,
+      confirmTx,
+      createPendingTransferTx,
+      signCommandTx,
+    });
+
     if (status === GMPStatus.ERROR_FETCHING_STATUS)
-      return AxelarGMPRecoveryProcessorResponse.ERROR_FETCHING_STATUS;
+      return errorResponse(ApproveGatewayError.ERROR_FETCHING_STATUS);
     if (status === GMPStatus.DEST_EXECUTED)
-      return AxelarGMPRecoveryProcessorResponse.ALREADY_EXECUTED;
+      return errorResponse(ApproveGatewayError.ALREADY_EXECUTED);
     if (status === GMPStatus.DEST_GATEWAY_APPROVED)
-      return AxelarGMPRecoveryProcessorResponse.APPROVED_BUT_NOT_EXECUTED;
+      return errorResponse(ApproveGatewayError.APPROVED_BUT_NOT_EXECUTED);
 
     try {
-      const confirmTx = await this.confirmGatewayTx(txHash, srcChain);
-      console.log("confirmedTx", confirmTx);
+      confirmTx = await this.confirmGatewayTx(txHash, srcChain);
       await sleep(2);
 
-      const crt = await this.createPendingTransfers(destChain);
-      console.log("pendingTransfer", crt);
+      createPendingTransferTx = await this.createPendingTransfers(destChain);
       await sleep(2);
 
-      const sc = await this.signCommands(destChain);
-      console.log("signedCommand", sc);
+      signCommandTx = await this.signCommands(destChain);
+      const signEvent = signCommandTx.rawLog[0].events.find((event: any) => event.type === "sign");
+
+      if (!signEvent) return errorResponse(ApproveGatewayError.SIGN_COMMAND_FAILED);
+
       await sleep(2);
 
       const batched = await asyncRetry(
@@ -122,13 +137,18 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
       console.log("broadcastedMsg", broadcasted);
 
-      return AxelarGMPRecoveryProcessorResponse.TRIGGERED_RELAY;
+      return {
+        success: true,
+        confirmTx,
+        createPendingTransferTx,
+        signCommandTx,
+      };
     } catch (e: any) {
       console.error(e);
       if (e.message.includes("account sequence mismatch")) {
-        return AxelarGMPRecoveryProcessorResponse.ACCOUNT_SEQUENCE_MISMATCH;
+        return errorResponse(ApproveGatewayError.ERROR_ACCOUNT_SEQUENCE_MISMATCH);
       }
-      return AxelarGMPRecoveryProcessorResponse.ERROR_INVOKING_RECOVERY;
+      return errorResponse(ApproveGatewayError.ERROR_UNKNOWN);
     }
   }
 
