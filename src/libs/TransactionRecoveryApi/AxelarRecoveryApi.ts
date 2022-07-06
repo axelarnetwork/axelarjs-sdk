@@ -1,6 +1,5 @@
 import fetch from "cross-fetch";
 import { loadChains } from "../../chains";
-import { ChainInfo } from "../../chains/types";
 import { EnvironmentConfigs, getConfigs } from "../../constants";
 import { AxelarRecoveryAPIConfig, Environment, EvmChain, EvmWalletDetails } from "../types";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
