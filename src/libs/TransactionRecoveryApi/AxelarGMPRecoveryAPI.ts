@@ -20,7 +20,6 @@ import {
   GMPStatusResponse,
 } from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
-import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { ContractReceipt, ContractTransaction, ethers } from "ethers";
 import IAxelarGasService from "../abi/IAxelarGasService.json";
@@ -83,8 +82,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
     const { callTx, status } = await this.queryTransactionStatus(txHash);
-    const srcChain = callTx.chain;
-    const destChain = callTx.returnValues.destinationChain;
 
     let confirmTx: Nullable<AxelarTxResponse>;
     let createPendingTransferTx: Nullable<AxelarTxResponse>;
@@ -105,6 +102,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (status === GMPStatus.DEST_GATEWAY_APPROVED)
       return errorResponse(ApproveGatewayError.ALREADY_APPROVED);
 
+    const srcChain = callTx.chain;
+    const destChain = callTx.returnValues.destinationChain;
+
     try {
       confirmTx = await this.confirmGatewayTx(txHash, srcChain);
       await sleep(2);
@@ -113,7 +113,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       await sleep(2);
 
       signCommandTx = await this.signCommands(destChain);
-      const signEvent = signCommandTx.rawLog[0].events.find((event: any) => event.type === "sign");
+      const signEvent = signCommandTx.rawLog[0]?.events?.find(
+        (event: any) => event.type === "sign"
+      );
 
       if (!signEvent) return errorResponse(ApproveGatewayError.SIGN_COMMAND_FAILED);
 
@@ -126,7 +128,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         () => this.queryBatchedCommands(destChain, batchedCommandId),
         (res?: BatchedCommandsResponse) => !!res && res.executeData?.length > 0
       );
-      console.log("batchedCommand", batchedCommand);
       if (!batchedCommand) return errorResponse(ApproveGatewayError.ERROR_BATCHED_COMMAND);
 
       await sleep(2);
@@ -136,7 +137,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         batchedCommand.executeData,
         _evmWalletDetails
       );
-      console.log("approveTx", approveTx);
 
       return {
         success: true,

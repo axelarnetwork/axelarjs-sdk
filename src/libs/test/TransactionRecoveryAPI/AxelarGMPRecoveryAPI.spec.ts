@@ -1,5 +1,12 @@
 import { AxelarGMPRecoveryAPI } from "../../TransactionRecoveryApi/AxelarGMPRecoveryAPI";
-import { AddGasOptions, Environment, EvmChain, EvmWalletDetails, GasToken } from "../../types";
+import {
+  AddGasOptions,
+  ApproveGatewayError,
+  Environment,
+  EvmChain,
+  EvmWalletDetails,
+  GasToken,
+} from "../../types";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
 import { Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
 import DistributionExecutable from "../abi/DistributionExecutable.json";
@@ -25,7 +32,13 @@ import {
 import { AXELAR_GATEWAY } from "../../AxelarGateway";
 import { GMPStatus } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
 import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contractCallHelper";
-import { contractReceiptStub, executeParamsStub } from "../stubs";
+import {
+  axelarTxResponseStub,
+  batchedCommandResponseStub,
+  contractReceiptStub,
+  executeParamsStub,
+} from "../stubs";
+import * as Sleep from "../../../utils/sleep";
 
 describe("AxelarDepositRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -39,13 +52,218 @@ describe("AxelarDepositRecoveryAPI", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     test("It should confirm a gateway tx", async () => {
-      const testParamsAxelarnet = {
-        txHash: "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
-        chain: "Avalanche",
-      };
-      const confirmation = await api.confirmGatewayTx(testParamsAxelarnet);
+      const confirmation = await api.confirmGatewayTx(
+        "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
+        EvmChain.AVALANCHE
+      );
       expect(confirmation).toBeTruthy();
     }, 60000);
+  });
+
+  describe("approveGatewayTx", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+
+    beforeEach(() => {
+      // Prevent sleep while testing
+      const mockSleep = jest.spyOn(Sleep, "sleep");
+      mockSleep.mockImplementation(() => Promise.resolve(undefined));
+    });
+
+    test("it shouldn't call approve given the gmp status cannot be fetched", async () => {
+      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.ERROR_FETCHING_STATUS });
+
+      const response = await api.approveGatewayTx("0x");
+
+      expect(response).toEqual({
+        success: false,
+        error: ApproveGatewayError.FETCHING_STATUS_FAILED,
+      });
+    });
+    test("it shouldn't call approve given the 'batchedCommandId' cannot be fetched", async () => {
+      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      mockQueryTransactionStatus.mockResolvedValueOnce({
+        status: GMPStatus.SRC_GATEWAY_CALLED,
+        callTx: {
+          chain: EvmChain.AVALANCHE,
+          returnValues: { destinationChain: EvmChain.MOONBEAM },
+        },
+      });
+      const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
+      mockConfirmGatewayTx.mockResolvedValueOnce(axelarTxResponseStub());
+      const mockcreatePendingTransfer = jest.spyOn(api, "createPendingTransfers");
+      mockcreatePendingTransfer.mockResolvedValueOnce(axelarTxResponseStub());
+      const mockSignCommandTx = jest.spyOn(api, "signCommands");
+      const signCommandStub = axelarTxResponseStub([
+        {
+          events: [
+            {
+              type: "sign",
+              attributes: [
+                {
+                  key: "batchedCommandId",
+                  value: "0x123",
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+      mockSignCommandTx.mockResolvedValueOnce(signCommandStub);
+
+      const mockQueryBatchedCommand = jest.spyOn(api, "queryBatchedCommands");
+      mockQueryBatchedCommand.mockResolvedValueOnce(batchedCommandResponseStub());
+
+      const response = await api.approveGatewayTx("0x");
+
+      expect(response).toEqual({
+        success: false,
+        error: ApproveGatewayError.ERROR_BATCHED_COMMAND,
+        confirmTx: axelarTxResponseStub(),
+        createPendingTransferTx: axelarTxResponseStub(),
+        signCommandTx: signCommandStub,
+      });
+    });
+    test("it shouldn't call approve given the tx is already executed", async () => {
+      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.DEST_EXECUTED });
+
+      const response = await api.approveGatewayTx("0x");
+
+      expect(response).toEqual({
+        success: false,
+        error: ApproveGatewayError.ALREADY_EXECUTED,
+      });
+    });
+
+    test("it shouldn't call approve given the tx is already approved", async () => {
+      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.DEST_GATEWAY_APPROVED });
+
+      const response = await api.approveGatewayTx("0x");
+
+      expect(response).toEqual({
+        success: false,
+        error: ApproveGatewayError.ALREADY_APPROVED,
+      });
+    });
+
+    test("it shouldn't call approve given the sign command returns 'no command to sign found'", async () => {
+      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      mockQueryTransactionStatus.mockResolvedValueOnce({
+        status: GMPStatus.SRC_GATEWAY_CALLED,
+        callTx: {
+          chain: EvmChain.AVALANCHE,
+          returnValues: { destinationChain: EvmChain.MOONBEAM },
+        },
+      });
+      const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
+      mockConfirmGatewayTx.mockResolvedValueOnce(axelarTxResponseStub());
+      const mockcreatePendingTransfer = jest.spyOn(api, "createPendingTransfers");
+      mockcreatePendingTransfer.mockResolvedValueOnce(axelarTxResponseStub());
+      const mockSignCommandTx = jest.spyOn(api, "signCommands");
+      const signCommandStub = axelarTxResponseStub([
+        {
+          events: [],
+        },
+      ]);
+      mockSignCommandTx.mockResolvedValueOnce(signCommandStub);
+
+      const response = await api.approveGatewayTx("0x");
+
+      expect(response).toEqual({
+        success: false,
+        error: ApproveGatewayError.SIGN_COMMAND_FAILED,
+        confirmTx: axelarTxResponseStub(),
+        createPendingTransferTx: axelarTxResponseStub(),
+        signCommandTx: signCommandStub,
+      });
+    });
+    test("it shouldn't call approve given the account sequence mismatch", async () => {
+      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      mockQueryTransactionStatus.mockResolvedValueOnce({
+        status: GMPStatus.SRC_GATEWAY_CALLED,
+        callTx: {
+          chain: EvmChain.AVALANCHE,
+          returnValues: { destinationChain: EvmChain.MOONBEAM },
+        },
+      });
+      const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
+      mockConfirmGatewayTx.mockRejectedValueOnce(new Error("account sequence mismatch"));
+
+      const response = await api.approveGatewayTx("0x");
+
+      expect(response).toEqual({
+        success: false,
+        error: ApproveGatewayError.ERROR_ACCOUNT_SEQUENCE_MISMATCH,
+      });
+    });
+    test("it shouldn't call approve given the error has thrown before finish", async () => {
+      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      mockQueryTransactionStatus.mockResolvedValueOnce({
+        status: GMPStatus.SRC_GATEWAY_CALLED,
+        callTx: {
+          chain: EvmChain.AVALANCHE,
+          returnValues: { destinationChain: EvmChain.MOONBEAM },
+        },
+      });
+      const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
+      mockConfirmGatewayTx.mockRejectedValueOnce(new Error("unknown error"));
+
+      const response = await api.approveGatewayTx("0x");
+
+      expect(response).toEqual({
+        success: false,
+        error: ApproveGatewayError.ERROR_UNKNOWN,
+      });
+    });
+    test("it should call approve successfully", async () => {
+      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      mockQueryTransactionStatus.mockResolvedValueOnce({
+        status: GMPStatus.SRC_GATEWAY_CALLED,
+        callTx: {
+          chain: EvmChain.AVALANCHE,
+          returnValues: { destinationChain: EvmChain.MOONBEAM },
+        },
+      });
+      const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
+      mockConfirmGatewayTx.mockResolvedValueOnce(axelarTxResponseStub());
+      const mockcreatePendingTransfer = jest.spyOn(api, "createPendingTransfers");
+      mockcreatePendingTransfer.mockResolvedValueOnce(axelarTxResponseStub());
+      const mockSignCommandTx = jest.spyOn(api, "signCommands");
+      const signCommandStub = axelarTxResponseStub([
+        {
+          events: [
+            {
+              type: "sign",
+              attributes: [
+                {
+                  key: "batchedCommandId",
+                  value: "0x123",
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+      mockSignCommandTx.mockResolvedValueOnce(signCommandStub);
+
+      const mockQueryBatchedCommand = jest.spyOn(api, "queryBatchedCommands");
+      mockQueryBatchedCommand.mockResolvedValueOnce(batchedCommandResponseStub("0x456"));
+      const mockApproveTx = jest.spyOn(api, "sendApproveTx");
+      const mockTransaction = { transactionHash: "0x123456" };
+      mockApproveTx.mockResolvedValueOnce(mockTransaction);
+
+      const response = await api.approveGatewayTx("0x");
+
+      expect(response).toEqual({
+        success: true,
+        confirmTx: axelarTxResponseStub(),
+        createPendingTransferTx: axelarTxResponseStub(),
+        signCommandTx: signCommandStub,
+        approveTx: mockTransaction,
+      });
+    });
   });
 
   describe("calculateWantedGasFee", () => {

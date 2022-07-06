@@ -30,7 +30,7 @@ export interface GasPaidInfo {
 export interface GMPStatusResponse {
   status: GMPStatus;
   gasPaidInfo?: GasPaidInfo;
-  errors?: any;
+  error?: any;
   callTx?: any;
 }
 
@@ -99,7 +99,7 @@ export class AxelarRecoveryApi {
 
     return {
       status,
-      errors: error,
+      error,
       gasPaidInfo,
       callTx: call,
     };
@@ -200,10 +200,10 @@ export class AxelarRecoveryApi {
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
-  public async queryBatchedCommands(chain: string, commandId?: string) {
+  public async queryBatchedCommands(chain: string, batchCommandId = "") {
     if (!this.axelarQuerySvc)
       this.axelarQuerySvc = await AxelarQueryClient.initOrGetAxelarQueryClient(this.config);
-    return await this.axelarQuerySvc.evm.BatchedCommands({ chain, id: commandId || "" });
+    return this.axelarQuerySvc.evm.BatchedCommands({ chain, id: batchCommandId });
   }
 
   public async queryGatewayAddress({ chain }: { chain: string }) {
