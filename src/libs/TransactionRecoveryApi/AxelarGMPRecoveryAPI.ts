@@ -9,6 +9,7 @@ import {
   GasToken,
   TxResult,
   QueryGasFeeOptions,
+  AxelarGMPRecoveryProcessorResponse,
 } from "../types";
 import {
   AxelarRecoveryApi,
@@ -18,7 +19,6 @@ import {
 } from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
-import AxelarGMPRecoveryProcessor from "./processors";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { ContractReceipt, ContractTransaction, ethers } from "ethers";
 import IAxelarGasService from "../abi/IAxelarGasService.json";
@@ -47,13 +47,13 @@ import {
   UnsupportedGasTokenError,
 } from "./constants/error";
 import { callExecute } from "./helpers";
+import { asyncRetry, sleep } from "../../utils";
+import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
-  private processor: AxelarGMPRecoveryProcessor;
   axelarQueryApi: AxelarQueryAPI;
   public constructor(config: AxelarRecoveryAPIConfig) {
     super(config);
-    this.processor = new AxelarGMPRecoveryProcessor(this);
     this.axelarQueryApi = new AxelarQueryAPI({
       environment: config.environment,
     });
@@ -74,31 +74,62 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
   }
 
-  public async confirmGatewayTx(params: { txHash: string; chain: string }) {
-    const chain: ChainInfo = loadChains({
-      environment: this.environment,
-    }).find((chain) => chain.chainInfo.chainName.toLowerCase() === params.chain.toLowerCase())
-      ?.chainInfo as ChainInfo;
-    if (!chain) throw new Error("cannot find chain" + params.chain);
+  public async approveGatewayTx(
+    txHash: string,
+    evmWalletDetails?: EvmWalletDetails
+  ): Promise<"triggered relay" | "approved but not executed" | "already executed" | unknown> {
+    const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
-    const txBytes = await this.execRecoveryUrlFetch("/confirm_gateway_tx", {
-      ...params,
-      module: chain.module,
-      chain: chain.chainIdentifier[this.environment],
-    });
+    const { callTx, status } = await this.queryTransactionStatus(txHash);
+    const srcChain = callTx.chain;
+    const destChain = callTx.returnValues.destinationChain;
 
-    const tx = await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+    if (status === GMPStatus.ERROR_FETCHING_STATUS)
+      return AxelarGMPRecoveryProcessorResponse.ERROR_FETCHING_STATUS;
+    if (status === GMPStatus.DEST_EXECUTED)
+      return AxelarGMPRecoveryProcessorResponse.ALREADY_EXECUTED;
+    if (status === GMPStatus.DEST_GATEWAY_APPROVED)
+      return AxelarGMPRecoveryProcessorResponse.APPROVED_BUT_NOT_EXECUTED;
 
-    return tx;
-  }
+    try {
+      const confirmTx = await this.confirmGatewayTx(txHash, srcChain);
+      console.log("confirmedTx", confirmTx);
+      await sleep(2);
 
-  public async manualRelayToDestChain(params: {
-    txHash: string;
-    src: EvmChain;
-    dest: EvmChain;
-    debug?: boolean;
-  }): Promise<"triggered relay" | "approved but not executed" | "already executed" | unknown> {
-    return await this.processor.process(params);
+      const crt = await this.createPendingTransfers(destChain);
+      console.log("pendingTransfer", crt);
+      await sleep(2);
+
+      const sc = await this.signCommands(destChain);
+      console.log("signedCommand", sc);
+      await sleep(2);
+
+      const batched = await asyncRetry(
+        () => this.queryBatchedCommands(destChain),
+        (res: BatchedCommandsResponse) =>
+          res && res.executeData !== null && res.executeData.length > 0,
+        undefined,
+        30,
+        5
+      );
+      console.log("batchedCommand", batched);
+      await sleep(2);
+
+      const broadcasted = await this.sendEvmTxToRelayer(
+        destChain,
+        batched.executeData,
+        _evmWalletDetails
+      );
+      console.log("broadcastedMsg", broadcasted);
+
+      return AxelarGMPRecoveryProcessorResponse.TRIGGERED_RELAY;
+    } catch (e: any) {
+      console.error(e);
+      if (e.message.includes("account sequence mismatch")) {
+        return AxelarGMPRecoveryProcessorResponse.ACCOUNT_SEQUENCE_MISMATCH;
+      }
+      return AxelarGMPRecoveryProcessorResponse.ERROR_INVOKING_RECOVERY;
+    }
   }
 
   /**

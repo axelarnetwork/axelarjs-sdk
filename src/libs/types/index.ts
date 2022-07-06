@@ -149,3 +149,12 @@ export interface QueryGasFeeOptions {
   provider?: ethers.providers.JsonRpcProvider;
   estimatedGas?: number;
 }
+
+export enum AxelarGMPRecoveryProcessorResponse {
+  TRIGGERED_RELAY = "triggered relay",
+  APPROVED_BUT_NOT_EXECUTED = "approved but not executed",
+  ALREADY_EXECUTED = "already executed",
+  ERROR_FETCHING_STATUS = "error fetching status",
+  ERROR_INVOKING_RECOVERY = "error invoking recovery",
+  ACCOUNT_SEQUENCE_MISMATCH = "account sequence mismatch",
+}
