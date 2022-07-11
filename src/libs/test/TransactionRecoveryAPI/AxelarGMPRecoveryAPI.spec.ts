@@ -1016,10 +1016,11 @@ describe("AxelarDepositRecoveryAPI", () => {
 
     test("it should call 'saveGMP' given contract call failed", async () => {
       // mock query api
+      const executeParams = executeParamsStub();
       const mockApi = jest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce({
         status: GMPStatus.DEST_GATEWAY_APPROVED,
-        data: executeParamsStub(),
+        data: executeParams,
       });
 
       // Mock contract call is failed
@@ -1043,6 +1044,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       );
 
       // Expect returns error
+      const { commandId, sourceAddress, sourceChain, payload, symbol, amount } = executeParams;
       expect(response).toEqual({
         success: false,
         error:
@@ -1050,13 +1052,12 @@ describe("AxelarDepositRecoveryAPI", () => {
         data: {
           functionName: "executeWithToken",
           args: {
-            commandId: "0x0ba67952f32cac9a910b1a24a437ecd6c4b0bc37a58a7fad76aad241a11d647c",
-            sourceChain: "Ethereum",
-            sourceAddress: "0x7CfC81955ad9286c516856817C37b7fAe87D8e79",
-            payload:
-              "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000ba86a5719722b02a5d5e388999c25f3333c7a9fb",
-            tokenSymbol: "aUSDC",
-            amount: "9800000",
+            commandId,
+            sourceChain,
+            sourceAddress,
+            payload,
+            symbol,
+            amount,
           },
         },
       });
