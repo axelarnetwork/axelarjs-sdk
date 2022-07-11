@@ -1014,7 +1014,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(response).toEqual(GMPQueryError());
     });
 
-    test("it shouldn't call 'saveGMP' given contract call failed", async () => {
+    test("it should call 'saveGMP' given contract call failed", async () => {
       // mock query api
       const mockApi = jest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce({
@@ -1039,7 +1039,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(response).toEqual(ContractCallError(error));
 
       // Expect we don't call saveGMP api
-      expect(mockGMPApi).not.toHaveBeenCalled();
+      expect(mockGMPApi).toHaveBeenCalled();
     });
 
     test("it should call 'execute' and return success = true", async () => {
