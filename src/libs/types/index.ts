@@ -144,7 +144,7 @@ export interface ExecuteArgs {
   sourceChain: string;
   sourceAddress: string;
   payload: string;
-  tokenSymbol?: string;
+  symbol?: string;
   amount?: string;
 }
 

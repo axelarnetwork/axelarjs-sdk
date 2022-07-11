@@ -365,7 +365,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (response?.status !== GMPStatus.DEST_GATEWAY_APPROVED) return NotApprovedError();
 
     const executeParams = response.data as ExecuteParams;
-    const { destinationChain, destinationContractAddress, isContractCallWithToken } = executeParams;
+    const { destinationChain, destinationContractAddress } = executeParams;
 
     const signer = this.getSigner(destinationChain, evmWalletDetails);
     const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
@@ -376,7 +376,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         transaction: tx,
       }))
       .catch((e: any) => {
-        return ExecuteError(e, contract, isContractCallWithToken);
+        return ExecuteError(e, executeParams);
       });
 
     // Submit execute data to axelarscan if the contract execution is success.

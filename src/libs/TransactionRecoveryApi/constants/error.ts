@@ -1,5 +1,6 @@
 import { Contract } from "ethers";
 import { EvmChain } from "../../../libs";
+import { ExecuteParams } from "../AxelarRecoveryApi";
 
 export const InvalidTransactionError = (chain: EvmChain) => ({
   success: false,
@@ -31,32 +32,43 @@ export const ContractCallError = (e: any) => ({
   error: e.error.reason,
 });
 
-export const ExecuteError = (e: any, contract: Contract, isContractCallWithToken: boolean) => {
-  const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
-  const { commandId, sourceChain, sourceAddress, payload, tokenSymbol, amount } =
-    contract.interface.decodeFunctionData(functionName, e.error.transaction.data);
+export const ExecuteError = (e: any, params: ExecuteParams) => {
+  const {
+    commandId,
+    sourceChain,
+    sourceAddress,
+    payload,
+    symbol,
+    amount,
+    isContractCallWithToken,
+  } = params;
 
-  const reason =
-    e.error.reason === "execution reverted"
-      ? `Transaction execution was reverted. Please check the implementation of the destination contract's ${
-          isContractCallWithToken ? "_executeWithToken" : "_execute"
-        } function.`
-      : e.error.reason;
+  const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
+
+  const data = {
+    functionName,
+    args: {
+      commandId,
+      sourceChain,
+      sourceAddress,
+      payload,
+      symbol,
+      amount,
+    },
+  };
+
+  const destContractErrorReasons = ["execution reverted", "processing response error"];
+
+  const reason = destContractErrorReasons.includes(e.error.reason)
+    ? `Transaction execution was reverted. Please check the implementation of the destination contract's ${
+        isContractCallWithToken ? "_executeWithToken" : "_execute"
+      } function.`
+    : e.error.reason;
 
   return {
     success: false,
     error: reason,
-    data: {
-      functionName,
-      args: {
-        commandId,
-        sourceChain,
-        sourceAddress,
-        payload,
-        tokenSymbol,
-        amount: amount.toString(),
-      },
-    },
+    data,
   };
 };
 
