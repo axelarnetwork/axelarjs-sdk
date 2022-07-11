@@ -60,8 +60,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   private async saveGMP(
     sourceTransactionHash: string,
-    transactionHash: string,
     relayerAddress: string,
+    transactionHash?: string,
     error?: any
   ) {
     return await this.execPost(super.getAxelarCachingServiceUrl, "", {
@@ -380,7 +380,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const signerAddress = await signer.getAddress();
     const executeTxHash = txResult.transaction?.transactionHash;
     if (executeTxHash) {
-      await this.saveGMP(srcTxHash, executeTxHash, signerAddress).catch(() => undefined);
+      await this.saveGMP(srcTxHash, signerAddress, executeTxHash).catch(() => undefined);
+    } else {
+      await this.saveGMP(srcTxHash, signerAddress, "", txResult.error).catch(() => undefined);
     }
 
     return txResult;
