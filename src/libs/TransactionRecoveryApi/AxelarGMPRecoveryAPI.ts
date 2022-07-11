@@ -37,6 +37,7 @@ import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
   ContractCallError,
+  ExecuteError,
   GasPriceAPIError,
   GMPQueryError,
   InvalidGasTokenError,
@@ -364,7 +365,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (response?.status !== GMPStatus.DEST_GATEWAY_APPROVED) return NotApprovedError();
 
     const executeParams = response.data as ExecuteParams;
-    const { destinationChain, destinationContractAddress } = executeParams;
+    const { destinationChain, destinationContractAddress, isContractCallWithToken } = executeParams;
 
     const signer = this.getSigner(destinationChain, evmWalletDetails);
     const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
@@ -374,7 +375,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         success: true,
         transaction: tx,
       }))
-      .catch(ContractCallError);
+      .catch((e: any) => {
+        return ExecuteError(e, contract, isContractCallWithToken);
+      });
 
     // Submit execute data to axelarscan if the contract execution is success.
     const signerAddress = await signer.getAddress();

@@ -15,7 +15,9 @@ export function callExecute(params: ExecuteParams, contract: Contract): Promise<
   if (isContractCallWithToken) {
     return contract
       .executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount)
-      .then((tx: ContractTransaction) => tx.wait());
+      .then((tx: ContractTransaction) => {
+        return tx.wait();
+      });
   } else {
     return contract
       .execute(commandId, sourceChain, sourceAddress, payload)

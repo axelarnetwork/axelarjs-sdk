@@ -139,10 +139,23 @@ export interface EventLog {
   logIndex: number;
 }
 
+export interface ExecuteArgs {
+  commandId: string;
+  sourceChain: string;
+  sourceAddress: string;
+  payload: string;
+  tokenSymbol?: string;
+  amount?: string;
+}
+
 export interface TxResult {
   success: boolean;
   transaction?: ContractReceipt;
   error?: string;
+  data?: {
+    functionName: string;
+    args: ExecuteArgs;
+  };
 }
 
 export interface QueryGasFeeOptions {
