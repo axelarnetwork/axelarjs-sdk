@@ -370,12 +370,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const signer = this.getSigner(destinationChain, evmWalletDetails);
     const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
 
+    let rawError: any;
     const txResult: TxResult = await callExecute(executeParams, contract)
       .then((tx: ContractReceipt) => ({
         success: true,
         transaction: tx,
       }))
       .catch((e: any) => {
+        rawError = e;
         return ExecuteError(e, executeParams);
       });
 
@@ -385,7 +387,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (executeTxHash) {
       await this.saveGMP(srcTxHash, signerAddress, executeTxHash).catch(() => undefined);
     } else {
-      await this.saveGMP(srcTxHash, signerAddress, "", txResult.error).catch(() => undefined);
+      await this.saveGMP(srcTxHash, signerAddress, "", rawError).catch(() => undefined);
     }
 
     return txResult;
