@@ -1,4 +1,3 @@
-import { Contract } from "ethers";
 import { EvmChain } from "../../../libs";
 import { ExecuteParams } from "../AxelarRecoveryApi";
 
@@ -70,7 +69,7 @@ export const ExecuteError = (e: any, params: ExecuteParams) => {
     if (error.includes(destContractErrorReasons[i])) {
       return {
         success: false,
-        error: `Transaction execution was reverted. Please check the implementation of the destination contract's ${
+        error: `Transaction reverted. Please check the implementation of the destination contract's ${
           isContractCallWithToken ? "_executeWithToken" : "_execute"
         } function.`,
         data,

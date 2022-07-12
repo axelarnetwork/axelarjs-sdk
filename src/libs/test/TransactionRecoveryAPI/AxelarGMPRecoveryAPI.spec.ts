@@ -20,7 +20,6 @@ import { GAS_RECEIVER } from "../../TransactionRecoveryApi/constants/contract";
 import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
-  ExecuteError,
   GasPriceAPIError,
   GMPQueryError,
   InvalidGasTokenError,
@@ -1048,7 +1047,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(response).toEqual({
         success: false,
         error:
-          "Transaction execution was reverted. Please check the implementation of the destination contract's _executeWithToken function.",
+          "Transaction reverted. Please check the implementation of the destination contract's _executeWithToken function.",
         data: {
           functionName: "executeWithToken",
           args: {

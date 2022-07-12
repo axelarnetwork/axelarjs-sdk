@@ -33,7 +33,7 @@ const mainnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-mainnet.axelar.dev`,
   axelarRpcUrl: "https://axelar-rpc.quickapi.com",
   axelarLcdUrl: "https://axelar-lcd.quickapi.com",
-  axelarCachingServiceUrl: "https://mainnet.api.gmp.axelarscan.io",
+  axelarCachingServiceUrl: "https://api.gmp.axelarscan.io",
   recoveryApiUrl: "https://axelar-signing-relayer-mainnet.axelar.dev",
 };
 
