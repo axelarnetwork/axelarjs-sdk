@@ -2,6 +2,14 @@ import { Contract } from "ethers";
 import { EvmChain } from "../../../libs";
 import { ExecuteParams } from "../AxelarRecoveryApi";
 
+const metamaskErrorMsg = (e: any) => e.data?.message;
+
+const ethersErrorMsg = (e: any) => e.error?.reason;
+
+const generalErrorMsg = (e: any) => e.message;
+
+export const ErrorMsg = (e: any) => ethersErrorMsg(e) || metamaskErrorMsg(e) || generalErrorMsg(e);
+
 export const InvalidTransactionError = (chain: EvmChain) => ({
   success: false,
   error: `Couldn't find a transaction on ${chain}`,
@@ -29,7 +37,7 @@ export const AlreadyPaidGasFeeError = () => ({
 
 export const ContractCallError = (e: any) => ({
   success: false,
-  error: e.error.reason,
+  error: ErrorMsg(e),
 });
 
 export const ExecuteError = (e: any, params: ExecuteParams) => {
@@ -42,7 +50,7 @@ export const ExecuteError = (e: any, params: ExecuteParams) => {
     amount,
     isContractCallWithToken,
   } = params;
-
+  const error = ErrorMsg(e);
   const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
 
   const data = {
@@ -57,17 +65,22 @@ export const ExecuteError = (e: any, params: ExecuteParams) => {
     },
   };
 
-  const destContractErrorReasons = ["execution reverted", "processing response error"];
-
-  const reason = destContractErrorReasons.includes(e.error.reason)
-    ? `Transaction execution was reverted. Please check the implementation of the destination contract's ${
-        isContractCallWithToken ? "_executeWithToken" : "_execute"
-      } function.`
-    : e.error.reason;
+  const destContractErrorReasons = ["processing response error", "revert"];
+  for (let i = 0; i < destContractErrorReasons.length; i++) {
+    if (error.includes(destContractErrorReasons[i])) {
+      return {
+        success: false,
+        error: `Transaction execution was reverted. Please check the implementation of the destination contract's ${
+          isContractCallWithToken ? "_executeWithToken" : "_execute"
+        } function.`,
+        data,
+      };
+    }
+  }
 
   return {
     success: false,
-    error: reason,
+    error,
     data,
   };
 };
