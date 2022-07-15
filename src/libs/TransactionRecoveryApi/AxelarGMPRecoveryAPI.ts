@@ -37,16 +37,17 @@ import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
   ContractCallError,
-  ExecuteError,
+  ExecutionRevertedError,
   GasPriceAPIError,
   GMPQueryError,
+  InsufficientFundsError,
   InvalidGasTokenError,
   InvalidTransactionError,
   NotApprovedError,
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "./constants/error";
-import { callExecute } from "./helpers";
+import { callExecute, CALL_EXECUTE_ERROR } from "./helpers";
 import { asyncRetry, sleep } from "../../utils";
 import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 
@@ -370,15 +371,20 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const signer = this.getSigner(destinationChain, evmWalletDetails);
     const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
 
-    let rawError: any;
     const txResult: TxResult = await callExecute(executeParams, contract)
       .then((tx: ContractReceipt) => ({
         success: true,
         transaction: tx,
       }))
-      .catch((e: any) => {
-        rawError = e;
-        return ExecuteError(e, executeParams);
+      .catch((e: Error) => {
+        if (e.message === CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS) {
+          return InsufficientFundsError(executeParams);
+        } else if (e.message === CALL_EXECUTE_ERROR.REVERT) {
+          return ExecutionRevertedError(executeParams);
+        } else {
+          // should not happen
+          return ContractCallError(e);
+        }
       });
 
     // Submit execute data to axelarscan if the contract execution is success.
@@ -387,7 +393,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (executeTxHash) {
       await this.saveGMP(srcTxHash, signerAddress, executeTxHash).catch(() => undefined);
     } else {
-      await this.saveGMP(srcTxHash, signerAddress, "", rawError).catch(() => undefined);
+      await this.saveGMP(srcTxHash, signerAddress, "", txResult.error).catch(() => undefined);
     }
 
     return txResult;

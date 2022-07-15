@@ -20,8 +20,10 @@ import { GAS_RECEIVER } from "../../TransactionRecoveryApi/constants/contract";
 import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
+  ExecutionRevertedError,
   GasPriceAPIError,
   GMPQueryError,
+  InsufficientFundsError,
   InvalidGasTokenError,
   InvalidTransactionError,
   NotApprovedError,
@@ -1013,7 +1015,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(response).toEqual(GMPQueryError());
     });
 
-    test("it should call 'saveGMP' given contract call failed", async () => {
+    test("it calls 'execute' and return revert error given 'callExecute' throws 'CALL_EXECUTE_ERROR.REVERT' error", async () => {
       // mock query api
       const executeParams = executeParamsStub();
       const mockApi = jest.spyOn(api, "queryExecuteParams");
@@ -1023,46 +1025,58 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
 
       // Mock contract call is failed
-      const error = {
-        error: {
-          reason: "execution reverted",
-          transaction: {
-            data: "0x1a98b2e00ba67952f32cac9a910b1a24a437ecd6c4b0bc37a58a7fad76aad241a11d647c00000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000016000000000000000000000000000000000000000000000000000000000000001e000000000000000000000000000000000000000000000000000000000009589400000000000000000000000000000000000000000000000000000000000000008457468657265756d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002a30783743664338313935356164393238366335313638353638313743333762376641653837443865373900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000ba86a5719722b02a5d5e388999c25f3333c7a9fb00000000000000000000000000000000000000000000000000000000000000056155534443000000000000000000000000000000000000000000000000000000",
-          },
-        },
-      };
+      const error = new Error(ContractCallHelper.CALL_EXECUTE_ERROR.REVERT);
       jest.spyOn(ContractCallHelper, "callExecute").mockRejectedValueOnce(error);
 
       // Mock private saveGMP
       const mockGMPApi = jest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
       mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
 
-      const response = await api.execute(
-        "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
-        evmWalletDetails
-      );
+      const sourceTxHash = "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae";
+      const response = await api.execute(sourceTxHash, evmWalletDetails);
 
       // Expect returns error
-      const { commandId, sourceAddress, sourceChain, payload, symbol, amount } = executeParams;
-      expect(response).toEqual({
-        success: false,
-        error:
-          "Transaction reverted. Please check the implementation of the destination contract's _executeWithToken function.",
-        data: {
-          functionName: "executeWithToken",
-          args: {
-            commandId,
-            sourceChain,
-            sourceAddress,
-            payload,
-            symbol,
-            amount,
-          },
-        },
-      });
+      expect(response).toEqual(ExecutionRevertedError(executeParams));
 
       // Expect we don't call saveGMP api
-      expect(mockGMPApi).toHaveBeenCalled();
+      expect(mockGMPApi).toHaveBeenCalledWith(
+        sourceTxHash,
+        new ethers.Wallet(evmWalletDetails.privateKey as string).address,
+        "",
+        response.error
+      );
+    });
+
+    test("it calls 'execute' and return revert error given 'callExecute' throws 'CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS' error", async () => {
+      // mock query api
+      const executeParams = executeParamsStub();
+      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      mockApi.mockResolvedValueOnce({
+        status: GMPStatus.DEST_GATEWAY_APPROVED,
+        data: executeParams,
+      });
+
+      // Mock contract call is failed
+      const error = new Error(ContractCallHelper.CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS);
+      jest.spyOn(ContractCallHelper, "callExecute").mockRejectedValueOnce(error);
+
+      // Mock private saveGMP
+      const mockGMPApi = jest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
+      mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
+
+      const sourceTxHash = "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae";
+      const response = await api.execute(sourceTxHash, evmWalletDetails);
+
+      // Expect returns error
+      expect(response).toEqual(InsufficientFundsError(executeParams));
+
+      // Expect we don't call saveGMP api
+      expect(mockGMPApi).toHaveBeenCalledWith(
+        sourceTxHash,
+        new ethers.Wallet(evmWalletDetails.privateKey as string).address,
+        "",
+        response.error
+      );
     });
 
     test("it should call 'execute' and return success = true", async () => {

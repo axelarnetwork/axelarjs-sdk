@@ -39,51 +39,6 @@ export const ContractCallError = (e: any) => ({
   error: ErrorMsg(e),
 });
 
-export const ExecuteError = (e: any, params: ExecuteParams) => {
-  const {
-    commandId,
-    sourceChain,
-    sourceAddress,
-    payload,
-    symbol,
-    amount,
-    isContractCallWithToken,
-  } = params;
-  const error = ErrorMsg(e);
-  const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
-
-  const data = {
-    functionName,
-    args: {
-      commandId,
-      sourceChain,
-      sourceAddress,
-      payload,
-      symbol,
-      amount,
-    },
-  };
-
-  const destContractErrorReasons = ["processing response error", "revert"];
-  for (let i = 0; i < destContractErrorReasons.length; i++) {
-    if (error.includes(destContractErrorReasons[i])) {
-      return {
-        success: false,
-        error: `Transaction reverted. Please check the implementation of the destination contract's ${
-          isContractCallWithToken ? "_executeWithToken" : "_execute"
-        } function.`,
-        data,
-      };
-    }
-  }
-
-  return {
-    success: false,
-    error,
-    data,
-  };
-};
-
 export const InvalidGasTokenError = () => ({
   success: false,
   error: "Invalid gas token address",
@@ -104,10 +59,58 @@ export const GMPQueryError = () => ({
   error: "Couldn't query the transaction details",
 });
 
-export const ExecutionRevertedError = (isContractCall: boolean, params: any) => ({
-  success: false,
-  error: `Transaction execution was reverted. Please check the implementation of the destination contract's ${
-    isContractCall ? "_execute" : "_executeWithToken"
-  } function.`,
-  params,
-});
+export const ExecutionRevertedError = (params: ExecuteParams) => {
+  const {
+    commandId,
+    sourceChain,
+    sourceAddress,
+    payload,
+    symbol,
+    amount,
+    isContractCallWithToken,
+  } = params;
+  const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
+  return {
+    success: false,
+    error: `Transaction execution was reverted. Please check the implementation of the destination contract's ${functionName} function.`,
+    data: {
+      functionName,
+      args: {
+        commandId,
+        sourceChain,
+        sourceAddress,
+        payload,
+        symbol,
+        amount,
+      },
+    },
+  };
+};
+
+export const InsufficientFundsError = (params: ExecuteParams) => {
+  const {
+    commandId,
+    sourceChain,
+    sourceAddress,
+    payload,
+    symbol,
+    amount,
+    isContractCallWithToken,
+  } = params;
+  const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
+  return {
+    success: false,
+    error: "Insufficient funds to pay for transaction gas cost",
+    data: {
+      functionName,
+      args: {
+        commandId,
+        sourceChain,
+        sourceAddress,
+        payload,
+        symbol,
+        amount,
+      },
+    },
+  };
+};

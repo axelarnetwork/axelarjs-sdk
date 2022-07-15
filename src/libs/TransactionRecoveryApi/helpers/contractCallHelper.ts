@@ -1,6 +1,11 @@
 import { Contract, ContractReceipt, ContractTransaction } from "ethers";
 import { ExecuteParams } from "../AxelarRecoveryApi";
 
+export enum CALL_EXECUTE_ERROR {
+  REVERT = "REVERT",
+  INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS",
+}
+
 export async function callExecute(
   params: ExecuteParams,
   contract: Contract
@@ -15,30 +20,31 @@ export async function callExecute(
     symbol,
   } = params;
 
-  const revertMsg = "execution reverted";
-
+  let txReceipt: ContractReceipt | undefined;
   if (isContractCallWithToken) {
     // Checking if the destination contract call reverted
     const estimatedGas = await contract.estimateGas
       .executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount)
       .catch(() => undefined);
+    if (!estimatedGas) throw new Error(CALL_EXECUTE_ERROR.REVERT);
 
-    if (!estimatedGas) throw new Error(revertMsg);
-
-    return contract
+    txReceipt = contract
       .executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount)
-      .then((tx: ContractTransaction) => {
-        return tx.wait();
-      });
+      .then((tx: ContractTransaction) => tx.wait())
+      .catch(() => undefined);
   } else {
     // Checking if the destination contract call reverted
     const estimatedGas = await contract.estimateGas
       .execute(commandId, sourceChain, sourceAddress, payload)
       .catch(() => undefined);
-    if (!estimatedGas) throw new Error(revertMsg);
+    if (!estimatedGas) throw new Error(CALL_EXECUTE_ERROR.REVERT);
 
-    return contract
+    txReceipt = contract
       .execute(commandId, sourceChain, sourceAddress, payload)
-      .then((tx: ContractTransaction) => tx.wait());
+      .then((tx: ContractTransaction) => tx.wait())
+      .catch(() => undefined);
   }
+
+  if (!txReceipt) throw new Error(CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS);
+  return txReceipt;
 }

@@ -1,4 +1,4 @@
-import { callExecute } from "../../../TransactionRecoveryApi/helpers";
+import { callExecute, CALL_EXECUTE_ERROR } from "../../../TransactionRecoveryApi/helpers";
 import { contractReceiptStub, executeParamsStub } from "../../stubs";
 import { EvmChain } from "../../../types";
 import IAxelarExecutable from "../../../abi/IAxelarExecutable";
@@ -19,7 +19,10 @@ describe("contractCallHelper", () => {
 
       // Mock contract's executeWithTokenFunction
       const mockExecuteWithToken = jest.fn().mockResolvedValueOnce({ wait: mockWait });
-      const contract: any = { executeWithToken: mockExecuteWithToken };
+      const contract: any = {
+        executeWithToken: mockExecuteWithToken,
+        estimateGas: { executeWithToken: jest.fn().mockResolvedValueOnce(1) },
+      };
 
       await callExecute(stub, contract);
 
@@ -39,7 +42,10 @@ describe("contractCallHelper", () => {
 
       // Mock contract's execute function
       const mockExecute = jest.fn().mockResolvedValueOnce({ wait: mockWait });
-      const contract: any = { execute: mockExecute };
+      const contract: any = {
+        execute: mockExecute,
+        estimateGas: { execute: jest.fn().mockResolvedValueOnce(1) },
+      };
 
       stub.isContractCallWithToken = false;
       await callExecute(stub, contract);
@@ -80,7 +86,7 @@ describe("contractCallHelper", () => {
           destinationContractAddress: contract.address,
         },
         contract
-      ).catch((err) => expect(err).toEqual(new Error("execution reverted")));
+      ).catch((err) => expect(err).toEqual(new Error(CALL_EXECUTE_ERROR.REVERT)));
     });
 
     test("it should return 'insufficient funds' error when the caller has insufficient funds", async () => {
@@ -112,7 +118,7 @@ describe("contractCallHelper", () => {
           destinationContractAddress: contract.address,
         },
         contract
-      ).catch((err) => expect(err.code).toEqual("INSUFFICIENT_FUNDS"));
+      ).catch((err) => expect(err).toEqual(new Error(CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS)));
     });
 
     test("it should return ContractReceipt when the caller has sufficient funds and destination contract logic is legit", async () => {
