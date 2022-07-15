@@ -1082,9 +1082,10 @@ describe("AxelarDepositRecoveryAPI", () => {
     test("it should call 'execute' and return success = true", async () => {
       // mock query api
       const mockApi = jest.spyOn(api, "queryExecuteParams");
+      const executeParams = executeParamsStub();
       mockApi.mockResolvedValueOnce({
         status: GMPStatus.DEST_GATEWAY_APPROVED,
-        data: executeParamsStub(),
+        data: executeParams,
       });
 
       // Mock contract call is successful
@@ -1099,9 +1100,31 @@ describe("AxelarDepositRecoveryAPI", () => {
         evmWalletDetails
       );
 
+      const {
+        commandId,
+        sourceChain,
+        sourceAddress,
+        payload,
+        symbol,
+        amount,
+        isContractCallWithToken,
+      } = executeParams;
+      const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
+
       expect(response).toEqual({
         success: true,
         transaction: contractReceiptStub(),
+        data: {
+          functionName,
+          args: {
+            commandId,
+            sourceChain,
+            sourceAddress,
+            payload,
+            symbol,
+            amount,
+          },
+        },
       });
 
       expect(mockGMPApi).toHaveBeenCalledTimes(1);

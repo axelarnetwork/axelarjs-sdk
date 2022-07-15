@@ -36,12 +36,12 @@ export interface GMPStatusResponse {
 export interface ExecuteParams {
   commandId: string;
   sourceChain: string;
-  destinationChain: EvmChain;
   sourceAddress: string;
-  destinationContractAddress: string;
   payload: string;
   symbol?: string;
   amount?: string;
+  destinationContractAddress: string;
+  destinationChain: EvmChain;
   isContractCallWithToken: boolean;
 }
 

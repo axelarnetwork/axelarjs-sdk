@@ -372,10 +372,33 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
 
     const txResult: TxResult = await callExecute(executeParams, contract)
-      .then((tx: ContractReceipt) => ({
-        success: true,
-        transaction: tx,
-      }))
+      .then((tx: ContractReceipt) => {
+        const {
+          commandId,
+          sourceChain,
+          sourceAddress,
+          payload,
+          symbol,
+          amount,
+          isContractCallWithToken,
+        } = executeParams;
+        const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
+        return {
+          success: true,
+          transaction: tx,
+          data: {
+            functionName,
+            args: {
+              commandId,
+              sourceChain,
+              sourceAddress,
+              payload,
+              symbol,
+              amount,
+            },
+          },
+        };
+      })
       .catch((e: Error) => {
         if (e.message === CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS) {
           return InsufficientFundsError(executeParams);
