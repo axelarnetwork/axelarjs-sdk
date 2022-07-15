@@ -72,7 +72,7 @@ describe("contractCallHelper", () => {
         provider
       );
 
-      await callExecute(
+      return callExecute(
         {
           commandId: "0x37a8ff7cc5cd6ec5ff3a043c1e30e7ebde9539cb2f12c36cb7fd6dac30c54c5c",
           sourceChain: "Moonbeam",
@@ -104,7 +104,7 @@ describe("contractCallHelper", () => {
         signer
       );
 
-      await callExecute(
+      return callExecute(
         {
           commandId: "0xcf3eef6939a392b4ea9726830bf87bf4b5a4f6939ac3a062b0095944bc97278d",
           sourceChain: "Avalanche",
