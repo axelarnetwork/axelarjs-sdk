@@ -5,7 +5,7 @@ export async function asyncRetry(
   retryConditionMet: (response: any) => boolean,
   errorHandler?: (e: Error, retryCount: number) => void,
   secondsToRetry = 5,
-  maxRetries = 2,
+  maxRetries = 3,
   count = 0
 ): Promise<any> {
   const retry = async () => {

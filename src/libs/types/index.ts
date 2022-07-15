@@ -1,6 +1,6 @@
 import { Network } from "@ethersproject/networks";
 
-import { SigningStargateClientOptions } from "@cosmjs/stargate";
+import { DeliverTxResponse, SigningStargateClientOptions } from "@cosmjs/stargate";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { LogDescription } from "ethers/lib/utils";
 import { ContractReceipt, ethers } from "ethers";
@@ -139,13 +139,49 @@ export interface EventLog {
   logIndex: number;
 }
 
+export interface ExecuteArgs {
+  commandId: string;
+  sourceChain: string;
+  sourceAddress: string;
+  payload: string;
+  symbol?: string;
+  amount?: string;
+}
+
 export interface TxResult {
   success: boolean;
   transaction?: ContractReceipt;
   error?: string;
+  data?: {
+    functionName: string;
+    args: ExecuteArgs;
+  };
 }
 
 export interface QueryGasFeeOptions {
   provider?: ethers.providers.JsonRpcProvider;
   estimatedGas?: number;
+}
+
+export interface AxelarTxResponse extends DeliverTxResponse {
+  rawLog: any;
+}
+
+export enum ApproveGatewayError {
+  ALREADY_APPROVED = "already approved",
+  ALREADY_EXECUTED = "already executed",
+  SIGN_COMMAND_FAILED = "cannot sign command",
+  FETCHING_STATUS_FAILED = "cannot fetching status",
+  ERROR_BATCHED_COMMAND = "cannot find batch command",
+  ERROR_UNKNOWN = "unknown error",
+  ERROR_ACCOUNT_SEQUENCE_MISMATCH = "account sequence mismatch",
+}
+
+export interface ApproveGatewayResponse {
+  success: boolean;
+  error?: ApproveGatewayError;
+  confirmTx?: AxelarTxResponse;
+  createPendingTransferTx?: AxelarTxResponse;
+  signCommandTx?: AxelarTxResponse;
+  approveTx?: any;
 }

@@ -21,7 +21,7 @@ xdescribe("AxelarDepositRecoveryAPI", () => {
 
   xdescribe("create pending transfers", () => {
     test("It should create pending transfers", async () => {
-      const confirmation = await api.createPendingTransfers({ chain: "ethereum" });
+      const confirmation = await api.createPendingTransfers("ethereum");
       console.log("confirmation", confirmation);
       expect(confirmation).toBeTruthy();
     }, 60000);
@@ -29,7 +29,7 @@ xdescribe("AxelarDepositRecoveryAPI", () => {
 
   xdescribe("create pending transfers", () => {
     test("It should create pending transfers", async () => {
-      const confirmation = await api.createPendingTransfers({ chain: "ethereum" });
+      const confirmation = await api.createPendingTransfers("ethereum");
       console.log("confirmation", confirmation);
       expect(confirmation).toBeTruthy();
     }, 60000);
@@ -37,7 +37,7 @@ xdescribe("AxelarDepositRecoveryAPI", () => {
 
   xdescribe("sign commands", () => {
     test("It should sign commands", async () => {
-      const confirmation = await api.signCommands({ chain: "ethereum" });
+      const confirmation = await api.signCommands("ethereum");
       console.log("confirmation", confirmation);
       expect(confirmation).toBeTruthy();
     }, 60000);
@@ -45,7 +45,7 @@ xdescribe("AxelarDepositRecoveryAPI", () => {
 
   xdescribe("execute pending transfers", () => {
     test("It should execute pending transfers", async () => {
-      const confirmation = await api.executePendingTransfers({ chain: "terra" });
+      const confirmation = await api.executePendingTransfers("terra");
       console.log("confirmation", confirmation);
       expect(confirmation).toBeTruthy();
     }, 60000);

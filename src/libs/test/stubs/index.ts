@@ -80,3 +80,23 @@ export const contractReceiptStub = () => ({
   type: 0,
   transactionIndex: 1,
 });
+
+export const axelarTxResponseStub = (rawLog: any = []) => ({
+  height: 1,
+  code: 0,
+  transactionHash: "0x",
+  rawLog,
+  gasUsed: 1,
+  gasWanted: 1,
+});
+
+export const batchedCommandResponseStub = (executeData = "") => ({
+  executeData,
+  id: "",
+  status: 1,
+  data: "",
+  keyId: "",
+  signature: [],
+  prevBatchedCommandsId: "",
+  commandIds: [],
+});

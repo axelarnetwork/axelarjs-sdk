@@ -1,4 +1,13 @@
 import { EvmChain } from "../../../libs";
+import { ExecuteParams } from "../AxelarRecoveryApi";
+
+const metamaskErrorMsg = (e: any) => e.data?.message;
+
+const ethersErrorMsg = (e: any) => e.error?.reason;
+
+const generalErrorMsg = (e: any) => e.message;
+
+export const ErrorMsg = (e: any) => ethersErrorMsg(e) || metamaskErrorMsg(e) || generalErrorMsg(e);
 
 export const InvalidTransactionError = (chain: EvmChain) => ({
   success: false,
@@ -27,7 +36,7 @@ export const AlreadyPaidGasFeeError = () => ({
 
 export const ContractCallError = (e: any) => ({
   success: false,
-  error: e.message,
+  error: ErrorMsg(e),
 });
 
 export const InvalidGasTokenError = () => ({
@@ -49,3 +58,59 @@ export const GMPQueryError = () => ({
   success: false,
   error: "Couldn't query the transaction details",
 });
+
+export const ExecutionRevertedError = (params: ExecuteParams) => {
+  const {
+    commandId,
+    sourceChain,
+    sourceAddress,
+    payload,
+    symbol,
+    amount,
+    isContractCallWithToken,
+  } = params;
+  const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
+  return {
+    success: false,
+    error: `Transaction execution was reverted. Please check the implementation of the destination contract's ${functionName} function.`,
+    data: {
+      functionName,
+      args: {
+        commandId,
+        sourceChain,
+        sourceAddress,
+        payload,
+        symbol,
+        amount,
+      },
+    },
+  };
+};
+
+export const InsufficientFundsError = (params: ExecuteParams) => {
+  const {
+    commandId,
+    sourceChain,
+    sourceAddress,
+    payload,
+    symbol,
+    amount,
+    isContractCallWithToken,
+  } = params;
+  const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
+  return {
+    success: false,
+    error: "Insufficient funds to pay for transaction gas cost",
+    data: {
+      functionName,
+      args: {
+        commandId,
+        sourceChain,
+        sourceAddress,
+        payload,
+        symbol,
+        amount,
+      },
+    },
+  };
+};

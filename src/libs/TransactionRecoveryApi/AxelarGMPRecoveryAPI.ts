@@ -1,5 +1,3 @@
-import { loadChains } from "../../chains";
-import { ChainInfo } from "../../chains/types";
 import {
   AxelarRecoveryAPIConfig,
   EvmChain,
@@ -9,6 +7,9 @@ import {
   GasToken,
   TxResult,
   QueryGasFeeOptions,
+  ApproveGatewayError,
+  ApproveGatewayResponse,
+  AxelarTxResponse,
 } from "../types";
 import {
   AxelarRecoveryApi,
@@ -17,8 +18,6 @@ import {
   GMPStatusResponse,
 } from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
-import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
-import AxelarGMPRecoveryProcessor from "./processors";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { ContractReceipt, ContractTransaction, ethers } from "ethers";
 import IAxelarGasService from "../abi/IAxelarGasService.json";
@@ -38,22 +37,24 @@ import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
   ContractCallError,
+  ExecutionRevertedError,
   GasPriceAPIError,
   GMPQueryError,
+  InsufficientFundsError,
   InvalidGasTokenError,
   InvalidTransactionError,
   NotApprovedError,
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "./constants/error";
-import { callExecute } from "./helpers";
+import { callExecute, CALL_EXECUTE_ERROR } from "./helpers";
+import { asyncRetry, sleep } from "../../utils";
+import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
-  private processor: AxelarGMPRecoveryProcessor;
   axelarQueryApi: AxelarQueryAPI;
   public constructor(config: AxelarRecoveryAPIConfig) {
     super(config);
-    this.processor = new AxelarGMPRecoveryProcessor(this);
     this.axelarQueryApi = new AxelarQueryAPI({
       environment: config.environment,
     });
@@ -61,8 +62,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   private async saveGMP(
     sourceTransactionHash: string,
-    transactionHash: string,
     relayerAddress: string,
+    transactionHash?: string,
     error?: any
   ) {
     return await this.execPost(super.getAxelarCachingServiceUrl, "", {
@@ -74,31 +75,82 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
   }
 
-  public async confirmGatewayTx(params: { txHash: string; chain: string }) {
-    const chain: ChainInfo = loadChains({
-      environment: this.environment,
-    }).find((chain) => chain.chainInfo.chainName.toLowerCase() === params.chain.toLowerCase())
-      ?.chainInfo as ChainInfo;
-    if (!chain) throw new Error("cannot find chain" + params.chain);
+  public async manualRelayToDestChain(
+    txHash: string,
+    evmWalletDetails?: EvmWalletDetails
+  ): Promise<ApproveGatewayResponse> {
+    const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
-    const txBytes = await this.execRecoveryUrlFetch("/confirm_gateway_tx", {
-      ...params,
-      module: chain.module,
-      chain: chain.chainIdentifier[this.environment],
+    const { callTx, status } = await this.queryTransactionStatus(txHash);
+
+    let confirmTx: Nullable<AxelarTxResponse>;
+    let createPendingTransferTx: Nullable<AxelarTxResponse>;
+    let signCommandTx: Nullable<AxelarTxResponse>;
+
+    const errorResponse = (error: ApproveGatewayError) => ({
+      success: false,
+      error,
+      confirmTx,
+      createPendingTransferTx,
+      signCommandTx,
     });
 
-    const tx = await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+    if (status === GMPStatus.ERROR_FETCHING_STATUS)
+      return errorResponse(ApproveGatewayError.FETCHING_STATUS_FAILED);
+    if (status === GMPStatus.DEST_EXECUTED)
+      return errorResponse(ApproveGatewayError.ALREADY_EXECUTED);
+    if (status === GMPStatus.DEST_GATEWAY_APPROVED)
+      return errorResponse(ApproveGatewayError.ALREADY_APPROVED);
 
-    return tx;
-  }
+    const srcChain = callTx.chain;
+    const destChain = callTx.returnValues.destinationChain;
 
-  public async manualRelayToDestChain(params: {
-    txHash: string;
-    src: EvmChain;
-    dest: EvmChain;
-    debug?: boolean;
-  }): Promise<"triggered relay" | "approved but not executed" | "already executed" | unknown> {
-    return await this.processor.process(params);
+    try {
+      confirmTx = await this.confirmGatewayTx(txHash, srcChain);
+      await sleep(2);
+
+      createPendingTransferTx = await this.createPendingTransfers(destChain);
+      await sleep(2);
+
+      signCommandTx = await this.signCommands(destChain);
+      const signEvent = signCommandTx.rawLog[0]?.events?.find(
+        (event: any) => event.type === "sign"
+      );
+
+      if (!signEvent) return errorResponse(ApproveGatewayError.SIGN_COMMAND_FAILED);
+
+      await sleep(2);
+      const batchedCommandId = signEvent.attributes.find(
+        (attr: any) => attr.key === "batchedCommandId"
+      )?.value;
+
+      const batchedCommand = await asyncRetry(
+        () => this.queryBatchedCommands(destChain, batchedCommandId),
+        (res?: BatchedCommandsResponse) => !!res && res.executeData?.length > 0
+      );
+      if (!batchedCommand) return errorResponse(ApproveGatewayError.ERROR_BATCHED_COMMAND);
+
+      await sleep(2);
+
+      const approveTx = await this.sendApproveTx(
+        destChain,
+        batchedCommand.executeData,
+        _evmWalletDetails
+      );
+
+      return {
+        success: true,
+        confirmTx,
+        createPendingTransferTx,
+        signCommandTx,
+        approveTx,
+      };
+    } catch (e: any) {
+      if (e.message.includes("account sequence mismatch")) {
+        return errorResponse(ApproveGatewayError.ERROR_ACCOUNT_SEQUENCE_MISMATCH);
+      }
+      return errorResponse(ApproveGatewayError.ERROR_UNKNOWN);
+    }
   }
 
   /**
@@ -320,17 +372,51 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
 
     const txResult: TxResult = await callExecute(executeParams, contract)
-      .then((tx: ContractReceipt) => ({
-        success: true,
-        transaction: tx,
-      }))
-      .catch(ContractCallError);
+      .then((tx: ContractReceipt) => {
+        const {
+          commandId,
+          sourceChain,
+          sourceAddress,
+          payload,
+          symbol,
+          amount,
+          isContractCallWithToken,
+        } = executeParams;
+        const functionName = isContractCallWithToken ? "executeWithToken" : "execute";
+        return {
+          success: true,
+          transaction: tx,
+          data: {
+            functionName,
+            args: {
+              commandId,
+              sourceChain,
+              sourceAddress,
+              payload,
+              symbol,
+              amount,
+            },
+          },
+        };
+      })
+      .catch((e: Error) => {
+        if (e.message === CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS) {
+          return InsufficientFundsError(executeParams);
+        } else if (e.message === CALL_EXECUTE_ERROR.REVERT) {
+          return ExecutionRevertedError(executeParams);
+        } else {
+          // should not happen
+          return ContractCallError(e);
+        }
+      });
 
     // Submit execute data to axelarscan if the contract execution is success.
     const signerAddress = await signer.getAddress();
     const executeTxHash = txResult.transaction?.transactionHash;
     if (executeTxHash) {
-      await this.saveGMP(srcTxHash, executeTxHash, signerAddress).catch(() => undefined);
+      await this.saveGMP(srcTxHash, signerAddress, executeTxHash).catch(() => undefined);
+    } else {
+      await this.saveGMP(srcTxHash, signerAddress, "", txResult.error).catch(() => undefined);
     }
 
     return txResult;
