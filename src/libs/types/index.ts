@@ -179,7 +179,7 @@ export enum ApproveGatewayError {
 
 export interface ApproveGatewayResponse {
   success: boolean;
-  error?: ApproveGatewayError;
+  error?: ApproveGatewayError | string;
   confirmTx?: AxelarTxResponse;
   createPendingTransferTx?: AxelarTxResponse;
   signCommandTx?: AxelarTxResponse;

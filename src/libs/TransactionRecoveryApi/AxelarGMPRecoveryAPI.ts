@@ -87,9 +87,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     let createPendingTransferTx: Nullable<AxelarTxResponse>;
     let signCommandTx: Nullable<AxelarTxResponse>;
 
-    const errorResponse = (error: ApproveGatewayError) => ({
+    const errorResponse = (error: ApproveGatewayError, errorDetails?: string) => ({
       success: false,
-      error,
+      error: errorDetails || error,
       confirmTx,
       createPendingTransferTx,
       signCommandTx,
@@ -149,7 +149,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       if (e.message.includes("account sequence mismatch")) {
         return errorResponse(ApproveGatewayError.ERROR_ACCOUNT_SEQUENCE_MISMATCH);
       }
-      return errorResponse(ApproveGatewayError.ERROR_UNKNOWN);
+      return errorResponse(ApproveGatewayError.ERROR_UNKNOWN, e);
     }
   }
 
