@@ -27,6 +27,6 @@ export async function broadcastCosmosTxBytes(
 function convertToAxelarTxResponse(response: DeliverTxResponse): AxelarTxResponse {
   return {
     ...response,
-    rawLog: JSON.parse(response.rawLog || "[]"),
+    rawLog: response.rawLog || "[]",
   };
 }
