@@ -85,16 +85,16 @@ export class AxelarRecoveryApi {
 
     if (!txDetails) return { status };
 
-    const { approved, call, gas_status, gas_paid, is_executed, error } = txDetails;
+    const { call, gas_status, gas_paid, error, status: statusFromApi } = txDetails;
 
     const gasPaidInfo: GasPaidInfo = {
       status: gas_status,
       details: gas_paid,
     };
 
-    if (is_executed) status = GMPStatus.DEST_EXECUTED;
-    else if (approved) status = GMPStatus.DEST_GATEWAY_APPROVED;
-    else if (call) status = GMPStatus.SRC_GATEWAY_CALLED;
+    if (statusFromApi === "executed") status = GMPStatus.DEST_EXECUTED;
+    else if (statusFromApi === "approved") status = GMPStatus.DEST_GATEWAY_APPROVED;
+    else if (statusFromApi === "called") status = GMPStatus.SRC_GATEWAY_CALLED;
 
     return {
       status,
