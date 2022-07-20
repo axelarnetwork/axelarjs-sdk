@@ -149,7 +149,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       if (e.message.includes("account sequence mismatch")) {
         return errorResponse(ApproveGatewayError.ERROR_ACCOUNT_SEQUENCE_MISMATCH);
       }
-      return errorResponse(ApproveGatewayError.ERROR_UNKNOWN, e);
+      return errorResponse(ApproveGatewayError.ERROR_UNKNOWN, e.message);
     }
   }
 
