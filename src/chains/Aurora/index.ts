@@ -10,7 +10,7 @@ export default class Aurora extends Ethereum implements Chain {
     assets: [],
     txFeeInPercent: 0.1,
     module: "evm",
-    confirmLevel: 6,
+    confirmLevel: 12,
     chainIdentifier: {
       devnet: "aurora",
       testnet: "aurora",
