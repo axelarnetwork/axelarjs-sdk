@@ -95,7 +95,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       signCommandTx,
     });
 
-    if (status === GMPStatus.ERROR_FETCHING_STATUS)
+    if (status === GMPStatus.CANNOT_FETCH_STATUS)
       return errorResponse(ApproveGatewayError.FETCHING_STATUS_FAILED);
     if (status === GMPStatus.DEST_EXECUTED)
       return errorResponse(ApproveGatewayError.ALREADY_EXECUTED);
@@ -149,7 +149,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       if (e.message.includes("account sequence mismatch")) {
         return errorResponse(ApproveGatewayError.ERROR_ACCOUNT_SEQUENCE_MISMATCH);
       }
-      return errorResponse(ApproveGatewayError.ERROR_UNKNOWN, e);
+      return errorResponse(ApproveGatewayError.ERROR_UNKNOWN, e.message);
     }
   }
 

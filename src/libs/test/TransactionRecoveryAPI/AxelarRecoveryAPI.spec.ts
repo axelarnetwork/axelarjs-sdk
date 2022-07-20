@@ -1,8 +1,12 @@
 import { ethers } from "ethers";
-import { AxelarRecoveryApi, GMPStatus } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
+import {
+  AxelarRecoveryApi,
+  GasPaidStatus,
+  GMPStatus,
+} from "../../TransactionRecoveryApi/AxelarRecoveryApi";
 import { Environment, EvmChain } from "../../types";
 
-xdescribe("AxelarDepositRecoveryAPI", () => {
+describe("AxelarDepositRecoveryAPI", () => {
   const api = new AxelarRecoveryApi({ environment: Environment.TESTNET });
 
   beforeEach(() => {
@@ -10,13 +14,183 @@ xdescribe("AxelarDepositRecoveryAPI", () => {
   });
 
   describe("queryTransactionStatus", () => {
-    test("It should get the latest state of a txHash using the axelar caching service API", async () => {
-      const txHash = "0xf459d54046b0507bd4b726bc64a7ce459053c53b0d858ea785d982e7c51594b0";
+    test("it should return 'GMPStatus.DEST_GATEWAY_APPROVED' when the transaction is approved, but not executed.", async () => {
+      const txHash = "0x123456789";
+      const txDetails = {
+        call: {
+          transactionHash: txHash,
+        },
+        gas_paid: {
+          transactionHash: txHash,
+        },
+        approved: {
+          transactionHash: txHash + "1",
+        },
+        executed: {
+          transactionHash: txHash + "2",
+        },
+        gas_status: "gas_paid",
+        status: "approved",
+      };
 
-      const confirmation = await api.queryTransactionStatus(txHash);
-      console.log("confirmation", confirmation);
-      expect(confirmation).toBeTruthy();
-    }, 60000);
+      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+
+      const status = await api.queryTransactionStatus(txHash);
+
+      expect(status).toEqual({
+        status: GMPStatus.DEST_GATEWAY_APPROVED,
+        error: undefined,
+        callTx: txDetails.call,
+        gasPaidInfo: {
+          status: GasPaidStatus.GAS_PAID,
+          details: txDetails.gas_paid,
+        },
+      });
+    });
+
+    test("it should return 'GMPStatus.DEST_EXECUTED' when the transaction is already executed", async () => {
+      const txHash = "0x123456789";
+      const txDetails = {
+        call: {
+          transactionHash: txHash,
+        },
+        gas_paid: {
+          transactionHash: txHash,
+        },
+        approved: {
+          transactionHash: txHash + "1",
+        },
+        executed: {
+          transactionHash: txHash + "2",
+        },
+        gas_status: "gas_paid_enough_gas",
+        status: "executed",
+      };
+
+      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+
+      const status = await api.queryTransactionStatus(txHash);
+
+      expect(status).toEqual({
+        status: GMPStatus.DEST_EXECUTED,
+        error: undefined,
+        callTx: txDetails.call,
+        gasPaidInfo: {
+          status: GasPaidStatus.GAS_PAID_ENOUGH_GAS,
+          details: txDetails.gas_paid,
+        },
+      });
+    });
+
+    test("it should return 'GMPStatus.SRC_GATEWAY_CALLED' when the transaction is not approved", async () => {
+      const txHash = "0x123456789";
+      const txDetails = {
+        call: {
+          transactionHash: txHash,
+        },
+        gas_paid: {
+          transactionHash: txHash,
+        },
+        gas_status: "gas_paid",
+        status: "called",
+      };
+
+      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+
+      const status = await api.queryTransactionStatus(txHash);
+
+      expect(status).toEqual({
+        status: GMPStatus.SRC_GATEWAY_CALLED,
+        error: undefined,
+        callTx: txDetails.call,
+        gasPaidInfo: {
+          status: GasPaidStatus.GAS_PAID,
+          details: txDetails.gas_paid,
+        },
+      });
+    });
+
+    test("it should return 'GMPStatus.DEST_EXECUTE_ERROR' when the transaction is not executed", async () => {
+      const txHash = "0x123456789";
+      const txDetails = {
+        call: {
+          transactionHash: txHash,
+        },
+        gas_paid: {
+          transactionHash: txHash,
+        },
+        approved: {
+          transactionHash: txHash + "1",
+        },
+        executed: {
+          transactionHash: txHash + "2",
+        },
+        error: {
+          error: {
+            reason: "execution reverted",
+          },
+        },
+        gas_status: "gas_paid_enough_gas",
+        status: "error",
+      };
+
+      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+
+      const status = await api.queryTransactionStatus(txHash);
+
+      expect(status).toEqual({
+        status: GMPStatus.DEST_EXECUTE_ERROR,
+        error: txDetails.error,
+        callTx: txDetails.call,
+        gasPaidInfo: {
+          status: GasPaidStatus.GAS_PAID_ENOUGH_GAS,
+          details: txDetails.gas_paid,
+        },
+      });
+    });
+
+    test("it should return 'GMPStatus.UNKNOWN_ERROR' when the api status is error but 'error' object is undefined", async () => {
+      const txHash = "0x123456789";
+      const txDetails = {
+        call: {
+          transactionHash: txHash,
+        },
+        gas_paid: {
+          transactionHash: txHash,
+        },
+        approved: {
+          transactionHash: txHash + "1",
+        },
+        executed: {
+          transactionHash: txHash + "2",
+        },
+        gas_status: "gas_paid_enough_gas",
+        status: "error",
+      };
+
+      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+
+      const status = await api.queryTransactionStatus(txHash);
+
+      expect(status).toEqual({
+        status: GMPStatus.UNKNOWN_ERROR,
+        callTx: txDetails.call,
+        gasPaidInfo: {
+          status: GasPaidStatus.GAS_PAID_ENOUGH_GAS,
+          details: txDetails.gas_paid,
+        },
+      });
+    });
+
+    test("it should return 'GMPStatus.CANNOT_FETCH_STATUS' when the axelarscan api is down", async () => {
+      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(undefined);
+
+      const status = await api.queryTransactionStatus("0x");
+
+      expect(status).toEqual({
+        status: GMPStatus.CANNOT_FETCH_STATUS,
+      });
+    });
   });
 
   xdescribe("create pending transfers", () => {

@@ -72,7 +72,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
     test("it shouldn't call approve given the gmp status cannot be fetched", async () => {
       const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
-      mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.ERROR_FETCHING_STATUS });
+      mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.CANNOT_FETCH_STATUS });
 
       const response = await api.manualRelayToDestChain("0x");
 
