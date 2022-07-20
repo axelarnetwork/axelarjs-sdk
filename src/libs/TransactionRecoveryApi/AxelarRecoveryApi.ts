@@ -13,8 +13,9 @@ export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
   DEST_GATEWAY_APPROVED = "destination_gateway_approved",
   DEST_EXECUTED = "destination_executed",
-  DEST_ERROR = "error",
-  ERROR_FETCHING_STATUS = "error_fetching_status",
+  DEST_EXECUTE_ERROR = "destination_execute_error",
+  UNKNOWN_ERROR = "unknown_error",
+  CANNOT_FETCH_STATUS = "cannot_fetch_status",
 }
 export enum GasPaidStatus {
   GAS_UNPAID = "gas_unpaid",
@@ -78,26 +79,30 @@ export class AxelarRecoveryApi {
       .catch(() => undefined);
   }
 
-  public async queryTransactionStatus(txHash: string): Promise<GMPStatusResponse> {
-    let status = GMPStatus.ERROR_FETCHING_STATUS;
+  private parseGMPStatus(response: any): GMPStatus {
+    const { error, status } = response;
 
+    if (status === "error" && error) return GMPStatus.DEST_EXECUTE_ERROR;
+    else if (status === "executed") return GMPStatus.DEST_EXECUTED;
+    else if (status === "approved") return GMPStatus.DEST_GATEWAY_APPROVED;
+    else if (status === "called") return GMPStatus.SRC_GATEWAY_CALLED;
+    else return GMPStatus.UNKNOWN_ERROR;
+  }
+
+  public async queryTransactionStatus(txHash: string): Promise<GMPStatusResponse> {
     const txDetails = await this.fetchGMPTransaction(txHash);
 
-    if (!txDetails) return { status };
+    if (!txDetails) return { status: GMPStatus.CANNOT_FETCH_STATUS };
 
-    const { call, gas_status, gas_paid, error, status: statusFromApi } = txDetails;
+    const { call, gas_status, gas_paid, error } = txDetails;
 
     const gasPaidInfo: GasPaidInfo = {
       status: gas_status,
       details: gas_paid,
     };
 
-    if (statusFromApi === "executed") status = GMPStatus.DEST_EXECUTED;
-    else if (statusFromApi === "approved") status = GMPStatus.DEST_GATEWAY_APPROVED;
-    else if (statusFromApi === "called") status = GMPStatus.SRC_GATEWAY_CALLED;
-
     return {
-      status,
+      status: this.parseGMPStatus(txDetails),
       error,
       gasPaidInfo,
       callTx: call,
