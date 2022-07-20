@@ -19,12 +19,14 @@ import Binance from "./Binance";
 import Kujira from "./Kujira";
 import Sei from "./Sei";
 import Secret from "./Secret";
+import Aurora from "./Aurora";
 
 export function loadChains(config: LoadChainConfig) {
   const allAssets = loadAssets(config);
   const _environment = config.environment as string;
 
   const rawChains: Chain[] = [
+    new Aurora(),
     new Axelar(),
     new Avalanche(),
     new Binance(),
