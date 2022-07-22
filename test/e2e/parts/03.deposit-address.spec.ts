@@ -45,11 +45,9 @@ export default () => {
     describe("getting deposit address concurrency", () => {
       jest.setTimeout(60000);
       const sdk = new AxelarAssetTransfer({ environment: Environment.MAINNET });
-      // const destinationAddress = "osmo1dn9534a72h733m8andex5ufklql3hfsvtagg7t";
       const destinationAddress = "0x1a71552966E3cd8e7D013a86461c60E10b1BEC09";
 
       it("deposit address should be different", async () => {
-        // const chains = ["Avalanche", "Ethereum", "Polygon", "Moonbeam", "Fantom"];
         const chains = ["Avalanche", "Ethereum", "Polygon"];
 
         const requests = [];
