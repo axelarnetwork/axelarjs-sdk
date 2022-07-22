@@ -330,7 +330,11 @@ describe("AxelarDepositRecoveryAPI", () => {
         GasToken.AVAX
       );
 
-      return expect(wantedGasFee).toBe(ethers.BigNumber.from(gasRequired).sub(gasPaid).toString());
+      const roundedWantedGasFee = parseFloat(ethers.utils.formatEther(wantedGasFee)).toFixed(7);
+      const roundedGasRequired = parseFloat(
+        ethers.utils.formatEther(ethers.BigNumber.from(gasRequired).sub(gasPaid).toString())
+      ).toFixed(7);
+      return expect(roundedWantedGasFee).toBe(roundedGasRequired);
     });
 
     test("it should return 0 given 'gas paid' >= 'gas required'", async () => {
