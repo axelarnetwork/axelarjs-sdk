@@ -24,12 +24,12 @@ Bump version and publish to npm.
 
 **Effect**: Bump the version based on the commit message -> commit and push updated version in `package.json` -> add tag -> publish to npm
 
-| Keyword       | Action                                                                            | Example version changes                                |
-| ------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| time to party | Increases **major** version -> commit & push -> tag new version -> publish to npm | 0.6.6 -> 1.0.0                                         |
-| feat, minor   | Increases **minor** version -> commit & push -> tag new version -> publish to npm | 0.6.6 -> 0.7.0                                         |
-| pre-alpha     | Increases **alpha** version -> commit & push -> tag new version -> publish to npm | 0.6.6 -> 0.6.7-alpha.0, 0.6.7-alpha.0 -> 0.6.7-alpha.1 |
-| \*            | Increases **patch** version -> commit & push -> tag new version -> publish to npm | 0.6.6 -> 0.6.7, 0.6.7-alpha.3 -> 0.6.8                 |
+| Keyword          | Action                                                                            | Example version changes                                |
+| ---------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| time to party    | Increases **major** version -> commit & push -> tag new version -> publish to npm | 0.6.6 -> 1.0.0                                         |
+| force bump minor | Increases **minor** version -> commit & push -> tag new version -> publish to npm | 0.6.6 -> 0.7.0                                         |
+| pre-alpha        | Increases **alpha** version -> commit & push -> tag new version -> publish to npm | 0.6.6 -> 0.6.7-alpha.0, 0.6.7-alpha.0 -> 0.6.7-alpha.1 |
+| \*               | Increases **patch** version -> commit & push -> tag new version -> publish to npm | 0.6.6 -> 0.6.7, 0.6.7-alpha.3 -> 0.6.8                 |
 
 Note that we may not want to increase major version soon, so the keyword to do that is kind of funny.
 
