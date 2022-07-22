@@ -13,7 +13,13 @@ import {
 } from "./stubs";
 
 describe("AxelarAssetTransfer", () => {
+  const socket = {
+    joinRoomAndWaitForEvent: jest.fn(),
+  };
   beforeEach(() => {
+    jest
+      .spyOn(AxelarAssetTransfer.prototype as any, "getSocketService")
+      .mockReturnValueOnce(socket);
     jest.clearAllMocks();
   });
 
@@ -48,7 +54,7 @@ describe("AxelarAssetTransfer", () => {
 
     describe("SocketService", () => {
       it("should be defined", () => {
-        expect(bridge.socket).toBeDefined();
+        expect(socket).toBeDefined();
       });
     });
   });
@@ -232,7 +238,7 @@ describe("AxelarAssetTransfer", () => {
         let error: any;
 
         beforeEach(async () => {
-          jest.spyOn(bridge.socket, "joinRoomAndWaitForEvent").mockRejectedValue(apiErrorStub());
+          jest.spyOn(socket, "joinRoomAndWaitForEvent").mockRejectedValue(apiErrorStub());
 
           roomId = await bridge.getLinkEvent(roomIdStub().roomId).catch((_error) => {
             error = _error;
@@ -241,7 +247,7 @@ describe("AxelarAssetTransfer", () => {
 
         describe("api", () => {
           it("should be called", () => {
-            expect(bridge.socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(roomIdStub().roomId);
+            expect(socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(roomIdStub().roomId);
           });
         });
 
@@ -261,14 +267,15 @@ describe("AxelarAssetTransfer", () => {
       describe("when called", () => {
         let roomId: any;
         beforeEach(async () => {
-          jest.spyOn(bridge.socket, "joinRoomAndWaitForEvent").mockResolvedValue(linkEventStub());
-
+          jest
+            .spyOn(socket, "joinRoomAndWaitForEvent")
+            .mockResolvedValueOnce({ newRoomId: newRoomIdStub() });
           roomId = await bridge.getLinkEvent(roomIdStub().roomId);
         });
 
         describe("api", () => {
           it("should be called", () => {
-            expect(bridge.socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(roomIdStub().roomId);
+            expect(socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(roomIdStub().roomId);
           });
         });
 

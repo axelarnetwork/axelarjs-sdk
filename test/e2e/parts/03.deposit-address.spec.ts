@@ -11,6 +11,29 @@ export default () => {
       });
     });
 
+    describe("concurrent calls", () => {
+      jest.setTimeout(30000);
+
+      it("addresses should be different", async () => {
+        const [address1, address2] = await Promise.all([
+          axelar.getDepositAddress(
+            "osmosis",
+            "avalanche",
+            "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD",
+            "uusdc"
+          ),
+          axelar.getDepositAddress(
+            "avalanche",
+            "osmosis",
+            "osmo1tck82gz5v5rzc74hmf8j9vyjcs3nnnycr7es2q",
+            "uusdc"
+          ),
+        ]);
+
+        expect(address1).not.toEqual(address2);
+      });
+    });
+
     describe("getting deposit address - Terra -> Avalanche", () => {
       jest.setTimeout(30000);
       let response: string;
