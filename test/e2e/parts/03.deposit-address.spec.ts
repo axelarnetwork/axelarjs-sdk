@@ -4,7 +4,7 @@ export default () => {
   describe("Deposit Address e2e", () => {
     let axelar: AxelarAssetTransfer;
 
-    describe("getting deposit address - Terra -> Avalanche", () => {
+    xdescribe("getting deposit address - Terra -> Avalanche", () => {
       jest.setTimeout(30000);
       let response: string;
       const destinationAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
@@ -23,7 +23,7 @@ export default () => {
       });
     });
 
-    describe("getting deposit address - Avalanche -> Terra", () => {
+    xdescribe("getting deposit address - Avalanche -> Terra", () => {
       jest.setTimeout(30000);
       let response: string;
       const destinationAddress = "terra1qem4njhac8azalrav7shvp06myhqldpmkk3p0t";
