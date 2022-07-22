@@ -12,7 +12,6 @@ export class AxelarAssetTransfer {
   readonly resourceUrl: string;
 
   readonly api: RestService;
-  readonly socket: SocketService;
 
   constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
@@ -24,7 +23,6 @@ export class AxelarAssetTransfer {
     if (config.overwriteResourceUrl) this.resourceUrl = config.overwriteResourceUrl;
 
     this.api = new RestService(this.resourceUrl);
-    this.socket = new SocketService(this.resourceUrl);
   }
 
   async getDepositAddress(
@@ -116,7 +114,8 @@ export class AxelarAssetTransfer {
   }
 
   async getLinkEvent(roomId: string): Promise<string> {
-    const { newRoomId } = await this.socket.joinRoomAndWaitForEvent(roomId).catch((error) => {
+    const socketService = new SocketService(this.resourceUrl);
+    const { newRoomId } = await socketService.joinRoomAndWaitForEvent(roomId).catch((error) => {
       throw error;
     });
 
