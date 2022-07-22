@@ -12,7 +12,7 @@ import Juno from "./Juno";
 import { loadAssets } from "../assets";
 import { AssetConfig, AssetInfo } from "../assets/types";
 import { Chain, LoadChainConfig } from "./types";
-import { cloneDeep } from "lodash";
+import cloneDeep from "clone-deep";
 import Crescent from "./Crescent";
 import EMoney from "./EMoney";
 import Binance from "./Binance";
