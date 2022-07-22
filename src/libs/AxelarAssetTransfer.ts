@@ -114,12 +114,17 @@ export class AxelarAssetTransfer {
   }
 
   async getLinkEvent(roomId: string): Promise<string> {
-    const socketService = new SocketService(this.resourceUrl);
-    const { newRoomId } = await socketService.joinRoomAndWaitForEvent(roomId).catch((error) => {
-      throw error;
-    });
+    const { newRoomId } = await this.getSocketService()
+      .joinRoomAndWaitForEvent(roomId)
+      .catch((error) => {
+        throw error;
+      });
 
     return newRoomId;
+  }
+
+  private getSocketService() {
+    return new SocketService(this.resourceUrl);
   }
 
   private extractDepositAddress(roomId: string) {
