@@ -26,6 +26,7 @@ jobs:
         with:
           tag-prefix: "v"
           major-wording: "time to party"
+          minor-wording: "bump minor"
       - name: "Updated version in package.json"
         run: cat ./package.json | grep version
     outputs:
