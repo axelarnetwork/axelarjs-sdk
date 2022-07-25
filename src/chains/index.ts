@@ -20,6 +20,7 @@ import Kujira from "./Kujira";
 import Sei from "./Sei";
 import Secret from "./Secret";
 import Aurora from "./Aurora";
+import Fetch from "./Fetch";
 
 export function loadChains(config: LoadChainConfig) {
   const allAssets = loadAssets(config);
@@ -35,6 +36,7 @@ export function loadChains(config: LoadChainConfig) {
     new Ethereum(),
     new EMoney(),
     new Fantom(),
+    new Fetch(),
     new Injective(),
     new Juno(),
     new Kujira(),
