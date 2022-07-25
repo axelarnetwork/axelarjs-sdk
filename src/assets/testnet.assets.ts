@@ -173,6 +173,14 @@ export const testnet = {
         fullDenomPath: "transfer/channel-8/wmatic-wei",
         tokenAddress: "wmatic-wei",
       },
+      fetch: {
+        assetSymbol: "WMATIC",
+        assetName: "axlWMATIC",
+        minDepositAmt: 0.03,
+        ibcDenom: "ibc/14E4FD1AB72DE9BF1D6725CBA18373C406CB9A7DA17955299F3F4DC5C6131A4E",
+        fullDenomPath: "transfer/channel-6/wmatic-wei",
+        tokenAddress: "wmatic-wei",
+      },
       terra: {
         assetSymbol: "WMATIC",
         assetName: "axlWMATIC",
@@ -279,6 +287,14 @@ export const testnet = {
         minDepositAmt: 0.04,
         ibcDenom: "ibc/C2BA0743260DDCD9B2E5464860584E2F0826E7C021E19B16A9F5CEF29D225CD3",
         fullDenomPath: "transfer/channel-8/wftm-wei",
+        tokenAddress: "wftm-wei",
+      },
+      fetch: {
+        assetSymbol: "WFTM",
+        assetName: "axlWFTM",
+        minDepositAmt: 0.04,
+        ibcDenom: "ibc/19E687E77D1AE3CADBB3DE487277AFEC0E340A84334D6ED3F216EF25A7075746",
+        fullDenomPath: "transfer/channel-6/wftm-wei",
         tokenAddress: "wftm-wei",
       },
       terra: {
@@ -389,6 +405,14 @@ export const testnet = {
         fullDenomPath: "transfer/channel-8/weth-wei",
         tokenAddress: "weth-wei",
       },
+      fetch: {
+        assetSymbol: "WETH",
+        assetName: "axlWETH",
+        minDepositAmt: 0.00002,
+        ibcDenom: "ibc/BC8A77AFBD872FDC32A348D3FB10CC09277C266CFE52081DE341C7EC6752E674",
+        fullDenomPath: "transfer/channel-6/weth-wei",
+        tokenAddress: "weth-wei",
+      },
       terra: {
         assetSymbol: "WETH",
         assetName: "axlWETH",
@@ -495,6 +519,14 @@ export const testnet = {
         minDepositAmt: 0.0007,
         ibcDenom: "ibc/C74D5A562B2D54AF03198E5BC6693D16EF978EBA0BD3BA22A7098511B43249CA",
         fullDenomPath: "transfer/channel-8/wavax-wei",
+        tokenAddress: "wavax-wei",
+      },
+      fetch: {
+        assetSymbol: "WAVAX",
+        assetName: "axlWAVAX",
+        minDepositAmt: 0.0007,
+        ibcDenom: "ibc/F992067A054C819B42D2DAB57F5CCE347D38352EB90453E59D566BFE64F1614B",
+        fullDenomPath: "transfer/channel-6/wavax-wei",
         tokenAddress: "wavax-wei",
       },
       terra: {
@@ -605,6 +637,14 @@ export const testnet = {
         fullDenomPath: "transfer/channel-8/wdev-wei",
         tokenAddress: "wdev-wei",
       },
+      fetch: {
+        assetSymbol: "WDEV",
+        assetName: "axlWDEV",
+        minDepositAmt: 0.02,
+        ibcDenom: "ibc/42ABF9E931A230BB249FE1F51F67C5E8C3D69FD756DB8D91D5DBED16170C2DF8",
+        fullDenomPath: "transfer/channel-6/wdev-wei",
+        tokenAddress: "wdev-wei",
+      },
       terra: {
         assetSymbol: "WDEV",
         assetName: "axlWDEV",
@@ -713,6 +753,14 @@ export const testnet = {
         fullDenomPath: "transfer/channel-8/uausdc",
         tokenAddress: "uausdc",
       },
+      fetch: {
+        assetSymbol: "aUSDC",
+        assetName: "axlaUSDC",
+        minDepositAmt: 0.05,
+        ibcDenom: "ibc/56FBD5B47B58A7302F6BED46F8702907E3619F2DC23DCEA8D6685064D79394F8",
+        fullDenomPath: "transfer/channel-6/uausdc",
+        tokenAddress: "uausdc",
+      },
       terra: {
         assetSymbol: "aUSDC",
         assetName: "axlaUSDC",
@@ -771,6 +819,14 @@ export const testnet = {
         minDepositAmt: 0.000002,
         ibcDenom: "ibc/9172E8B854F0E25A9D075272CE71A9534B91A0A2C581B747BB4CCD35F77E4C76",
         fullDenomPath: "transfer/channel-8/wbtc-satoshi",
+        tokenAddress: "wbtc-satoshi",
+      },
+      fetch: {
+        assetSymbol: "WBTC",
+        assetName: "axlWBTC",
+        minDepositAmt: 0.000002,
+        ibcDenom: "ibc/05D299885B07905B6886F554B39346EA6761246076A1120B1950049B92B922DD",
+        fullDenomPath: "transfer/channel-6/wbtc-satoshi",
         tokenAddress: "wbtc-satoshi",
       },
       terra: {
@@ -879,6 +935,14 @@ export const testnet = {
         minDepositAmt: 0.0002,
         ibcDenom: "ibc/E09D271B56568F9C4E4B6A32D877F4E904C35FF3B8A4503AD8547A95F6D9925C",
         fullDenomPath: "transfer/channel-8/wbnb-wei",
+        tokenAddress: "wbnb-wei",
+      },
+      fetch: {
+        assetSymbol: "WBNB",
+        assetName: "axlWBNB",
+        minDepositAmt: 0.0002,
+        ibcDenom: "ibc/1319C6B38CA613C89D78C2D1461B305038B1085F6855E8CD276FE3F7C9600B4C",
+        fullDenomPath: "transfer/channel-6/wbnb-wei",
         tokenAddress: "wbnb-wei",
       },
       terra: {
