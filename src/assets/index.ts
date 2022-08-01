@@ -1,6 +1,4 @@
 import { AssetConfig, LoadAssetConfig } from "./types";
-import { mainnet } from "./mainnet.assets";
-import { devnet } from "./devnet.assets";
 import { Environment } from "../libs";
 
 const urlMap: Record<Environment, string> = {
