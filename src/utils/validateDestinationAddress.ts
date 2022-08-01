@@ -18,7 +18,7 @@ export async function validateDestinationAddressByChainSymbol(
 
   return targetChain?.module === "evm"
     ? isAddress(destinationAddress)
-    : bech32.decode(destinationAddress).prefix === targetChain?.chainName.toLowerCase();
+    : bech32.decode(destinationAddress).prefix === targetChain?.addressPrefix;
 }
 
 export async function validateDestinationAddressByChainName(
@@ -36,5 +36,5 @@ export async function validateDestinationAddressByChainName(
 
   return targetChain?.module === "evm"
     ? isAddress(destinationAddress)
-    : bech32.decode(destinationAddress).prefix === targetChain?.chainName.toLowerCase();
+    : bech32.decode(destinationAddress).prefix === targetChain?.addressPrefix;
 }

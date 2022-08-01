@@ -28,6 +28,7 @@ export interface ChainInfo {
     testnet: string;
     mainnet: string;
   };
+  addressPrefix: string;
 }
 
 export interface AssetTransferObject {
