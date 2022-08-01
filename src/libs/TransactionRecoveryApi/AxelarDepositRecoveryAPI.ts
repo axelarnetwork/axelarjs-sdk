@@ -15,9 +15,9 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async confirmDeposit(params: ConfirmDepositRequest) {
-    const chain: ChainInfo = loadChains({
+    const chain: ChainInfo = (await loadChains({
       environment: this.environment,
-    }).find((chain) => chain.chainInfo.chainName.toLowerCase() === params.from.toLowerCase())
+    })).find((chain) => chain.chainInfo.chainName.toLowerCase() === params.from.toLowerCase())
       ?.chainInfo as ChainInfo;
     if (!chain) throw new Error("cannot find chain" + params.from);
 

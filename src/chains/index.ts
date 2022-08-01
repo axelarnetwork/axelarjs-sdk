@@ -22,8 +22,8 @@ import Secret from "./Secret";
 import Aurora from "./Aurora";
 import Fetch from "./Fetch";
 
-export function loadChains(config: LoadChainConfig) {
-  const allAssets = loadAssets(config);
+export async function loadChains(config: LoadChainConfig) {
+  const allAssets = await loadAssets(config);
   const _environment = config.environment as string;
 
   const rawChains: Chain[] = [

@@ -1,12 +1,12 @@
 import { Environment } from "../libs";
 import { loadChains } from "../chains";
 
-export function validateDestinationAddressByChainSymbol(
+export async function validateDestinationAddressByChainSymbol(
   chainSymbol: string,
   destinationAddress: string,
   environment: Environment
 ) {
-  const chains = loadChains({
+  const chains = await loadChains({
     environment,
   });
 
@@ -17,12 +17,12 @@ export function validateDestinationAddressByChainSymbol(
   return targetChain?.validateAddress(destinationAddress);
 }
 
-export function validateDestinationAddressByChainName(
+export async function validateDestinationAddressByChainName(
   chainName: string,
   destinationAddress: string,
   environment: Environment
 ) {
-  const chains = loadChains({
+  const chains = await loadChains({
     environment,
   });
 

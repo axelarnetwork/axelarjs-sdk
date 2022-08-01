@@ -137,8 +137,8 @@ export class AxelarQueryAPI {
    * @param chainName
    * @returns
    */
-  public getDenomFromSymbol(symbol: string, chainName: string) {
-    const allAssets = loadAssets({ environment: this.environment });
+  public async getDenomFromSymbol(symbol: string, chainName: string) {
+    const allAssets = await loadAssets({ environment: this.environment });
     const assetConfig: AssetConfig | undefined = allAssets.find(
       (assetConfig) => assetConfig.chain_aliases[chainName]?.assetSymbol === symbol
     );
@@ -152,8 +152,8 @@ export class AxelarQueryAPI {
    * @param chainName
    * @returns
    */
-  public getSymbolFromDenom(denom: string, chainName: string) {
-    const allAssets = loadAssets({ environment: this.environment });
+  public async getSymbolFromDenom(denom: string, chainName: string) {
+    const allAssets = await loadAssets({ environment: this.environment });
     const assetConfig: AssetConfig | undefined = allAssets.find(
       (assetConfig) => assetConfig.common_key[this.environment] === denom
     );
