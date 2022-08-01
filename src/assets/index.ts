@@ -1,6 +1,6 @@
+import fetch from "cross-fetch";
 import { AssetConfig, LoadAssetConfig } from "./types";
 import { Environment } from "../libs";
-
 const urlMap: Record<Environment, string> = {
   devnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-asset-config.json", //TODO
   testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-asset-config.json",
@@ -23,6 +23,6 @@ async function execGet(base: string) {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   })
-    .then((res) => res.json())
-    .then((res) => res.data);
+    .then((res) => res.json());
+    // .then((res) => res.data);
 }

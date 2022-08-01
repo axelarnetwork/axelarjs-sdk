@@ -1,7 +1,7 @@
-
+import fetch from "cross-fetch";
 import { loadAssets } from "../assets";
 import { AssetConfig, AssetInfo } from "../assets/types";
-import { Chain, ChainInfo, LoadChainConfig } from "./types";
+import { ChainInfo, LoadChainConfig } from "./types";
 import cloneDeep from "clone-deep";
 import { Environment } from "src/libs";
 
@@ -61,6 +61,5 @@ async function execGet(base: string) {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   })
-    .then((res) => res.json())
-    .then((res) => res.data);
+    .then((res) => res.json());
 }
