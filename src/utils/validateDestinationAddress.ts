@@ -1,5 +1,7 @@
 import { Environment } from "../libs";
 import { loadChains } from "../chains";
+import { isAddress } from "ethers/lib/utils";
+import { bech32 } from "bech32";
 
 export async function validateDestinationAddressByChainSymbol(
   chainSymbol: string,
@@ -11,10 +13,12 @@ export async function validateDestinationAddressByChainSymbol(
   });
 
   const targetChain = chains.find(
-    (_chain) => _chain.chainInfo.chainSymbol.toLowerCase() === chainSymbol.toLowerCase()
+    (chainInfo) => chainInfo.chainSymbol.toLowerCase() === chainSymbol.toLowerCase()
   );
 
-  return targetChain?.validateAddress(destinationAddress);
+  return targetChain?.module === "evm"
+    ? isAddress(destinationAddress)
+    : bech32.decode(destinationAddress).prefix === targetChain?.chainName.toLowerCase();
 }
 
 export async function validateDestinationAddressByChainName(
@@ -27,8 +31,10 @@ export async function validateDestinationAddressByChainName(
   });
 
   const targetChain = chains.find(
-    (_chain) => _chain.chainInfo.chainName.toLowerCase() === chainName.toLowerCase()
+    (chainInfo) => chainInfo.chainName.toLowerCase() === chainName.toLowerCase()
   );
 
-  return targetChain?.validateAddress(destinationAddress);
+  return targetChain?.module === "evm"
+    ? isAddress(destinationAddress)
+    : bech32.decode(destinationAddress).prefix === targetChain?.chainName.toLowerCase();
 }

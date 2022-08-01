@@ -18,8 +18,7 @@ export async function loadAssets(config: LoadAssetConfig): Promise<AssetConfig[]
 
   return Object.values(assetMap[config.environment]);
 }
-
-export async function execGet(base: string) {
+async function execGet(base: string) {
   return await fetch(base, {
     method: "GET",
     headers: { "Content-Type": "application/json" },

@@ -152,8 +152,8 @@ export class AxelarRecoveryApi {
     const chainInfo = (await loadChains({
       environment: this.environment,
     })).find(
-      ({ chainInfo }) => chainInfo.chainName.toLowerCase() === chain.toLowerCase()
-    )?.chainInfo;
+      (chainInfo) => chainInfo.chainName.toLowerCase() === chain.toLowerCase()
+    );
 
     if (!chainInfo) throw new Error("cannot find chain" + chain);
 
