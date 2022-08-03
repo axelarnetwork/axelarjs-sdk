@@ -36,5 +36,5 @@ export async function validateDestinationAddressByChainName(
 
   return targetChain?.module === "evm"
     ? isAddress(destinationAddress)
-    : bech32.decode(destinationAddress).prefix === targetChain?.addressPrefix;
+    : targetChain?.addressPrefix && bech32.decode(destinationAddress).prefix === targetChain?.addressPrefix;
 }
