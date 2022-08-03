@@ -39,9 +39,9 @@ export async function loadChains(config: LoadChainConfig) {
 }
 
 const urlMap: Record<Environment, string> = {
-  devnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-chain-config.json", //TODO
+  devnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/devnet-chain-config.json",
   testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-chain-config.json",
-  mainnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-chain-config.json" //TODO
+  mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/mainnet-chain-config.json"
 }
 const chainMap: Record<Environment, any> = { devnet: null, testnet: null, mainnet: null };
 
@@ -49,9 +49,7 @@ export async function importChains(config: LoadChainConfig): Promise<ChainInfo[]
   if (chainMap[config.environment]) 
     return Object.values(chainMap[config.environment]);
 
-    chainMap[config.environment] = await execGet(urlMap[config.environment]);
-
-  console.log("chains for environment",chainMap[config.environment])
+  chainMap[config.environment] = await execGet(urlMap[config.environment]);
 
   return Object.values(chainMap[config.environment]);
 }
