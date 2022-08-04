@@ -1,8 +1,0 @@
-version: 2
-updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    target-branch: "dependencies"
-    # Labels on pull requests for security and version updates
-    labels:
-      - "npm dependencies"
