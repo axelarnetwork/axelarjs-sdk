@@ -12,6 +12,7 @@ import {
 } from "./types";
 import { ethers } from "ethers";
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
+import { AxelarQueryClient } from "./AxelarQueryClient";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -21,6 +22,7 @@ export class AxelarQueryAPI {
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
   readonly axelarCachingServiceUrl: string;
+  private allAssets: AssetConfig[];
 
   public constructor(config: AxelarQueryAPIConfig) {
     const { axelarLcdUrl, axelarRpcUrl, environment } = config;
@@ -34,6 +36,12 @@ export class AxelarQueryAPI {
     this.lcdApi = new RestService(this.axelarLcdUrl);
     this.rpcApi = new RestService(this.axelarRpcUrl);
     this.axelarCachingServiceApi = new RestService(this.axelarCachingServiceUrl);
+
+    this._initializeAssets();
+  }
+
+  private async _initializeAssets() {
+    this.allAssets = await loadAssets({ environment: this.environment });
   }
 
   /**
@@ -137,9 +145,12 @@ export class AxelarQueryAPI {
    * @param chainName
    * @returns
    */
-  public async getDenomFromSymbol(symbol: string, chainName: string) {
-    const allAssets = await loadAssets({ environment: this.environment });
-    const assetConfig: AssetConfig | undefined = allAssets.find(
+  public getDenomFromSymbol(symbol: string, chainName: string) {
+    if (!this.allAssets) {
+      this._initializeAssets();
+      throw "Assets not downloaded";
+    }
+    const assetConfig: AssetConfig | undefined = this.allAssets.find(
       (assetConfig) => assetConfig.chain_aliases[chainName]?.assetSymbol === symbol
     );
     if (!assetConfig) return null;
@@ -153,8 +164,11 @@ export class AxelarQueryAPI {
    * @returns
    */
   public async getSymbolFromDenom(denom: string, chainName: string) {
-    const allAssets = await loadAssets({ environment: this.environment });
-    const assetConfig: AssetConfig | undefined = allAssets.find(
+    if (!this.allAssets) {
+      this._initializeAssets();
+      throw "Assets not downloaded";
+    }
+    const assetConfig: AssetConfig | undefined = this.allAssets.find(
       (assetConfig) => assetConfig.common_key[this.environment] === denom
     );
     if (!assetConfig) return null;

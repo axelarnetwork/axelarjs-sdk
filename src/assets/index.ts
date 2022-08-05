@@ -22,5 +22,8 @@ async function execGet(base: string) {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   })
-    .then((res) => res.json());
-}
+    .then((res) => res.json())
+    .catch((error) => {
+      throw error;
+    });
+  }
