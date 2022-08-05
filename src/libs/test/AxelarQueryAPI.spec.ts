@@ -1,5 +1,6 @@
+import { FeeInfoResponse, TransferFeeResponse } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
-import { Environment, EvmChain, FeeInfoResponse, GasToken, TransferFeeResponse } from "../types";
+import { Environment, EvmChain, GasToken } from "../types";
 
 describe("AxelarQueryAPI", () => {
   const api = new AxelarQueryAPI({ environment: Environment.TESTNET });
@@ -13,12 +14,12 @@ describe("AxelarQueryAPI", () => {
       const [chain, assetDenom] = ["avalanche", "uusd"];
       const response: FeeInfoResponse = await api.getFeeForChainAndAsset(chain, assetDenom);
 
-      expect(response.fee_info).toBeDefined();
-      expect(response.fee_info.chain).toEqual(chain);
-      expect(response.fee_info.asset).toEqual(assetDenom);
-      expect(response.fee_info.fee_rate).toBeDefined();
-      expect(response.fee_info.min_fee).toBeDefined();
-      expect(response.fee_info.max_fee).toBeDefined();
+      expect(response.feeInfo).toBeDefined();
+      expect(response.feeInfo?.chain).toEqual(chain);
+      expect(response.feeInfo?.asset).toEqual(assetDenom);
+      expect(response.feeInfo?.feeRate).toBeDefined();
+      expect(response.feeInfo?.minFee).toBeDefined();
+      expect(response.feeInfo?.maxFee).toBeDefined();
     });
   });
 
@@ -39,8 +40,8 @@ describe("AxelarQueryAPI", () => {
 
       expect(response).toBeDefined();
       expect(response.fee).toBeDefined();
-      expect(response.fee.denom).toEqual(assetDenom);
-      expect(response.fee.amount).toBeDefined();
+      expect(response.fee?.denom).toEqual(assetDenom);
+      expect(response.fee?.amount).toBeDefined();
     });
   });
 
