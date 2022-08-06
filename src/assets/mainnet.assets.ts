@@ -1106,7 +1106,7 @@ export const mainnet = {
         assetName: "ATOM",
         minDepositAmt: 0.07,
         ibcDenom: "uatom",
-        fullDenomPath: "uatom",
+        fullDenomPath: "transfer/channel-293/uatom",
         tokenAddress: "uatom",
       },
     },
