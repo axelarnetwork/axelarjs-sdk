@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: "Checkout source code"
         uses: "actions/checkout@v3"
+        with:
+          token: ${{ secrets.GH_TOKEN_ACTION_BUMP_VERSION }}
       - uses: "actions/setup-node@v2"
         with:
           node-version: 16
@@ -21,7 +23,7 @@ jobs:
       - name: "Automated Version Bump"
         id: version-bump
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ACTION_BUMP_VERSION }}
         uses: "phips28/gh-action-bump-version@master"
         with:
           default: prerelease
