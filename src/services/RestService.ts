@@ -29,19 +29,19 @@ export class RestService {
   }
 
   private async execRest(endpoint: string, requestOptions: any) {
-
+    
     return fetch(this.host + endpoint, requestOptions)
       .then((response) => {
         if (!response.ok) throw response;
         return response;
       })
       .then((response) => response.json())
-      .catch(async (err) => {
+      .catch((err) => {
         throw {
           message: "AxelarJS-SDK uncaught post error",
           uncaught: true,
           fullMessage: err?.message || err,
         };
-
+      });
   }
 }
