@@ -10,7 +10,7 @@ export default class Binance implements Chain {
     assets: [],
     txFeeInPercent: 0,
     module: "evm",
-    confirmLevel: 20,
+    confirmLevel: 17,
     chainIdentifier: {
       devnet: "binance",
       testnet: "binance",
