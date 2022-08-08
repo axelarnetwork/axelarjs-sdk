@@ -9,8 +9,8 @@ jest.mock("cross-fetch", () => {
   };
 });
 
-describe("AxelarQueryAPI", () => {
-  const host = "http://localhost:4000";
+describe("RestService", () => {
+  const host = "http://localhost:3000";
   const api = new RestService(host);
 
   beforeEach(() => {
