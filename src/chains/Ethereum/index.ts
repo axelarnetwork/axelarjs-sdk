@@ -10,7 +10,7 @@ export default class Ethereum implements Chain {
     assets: [],
     txFeeInPercent: 0.1,
     module: "evm",
-    confirmLevel: 65,
+    confirmLevel: 38,
     chainIdentifier: {
       devnet: "ethereum",
       testnet: "ethereum",
