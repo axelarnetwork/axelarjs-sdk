@@ -5,6 +5,43 @@ const mock = {
   validateDestinationAddressByChainSymbol: validateDestinationAddressByChainSymbol,
 };
 
+jest.mock("../../chains", () => ({
+  loadChains: () => {
+    return Promise.resolve([
+      {
+        chainSymbol: "AVAX",
+        chainName: "Avalanche",
+        estimatedWaitTime: 5,
+        fullySupported: true,
+        assets: [],
+        txFeeInPercent: 0.1,
+        module: "evm",
+        confirmLevel: 3,
+        chainIdentifier: {
+          devnet: "avalanche",
+          testnet: "avalanche",
+          mainnet: "avalanche",
+        },
+      },
+      {
+        chainSymbol: "Terra",
+        chainName: "Terra",
+        estimatedWaitTime: 5,
+        fullySupported: true,
+        assets: [],
+        txFeeInPercent: 0.1,
+        module: "axelarnet",
+        chainIdentifier: {
+          devnet: "terra-2",
+          testnet: "terra-2",
+          mainnet: "terra-2",
+        },
+        addressPrefix: "terra"
+      },
+    ]);
+  },
+}));
+
 xdescribe("validateDestinationAddress() - evm chain", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -72,8 +109,9 @@ describe("validateDestinationAddress() - cosmos chain", () => {
     const environment = Environment.TESTNET;
 
     describe("when validateDestinationAddress is called", () => {
-      beforeEach(() => {
-        mock.validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment);
+
+      beforeEach(async () => {
+        await mock.validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment);
       });
 
       test("then it should be called", () => {
@@ -85,7 +123,8 @@ describe("validateDestinationAddress() - cosmos chain", () => {
       });
 
       test("then it should return true", () => {
-        expect(mock.validateDestinationAddressByChainSymbol).toHaveReturnedWith(true);
+        expect.assertions(1);
+        return mock.validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment).then(data => expect(data).toEqual(true));
       });
     });
   });
@@ -108,8 +147,9 @@ describe("validateDestinationAddress() - cosmos chain", () => {
         );
       });
 
-      test("then it should return false", () => {
-        expect(mock.validateDestinationAddressByChainSymbol).toHaveReturnedWith(false);
+      test("then it should return true", () => {
+        expect.assertions(1);
+        return mock.validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment).then(data => expect(data).toEqual(false));
       });
     });
   });
