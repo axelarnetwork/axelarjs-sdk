@@ -18,5 +18,5 @@ changelog vs. 0.6.x. changelogs prior to 0.7.0 were not systematically captured,
 
 ### Fixed
 
-- resolves https://github.com/axelarnetwork/axelarjs-sdk/issues/127
-- resolves https://github.com/axelarnetwork/axelarjs-sdk/issues/116
+- Rest fetch error. resolves https://github.com/axelarnetwork/axelarjs-sdk/issues/127
+- Optimized build size. resolves https://github.com/axelarnetwork/axelarjs-sdk/issues/116
