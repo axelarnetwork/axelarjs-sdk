@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.7.0] - 2022-AUGUST-12
+## [0.7.1] - 2022-AUGUST-12
 
 changelog vs. 0.6.x. changelogs prior to 0.7.0 were not systematically captured, but they will be going forward.
 
