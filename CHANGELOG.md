@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- update `@axelar-network/axelarjs-sdk` dependency to v0.22.1
+- update `@axelar-network/axelarjs-sdk` dependency to v0.22.1.
 
 ## [0.7.1] - 2022-AUGUST-12
 
