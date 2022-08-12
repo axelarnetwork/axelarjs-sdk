@@ -22,9 +22,9 @@ changelog vs. 0.6.x. changelogs prior to 0.7.0 were not systematically captured,
       - `getChainInfo`
     - `validateDestinationAddressByChainSymbol` and `validateDestinationAddressByChainName`
 - refactor to LCD queries in `AxelarQueryAPI` to use `axelarjs-types` natively, rather than query params.
-- interfaces that were previously hard-coded in the SDK (such as `FeeInfoResponse` and `TransferFeeResponse` are now imported from `axelarjs-types`
+- interfaces that were previously hard-coded in the SDK (such as `FeeInfoResponse` and `TransferFeeResponse`) are now imported from `axelarjs-types`
 - remove unused dependencies from package.json
-- new axelarjs-types (based on axelar-core v20 upgrade)
+- new axelarjs-types (based on axelar-core v20 upgrade): https://www.npmjs.com/package/@axelar-network/axelarjs-types/v/0.20.0
 
 ### Fixed
 
