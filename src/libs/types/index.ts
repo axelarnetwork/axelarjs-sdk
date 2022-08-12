@@ -98,23 +98,6 @@ export type AxelarRecoveryAPIConfig = {
   environment: Environment;
 };
 
-export interface FeeInfoResponse {
-  fee_info: {
-    chain: string;
-    asset: string;
-    fee_rate: string;
-    min_fee: string;
-    max_fee: string;
-  };
-}
-
-export interface TransferFeeResponse {
-  fee: {
-    denom: string;
-    amount: string;
-  };
-}
-
 // Includes all native tokens and stablecoins
 export enum GasToken {
   ETH = "ETH",

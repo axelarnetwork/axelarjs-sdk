@@ -148,12 +148,12 @@ export class AxelarRecoveryApi {
     };
   }
 
-  private getChainInfo(chain: string) {
-    const chainInfo = loadChains({
+  private async getChainInfo(chain: string) {
+    const chainInfo = (await loadChains({
       environment: this.environment,
-    }).find(
-      ({ chainInfo }) => chainInfo.chainName.toLowerCase() === chain.toLowerCase()
-    )?.chainInfo;
+    })).find(
+      (chainInfo) => chainInfo.chainName.toLowerCase() === chain.toLowerCase()
+    );
 
     if (!chainInfo) throw new Error("cannot find chain" + chain);
 
@@ -161,7 +161,7 @@ export class AxelarRecoveryApi {
   }
 
   public async confirmGatewayTx(txHash: string, chain: string) {
-    const { module, chainIdentifier } = this.getChainInfo(chain);
+    const { module, chainIdentifier } = await this.getChainInfo(chain);
 
     const txBytes = await this.execRecoveryUrlFetch("/confirm_gateway_tx", {
       txHash,
@@ -173,7 +173,7 @@ export class AxelarRecoveryApi {
   }
 
   public async createPendingTransfers(chain: string) {
-    const { module, chainIdentifier } = this.getChainInfo(chain);
+    const { module, chainIdentifier } = await this.getChainInfo(chain);
 
     const txBytes = await this.execRecoveryUrlFetch("/create_pending_transfers", {
       chain: chainIdentifier[this.environment],
@@ -184,7 +184,7 @@ export class AxelarRecoveryApi {
   }
 
   public async executePendingTransfers(chain: string) {
-    const { module, chainIdentifier } = this.getChainInfo(chain);
+    const { module, chainIdentifier } = await this.getChainInfo(chain);
     const txBytes = await this.execRecoveryUrlFetch("/execute_pending_transfers", {
       chain: chainIdentifier[this.environment],
       module,
@@ -194,7 +194,7 @@ export class AxelarRecoveryApi {
   }
 
   public async signCommands(chain: string) {
-    const { module, chainIdentifier } = this.getChainInfo(chain);
+    const { module, chainIdentifier } = await this.getChainInfo(chain);
 
     const txBytes = await this.execRecoveryUrlFetch("/sign_commands", {
       chain: chainIdentifier[this.environment],

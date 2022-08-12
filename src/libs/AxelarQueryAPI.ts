@@ -2,16 +2,14 @@ import { AssetConfig } from "../assets/types";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
-import {
-  AxelarQueryAPIConfig,
-  Environment,
-  EvmChain,
-  FeeInfoResponse,
-  GasToken,
-  TransferFeeResponse,
-} from "./types";
+import { AxelarQueryAPIConfig, Environment, EvmChain, GasToken } from "./types";
 import { ethers } from "ethers";
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
+import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
+import {
+  FeeInfoResponse,
+  TransferFeeResponse,
+} from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -21,6 +19,8 @@ export class AxelarQueryAPI {
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
   readonly axelarCachingServiceUrl: string;
+  private allAssets: AssetConfig[];
+  private axelarQueryClient: AxelarQueryClientType;
 
   public constructor(config: AxelarQueryAPIConfig) {
     const { axelarLcdUrl, axelarRpcUrl, environment } = config;
@@ -34,6 +34,12 @@ export class AxelarQueryAPI {
     this.lcdApi = new RestService(this.axelarLcdUrl);
     this.rpcApi = new RestService(this.axelarRpcUrl);
     this.axelarCachingServiceApi = new RestService(this.axelarCachingServiceUrl);
+
+    this._initializeAssets();
+  }
+
+  private async _initializeAssets() {
+    this.allAssets = await loadAssets({ environment: this.environment });
   }
 
   /**
@@ -48,10 +54,11 @@ export class AxelarQueryAPI {
     assetDenom: string
   ): Promise<FeeInfoResponse> {
     try {
-      let queryEndpoint = `/axelar/nexus/v1beta1/fee`;
-      queryEndpoint += `?chain=${chainName?.toLowerCase()}`;
-      queryEndpoint += `&asset=${assetDenom}`;
-      return (await this.lcdApi.get(queryEndpoint)) as FeeInfoResponse;
+      if (!this.axelarQueryClient)
+        this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
+          environment: this.environment,
+        });
+      return await this.axelarQueryClient.nexus.FeeInfo({ chain: chainName, asset: assetDenom });
     } catch (e: any) {
       throw e;
     }
@@ -73,11 +80,15 @@ export class AxelarQueryAPI {
     amountInDenom: number
   ): Promise<TransferFeeResponse> {
     try {
-      let queryEndpoint = `/axelar/nexus/v1beta1/transfer_fee`;
-      queryEndpoint += `?source_chain=${sourceChainName?.toLowerCase()}`;
-      queryEndpoint += `&destination_chain=${destinationChainName?.toLowerCase()}`;
-      queryEndpoint += `&amount=${amountInDenom?.toString()}${assetDenom}`;
-      return this.lcdApi.get(queryEndpoint);
+      if (!this.axelarQueryClient)
+        this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
+          environment: this.environment,
+        });
+      return await this.axelarQueryClient.nexus.TransferFee({
+        sourceChain: sourceChainName,
+        destinationChain: destinationChainName,
+        amount: `${amountInDenom.toString()}${assetDenom}`,
+      });
     } catch (e: any) {
       throw e;
     }
@@ -137,9 +148,9 @@ export class AxelarQueryAPI {
    * @param chainName
    * @returns
    */
-  public getDenomFromSymbol(symbol: string, chainName: string) {
-    const allAssets = loadAssets({ environment: this.environment });
-    const assetConfig: AssetConfig | undefined = allAssets.find(
+  public async getDenomFromSymbol(symbol: string, chainName: string) {
+    if (!this.allAssets) await this._initializeAssets();
+    const assetConfig: AssetConfig | undefined = this.allAssets.find(
       (assetConfig) => assetConfig.chain_aliases[chainName]?.assetSymbol === symbol
     );
     if (!assetConfig) return null;
@@ -152,9 +163,9 @@ export class AxelarQueryAPI {
    * @param chainName
    * @returns
    */
-  public getSymbolFromDenom(denom: string, chainName: string) {
-    const allAssets = loadAssets({ environment: this.environment });
-    const assetConfig: AssetConfig | undefined = allAssets.find(
+  public async getSymbolFromDenom(denom: string, chainName: string) {
+    if (!this.allAssets) await this._initializeAssets();
+    const assetConfig: AssetConfig | undefined = this.allAssets.find(
       (assetConfig) => assetConfig.common_key[this.environment] === denom
     );
     if (!assetConfig) return null;

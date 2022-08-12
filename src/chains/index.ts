@@ -1,55 +1,18 @@
-import Axelar from "./Axelar";
-import Ethereum from "./Ethereum";
-import Avalanche from "./Avalanche";
-import Terra from "./Terra";
-import Fantom from "./Fantom";
-import Polygon from "./Polygon";
-import Moonbeam from "./Moonbeam";
-import Osmosis from "./Osmosis";
-import Cosmoshub from "./Cosmoshub";
-import Injective from "./Injective";
-import Juno from "./Juno";
+import fetch from "cross-fetch";
 import { loadAssets } from "../assets";
 import { AssetConfig, AssetInfo } from "../assets/types";
-import { Chain, LoadChainConfig } from "./types";
+import { ChainInfo, LoadChainConfig } from "./types";
 import cloneDeep from "clone-deep";
-import Crescent from "./Crescent";
-import EMoney from "./EMoney";
-import Binance from "./Binance";
-import Kujira from "./Kujira";
-import Sei from "./Sei";
-import Secret from "./Secret";
-import Aurora from "./Aurora";
-import Fetch from "./Fetch";
+import { Environment } from "src/libs";
 
-export function loadChains(config: LoadChainConfig) {
-  const allAssets = loadAssets(config);
-  const _environment = config.environment as string;
+export async function loadChains(config: LoadChainConfig) {
+  const allAssets = await loadAssets(config);
+  const _environment = config.environment as Environment;
 
-  const rawChains: Chain[] = [
-    new Aurora(),
-    new Axelar(),
-    new Avalanche(),
-    new Binance(),
-    new Cosmoshub(),
-    new Crescent(),
-    new Ethereum(),
-    new EMoney(),
-    new Fantom(),
-    new Fetch(),
-    new Injective(),
-    new Juno(),
-    new Kujira(),
-    new Moonbeam(),
-    new Osmosis(),
-    new Polygon(),
-    new Secret(),
-    new Sei(),
-    new Terra(),
-  ];
+  const rawChains: ChainInfo[] = await importChains({ environment: _environment})
 
   /*push assets to supported chains*/
-  rawChains.forEach(({ chainInfo }) => {
+  rawChains.forEach((chainInfo) => {
     const filteredAssetList: AssetConfig[] = allAssets.filter(
       ({ chain_aliases }) =>
         Object.keys(chain_aliases).indexOf(chainInfo.chainName.toLowerCase()) > -1
@@ -62,7 +25,7 @@ export function loadChains(config: LoadChainConfig) {
         asset.chain_aliases[chainInfo.chainName.toLowerCase()]
       );
       assetToPush.common_key =
-        asset.common_key[_environment === "local" ? "testnet" : _environment];
+        asset.common_key[_environment];
       assetToPush.native_chain = asset.native_chain;
       assetToPush.decimals = asset.decimals;
       assetToPush.fullySupported = asset.fully_supported;
@@ -74,3 +37,30 @@ export function loadChains(config: LoadChainConfig) {
 
   return rawChains;
 }
+
+const urlMap: Record<Environment, string> = {
+  devnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/devnet-chain-config.json",
+  testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-chain-config.json",
+  mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/mainnet-chain-config.json"
+}
+const chainMap: Record<Environment, any> = { devnet: null, testnet: null, mainnet: null };
+
+export async function importChains(config: LoadChainConfig): Promise<ChainInfo[]> {
+  if (chainMap[config.environment]) 
+    return Object.values(chainMap[config.environment]);
+
+  chainMap[config.environment] = await execGet(urlMap[config.environment]);
+
+  return Object.values(chainMap[config.environment]);
+}
+
+async function execGet(base: string) {
+  return await fetch(base, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((res) => res.json())
+    .catch((error) => {
+      throw error;
+    });
+  }
