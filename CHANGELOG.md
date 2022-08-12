@@ -7,11 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.8.0] - 2022-AUGUST-12
 
-- update `@axelar-network/axelarjs-sdk` dependency to v0.22.1
-
 ### Changed
 
-- refactor to how chains and assets are instantiated. now fetches this list dynamically from a remote resource instead.
+- update `@axelar-network/axelarjs-sdk` dependency to v0.22.1
 
 ## [0.7.1] - 2022-AUGUST-12
 
