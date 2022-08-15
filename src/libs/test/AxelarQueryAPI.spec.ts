@@ -1,4 +1,7 @@
-import { FeeInfoResponse, TransferFeeResponse } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
+import {
+  FeeInfoResponse,
+  TransferFeeResponse,
+} from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
 
@@ -71,17 +74,33 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
-  xdescribe("getDenomFromSymbol", () => {
+  describe("getDenomFromSymbol", () => {
     test("It should get the denom for an asset given its symbol on a chain", async () => {
-      const response = await api.getDenomFromSymbol("UST", "ethereum");
-      expect(response).toEqual("uusd");
+      const response = await api.getDenomFromSymbol("aUSDC", "axelar");
+      expect(response).toEqual("uausdc");
     });
   });
 
-  xdescribe("getSymbolFromDenom", () => {
+  describe("getSymbolFromDenom", () => {
     test("It should get the symbol for an asset on a given chain given its denom", async () => {
-      const response = await api.getSymbolFromDenom("uusd", "ethereum");
-      expect(response).toEqual("UST");
+      const response = await api.getSymbolFromDenom("uaxl", "axelar");
+      expect(response).toEqual("AXL");
+    });
+  });
+
+  describe("getAssetConfigFromDenom", () => {
+    test("It should get asset config for an asset on a given chain given its denom", async () => {
+      const response = await api.getAssetConfigFromDenom("uaxl", "axelar");
+      expect(response).toEqual({
+        assetSymbol: "AXL",
+        assetName: "AXL",
+        minDepositAmt: 0.05,
+        ibcDenom: "uaxl",
+        fullDenomPath: "uaxl",
+        tokenAddress: "uaxl",
+        decimals: 6,
+        common_key: "uaxl",
+      });
     });
   });
 });
