@@ -171,4 +171,23 @@ export class AxelarQueryAPI {
     if (!assetConfig) return null;
     return assetConfig.chain_aliases[chainName].assetSymbol;
   }
+
+  /**
+   * Get the asset config for an asset on a given chain given its denom
+   * @param denom
+   * @param chainName
+   * @returns
+   */
+  public async getAssetConfigFromDenom(denom: string, chainName: string) {
+    if (!this.allAssets) await this._initializeAssets();
+    const assetConfig: AssetConfig | undefined = this.allAssets.find(
+      (assetConfig) => assetConfig.common_key[this.environment] === denom
+    );
+    if (!assetConfig) return null;
+    const result = assetConfig.chain_aliases[chainName];
+    if (!result) return null;
+    result.decimals = assetConfig.decimals;
+    result.common_key = assetConfig.common_key[this.environment];
+    return result;
+  }
 }
