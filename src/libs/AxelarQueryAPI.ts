@@ -57,6 +57,7 @@ export class AxelarQueryAPI {
       if (!this.axelarQueryClient)
         this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
           environment: this.environment,
+          axelarRpcUrl: this.axelarRpcUrl
         });
       return await this.axelarQueryClient.nexus.FeeInfo({ chain: chainName, asset: assetDenom });
     } catch (e: any) {
@@ -83,6 +84,7 @@ export class AxelarQueryAPI {
       if (!this.axelarQueryClient)
         this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
           environment: this.environment,
+          axelarRpcUrl: this.axelarRpcUrl
         });
       return await this.axelarQueryClient.nexus.TransferFee({
         sourceChain: sourceChainName,
