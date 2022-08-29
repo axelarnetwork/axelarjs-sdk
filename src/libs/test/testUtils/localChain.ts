@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import ganache from "ganache";
-import { rpcMap } from "../../TransactionRecoveryApi/constants/chain";
+import rpcInfo from "../../TransactionRecoveryApi/constants/chain";
 import { EvmChain } from "../../types";
 
 export interface ForkOptions {
@@ -22,7 +22,7 @@ export function fork(
       defaultBalance: options.defaultBalance,
     },
     fork: {
-      url: rpcMap[evmChain],
+      url: rpcInfo.testnet.rpcMap[evmChain],
       blockNumber: options?.blockNumber,
     },
     chain: {

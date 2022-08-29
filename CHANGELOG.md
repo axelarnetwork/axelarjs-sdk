@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.0] - 2022-AUGUST-29
+
+### Changed
+
+- update `@axelar-network/axelarjs-types` dependency to v0.24.0.
+- add mainnet RPC endpoints for transaction recovery API, which can now toggle endpoints per environment
+
 ## [0.8.1] - 2022-AUGUST-22
 
 ### Changed
