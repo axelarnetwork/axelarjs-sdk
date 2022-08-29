@@ -17,6 +17,8 @@ export enum EvmChain {
   FANTOM = "fantom",
   POLYGON = "polygon",
   MOONBEAM = "moonbeam",
+  AURORA = "aurora",
+  BINANCE = "binance"
 }
 
 export enum CosmosChain {
@@ -107,6 +109,8 @@ export enum GasToken {
   MATIC = "MATIC",
   UST = "UST",
   USDC = "USDC",
+  AURORA = "AURORA",
+  BINANCE = "BSC"
 }
 
 export interface AddGasOptions {

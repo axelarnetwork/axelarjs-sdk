@@ -6,7 +6,7 @@ import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
 import EVMClient from "./client/EVMClient";
 import { TransactionRequest } from "@ethersproject/providers";
-import { rpcMap } from "./constants/chain";
+import rpcInfo from "./constants/chain";
 import { BigNumber } from "ethers";
 
 export enum GMPStatus {
@@ -219,7 +219,7 @@ export class AxelarRecoveryApi {
   public async getSignedTxAndBroadcast(chain: EvmChain, data: string) {
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
-      rpcUrl: rpcMap[chain],
+      rpcUrl: rpcInfo[this.environment].rpcMap[chain],
       evmWalletDetails: { useWindowEthereum: true },
     });
     const txRequest: TransactionRequest = evmClient.buildUnsignedTx(gatewayInfo.address, { data });
@@ -236,7 +236,7 @@ export class AxelarRecoveryApi {
   public async sendApproveTx(chain: EvmChain, data: string, evmWalletDetails: EvmWalletDetails) {
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
-      rpcUrl: rpcMap[chain],
+      rpcUrl: rpcInfo[this.environment].rpcMap[chain],
       evmWalletDetails,
     });
 
@@ -256,7 +256,7 @@ export class AxelarRecoveryApi {
   ) {
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
-      rpcUrl: rpcMap[chain],
+      rpcUrl: rpcInfo[this.environment].rpcMap[chain],
       evmWalletDetails,
     });
     return await evmClient.broadcastToGateway(gatewayInfo.address, { data });
