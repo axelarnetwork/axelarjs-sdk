@@ -21,7 +21,9 @@ describe("AxelarGateway", () => {
     const network = await createNetwork({ name: chain });
     signer = network.ownerWallet;
     gatewayContract = network.gateway.connect(signer);
-    erc20Contract = network.usdc.connect(signer);
+    erc20Contract = await network
+      .deployToken("Axelar Wrapped aUSDC", "aUSDC", 6, BigInt(1e70))
+      .then((usdc) => usdc.connect(signer));
     axelarGateway = new AxelarGateway(gatewayContract.address, network.provider);
     await network.giveToken(
       await signer.getAddress(),
