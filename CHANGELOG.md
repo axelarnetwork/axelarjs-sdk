@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- add `getNativeGasBaseFee` to AxelarQueryAPI. This method gets the base fee in native token wei for a given source and destination chain combination
+- add `getNativeGasBaseFee` to AxelarQueryAPI. This method gets the base fee in native token wei for a given source and destination chain combination. update `estimateGasFee` to add result of `getNativeGasBaseFee` if native token is selected
 
 ## [0.9.0] - 2022-AUGUST-29
 
