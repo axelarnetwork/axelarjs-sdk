@@ -106,7 +106,7 @@ export class AxelarQueryAPI {
   public async getNativeGasBaseFee(
     sourceChainName: EvmChain,
     destinationChainName: EvmChain
-  ): Promise<ethers.BigNumber | { success: boolean; error: any; }> {
+  ): Promise<ethers.BigNumber | { success: boolean; error: any }> {
     return this.axelarCachingServiceApi
       .post("", {
         method: "getFees",
