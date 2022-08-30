@@ -3,7 +3,14 @@ import { parseEther, parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
-import { AxelarQueryAPIConfig, Environment, EvmChain, GasToken, isNativeToken } from "./types";
+import {
+  AxelarQueryAPIConfig,
+  BaseFeeResponse,
+  Environment,
+  EvmChain,
+  GasToken,
+  isNativeToken,
+} from "./types";
 import { ethers } from "ethers";
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
@@ -106,7 +113,7 @@ export class AxelarQueryAPI {
   public async getNativeGasBaseFee(
     sourceChainName: EvmChain,
     destinationChainName: EvmChain
-  ): Promise<ethers.BigNumber | { success: boolean; error: any }> {
+  ): Promise<BaseFeeResponse> {
     return this.axelarCachingServiceApi
       .post("", {
         method: "getFees",
@@ -116,7 +123,8 @@ export class AxelarQueryAPI {
       .then((response) => {
         const { base_fee, destination_native_token } = response.result;
         const { decimals } = destination_native_token;
-        return parseUnits(base_fee.toString(), decimals);
+        const baseFee = parseUnits(base_fee.toString(), decimals).toString();
+        return { baseFee, success: true };
       })
       .catch((error) => ({ success: false, error: error.message }));
   }
@@ -164,13 +172,26 @@ export class AxelarQueryAPI {
       sourceChainName,
       destinationChainName,
       sourceChainTokenSymbol
-    );
+    ).catch(() => undefined);
+    // If the gas price is not available, return 0
+    if (!response) return "0";
+
     const { gas_price: gasPrice } = response.source_token;
-    const res = parseEther(gasPrice).mul(estimatedGasUsed);
+    const destTxFee = parseEther(gasPrice).mul(estimatedGasUsed);
     if (isNativeToken(sourceChainName, sourceChainTokenSymbol as GasToken)) {
-      res.add(await this.getNativeGasBaseFee(sourceChainName, destinationChainName));
+      const { success, baseFee } = await this.getNativeGasBaseFee(
+        sourceChainName,
+        destinationChainName
+      );
+      if (success && baseFee) {
+        // If the base fee is available, add it to the destTxFee, and return the result
+        return destTxFee.add(baseFee).toString();
+      } else {
+        // If the base fee is not available, return 0
+        return "0";
+      }
     }
-    return res.toString();
+    return destTxFee.toString();
   }
 
   /**

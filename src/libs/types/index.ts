@@ -71,6 +71,12 @@ export type AxelarQueryAPIConfig = {
   environment: Environment;
 };
 
+export interface BaseFeeResponse {
+  success: boolean;
+  error?: string;
+  baseFee?: string;
+}
+
 export type CosmosBasedWalletDetails = {
   mnemonic?: string;
   offlineSigner?: OfflineSigner;
