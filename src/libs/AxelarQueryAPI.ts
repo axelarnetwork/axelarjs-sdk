@@ -176,19 +176,23 @@ export class AxelarQueryAPI {
     // If the gas price is not available, return 0
     if (!response) return "0";
 
-    const { gas_price: gasPrice } = response.source_token;
-    const destTxFee = parseEther(gasPrice).mul(estimatedGasUsed);
+    const { gas_price: gasPrice, decimals: srcTokenDecimals } = response.source_token;
+    const { decimals: destTokenDecimals } = response.destination_native_token;
+
+    const destTxFee = parseEther(gasPrice)
+      .mul(estimatedGasUsed)
+      .div(ethers.BigNumber.from("10").pow(destTokenDecimals - srcTokenDecimals));
+
     if (isNativeToken(sourceChainName, sourceChainTokenSymbol as GasToken)) {
       const { success, baseFee } = await this.getNativeGasBaseFee(
         sourceChainName,
         destinationChainName
       );
-      if (success && baseFee) {
-        // If the base fee is available, add it to the destTxFee, and return the result
-        return destTxFee.add(baseFee).toString();
-      }
       // If the base fee is not available, return 0
-      return "0";
+      if (!success || !baseFee) return "0";
+
+      // If the base fee is available, add it to the destTxFee, and return the result
+      return destTxFee.add(baseFee).toString();
     }
     return destTxFee.toString();
   }
