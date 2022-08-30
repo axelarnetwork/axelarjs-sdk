@@ -74,6 +74,16 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
+  describe("getNativeGasBaseFee", () => {
+    test("It should return base fee for a certain source chain / destination chain combination", async () => {
+      const gasAmount = await api.getNativeGasBaseFee(
+        EvmChain.AVALANCHE,
+        EvmChain.ETHEREUM
+      );
+      expect(gasAmount).toBeDefined();
+    });
+  });
+
   describe("getDenomFromSymbol", () => {
     test("It should get the denom for an asset given its symbol on a chain", async () => {
       const response = await api.getDenomFromSymbol("aUSDC", "axelar");

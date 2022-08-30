@@ -57,7 +57,7 @@ export class AxelarQueryAPI {
       if (!this.axelarQueryClient)
         this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
           environment: this.environment,
-          axelarRpcUrl: this.axelarRpcUrl
+          axelarRpcUrl: this.axelarRpcUrl,
         });
       return await this.axelarQueryClient.nexus.FeeInfo({ chain: chainName, asset: assetDenom });
     } catch (e: any) {
@@ -84,7 +84,7 @@ export class AxelarQueryAPI {
       if (!this.axelarQueryClient)
         this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
           environment: this.environment,
-          axelarRpcUrl: this.axelarRpcUrl
+          axelarRpcUrl: this.axelarRpcUrl,
         });
       return await this.axelarQueryClient.nexus.TransferFee({
         sourceChain: sourceChainName,
@@ -94,6 +94,30 @@ export class AxelarQueryAPI {
     } catch (e: any) {
       throw e;
     }
+  }
+
+  /**
+   * Gets the base fee in native token wei for a given source and destination chain combination
+   * @param sourceChainName
+   * @param destinationChainName
+   * @returns base fee in native token in wei
+   */
+  public async getNativeGasBaseFee(
+    sourceChainName: EvmChain,
+    destinationChainName: EvmChain
+  ): Promise<any> {
+    return this.axelarCachingServiceApi
+      .post("", {
+        method: "getFees",
+        destinationChain: destinationChainName,
+        sourceChain: sourceChainName,
+      })
+      .then((response) => {
+        const { base_fee, destination_native_token } = response.result;
+        const { decimals } = destination_native_token;
+        return ethers.utils.parseUnits(base_fee.toString(), decimals).toString();
+      })
+      .catch((error) => ({ success: false, error: error.message }));
   }
 
   /**

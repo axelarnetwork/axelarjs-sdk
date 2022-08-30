@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.1] - 2022-AUGUST-30
+
+### Changed
+
+- add `getNativeGasBaseFee` to AxelarQueryAPI. This method gets the base fee in native token wei for a given source and destination chain combination
+
 ## [0.9.0] - 2022-AUGUST-29
 
 ### Changed
