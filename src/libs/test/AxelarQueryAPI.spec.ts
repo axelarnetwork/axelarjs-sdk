@@ -2,6 +2,7 @@ import {
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
+import { ethers } from "ethers";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
 
@@ -63,14 +64,38 @@ describe("AxelarQueryAPI", () => {
       expect(response.source_token).toBeDefined();
       expect(response.destination_native_token).toBeDefined();
     });
+  });
 
-    test("It should return estimated gas amount", async () => {
+  describe("estimateGasFee", () => {
+    test("It should return estimated gas amount that makes sense for USDC", async () => {
+      const gasAmount = await api.estimateGasFee(
+        EvmChain.AVALANCHE,
+        EvmChain.ETHEREUM,
+        GasToken.USDC
+      );
+
+      // gasAmount should be less than 10k usd, otherwise we handle decimal conversion incorrectly.
+      expect(ethers.utils.parseUnits("10000", 6).gt(gasAmount)).toBeTruthy();
+    });
+
+    test("It should return estimated gas amount that makes sense for native token", async () => {
       const gasAmount = await api.estimateGasFee(
         EvmChain.AVALANCHE,
         EvmChain.ETHEREUM,
         GasToken.AVAX
       );
-      expect(gasAmount).toBeDefined();
+
+      // gasAmount should be greater than 0.0000001, otherwise we handle decimal conversion incorrectly.
+      expect(ethers.utils.parseEther("0.0000001").lt(gasAmount)).toBeTruthy();
+    });
+  });
+
+  describe("getNativeGasBaseFee", () => {
+    test("It should return base fee for a certain source chain / destination chain combination", async () => {
+      const gasResult = await api.getNativeGasBaseFee(EvmChain.AVALANCHE, EvmChain.ETHEREUM);
+      expect(gasResult.success).toBeTruthy();
+      expect(gasResult.baseFee).toBeDefined();
+      expect(gasResult.error).toBeUndefined();
     });
   });
 

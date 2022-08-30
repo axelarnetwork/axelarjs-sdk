@@ -20,7 +20,7 @@ export const getTransferPayload = (
         testnet: "terra",
         mainnet: "terra",
       },
-      addressPrefix: "terra"
+      addressPrefix: "terra",
     },
     selectedSourceAsset: {
       assetSymbol: "UST",
@@ -44,7 +44,7 @@ export const getTransferPayload = (
         testnet: "avalanche",
         mainnet: "avalanche",
       },
-      addressPrefix: ""
+      addressPrefix: "",
     },
     selectedDestinationAsset: {
       assetAddress: destAddress,

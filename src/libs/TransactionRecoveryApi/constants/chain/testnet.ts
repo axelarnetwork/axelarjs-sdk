@@ -8,7 +8,7 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.AVALANCHE]: "https://api.avax-test.network/ext/bc/C/rpc",
   [EvmChain.ETHEREUM]: "https://ropsten.infura.io/v3/510b6d5b3c56497b8070626a54f565a9",
   [EvmChain.AURORA]: "https://testnet.aurora.dev",
-  [EvmChain.BINANCE]: "https://data-seed-prebsc-1-s1.binance.org:8545"
+  [EvmChain.BINANCE]: "https://data-seed-prebsc-1-s1.binance.org:8545",
 };
 
 export const networkInfo: Record<EvmChain, Network> = {
@@ -34,10 +34,10 @@ export const networkInfo: Record<EvmChain, Network> = {
   },
   [EvmChain.AURORA]: {
     chainId: 1313161555,
-    name: EvmChain.AURORA
+    name: EvmChain.AURORA,
   },
   [EvmChain.BINANCE]: {
     chainId: 97,
-    name: EvmChain.BINANCE
-  }
+    name: EvmChain.BINANCE,
+  },
 };

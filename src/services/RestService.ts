@@ -29,7 +29,6 @@ export class RestService {
   }
 
   private async execRest(endpoint: string, requestOptions: any) {
-    
     return fetch(this.host + endpoint, requestOptions)
       .then((response) => {
         if (!response.ok) throw response;

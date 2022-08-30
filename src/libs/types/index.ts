@@ -18,7 +18,7 @@ export enum EvmChain {
   POLYGON = "polygon",
   MOONBEAM = "moonbeam",
   AURORA = "aurora",
-  BINANCE = "binance"
+  BINANCE = "binance",
 }
 
 export enum CosmosChain {
@@ -71,6 +71,12 @@ export type AxelarQueryAPIConfig = {
   environment: Environment;
 };
 
+export interface BaseFeeResponse {
+  success: boolean;
+  error?: string;
+  baseFee?: string;
+}
+
 export type CosmosBasedWalletDetails = {
   mnemonic?: string;
   offlineSigner?: OfflineSigner;
@@ -110,7 +116,7 @@ export enum GasToken {
   UST = "UST",
   USDC = "USDC",
   AURORA = "AURORA",
-  BINANCE = "BSC"
+  BINANCE = "BSC",
 }
 
 export interface AddGasOptions {
@@ -172,3 +178,16 @@ export interface ApproveGatewayResponse {
   signCommandTx?: AxelarTxResponse;
   approveTx?: any;
 }
+
+export const isNativeToken = (chain: EvmChain, selectedToken: GasToken) => {
+  const nativeTokenMap = {
+    [EvmChain.ETHEREUM]: GasToken.ETH,
+    [EvmChain.AVALANCHE]: GasToken.AVAX,
+    [EvmChain.FANTOM]: GasToken.FTM,
+    [EvmChain.POLYGON]: GasToken.MATIC,
+    [EvmChain.MOONBEAM]: GasToken.GLMR,
+    [EvmChain.AURORA]: GasToken.AURORA,
+    [EvmChain.BINANCE]: GasToken.BINANCE,
+  };
+  return nativeTokenMap[chain] === selectedToken;
+};

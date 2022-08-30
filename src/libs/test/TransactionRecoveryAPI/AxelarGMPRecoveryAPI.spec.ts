@@ -272,6 +272,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
     let contract: Contract;
     let userWallet: Wallet;
+    let usdc: Contract;
     let provider: ethers.providers.Web3Provider;
     const tokenSymbol = "aUSDC";
     const queryApi = new AxelarQueryAPI({ environment: Environment.TESTNET });
@@ -285,12 +286,13 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       // Deploy test contract
       contract = await utils.deployContract(userWallet, DistributionExecutable, args as any);
+      usdc = await srcChain.deployToken("Axelar Wrapped aUSDC", "aUSDC", 6, BigInt(1e70));
 
       // Send USDC to the user wallet for testing
       await srcChain.giveToken(userWallet.address, tokenSymbol, BigInt("10000000"));
 
       // Approve token before running any test
-      await srcChain.usdc
+      await usdc
         .connect(userWallet)
         .approve(contract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
@@ -387,7 +389,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       gasReceiverContract = srcChain.gasReceiver;
       userWallet = srcChain.adminWallets[0];
       provider = srcChain.provider as ethers.providers.Web3Provider;
-      usdc = srcChain.usdc.connect(userWallet);
+      usdc = await (
+        await srcChain.deployToken("Axelar Wrapped aUSDC", "aUSDC", 6, BigInt(1e70))
+      ).connect(userWallet);
 
       // Override the provider and wallet to use data from the local network
       addNativeGasOptions = {
@@ -409,8 +413,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       await srcChain.giveToken(userWallet.address, tokenSymbol, BigInt("10000000"));
 
       // Approve token before running any test
-      await srcChain.usdc
-        .connect(userWallet)
+      await usdc
         .approve(contract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
 
@@ -656,7 +659,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       gasReceiverContract = srcChain.gasReceiver;
       userWallet = srcChain.adminWallets[0];
       provider = srcChain.provider as ethers.providers.Web3Provider;
-      usdc = srcChain.usdc.connect(userWallet);
+      usdc = await srcChain
+        .deployToken("Axelar Wrapped aUSDC", "aUSDC", 6, BigInt(1e70))
+        .then((usdc) => usdc.connect(userWallet));
       addGasOptions = {
         evmWalletDetails: {
           useWindowEthereum: false,
