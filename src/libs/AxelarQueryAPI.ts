@@ -186,10 +186,9 @@ export class AxelarQueryAPI {
       if (success && baseFee) {
         // If the base fee is available, add it to the destTxFee, and return the result
         return destTxFee.add(baseFee).toString();
-      } else {
-        // If the base fee is not available, return 0
-        return "0";
       }
+      // If the base fee is not available, return 0
+      return "0";
     }
     return destTxFee.toString();
   }
