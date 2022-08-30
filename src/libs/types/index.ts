@@ -172,3 +172,16 @@ export interface ApproveGatewayResponse {
   signCommandTx?: AxelarTxResponse;
   approveTx?: any;
 }
+
+export const isNativeToken = (chain: EvmChain, selectedToken: GasToken) => {
+  const nativeTokenMap = {
+    [EvmChain.ETHEREUM]: GasToken.ETH,
+    [EvmChain.AVALANCHE]: GasToken.AVAX,
+    [EvmChain.FANTOM]: GasToken.FTM,
+    [EvmChain.POLYGON]: GasToken.MATIC,
+    [EvmChain.MOONBEAM]: GasToken.GLMR,
+    [EvmChain.AURORA]: GasToken.AURORA,
+    [EvmChain.BINANCE]: GasToken.BINANCE
+  }
+  return nativeTokenMap[chain] === selectedToken;
+}

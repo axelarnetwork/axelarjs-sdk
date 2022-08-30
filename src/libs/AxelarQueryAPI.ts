@@ -1,8 +1,9 @@
 import { AssetConfig } from "../assets/types";
+import { parseEther, parseUnits } from "ethers/lib/utils"
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
-import { AxelarQueryAPIConfig, Environment, EvmChain, GasToken } from "./types";
+import { AxelarQueryAPIConfig, Environment, EvmChain, GasToken, isNativeToken } from "./types";
 import { ethers } from "ethers";
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
@@ -115,7 +116,7 @@ export class AxelarQueryAPI {
       .then((response) => {
         const { base_fee, destination_native_token } = response.result;
         const { decimals } = destination_native_token;
-        return ethers.utils.parseUnits(base_fee.toString(), decimals).toString();
+        return parseUnits(base_fee.toString(), decimals);
       })
       .catch((error) => ({ success: false, error: error.message }));
   }
@@ -165,7 +166,11 @@ export class AxelarQueryAPI {
       sourceChainTokenSymbol
     );
     const { gas_price: gasPrice } = response.source_token;
-    return ethers.utils.parseEther(gasPrice).mul(estimatedGasUsed).toString();
+    let res = ethers.utils.parseEther(gasPrice).mul(estimatedGasUsed);
+    if (isNativeToken(sourceChainName, sourceChainTokenSymbol as GasToken)) {
+      res.add(await this.getNativeGasBaseFee(sourceChainName, destinationChainName));
+    }
+    return res.toString();
   }
 
   /**
