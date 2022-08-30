@@ -76,10 +76,7 @@ describe("AxelarQueryAPI", () => {
 
   describe("getNativeGasBaseFee", () => {
     test("It should return base fee for a certain source chain / destination chain combination", async () => {
-      const gasAmount = await api.getNativeGasBaseFee(
-        EvmChain.AVALANCHE,
-        EvmChain.ETHEREUM
-      );
+      const gasAmount = await api.getNativeGasBaseFee(EvmChain.AVALANCHE, EvmChain.ETHEREUM);
       expect(gasAmount).toBeDefined();
     });
   });

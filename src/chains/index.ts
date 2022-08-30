@@ -9,7 +9,7 @@ export async function loadChains(config: LoadChainConfig) {
   const allAssets = await loadAssets(config);
   const _environment = config.environment as Environment;
 
-  const rawChains: ChainInfo[] = await importChains({ environment: _environment})
+  const rawChains: ChainInfo[] = await importChains({ environment: _environment });
 
   /*push assets to supported chains*/
   rawChains.forEach((chainInfo) => {
@@ -24,8 +24,7 @@ export async function loadChains(config: LoadChainConfig) {
       const assetToPush: AssetInfo = cloneDeep(
         asset.chain_aliases[chainInfo.chainName.toLowerCase()]
       );
-      assetToPush.common_key =
-        asset.common_key[_environment];
+      assetToPush.common_key = asset.common_key[_environment];
       assetToPush.native_chain = asset.native_chain;
       assetToPush.decimals = asset.decimals;
       assetToPush.fullySupported = asset.fully_supported;
@@ -41,13 +40,12 @@ export async function loadChains(config: LoadChainConfig) {
 const urlMap: Record<Environment, string> = {
   devnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/devnet-chain-config.json",
   testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-chain-config.json",
-  mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/mainnet-chain-config.json"
-}
+  mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/mainnet-chain-config.json",
+};
 const chainMap: Record<Environment, any> = { devnet: null, testnet: null, mainnet: null };
 
 export async function importChains(config: LoadChainConfig): Promise<ChainInfo[]> {
-  if (chainMap[config.environment]) 
-    return Object.values(chainMap[config.environment]);
+  if (chainMap[config.environment]) return Object.values(chainMap[config.environment]);
 
   chainMap[config.environment] = await execGet(urlMap[config.environment]);
 
@@ -63,4 +61,4 @@ async function execGet(base: string) {
     .catch((error) => {
       throw error;
     });
-  }
+}

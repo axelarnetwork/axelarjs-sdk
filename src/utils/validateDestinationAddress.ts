@@ -18,7 +18,9 @@ export async function validateDestinationAddressByChainSymbol(
 
   return targetChain?.module === "evm"
     ? isAddress(destinationAddress)
-    : destinationAddress && targetChain?.addressPrefix && checkPrefix(destinationAddress, targetChain?.addressPrefix);
+    : destinationAddress &&
+        targetChain?.addressPrefix &&
+        checkPrefix(destinationAddress, targetChain?.addressPrefix);
 }
 
 export async function validateDestinationAddressByChainName(
@@ -36,7 +38,9 @@ export async function validateDestinationAddressByChainName(
 
   return targetChain?.module === "evm"
     ? isAddress(destinationAddress)
-    : destinationAddress && targetChain?.addressPrefix && checkPrefix(destinationAddress, targetChain?.addressPrefix);
+    : destinationAddress &&
+        targetChain?.addressPrefix &&
+        checkPrefix(destinationAddress, targetChain?.addressPrefix);
 }
 
 const checkPrefix = (address: string, addressPrefix: string): boolean => {

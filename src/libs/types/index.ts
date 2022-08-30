@@ -18,7 +18,7 @@ export enum EvmChain {
   POLYGON = "polygon",
   MOONBEAM = "moonbeam",
   AURORA = "aurora",
-  BINANCE = "binance"
+  BINANCE = "binance",
 }
 
 export enum CosmosChain {
@@ -110,7 +110,7 @@ export enum GasToken {
   UST = "UST",
   USDC = "USDC",
   AURORA = "AURORA",
-  BINANCE = "BSC"
+  BINANCE = "BSC",
 }
 
 export interface AddGasOptions {
@@ -181,7 +181,7 @@ export const isNativeToken = (chain: EvmChain, selectedToken: GasToken) => {
     [EvmChain.POLYGON]: GasToken.MATIC,
     [EvmChain.MOONBEAM]: GasToken.GLMR,
     [EvmChain.AURORA]: GasToken.AURORA,
-    [EvmChain.BINANCE]: GasToken.BINANCE
-  }
+    [EvmChain.BINANCE]: GasToken.BINANCE,
+  };
   return nativeTokenMap[chain] === selectedToken;
-}
+};

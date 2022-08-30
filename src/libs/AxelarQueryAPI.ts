@@ -1,5 +1,5 @@
 import { AssetConfig } from "../assets/types";
-import { parseEther, parseUnits } from "ethers/lib/utils"
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
@@ -166,7 +166,7 @@ export class AxelarQueryAPI {
       sourceChainTokenSymbol
     );
     const { gas_price: gasPrice } = response.source_token;
-    let res = ethers.utils.parseEther(gasPrice).mul(estimatedGasUsed);
+    const res = parseEther(gasPrice).mul(estimatedGasUsed);
     if (isNativeToken(sourceChainName, sourceChainTokenSymbol as GasToken)) {
       res.add(await this.getNativeGasBaseFee(sourceChainName, destinationChainName));
     }

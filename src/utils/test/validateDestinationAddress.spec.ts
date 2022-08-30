@@ -36,7 +36,7 @@ jest.mock("../../chains", () => ({
           testnet: "terra-2",
           mainnet: "terra-2",
         },
-        addressPrefix: "terra"
+        addressPrefix: "terra",
       },
     ]);
   },
@@ -109,9 +109,12 @@ describe("validateDestinationAddress() - cosmos chain", () => {
     const environment = Environment.TESTNET;
 
     describe("when validateDestinationAddress is called", () => {
-
       beforeEach(async () => {
-        await mock.validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment);
+        await mock.validateDestinationAddressByChainSymbol(
+          chainSymbol,
+          destinationAddress,
+          environment
+        );
       });
 
       test("then it should be called", () => {
@@ -124,7 +127,9 @@ describe("validateDestinationAddress() - cosmos chain", () => {
 
       test("then it should return true", () => {
         expect.assertions(1);
-        return mock.validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment).then(data => expect(data).toEqual(true));
+        return mock
+          .validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment)
+          .then((data) => expect(data).toEqual(true));
       });
     });
   });
@@ -149,7 +154,9 @@ describe("validateDestinationAddress() - cosmos chain", () => {
 
       test("then it should return true", () => {
         expect.assertions(1);
-        return mock.validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment).then(data => expect(data).toEqual(false));
+        return mock
+          .validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment)
+          .then((data) => expect(data).toEqual(false));
       });
     });
   });
