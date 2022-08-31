@@ -994,6 +994,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       const response = await api.execute(
         "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
+        undefined,
         evmWalletDetails
       );
 
@@ -1006,6 +1007,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       const response = await api.execute(
         "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
+        undefined,
         evmWalletDetails
       );
 
@@ -1018,6 +1020,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       const response = await api.execute(
         "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
+        undefined,
         evmWalletDetails
       );
 
@@ -1042,7 +1045,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
 
       const sourceTxHash = "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae";
-      const response = await api.execute(sourceTxHash, evmWalletDetails);
+      const response = await api.execute(sourceTxHash, undefined, evmWalletDetails);
 
       // Expect returns error
       expect(response).toEqual(ExecutionRevertedError(executeParams));
@@ -1074,7 +1077,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
 
       const sourceTxHash = "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae";
-      const response = await api.execute(sourceTxHash, evmWalletDetails);
+      const response = await api.execute(sourceTxHash, undefined, evmWalletDetails);
 
       // Expect returns error
       expect(response).toEqual(InsufficientFundsError(executeParams));
@@ -1106,6 +1109,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       const response = await api.execute(
         "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
+        undefined,
         evmWalletDetails
       );
 

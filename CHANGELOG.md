@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.2] - 2022-AUGUST-31
+
+- fix `execute` in AxelarGMPRecoveryAPI that returns wrong transaction status in some case.
+- accept `txLogIndex` (optional) to `execute` function to execute the right contract call which is needed when there're multiple `ContractCallWithToken` or `ContractCall` events emitted by Axelar Gateway contract associated with given transaction hash.
+
 ## [0.9.1] - 2022-AUGUST-30
 
 ### Changed

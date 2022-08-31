@@ -353,11 +353,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   /**
    * Execute a transaction on the destination chain associated with given `srcTxHash`.
    * @param srcTxHash - The transaction hash on the source chain.
+   * @param srcTxLogIndex - The log index of the transaction on the source chain.
    * @param evmWalletDetails - The wallet details to use for executing the transaction.
    * @returns The result of executing the transaction.
    */
-  public async execute(srcTxHash: string, evmWalletDetails?: EvmWalletDetails): Promise<TxResult> {
-    const response = await this.queryExecuteParams(srcTxHash).catch(() => undefined);
+  public async execute(
+    srcTxHash: string,
+    srcTxLogIndex?: number,
+    evmWalletDetails?: EvmWalletDetails
+  ): Promise<TxResult> {
+    const response = await this.queryExecuteParams(srcTxHash, srcTxLogIndex).catch(() => undefined);
     // Couldn't query the transaction details
     if (!response) return GMPQueryError();
     // Already executed
