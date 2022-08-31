@@ -70,10 +70,11 @@ export class AxelarRecoveryApi {
     this.config = config;
   }
 
-  public async fetchGMPTransaction(txHash: string) {
+  public async fetchGMPTransaction(txHash: string, txLogIndex?: number) {
     return await this.execGet(this.axelarCachingServiceUrl, {
       method: "searchGMP",
       txHash,
+      txLogIndex,
     })
       .then((data) => data.find((gmpTx: any) => gmpTx.id.indexOf(txHash) > -1))
       .catch(() => undefined);
@@ -109,8 +110,11 @@ export class AxelarRecoveryApi {
     };
   }
 
-  public async queryExecuteParams(txHash: string): Promise<Nullable<ExecuteParamsResponse>> {
-    const data = await this.fetchGMPTransaction(txHash);
+  public async queryExecuteParams(
+    txHash: string,
+    txLogIndex?: number
+  ): Promise<Nullable<ExecuteParamsResponse>> {
+    const data = await this.fetchGMPTransaction(txHash, txLogIndex);
     if (!data) return;
 
     // Return if approve tx doesn't not exist
