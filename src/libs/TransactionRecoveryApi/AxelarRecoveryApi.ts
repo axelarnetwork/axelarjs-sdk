@@ -75,7 +75,7 @@ export class AxelarRecoveryApi {
       method: "searchGMP",
       txHash,
     })
-      .then((data) => data.find((txDetails: any) => txDetails.id.indexOf(txHash) > -1))
+      .then((data) => data.find((gmpTx: any) => gmpTx.id.indexOf(txHash) > -1))
       .catch(() => undefined);
   }
 
