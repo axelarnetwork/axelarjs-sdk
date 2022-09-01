@@ -694,8 +694,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         .approve(gasReceiverContract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
 
-      // This is a hacky way to set the gas receiver constant object to local gas receiver contract address
-      // GAS_RECEIVER[Environment.TESTNET][chain] = gasReceiverContract.address;
+      // This is a hacky way to set the gateway object to local gateway contract address
       AXELAR_GATEWAY[Environment.TESTNET][chain] = srcChain.gateway.address;
     });
 
