@@ -462,9 +462,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async getGasReceiverContractAddress(chainName: EvmChain): Promise<string> {
-    const url = s3[this.environment];
-    console.log("url", url, this.environment);
-    return await fetch(url)
+    return await fetch(s3[this.environment])
       .then((res) => res.json())
       .then((body) => body.assets.network[chainName.toLowerCase()]?.gas_service)
       .catch((e) => "");
