@@ -16,7 +16,6 @@ import TestToken from "../abi/TestToken.json";
 import { AxelarQueryAPI } from "../../AxelarQueryAPI";
 import { findContractEvent, getLogIndexFromTxReceipt } from "../../TransactionRecoveryApi/helpers";
 import { Interface } from "ethers/lib/utils";
-import { GAS_RECEIVER } from "../../TransactionRecoveryApi/constants/contract";
 import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
@@ -387,6 +386,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       // Create a source chain network
       const srcChain = await createNetwork({ name: chain });
       gasReceiverContract = srcChain.gasReceiver;
+      jest
+        .spyOn(api, "getGasReceiverContractAddress")
+        .mockResolvedValue(gasReceiverContract.address);
       userWallet = srcChain.adminWallets[0];
       provider = srcChain.provider as ethers.providers.Web3Provider;
       usdc = await (
@@ -416,9 +418,6 @@ describe("AxelarDepositRecoveryAPI", () => {
       await usdc
         .approve(contract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
-
-      // This is a hacky way to set the gas receiver constant object to local gas receiver contract address
-      GAS_RECEIVER[Environment.TESTNET][chain] = gasReceiverContract.address;
     });
 
     test("it shouldn't call 'addNativeGas' given tx is already executed", async () => {
@@ -657,6 +656,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       // Create a source chain network
       const srcChain = await createNetwork({ name: chain });
       gasReceiverContract = srcChain.gasReceiver;
+      jest
+        .spyOn(api, "getGasReceiverContractAddress")
+        .mockResolvedValue(gasReceiverContract.address);
       userWallet = srcChain.adminWallets[0];
       provider = srcChain.provider as ethers.providers.Web3Provider;
       usdc = await srcChain
@@ -692,8 +694,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         .approve(gasReceiverContract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
 
-      // This is a hacky way to set the gas receiver constant object to local gas receiver contract address
-      GAS_RECEIVER[Environment.TESTNET][chain] = gasReceiverContract.address;
+      // This is a hacky way to set the gateway object to local gateway contract address
       AXELAR_GATEWAY[Environment.TESTNET][chain] = srcChain.gateway.address;
     });
 
@@ -1141,6 +1142,19 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
 
       expect(mockGMPApi).toHaveBeenCalledTimes(1);
+    });
+  });
+  describe("getGasReceiverContractAddress", () => {
+    let api: AxelarGMPRecoveryAPI;
+
+    beforeEach(async () => {
+      api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+    });
+
+    test("it should retrieve the gas receiver address remotely", async () => {
+      await api.getGasReceiverContractAddress(EvmChain.MOONBEAM).then((res) => {
+        expect(res).toBeDefined();
+      });
     });
   });
 });
