@@ -386,7 +386,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       // Create a source chain network
       const srcChain = await createNetwork({ name: chain });
       gasReceiverContract = srcChain.gasReceiver;
-      jest.spyOn(api, "getGasReceiverContractAddress").mockResolvedValue(gasReceiverContract.address)
+      jest
+        .spyOn(api, "getGasReceiverContractAddress")
+        .mockResolvedValue(gasReceiverContract.address);
       userWallet = srcChain.adminWallets[0];
       provider = srcChain.provider as ethers.providers.Web3Provider;
       usdc = await (
@@ -416,7 +418,6 @@ describe("AxelarDepositRecoveryAPI", () => {
       await usdc
         .approve(contract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
-
     });
 
     test("it shouldn't call 'addNativeGas' given tx is already executed", async () => {
@@ -655,7 +656,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       // Create a source chain network
       const srcChain = await createNetwork({ name: chain });
       gasReceiverContract = srcChain.gasReceiver;
-      jest.spyOn(api, "getGasReceiverContractAddress").mockResolvedValue(gasReceiverContract.address)
+      jest
+        .spyOn(api, "getGasReceiverContractAddress")
+        .mockResolvedValue(gasReceiverContract.address);
       userWallet = srcChain.adminWallets[0];
       provider = srcChain.provider as ethers.providers.Web3Provider;
       usdc = await srcChain
@@ -1144,11 +1147,11 @@ describe("AxelarDepositRecoveryAPI", () => {
   });
   describe("getGasReceiverContractAddress", () => {
     let api: AxelarGMPRecoveryAPI;
-  
+
     beforeEach(async () => {
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
     });
-  
+
     test("it should retrieve the gas receiver address remotely", async () => {
       await api.getGasReceiverContractAddress(EvmChain.MOONBEAM).then((res) => {
         expect(res).toBeDefined();
