@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.10.0] - 2022-SEPTEMBER-1
 
-- update AxelarGMPRecoveryAPI's `addGas` and `addNativeGas` methods to fetch gas receiver contract addresses remotely
+- update AxelarGMPRecoveryAPI's `addGas` and `addNativeGas` methods to fetch gas receiver contract addresses remotely, replacing hard-coded values
 
 ## [0.9.2] - 2022-AUGUST-31
 
