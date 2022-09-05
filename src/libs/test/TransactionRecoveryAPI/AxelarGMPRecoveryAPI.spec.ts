@@ -266,8 +266,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
   });
 
-  // TODO: Reduce testing time. Currently, it takes about 1 minute to complete.
-  xdescribe("calculateWantedGasFee", () => {
+  describe("calculateWantedGasFee", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     let contract: Contract;
@@ -275,7 +274,6 @@ describe("AxelarDepositRecoveryAPI", () => {
     let usdc: Contract;
     let provider: ethers.providers.Web3Provider;
     const tokenSymbol = "aUSDC";
-    const queryApi = new AxelarQueryAPI({ environment: Environment.TESTNET });
 
     beforeAll(async () => {
       // Create a source chain network
@@ -299,7 +297,8 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
 
     test("it should return 'gas required' - 'gas paid' given 'gas required' > 'gas paid'", async () => {
-      const gasPaid = ethers.utils.parseEther("0.000001");
+      const gasPaid = ethers.utils.parseEther("1");
+      const gasRequired = ethers.utils.parseEther("2");
 
       // Send transaction at the source chain with some gas.
       const tx = await contract
@@ -316,6 +315,10 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
+      jest
+        .spyOn(api.axelarQueryApi, "estimateGasFee")
+        .mockResolvedValueOnce(gasRequired.toString());
+
       // Calculate how many gas we need to add more.
       const wantedGasFee = await api.calculateNativeGasFee(
         tx.transactionHash,
@@ -325,22 +328,12 @@ describe("AxelarDepositRecoveryAPI", () => {
         { provider }
       );
 
-      // Get gas required
-      const gasRequired = await queryApi.estimateGasFee(
-        EvmChain.AVALANCHE,
-        EvmChain.MOONBEAM,
-        GasToken.AVAX
-      );
-
-      const roundedWantedGasFee = parseFloat(ethers.utils.formatEther(wantedGasFee)).toFixed(7);
-      const roundedGasRequired = parseFloat(
-        ethers.utils.formatEther(ethers.BigNumber.from(gasRequired).sub(gasPaid).toString())
-      ).toFixed(7);
-      return expect(roundedWantedGasFee).toBe(roundedGasRequired);
+      return expect(wantedGasFee).toBe(gasRequired.sub(gasPaid).toString());
     });
 
     test("it should return 0 given 'gas paid' >= 'gas required'", async () => {
       const gasPaid = ethers.utils.parseEther("10");
+      const gasRequired = ethers.utils.parseEther("2");
 
       // Send transaction at the source chain with overpaid gas.
       const tx = await contract
@@ -357,6 +350,10 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
+      jest
+        .spyOn(api.axelarQueryApi, "estimateGasFee")
+        .mockResolvedValueOnce(gasRequired.toString());
+
       // Calculate how many gas we need to add more.
       const wantedGasFee = await api.calculateNativeGasFee(
         tx.transactionHash,
@@ -370,7 +367,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
   });
 
-  describe("addNativeGas", () => {
+  xdescribe("addNativeGas", () => {
     let api: AxelarGMPRecoveryAPI;
     let contract: Contract;
     let userWallet: Wallet;
@@ -671,7 +668,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
   });
 
-  describe("addGas", () => {
+  xdescribe("addGas", () => {
     let api: AxelarGMPRecoveryAPI;
     let contract: Contract;
     let userWallet: Wallet;
