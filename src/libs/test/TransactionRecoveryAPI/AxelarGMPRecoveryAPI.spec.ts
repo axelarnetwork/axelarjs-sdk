@@ -60,7 +60,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     }, 60000);
   });
 
-  xdescribe("manualRelayToDestChain", () => {
+  describe("manualRelayToDestChain", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     beforeEach(() => {
@@ -266,7 +266,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
   });
 
-  xdescribe("calculateNativeGasFee", () => {
+  describe("calculateNativeGasFee", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     let contract: Contract;
@@ -367,7 +367,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
   });
 
-  xdescribe("addNativeGas", () => {
+  describe("addNativeGas", () => {
     let api: AxelarGMPRecoveryAPI;
     let contract: Contract;
     let userWallet: Wallet;
@@ -668,7 +668,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
   });
 
-  xdescribe("addGas", () => {
+  describe("addGas", () => {
     let api: AxelarGMPRecoveryAPI;
     let contract: Contract;
     let userWallet: Wallet;
@@ -1025,7 +1025,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
   });
 
-  xdescribe("execute", () => {
+  describe("execute", () => {
     let api: AxelarGMPRecoveryAPI;
     const wallet = Wallet.createRandom();
     const evmWalletDetails: EvmWalletDetails = {
@@ -1192,7 +1192,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(mockGMPApi).toHaveBeenCalledTimes(1);
     });
   });
-  xdescribe("getGasReceiverContractAddress", () => {
+  describe("getGasReceiverContractAddress", () => {
     let api: AxelarGMPRecoveryAPI;
 
     beforeEach(async () => {
