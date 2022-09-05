@@ -860,56 +860,6 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(response).toEqual(GasPriceAPIError());
     });
 
-    test("it should call 'addGas' with specified amount in 'options' object without calling 'calculateGasFee' function", async () => {
-      const gasPaid = ethers.utils.parseEther("0.00001");
-
-      // Send transaction at the source chain with overpaid gas
-      const tx: ContractReceipt = await contract
-        .sendToMany(
-          EvmChain.MOONBEAM,
-          ethers.constants.AddressZero,
-          [ethers.constants.AddressZero],
-          tokenSymbol,
-          "10000",
-          usdc.address,
-          gasPaid
-        )
-        .then((tx: ContractTransaction) => tx.wait());
-
-      // Override the amount, so it should call contract's addGas even the gas price api returns error
-      const overridedAddGasOptions = {
-        ...addGasOptions,
-        amount: ethers.utils.parseEther("10").toString(),
-      };
-
-      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
-      const calculateGasFeeFunction = jest.spyOn(api, "calculateGasFee");
-
-      // Call addGas function
-      const response = await api.addGas(
-        chain,
-        tx.transactionHash,
-        usdc.address,
-        overridedAddGasOptions
-      );
-
-      expect(response.success).toBe(true);
-      expect(calculateGasFeeFunction).not.toHaveBeenCalled();
-
-      // Validate event data
-      const signatureGasAdded = ethers.utils.id(
-        "GasAdded(bytes32,uint256,address,uint256,address)"
-      );
-      const gasAddedEvent = findContractEvent(
-        response.transaction as ContractReceipt,
-        [signatureGasAdded],
-        new Interface(GasServiceAbi)
-      );
-      const args = gasAddedEvent?.eventLog.args;
-      const eventGasFeeAmount = args?.gasFeeAmount?.toString();
-      expect(eventGasFeeAmount).toBe(overridedAddGasOptions.amount);
-    });
-
     test("it shouldn't call 'addGas' given 'gasTokenAddress' does not exist", async () => {
       const gasPaid = ethers.utils.parseEther("0.00001");
 
@@ -976,6 +926,56 @@ describe("AxelarDepositRecoveryAPI", () => {
       );
 
       expect(response).toEqual(UnsupportedGasTokenError(testToken.address));
+    });
+
+    test("it should call 'addGas' with specified amount in 'options' object without calling 'calculateGasFee' function", async () => {
+      const gasPaid = ethers.utils.parseEther("0.00001");
+
+      // Send transaction at the source chain with overpaid gas
+      const tx: ContractReceipt = await contract
+        .sendToMany(
+          EvmChain.MOONBEAM,
+          ethers.constants.AddressZero,
+          [ethers.constants.AddressZero],
+          tokenSymbol,
+          "10000",
+          usdc.address,
+          gasPaid
+        )
+        .then((tx: ContractTransaction) => tx.wait());
+
+      // Override the amount, so it should call contract's addGas even the gas price api returns error
+      const overridedAddGasOptions = {
+        ...addGasOptions,
+        amount: ethers.utils.parseEther("10").toString(),
+      };
+
+      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
+      const calculateGasFeeFunction = jest.spyOn(api, "calculateGasFee");
+
+      // Call addGas function
+      const response = await api.addGas(
+        chain,
+        tx.transactionHash,
+        usdc.address,
+        overridedAddGasOptions
+      );
+
+      expect(response.success).toBe(true);
+      expect(calculateGasFeeFunction).not.toHaveBeenCalled();
+
+      // Validate event data
+      const signatureGasAdded = ethers.utils.id(
+        "GasAdded(bytes32,uint256,address,uint256,address)"
+      );
+      const gasAddedEvent = findContractEvent(
+        response.transaction as ContractReceipt,
+        [signatureGasAdded],
+        new Interface(GasServiceAbi)
+      );
+      const args = gasAddedEvent?.eventLog.args;
+      const eventGasFeeAmount = args?.gasFeeAmount?.toString();
+      expect(eventGasFeeAmount).toBe(overridedAddGasOptions.amount);
     });
 
     test("it should call 'addGas' successfully", async () => {
