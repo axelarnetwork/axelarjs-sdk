@@ -121,8 +121,8 @@ export class AxelarQueryAPI {
         sourceChain: sourceChainName,
       })
       .then((response) => {
-        const { base_fee, destination_native_token } = response.result;
-        const { decimals } = destination_native_token;
+        const { base_fee, source_token } = response.result;
+        const { decimals } = source_token;
         const baseFee = parseUnits(base_fee.toString(), decimals).toString();
         return { baseFee, success: true };
       })
