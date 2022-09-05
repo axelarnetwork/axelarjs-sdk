@@ -381,18 +381,19 @@ describe("AxelarDepositRecoveryAPI", () => {
     const chain = EvmChain.AVALANCHE;
     const tokenSymbol = "aUSDC";
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    beforeAll(async () => {
+    beforeEach(() => {
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
-      // Create a source chain network
-      const srcChain = await createNetwork({ name: chain });
-      gasReceiverContract = srcChain.gasReceiver;
+      jest.clearAllMocks();
       jest
         .spyOn(api, "getGasReceiverContractAddress")
         .mockResolvedValue(gasReceiverContract.address);
+    });
+
+    beforeAll(async () => {
+      // Create a source chain network
+      const srcChain = await createNetwork({ name: chain });
+      gasReceiverContract = srcChain.gasReceiver;
+
       userWallet = srcChain.adminWallets[0];
       provider = srcChain.provider as ethers.providers.Web3Provider;
       usdc = await (
@@ -560,7 +561,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(response.error).toBe("Couldn't query the gas price");
     });
 
-    test("it should call 'addNativeGas' with specified amount in 'options' object without calling 'calculatingGasFee' function", async () => {
+    test("it should call 'addNativeGas' with specified amount in 'options' object without calling 'calculateNativeGasFee' function", async () => {
       const gasPaid = ethers.utils.parseEther("1");
       const tx: ContractReceipt = await contract
         .sendToMany(
@@ -585,7 +586,9 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       // Mock that this transaction is already executed.
       jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
-      const calculateGasFeeFunction = jest.spyOn(api, "calculateGasFee").mockResolvedValueOnce("9");
+      const calculateNativeGasFeeFunction = jest
+        .spyOn(api, "calculateNativeGasFee")
+        .mockResolvedValueOnce("9");
 
       // Call addNativeGas function
       const response = await api.addNativeGas(
@@ -607,7 +610,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const args = nativeGasAddedEvent?.eventLog.args;
       const eventGasFeeAmount = args?.gasFeeAmount?.toString();
 
-      expect(calculateGasFeeFunction).not.toHaveBeenCalled();
+      expect(calculateNativeGasFeeFunction).not.toHaveBeenCalled();
       expect(response.success).toBe(true);
       // Validate that the additional gas fee is equal to "total gas fee" - "gas paid".
       expect(eventGasFeeAmount).toBe(manualAddedGasAmount.toString());
@@ -667,7 +670,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
   });
 
-  xdescribe("addGas", () => {
+  describe("addGas", () => {
     let api: AxelarGMPRecoveryAPI;
     let contract: Contract;
     let userWallet: Wallet;
@@ -679,15 +682,19 @@ describe("AxelarDepositRecoveryAPI", () => {
     // Override the provider and wallet to use data from the local network
     let addGasOptions: AddGasOptions;
 
-    beforeAll(async () => {
+    beforeEach(() => {
       jest.clearAllMocks();
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+      jest
+        .spyOn(api, "getGasReceiverContractAddress")
+        .mockResolvedValueOnce(gasReceiverContract.address);
+    });
+
+    beforeAll(async () => {
       // Create a source chain network
       const srcChain = await createNetwork({ name: chain });
       gasReceiverContract = srcChain.gasReceiver;
-      jest
-        .spyOn(api, "getGasReceiverContractAddress")
-        .mockResolvedValue(gasReceiverContract.address);
+
       userWallet = srcChain.adminWallets[0];
       provider = srcChain.provider as ethers.providers.Web3Provider;
       usdc = await srcChain
@@ -807,6 +814,8 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
+      jest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
+
       // Mock total gas fee is 0.1 USDC
       jest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
@@ -834,10 +843,11 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
+      jest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
       // Simulate gasPrice api error
       jest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
-        .mockRejectedValueOnce(() => Promise.reject());
+        .mockRejectedValueOnce("unable to fetch gas price");
 
       // Call addNativeGas function
       const response = await api.addGas(
@@ -850,7 +860,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(response).toEqual(GasPriceAPIError());
     });
 
-    test("it should call 'addGas' given gasPrice api is not available but gas amount is specified", async () => {
+    test("it should call 'addGas' with specified amount in 'options' object without calling 'calculateGasFee' function", async () => {
       const gasPaid = ethers.utils.parseEther("0.00001");
 
       // Send transaction at the source chain with overpaid gas
@@ -866,18 +876,38 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      // Simulate gasPrice api error
-      jest
-        .spyOn(api.axelarQueryApi, "estimateGasFee")
-        .mockRejectedValueOnce(() => Promise.reject());
-
       // Override the amount, so it should call contract's addGas even the gas price api returns error
-      addGasOptions.amount = ethers.utils.parseEther("10").toString();
+      const overridedAddGasOptions = {
+        ...addGasOptions,
+        amount: ethers.utils.parseEther("10").toString(),
+      };
+
+      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
+      const calculateGasFeeFunction = jest.spyOn(api, "calculateGasFee");
 
       // Call addGas function
-      const response = await api.addGas(chain, tx.transactionHash, usdc.address, addGasOptions);
+      const response = await api.addGas(
+        chain,
+        tx.transactionHash,
+        usdc.address,
+        overridedAddGasOptions
+      );
 
       expect(response.success).toBe(true);
+      expect(calculateGasFeeFunction).not.toHaveBeenCalled();
+
+      // Validate event data
+      const signatureGasAdded = ethers.utils.id(
+        "GasAdded(bytes32,uint256,address,uint256,address)"
+      );
+      const gasAddedEvent = findContractEvent(
+        response.transaction as ContractReceipt,
+        [signatureGasAdded],
+        new Interface(GasServiceAbi)
+      );
+      const args = gasAddedEvent?.eventLog.args;
+      const eventGasFeeAmount = args?.gasFeeAmount?.toString();
+      expect(eventGasFeeAmount).toBe(overridedAddGasOptions.amount);
     });
 
     test("it shouldn't call 'addGas' given 'gasTokenAddress' does not exist", async () => {
@@ -949,7 +979,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
 
     test("it should call 'addGas' successfully", async () => {
-      const gasPaid = ethers.utils.parseEther("0.000001");
+      const gasPaid = ethers.utils.parseEther("1");
 
       // Send transaction at the source chain with some gas.
       const tx: ContractReceipt = await contract
@@ -964,10 +994,9 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      // Mock total gas fee is 0.1 USDC
-      jest
-        .spyOn(api.axelarQueryApi, "estimateGasFee")
-        .mockResolvedValue(ethers.utils.parseEther("0.1").toString());
+      jest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
+      const mockedGasFee = ethers.utils.parseEther("2").toString();
+      jest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValue(mockedGasFee);
 
       // Call addGas function
       const response = await api.addGas(chain, tx.transactionHash, usdc.address, addGasOptions);
@@ -986,22 +1015,14 @@ describe("AxelarDepositRecoveryAPI", () => {
       );
 
       // Calculate how many gas we need to add more.
-      const _expectedGasFee = await api.calculateGasFee(
-        tx.transactionHash,
-        chain,
-        EvmChain.MOONBEAM,
-        GasToken.USDC,
-        { provider }
-      );
       const expectedLogIndex = getLogIndexFromTxReceipt(tx);
 
       // Validate event data
       const args = gasAddedEvent?.eventLog.args;
-      const eventGasFeeAmount = parseFloat(ethers.utils.formatEther(args?.gasFeeAmount)).toFixed(2);
-      const expectedGasFee = parseFloat(ethers.utils.formatEther(_expectedGasFee)).toFixed(2);
+      const eventGasFeeAmount = args?.gasFeeAmount?.toString();
 
       expect(args?.logIndex?.toNumber()).toBe(expectedLogIndex);
-      expect(eventGasFeeAmount).toBe(expectedGasFee);
+      expect(eventGasFeeAmount).toBe(ethers.BigNumber.from(mockedGasFee).sub(gasPaid).toString());
       expect(args?.refundAddress).toBe(userWallet.address);
     });
   });
@@ -1173,7 +1194,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(mockGMPApi).toHaveBeenCalledTimes(1);
     });
   });
-  describe("getGasReceiverContractAddress", () => {
+  xdescribe("getGasReceiverContractAddress", () => {
     let api: AxelarGMPRecoveryAPI;
 
     beforeEach(async () => {
