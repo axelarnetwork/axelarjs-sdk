@@ -510,6 +510,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
       jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
+      jest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValueOnce(gasPaid.toString());
 
       // Call addNativeGas function
       const response = await api.addNativeGas(chain, tx.transactionHash, addNativeGasOptions);
