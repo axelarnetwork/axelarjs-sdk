@@ -116,7 +116,7 @@ export enum GasToken {
   UST = "UST",
   USDC = "USDC",
   AURORA = "AURORA",
-  BINANCE = "BSC",
+  BINANCE = "BNB",
 }
 
 export interface AddGasOptions {
