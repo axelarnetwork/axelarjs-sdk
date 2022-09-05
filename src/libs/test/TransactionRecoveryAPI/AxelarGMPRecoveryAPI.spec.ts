@@ -60,7 +60,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     }, 60000);
   });
 
-  xdescribe("approveGatewayTx", () => {
+  xdescribe("manualRelayToDestChain", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     beforeEach(() => {
@@ -112,7 +112,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       mockSignCommandTx.mockResolvedValueOnce(signCommandStub);
 
       const mockQueryBatchedCommand = jest.spyOn(api, "queryBatchedCommands");
-      mockQueryBatchedCommand.mockResolvedValueOnce(batchedCommandResponseStub());
+      mockQueryBatchedCommand.mockResolvedValue(batchedCommandResponseStub());
 
       const response = await api.manualRelayToDestChain("0x");
 
@@ -266,7 +266,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
   });
 
-  describe("calculateWantedGasFee", () => {
+  xdescribe("calculateNativeGasFee", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     let contract: Contract;
