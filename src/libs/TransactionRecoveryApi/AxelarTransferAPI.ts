@@ -5,31 +5,38 @@ import {
   QueryTransferResponse,
   QueryTransferStatus,
 } from "../types";
-import fetch from "cross-fetch";
+import { RestService } from "../../services";
 
 export class AxelarTransferApi {
-  private axelarCrosschainApiUrl: string;
+  private axelarCrosschainUrl: string;
   private axelarnscanUrl: string;
+  readonly axelarCrosschainApi: RestService;
 
   public constructor(config: AxelarTransferAPIConfig) {
     const environment = config.environment;
     const links = getConfigs(environment);
-    this.axelarCrosschainApiUrl = links.axelarCrosschainApiUrl;
+    this.axelarCrosschainUrl = links.axelarCrosschainApiUrl;
     this.axelarnscanUrl = links.axelarscanUrl;
+    this.axelarCrosschainApi = new RestService(this.axelarCrosschainUrl);
   }
 
   public async queryTransferStatus(
     txHash: string,
     options?: QueryTransferOptions
   ): Promise<QueryTransferResponse> {
-    const response = await fetch(`${this.axelarCrosschainApiUrl}/transfers-status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const response = await this.axelarCrosschainApi
+      .post("/transfers-status", {
         txHash,
         ...options,
-      }),
-    }).then((resp) => resp.json());
+      })
+      .catch(() => undefined);
+
+    if (!response) {
+      return {
+        success: false,
+        error: "Axelar Transfer API is not available",
+      };
+    }
     if (response.length === 0) {
       return {
         success: false,
@@ -51,7 +58,7 @@ export class AxelarTransferApi {
         senderAddress: transfer.source.sender_address,
         recipientChain: transfer.source.recipient_chain,
         recipientAddress: transfer.source.recipient_address,
-        blockexplorerUrl: `${this.axelarnscanUrl}/transfer/${transfer.source.id}`,
+        blockExplorerUrl: `${this.axelarnscanUrl}/transfer/${transfer.source.id}`,
         blockHeight: transfer.source.height,
       },
     };

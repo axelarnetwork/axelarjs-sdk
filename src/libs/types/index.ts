@@ -188,7 +188,7 @@ export interface QueryTransferResponse {
     senderAddress: string;
     recipientChain: string;
     recipientAddress: string;
-    blockexplorerUrl: string;
+    blockExplorerUrl: string;
     blockHeight: number;
   };
 }
