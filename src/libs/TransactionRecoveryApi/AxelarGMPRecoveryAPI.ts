@@ -59,6 +59,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     super(config);
     this.axelarQueryApi = new AxelarQueryAPI({
       environment: config.environment,
+      axelarRpcUrl: this.axelarRpcUrl,
+      axelarLcdUrl: this.axelarLcdUrl
     });
   }
 

@@ -65,7 +65,7 @@ export type AxelarAssetTransferConfig = {
   overwriteResourceUrl?: string;
 };
 
-export type AxelarQueryAPIConfig = {
+export interface AxelarQueryAPIConfig {
   axelarRpcUrl?: string;
   axelarLcdUrl?: string;
   environment: Environment;
@@ -102,8 +102,7 @@ export interface AxelarSigningClientConfig extends AxelarQueryClientConfig {
   options: SigningStargateClientOptions;
 }
 
-export type AxelarRecoveryAPIConfig = {
-  environment: Environment;
+export interface AxelarRecoveryAPIConfig extends AxelarQueryAPIConfig {
 };
 
 // Includes all native tokens and stablecoins
