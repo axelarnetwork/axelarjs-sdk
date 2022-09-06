@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.10.4] - 22-SEPTEMBER-6
 
 - add `AxelarTransferAPI` to allow query transfer status for cross-chain transfer via deposit address or sendToken method.
+- rename `axelarCachingServiceUrl` to `axelarGMPApiUrl`
 
 ## [0.10.3] - 2022-SEPTEMBER-5
 

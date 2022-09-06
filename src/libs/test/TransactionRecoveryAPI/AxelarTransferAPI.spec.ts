@@ -1,5 +1,5 @@
 import { getConfigs } from "../../../constants";
-import { AxelarTransferApi } from "../../TransactionRecoveryApi/AxelarTransferAPI";
+import { AxelarTransferApi } from "../../TransactionRecoveryApi";
 import { Environment } from "../../types";
 import { transferResponseExecutedStub } from "../stubs";
 
