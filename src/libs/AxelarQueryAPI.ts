@@ -23,10 +23,10 @@ export class AxelarQueryAPI {
   readonly environment: Environment;
   readonly lcdApi: RestService;
   readonly rpcApi: RestService;
-  readonly axelarCachingServiceApi: RestService;
+  readonly axelarGMPServiceApi: RestService;
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
-  readonly axelarCachingServiceUrl: string;
+  readonly axelarGMPServiceUrl: string;
   private allAssets: AssetConfig[];
   private axelarQueryClient: AxelarQueryClientType;
 
@@ -36,12 +36,12 @@ export class AxelarQueryAPI {
 
     this.axelarRpcUrl = axelarRpcUrl || links.axelarRpcUrl;
     this.axelarLcdUrl = axelarLcdUrl || links.axelarLcdUrl;
-    this.axelarCachingServiceUrl = links.axelarCachingServiceUrl;
+    this.axelarGMPServiceUrl = links.axelarGMPApiUrl;
     this.environment = environment;
 
     this.lcdApi = new RestService(this.axelarLcdUrl);
     this.rpcApi = new RestService(this.axelarRpcUrl);
-    this.axelarCachingServiceApi = new RestService(this.axelarCachingServiceUrl);
+    this.axelarGMPServiceApi = new RestService(this.axelarGMPServiceUrl);
 
     this._initializeAssets();
   }
@@ -114,7 +114,7 @@ export class AxelarQueryAPI {
     sourceChainName: EvmChain,
     destinationChainName: EvmChain
   ): Promise<BaseFeeResponse> {
-    return this.axelarCachingServiceApi
+    return this.axelarGMPServiceApi
       .post("", {
         method: "getFees",
         destinationChain: destinationChainName,
@@ -150,7 +150,7 @@ export class AxelarQueryAPI {
       sourceTokenSymbol: sourceChainTokenSymbol,
     });
 
-    return this.axelarCachingServiceApi.get(`?${params}`).then((resp) => resp.result);
+    return this.axelarGMPServiceApi.get(`?${params}`).then((resp) => resp.result);
   }
 
   /**

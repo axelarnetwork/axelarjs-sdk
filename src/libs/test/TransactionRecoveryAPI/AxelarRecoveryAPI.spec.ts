@@ -294,7 +294,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       ]);
       const executeParams = await api.queryExecuteParams(txHash);
 
-      expect(api.execGet).toHaveBeenCalledWith(api.axelarCachingServiceUrl, {
+      expect(api.execGet).toHaveBeenCalledWith(api.axelarGMPApiUrl, {
         method: "searchGMP",
         txHash,
       });
@@ -340,7 +340,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       ]);
       const executeParams = await api.queryExecuteParams(txHash);
 
-      expect(api.execGet).toHaveBeenCalledWith(api.axelarCachingServiceUrl, {
+      expect(api.execGet).toHaveBeenCalledWith(api.axelarGMPApiUrl, {
         method: "searchGMP",
         txHash,
       });

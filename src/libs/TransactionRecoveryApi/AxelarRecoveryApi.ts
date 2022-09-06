@@ -54,7 +54,7 @@ export interface ExecuteParamsResponse {
 export class AxelarRecoveryApi {
   readonly environment: Environment;
   readonly recoveryApiUrl: string;
-  readonly axelarCachingServiceUrl: string;
+  readonly axelarGMPApiUrl: string;
   readonly axelarRpcUrl: string;
   readonly config: AxelarRecoveryAPIConfig;
   protected axelarQuerySvc: AxelarQueryClientType | null = null;
@@ -63,7 +63,7 @@ export class AxelarRecoveryApi {
   public constructor(config: AxelarRecoveryAPIConfig) {
     const { environment } = config;
     const links: EnvironmentConfigs = getConfigs(environment);
-    this.axelarCachingServiceUrl = links.axelarCachingServiceUrl;
+    this.axelarGMPApiUrl = links.axelarGMPApiUrl;
     this.recoveryApiUrl = links.recoveryApiUrl;
     this.axelarRpcUrl = links.axelarRpcUrl;
     this.environment = environment;
@@ -71,7 +71,7 @@ export class AxelarRecoveryApi {
   }
 
   public async fetchGMPTransaction(txHash: string, txLogIndex?: number) {
-    return await this.execGet(this.axelarCachingServiceUrl, {
+    return await this.execGet(this.axelarGMPApiUrl, {
       method: "searchGMP",
       txHash,
       txLogIndex,
@@ -288,7 +288,7 @@ export class AxelarRecoveryApi {
       .then((res) => res.json())
       .then((res) => res.data);
   }
-  get getAxelarCachingServiceUrl(): string {
-    return this.axelarCachingServiceUrl;
+  get getAxelarGMPApiUrl(): string {
+    return this.axelarGMPApiUrl;
   }
 }
