@@ -65,11 +65,11 @@ export type AxelarAssetTransferConfig = {
   overwriteResourceUrl?: string;
 };
 
-export type AxelarQueryAPIConfig = {
+export interface AxelarQueryAPIConfig {
   axelarRpcUrl?: string;
   axelarLcdUrl?: string;
   environment: Environment;
-};
+}
 
 export interface BaseFeeResponse {
   success: boolean;
@@ -102,9 +102,7 @@ export interface AxelarSigningClientConfig extends AxelarQueryClientConfig {
   options: SigningStargateClientOptions;
 }
 
-export type AxelarRecoveryAPIConfig = {
-  environment: Environment;
-};
+export type AxelarRecoveryAPIConfig = AxelarQueryAPIConfig;
 
 // Includes all native tokens and stablecoins
 export enum GasToken {
