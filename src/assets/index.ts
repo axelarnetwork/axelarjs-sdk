@@ -16,13 +16,15 @@ export async function loadAssets(config: LoadAssetConfig): Promise<AssetConfig[]
 
   return Object.values(assetMap[config.environment]);
 }
-async function execGet(base: string) {
-  return await fetch(base, {
+
+async function execGet(url: string) {
+  return fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   })
     .then((res) => res.json())
     .catch((error) => {
+      console.log({ error });
       throw error;
     });
 }
