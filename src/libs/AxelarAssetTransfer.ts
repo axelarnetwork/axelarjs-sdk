@@ -6,12 +6,26 @@ import { createWallet, validateDestinationAddressByChainName } from "../utils";
 
 import { getConfigs } from "../constants";
 import { AxelarAssetTransferConfig, Environment } from "./types";
+import {
+  defaultAbiCoder,
+  formatBytes32String,
+  getCreate2Address,
+  hexlify,
+  hexZeroPad,
+  Interface,
+  keccak256,
+  solidityPack,
+  toUtf8Bytes,
+} from "ethers/lib/utils";
+import DepositReceiver from "./abi/deposit-service/DepositReceiver.json";
+import ReceiverImplementation from "./abi/deposit-service/ReceiverImplementation.json";
 
 export class AxelarAssetTransfer {
   readonly environment: Environment;
   readonly resourceUrl: string;
 
   readonly api: RestService;
+  readonly depositServiceApi: RestService;
 
   constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
@@ -23,6 +37,124 @@ export class AxelarAssetTransfer {
     if (config.overwriteResourceUrl) this.resourceUrl = config.overwriteResourceUrl;
 
     this.api = new RestService(this.resourceUrl);
+    this.depositServiceApi = new RestService(configs.depositServiceUrl);
+  }
+
+  async getDepositAddressForNativeWrap(
+    fromChain: string,
+    toChain: string,
+    destinationAddress: string,
+    refundAddress: string,
+    salt?: number
+  ): Promise<string> {
+    const hexSalt = hexZeroPad(hexlify((salt || salt === 0) ? salt : new Date().toString()), 32);
+    const { address } = await this.getDepositAddressFromRemote(
+      "unwrap",
+      fromChain,
+      toChain,
+      destinationAddress,
+      refundAddress,
+      hexSalt
+    );
+
+    const expectedAddress = this.validateOfflineDepositAddress(
+      "wrap",
+      toChain,
+      destinationAddress,
+      refundAddress,
+      hexSalt
+    );
+
+    if (address !== expectedAddress) return "";
+
+    return address;
+  }
+
+  async getDepositAddressForNativeUnwrap(
+    toChain: string,
+    destinationAddress: string,
+    refundAddress: string,
+    salt?: number
+  ): Promise<string> {
+    const hexSalt = hexZeroPad(hexlify((salt || salt === 0) ? salt : new Date().toString()), 32);
+    const { address } = await this.getDepositAddressFromRemote(
+      "unwrap",
+      "",
+      toChain,
+      destinationAddress,
+      refundAddress,
+      hexSalt
+    );
+
+    const expectedAddress = this.validateOfflineDepositAddress(
+      "unwrap",
+      "",
+      destinationAddress,
+      refundAddress,
+      hexSalt
+    );
+
+    if (address !== expectedAddress) return "";
+
+    return address;
+  }
+
+  async getDepositAddressFromRemote(
+    wrapOrUnWrap: "wrap" | "unwrap",
+    fromChain: string,
+    toChain: string,
+    destinationAddress: string,
+    refundAddress: string,
+    hexSalt: string
+  ): Promise<{ address: string }> {
+
+    console.log("calling this");
+    const endpoint = wrapOrUnWrap === "wrap" ? "/deposit/wrap" : "/deposit/unwrap";
+    return await this.depositServiceApi
+      .post(endpoint, {
+        salt: hexSalt,
+        source_chain: fromChain,
+        destination_chain: toChain,
+        destination_address: destinationAddress,
+        refund_address: refundAddress,
+      })
+      .catch(() => ({ address: "" }));
+  }
+
+  public validateOfflineDepositAddress(
+    wrapOrUnWrap: "wrap" | "unwrap",
+    toChain: string,
+    destinationAddress: string,
+    refundAddress: string,
+    hexSalt: string
+  ) {
+    const receiverInterface = new Interface(ReceiverImplementation.abi);
+    const functionData =
+      wrapOrUnWrap === "wrap"
+        ? receiverInterface.encodeFunctionData("receiveAndSendNative", [
+            refundAddress,
+            toChain,
+            destinationAddress,
+          ])
+        : receiverInterface.encodeFunctionData("receiveAndUnwrapNative", [
+            refundAddress,
+            destinationAddress,
+          ]);
+
+    const address = getCreate2Address(
+      "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+      hexSalt,
+      keccak256(
+        solidityPack(
+          ["bytes", "bytes"],
+          [
+            DepositReceiver.bytecode,
+            defaultAbiCoder.encode(["bytes", "address"], [functionData, refundAddress]),
+          ]
+        )
+      )
+    );
+    return address;
   }
 
   async getDepositAddress(

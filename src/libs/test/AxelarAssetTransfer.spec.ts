@@ -1,3 +1,4 @@
+import { hexlify, hexZeroPad } from "ethers/lib/utils";
 import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET } from "../..";
 import { AxelarAssetTransfer } from "../AxelarAssetTransfer";
 import { Environment } from "../types";
@@ -331,6 +332,74 @@ describe("AxelarAssetTransfer", () => {
 
       it("should return deposit address", () => {
         expect(response).toBe(JSON.parse(newRoomIdStub())["depositAddress"]);
+      });
+    });
+  });
+
+  describe("offline deposit address methods", () => {
+    let bridge: AxelarAssetTransfer;
+
+    beforeEach(() => {
+      bridge = new AxelarAssetTransfer({
+        environment: Environment.TESTNET,
+      });
+    });
+
+    describe("validateOfflineDepositAddress", () => {
+      it("should be able to generate a deposit address offline", () => {
+        const depositAddress = bridge.validateOfflineDepositAddress(
+          "wrap",
+          "Avalanche",
+          "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+          "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+          hexZeroPad(hexlify(0), 32)
+        );
+        expect(depositAddress).toBeDefined();
+      });
+    });
+    describe("getDepositAddressForNativeWrap", () => {
+      let address: string;
+      beforeEach(async () => {
+        address = "0xD75901e96C3a92738Fd664321Db5A45E48627e3E";
+        jest.spyOn(bridge, "getDepositAddressFromRemote").mockResolvedValue({ address });
+      });
+      it("should be able to generate a deposit address offline", () => {
+        const depositAddress = bridge.validateOfflineDepositAddress(
+          "wrap",
+          "Avalanche",
+          "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+          "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+          hexZeroPad(hexlify(0), 32)
+        );
+        expect(depositAddress).toBeDefined();
+      });
+      it("should be able to retrieve the deposit address from microservices for native wrap", async () => {
+        await expect(
+          bridge.getDepositAddressForNativeWrap(
+            "Fantom",
+            "Avalanche",
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            0
+          )
+        ).resolves.toBe(address);
+      });
+    });
+    describe("getDepositAddressForNativeUnwrap", () => {
+      let address: string;
+      beforeEach(async () => {
+        address = "0x39C9654364bdB672A8B18788F8a65A1d738f6baA";
+        jest.spyOn(bridge, "getDepositAddressFromRemote").mockResolvedValue({ address });
+      });
+      it("should be able to retrieve the deposit address from microservices for erc20 unwrap", async () => {
+        await expect(
+          bridge.getDepositAddressForNativeUnwrap(
+            "Avalanche",
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            0
+          )
+        ).resolves.toBe(address);
       });
     });
   });
