@@ -34,7 +34,7 @@ export const depositAddressSource = () => {
       ]);
     });
 
-    it("should generate unique deposit addresses", async () => {
+    it("should generate unique deposit addresses", () => {
       expect(results[0]).not.toEqual(results[1]);
     });
   });
