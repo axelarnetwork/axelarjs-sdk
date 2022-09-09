@@ -65,7 +65,7 @@ export class AxelarAssetTransfer {
     );
 
     // extract deposit address from link event
-    const newRoomId = await this.getLinkEvent(roomId);
+    const newRoomId = await this.getLinkEvent(roomId, fromChain, toChain, destinationAddress);
     const depositAddress = this.extractDepositAddress(newRoomId);
 
     return depositAddress;
@@ -113,9 +113,14 @@ export class AxelarAssetTransfer {
     return roomId;
   }
 
-  async getLinkEvent(roomId: string): Promise<string> {
+  async getLinkEvent(
+    roomId: string,
+    sourceChain: string,
+    destinationChain: string,
+    destinationAddress: string
+  ): Promise<string> {
     const { newRoomId } = await this.getSocketService()
-      .joinRoomAndWaitForEvent(roomId)
+      .joinRoomAndWaitForEvent(roomId, sourceChain, destinationChain, destinationAddress)
       .catch((error) => {
         throw error;
       });

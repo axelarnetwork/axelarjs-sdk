@@ -125,6 +125,7 @@ describe("AxelarQueryAPI", () => {
         tokenAddress: "uaxl",
         decimals: 6,
         common_key: "uaxl",
+        mintLimit: 0,
       });
     });
   });
