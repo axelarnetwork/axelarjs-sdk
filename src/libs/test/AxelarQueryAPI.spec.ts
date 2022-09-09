@@ -67,7 +67,7 @@ describe("AxelarQueryAPI", () => {
   });
 
   describe("estimateGasFee", () => {
-    test("It should return estimated gas amount that makes sense for USDC", async () => {
+    xtest("It should return estimated gas amount that makes sense for USDC", async () => {
       const gasAmount = await api.estimateGasFee(
         EvmChain.AVALANCHE,
         EvmChain.ETHEREUM,
