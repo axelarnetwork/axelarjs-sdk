@@ -70,7 +70,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     transactionHash?: string,
     error?: any
   ) {
-    return await this.execPost(super.getAxelarCachingServiceUrl, "", {
+    return await this.execPost(super.getAxelarGMPApiUrl, "", {
       method: "saveGMP",
       sourceTransactionHash,
       transactionHash,

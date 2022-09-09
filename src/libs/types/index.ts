@@ -104,6 +104,10 @@ export interface AxelarSigningClientConfig extends AxelarQueryClientConfig {
 
 export type AxelarRecoveryAPIConfig = AxelarQueryAPIConfig;
 
+export type AxelarTransferAPIConfig = {
+  environment: Environment;
+};
+
 // Includes all native tokens and stablecoins
 export enum GasToken {
   ETH = "ETH",
@@ -154,6 +158,38 @@ export interface QueryGasFeeOptions {
   estimatedGas?: number;
 }
 
+export interface QueryTransferOptions {
+  depositAddress?: string;
+  recipientAddress?: string;
+}
+
+export enum QueryTransferStatus {
+  DEPOSIT_CONFIRMED = "deposit_confirmed",
+  ASSET_SENT = "asset_sent",
+  VOTED = "voted",
+  BATCH_SIGNED = "batch_signed",
+  IBC_SENT = "ibc_sent",
+  EXECUTED = "executed",
+}
+
+export interface QueryTransferResponse {
+  success: boolean;
+  error?: string;
+  data?: {
+    id: string;
+    status: QueryTransferStatus;
+    type: string;
+    amount: number;
+    fee: number;
+    denom: string;
+    senderChain: string;
+    senderAddress: string;
+    recipientChain: string;
+    recipientAddress: string;
+    blockExplorerUrl: string;
+    blockHeight: number;
+  };
+}
 export interface AxelarTxResponse extends DeliverTxResponse {
   rawLog: any;
 }
