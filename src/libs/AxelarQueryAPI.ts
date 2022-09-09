@@ -1,5 +1,5 @@
 import { AssetConfig } from "../assets/types";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { formatEther, parseEther, parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
@@ -105,31 +105,6 @@ export class AxelarQueryAPI {
   }
 
   /**
-   * Gets the base fee in native token wei for a given source and destination chain combination
-   * @param sourceChainName
-   * @param destinationChainName
-   * @returns base fee in native token in wei
-   */
-  public async getNativeGasBaseFee(
-    sourceChainName: EvmChain,
-    destinationChainName: EvmChain
-  ): Promise<BaseFeeResponse> {
-    return this.axelarCachingServiceApi
-      .post("", {
-        method: "getFees",
-        destinationChain: destinationChainName,
-        sourceChain: sourceChainName,
-      })
-      .then((response) => {
-        const { base_fee, source_token } = response.result;
-        const { decimals } = source_token;
-        const baseFee = parseUnits(base_fee.toString(), decimals).toString();
-        return { baseFee, success: true };
-      })
-      .catch((error) => ({ success: false, error: error.message }));
-  }
-
-  /**
    * Gets the gas price for a destination chain to be paid to the gas receiver on a source chain
    * example testnet query: https://testnet.api.gmp.axelarscan.io/?method=getGasPrice&destinationChain=ethereum&sourceChain=avalanche&sourceTokenAddress=0x43F4600b552089655645f8c16D86A5a9Fa296bc3&sourceTokenSymbol=UST
    * @param sourceChainName
@@ -154,6 +129,67 @@ export class AxelarQueryAPI {
   }
 
   /**
+   * Gets the base fee in native token wei for a given source and destination chain combination
+   * @param sourceChainName
+   * @param destinationChainName
+   * @param sourceTokenSymbol (optional)
+   * @returns base fee in native token in wei, translated into the native gas token of choice
+   */
+  public async getNativeGasBaseFee(
+    sourceChainName: EvmChain,
+    destinationChainName: EvmChain,
+    sourceTokenSymbol?: GasToken
+  ): Promise<BaseFeeResponse> {
+    return this.axelarCachingServiceApi
+      .post("", {
+        method: "getFees",
+        destinationChain: destinationChainName,
+        sourceChain: sourceChainName,
+        sourceTokenSymbol,
+      })
+      .then((response) => {
+        const { base_fee, source_token } = response.result;
+        const { decimals } = source_token;
+        const baseFee = parseUnits(base_fee.toString(), decimals).toString();
+        return { baseFee, sourceToken: source_token, success: true };
+      })
+      .catch((error) => ({ success: false, error: error.message }));
+  }
+
+  /**
+   * Calculate estimated gas amount to pay for the gas receiver contract.
+   * @param sourceChainName
+   * @param destinationChainName
+   * @param sourceChainTokenSymbol
+   * @param estimatedGasUsed (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which sufficients for most transaction.
+   * @returns
+   */
+  public async estimateGasFee(
+    sourceChainName: EvmChain,
+    destinationChainName: EvmChain,
+    sourceChainTokenSymbol: GasToken | string,
+    estimatedGasUsed = DEFAULT_ESTIMATED_GAS
+  ): Promise<string> {
+    const response = await this.getNativeGasBaseFee(
+      sourceChainName,
+      destinationChainName,
+      sourceChainTokenSymbol as GasToken
+    ).catch(() => undefined);
+
+    if (!response) return "0";
+
+    const { baseFee, sourceToken, success } = response;
+
+    if (!success || !baseFee || !sourceToken) return "0";
+
+    const { gas_price } = sourceToken;
+
+    const destTxFee = parseEther(gas_price).mul(estimatedGasUsed);
+
+    return destTxFee.add(baseFee).toString();
+  }
+
+  /**
    * Calculate estimated gas amount to pay for the gas receiver contract.
    *
    * @param sourceChainName
@@ -162,7 +198,7 @@ export class AxelarQueryAPI {
    * @param estimatedGasUsed (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which sufficients for most transaction.
    * @returns
    */
-  public async estimateGasFee(
+  public async estimateGasFeeOld(
     sourceChainName: EvmChain,
     destinationChainName: EvmChain,
     sourceChainTokenSymbol: GasToken | string,

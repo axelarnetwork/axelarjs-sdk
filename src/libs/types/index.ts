@@ -75,6 +75,12 @@ export interface BaseFeeResponse {
   success: boolean;
   error?: string;
   baseFee?: string;
+  sourceToken?: {
+    gas_price: string;
+    decimals: number;
+    name: string;
+    symbol: string;
+  };
 }
 
 export type CosmosBasedWalletDetails = {

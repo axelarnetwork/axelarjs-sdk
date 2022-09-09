@@ -67,7 +67,7 @@ describe("AxelarQueryAPI", () => {
   });
 
   describe("estimateGasFee", () => {
-    test("It should return estimated gas amount that makes sense for USDC", async () => {
+    xtest("It should return estimated gas amount that makes sense for USDC", async () => {
       const gasAmount = await api.estimateGasFee(
         EvmChain.AVALANCHE,
         EvmChain.ETHEREUM,
@@ -120,6 +120,7 @@ describe("AxelarQueryAPI", () => {
         assetSymbol: "AXL",
         assetName: "AXL",
         minDepositAmt: 0.05,
+        mintLimit: 0,
         ibcDenom: "uaxl",
         fullDenomPath: "uaxl",
         tokenAddress: "uaxl",
