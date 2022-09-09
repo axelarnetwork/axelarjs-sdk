@@ -233,6 +233,7 @@ describe("AxelarAssetTransfer", () => {
     });
 
     describe("on error", () => {
+      const dto = depositAddressPayloadStub();
       describe("when called", () => {
         let roomId: any;
         let error: any;
@@ -240,14 +241,21 @@ describe("AxelarAssetTransfer", () => {
         beforeEach(async () => {
           jest.spyOn(socket, "joinRoomAndWaitForEvent").mockRejectedValue(apiErrorStub());
 
-          roomId = await bridge.getLinkEvent(roomIdStub().roomId).catch((_error) => {
-            error = _error;
-          });
+          roomId = await bridge
+            .getLinkEvent(roomIdStub().roomId, dto.fromChain, dto.toChain, dto.destinationAddress)
+            .catch((_error) => {
+              error = _error;
+            });
         });
 
         describe("api", () => {
           it("should be called", () => {
-            expect(socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(roomIdStub().roomId);
+            expect(socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(
+              roomIdStub().roomId,
+              dto.fromChain,
+              dto.toChain,
+              dto.destinationAddress
+            );
           });
         });
 
@@ -264,18 +272,29 @@ describe("AxelarAssetTransfer", () => {
     });
 
     describe("on success", () => {
+      const dto = depositAddressPayloadStub();
       describe("when called", () => {
         let roomId: any;
         beforeEach(async () => {
           jest
             .spyOn(socket, "joinRoomAndWaitForEvent")
             .mockResolvedValueOnce({ newRoomId: newRoomIdStub() });
-          roomId = await bridge.getLinkEvent(roomIdStub().roomId);
+          roomId = await bridge.getLinkEvent(
+            roomIdStub().roomId,
+            dto.fromChain,
+            dto.toChain,
+            dto.destinationAddress
+          );
         });
 
         describe("api", () => {
           it("should be called", () => {
-            expect(socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(roomIdStub().roomId);
+            expect(socket.joinRoomAndWaitForEvent).toHaveBeenCalledWith(
+              roomIdStub().roomId,
+              dto.fromChain,
+              dto.toChain,
+              dto.destinationAddress
+            );
           });
         });
 
