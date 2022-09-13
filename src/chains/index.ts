@@ -52,8 +52,8 @@ export async function importChains(config: LoadChainConfig): Promise<ChainInfo[]
   return Object.values(chainMap[config.environment]);
 }
 
-async function execGet(base: string) {
-  return await fetch(base, {
+async function execGet(url: string) {
+  return fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   })

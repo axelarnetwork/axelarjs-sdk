@@ -23,10 +23,10 @@ export class AxelarQueryAPI {
   readonly environment: Environment;
   readonly lcdApi: RestService;
   readonly rpcApi: RestService;
-  readonly axelarCachingServiceApi: RestService;
+  readonly axelarGMPServiceApi: RestService;
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
-  readonly axelarCachingServiceUrl: string;
+  readonly axelarGMPServiceUrl: string;
   private allAssets: AssetConfig[];
   private axelarQueryClient: AxelarQueryClientType;
 
@@ -36,12 +36,12 @@ export class AxelarQueryAPI {
 
     this.axelarRpcUrl = axelarRpcUrl || links.axelarRpcUrl;
     this.axelarLcdUrl = axelarLcdUrl || links.axelarLcdUrl;
-    this.axelarCachingServiceUrl = links.axelarCachingServiceUrl;
+    this.axelarGMPServiceUrl = links.axelarGMPApiUrl;
     this.environment = environment;
 
     this.lcdApi = new RestService(this.axelarLcdUrl);
     this.rpcApi = new RestService(this.axelarRpcUrl);
-    this.axelarCachingServiceApi = new RestService(this.axelarCachingServiceUrl);
+    this.axelarGMPServiceApi = new RestService(this.axelarGMPServiceUrl);
 
     this._initializeAssets();
   }
@@ -105,31 +105,6 @@ export class AxelarQueryAPI {
   }
 
   /**
-   * Gets the base fee in native token wei for a given source and destination chain combination
-   * @param sourceChainName
-   * @param destinationChainName
-   * @returns base fee in native token in wei
-   */
-  public async getNativeGasBaseFee(
-    sourceChainName: EvmChain,
-    destinationChainName: EvmChain
-  ): Promise<BaseFeeResponse> {
-    return this.axelarCachingServiceApi
-      .post("", {
-        method: "getFees",
-        destinationChain: destinationChainName,
-        sourceChain: sourceChainName,
-      })
-      .then((response) => {
-        const { base_fee, source_token } = response.result;
-        const { decimals } = source_token;
-        const baseFee = parseUnits(base_fee.toString(), decimals).toString();
-        return { baseFee, success: true };
-      })
-      .catch((error) => ({ success: false, error: error.message }));
-  }
-
-  /**
    * Gets the gas price for a destination chain to be paid to the gas receiver on a source chain
    * example testnet query: https://testnet.api.gmp.axelarscan.io/?method=getGasPrice&destinationChain=ethereum&sourceChain=avalanche&sourceTokenAddress=0x43F4600b552089655645f8c16D86A5a9Fa296bc3&sourceTokenSymbol=UST
    * @param sourceChainName
@@ -150,12 +125,39 @@ export class AxelarQueryAPI {
       sourceTokenSymbol: sourceChainTokenSymbol,
     });
 
-    return this.axelarCachingServiceApi.get(`?${params}`).then((resp) => resp.result);
+    return this.axelarGMPServiceApi.get(`?${params}`).then((resp) => resp.result);
+  }
+
+  /**
+   * Gets the base fee in native token wei for a given source and destination chain combination
+   * @param sourceChainName
+   * @param destinationChainName
+   * @param sourceTokenSymbol (optional)
+   * @returns base fee in native token in wei, translated into the native gas token of choice
+   */
+  public async getNativeGasBaseFee(
+    sourceChainName: EvmChain,
+    destinationChainName: EvmChain,
+    sourceTokenSymbol?: GasToken
+  ): Promise<BaseFeeResponse> {
+    return this.axelarGMPServiceApi
+      .post("", {
+        method: "getFees",
+        destinationChain: destinationChainName,
+        sourceChain: sourceChainName,
+        sourceTokenSymbol,
+      })
+      .then((response) => {
+        const { base_fee, source_token } = response.result;
+        const { decimals } = source_token;
+        const baseFee = parseUnits(base_fee.toString(), decimals).toString();
+        return { baseFee, sourceToken: source_token, success: true };
+      })
+      .catch((error) => ({ success: false, error: error.message }));
   }
 
   /**
    * Calculate estimated gas amount to pay for the gas receiver contract.
-   *
    * @param sourceChainName
    * @param destinationChainName
    * @param sourceChainTokenSymbol
@@ -168,33 +170,24 @@ export class AxelarQueryAPI {
     sourceChainTokenSymbol: GasToken | string,
     estimatedGasUsed = DEFAULT_ESTIMATED_GAS
   ): Promise<string> {
-    const response = await this.getGasInfo(
+    const response = await this.getNativeGasBaseFee(
       sourceChainName,
       destinationChainName,
-      sourceChainTokenSymbol
+      sourceChainTokenSymbol as GasToken
     ).catch(() => undefined);
-    // If the gas price is not available, return 0
+
     if (!response) return "0";
 
-    const { gas_price: gasPrice, decimals: srcTokenDecimals } = response.source_token;
-    const { decimals: destTokenDecimals } = response.destination_native_token;
+    const { baseFee, sourceToken, success } = response;
 
-    const destTxFee = parseEther(gasPrice)
-      .mul(estimatedGasUsed)
-      .div(ethers.BigNumber.from("10").pow(destTokenDecimals - srcTokenDecimals));
+    if (!success || !baseFee || !sourceToken) return "0";
 
-    if (isNativeToken(sourceChainName, sourceChainTokenSymbol as GasToken)) {
-      const { success, baseFee } = await this.getNativeGasBaseFee(
-        sourceChainName,
-        destinationChainName
-      );
-      // If the base fee is not available, return 0
-      if (!success || !baseFee) return "0";
+    const { gas_price } = sourceToken;
 
-      // If the base fee is available, add it to the destTxFee, and return the result
-      return destTxFee.add(baseFee).toString();
-    }
-    return destTxFee.toString();
+    const destTxFee = parseEther(gas_price).mul(estimatedGasUsed);
+
+    return destTxFee.add(baseFee).toString();
+
   }
 
   /**

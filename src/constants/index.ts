@@ -4,37 +4,47 @@ export interface EnvironmentConfigs {
   resourceUrl: string;
   axelarRpcUrl: string;
   axelarLcdUrl: string;
-  axelarCachingServiceUrl: string;
+  axelarGMPApiUrl: string;
   recoveryApiUrl: string;
+  axelarCrosschainApiUrl: string;
+  axelarscanUrl: string;
 }
 
 const localConfigs: EnvironmentConfigs = {
   resourceUrl: `http://localhost:4000`,
   axelarRpcUrl: "https://axelar-testnet-rpc.axelar-dev.workers.dev",
   axelarLcdUrl: "https://axelar-testnet-lcd.axelar-dev.workers.dev",
-  axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io",
+  axelarGMPApiUrl: "https://testnet.api.gmp.axelarscan.io",
   recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev",
+  axelarCrosschainApiUrl: "https://testnet.api.axelarscan.io/cross-chain",
+  axelarscanUrl: "https://testnet.axelarscan.io",
 };
 const devnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-devnet.axelar.dev`,
   axelarRpcUrl: "",
   axelarLcdUrl: "",
-  axelarCachingServiceUrl: "https://devnet.api.gmp.axelarscan.io",
+  axelarGMPApiUrl: "https://devnet.api.gmp.axelarscan.io",
   recoveryApiUrl: "",
+  axelarCrosschainApiUrl: "",
+  axelarscanUrl: "",
 };
 const testnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-testnet.axelar.dev`,
   axelarRpcUrl: "https://axelar-testnet-rpc.axelar-dev.workers.dev",
   axelarLcdUrl: "https://axelar-testnet-lcd.axelar-dev.workers.dev",
-  axelarCachingServiceUrl: "https://testnet.api.gmp.axelarscan.io",
+  axelarGMPApiUrl: "https://testnet.api.gmp.axelarscan.io",
   recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev",
+  axelarCrosschainApiUrl: "https://testnet.api.axelarscan.io/cross-chain",
+  axelarscanUrl: "https://testnet.axelarscan.io",
 };
 const mainnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-mainnet.axelar.dev`,
   axelarRpcUrl: "https://axelar-rpc.quickapi.com",
   axelarLcdUrl: "https://axelar-lcd.quickapi.com",
-  axelarCachingServiceUrl: "https://api.gmp.axelarscan.io",
+  axelarGMPApiUrl: "https://api.gmp.axelarscan.io",
   recoveryApiUrl: "https://axelar-signing-relayer-mainnet.axelar.dev",
+  axelarCrosschainApiUrl: "https://api.axelarscan.io/cross-chain",
+  axelarscanUrl: "https://axelarscan.io",
 };
 
 configsMap["local"] = localConfigs;

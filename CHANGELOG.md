@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.0] - 2022-SEPTEMBER-12
+
+- add `AxelarTransferAPI` to allow query transfer status for cross-chain transfer via deposit address or sendToken method. #154, addresses #143
+- rename `axelarCachingServiceUrl` to `axelarGMPApiUrl`
+- Fixed an issue where the deposit address can be the same in the case of two parallel requests with different source chain names. #157
+- updates `estimateGasFee` method to allow for input gastoken
+
 ## [0.10.3] - 2022-SEPTEMBER-5
 
 - update the `AxelarGMPRecoveryAPI` to allow for rpc/lcd endpoint overrides in constructor for the API

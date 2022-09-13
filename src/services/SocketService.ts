@@ -39,19 +39,33 @@ export class SocketService {
     });
   }
 
-  public joinRoomAndWaitForEvent(roomId: string): Promise<any> {
+  public joinRoomAndWaitForEvent(
+    roomId: string,
+    sourceChain: string,
+    destinationChain: string,
+    destinationAddress: string
+  ): Promise<any> {
     return new Promise(async (resolve) => {
       await this.createSocket();
       const ms = 1.8e6; //30 minutes
       const timeout = setTimeout(() => {
+        this.socket.off("bridge-event");
         this.disconnect();
       }, ms);
-      this.socket.emit("room:join", roomId, () => {
-        this.socket.on("bridge-event", (data: any) => {
+      this.socket.emit("room:join", roomId);
+      this.socket.on("bridge-event", (data: any) => {
+        const attributes = data.Attributes;
+        const sourceChainMatch = attributes.sourceChain.toLowerCase() === sourceChain.toLowerCase();
+        const destChainMatch =
+          attributes.destinationChain.toLowerCase() === destinationChain.toLowerCase();
+        const destAddressMatch = attributes.destinationAddress === destinationAddress;
+
+        if (sourceChainMatch && destChainMatch && destAddressMatch) {
           clearTimeout(timeout);
-          resolve(data);
+          this.socket.off("bridge-event");
           this.disconnect();
-        });
+          resolve(data);
+        }
       });
     });
   }
