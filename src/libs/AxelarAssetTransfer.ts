@@ -18,6 +18,7 @@ import {
   toUtf8Bytes,
 } from "ethers/lib/utils";
 import DepositReceiver from "./abi/deposit-service/DepositReceiver.json";
+import DepositReceiverABI from "@axelar-network/axelar-cgp-solidity/interfaces/IAxelarDepositService.sol/IAxelarDepositService.json"
 import ReceiverImplementation from "./abi/deposit-service/ReceiverImplementation.json";
 
 export class AxelarAssetTransfer {
@@ -49,7 +50,7 @@ export class AxelarAssetTransfer {
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify((salt || salt === 0) ? salt : new Date().toString()), 32);
     const { address } = await this.getDepositAddressFromRemote(
-      "unwrap",
+      "wrap",
       fromChain,
       toChain,
       destinationAddress,
@@ -71,13 +72,14 @@ export class AxelarAssetTransfer {
   }
 
   async getDepositAddressForNativeUnwrap(
+    fromChain: string,
     toChain: string,
     destinationAddress: string,
     refundAddress: string,
     salt?: number
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify((salt || salt === 0) ? salt : new Date().toString()), 32);
-    const { address } = await this.getDepositAddressFromRemote(
+    const { address: interimAddress } = await this.getDepositAddressFromRemote(
       "unwrap",
       "",
       toChain,
@@ -94,9 +96,11 @@ export class AxelarAssetTransfer {
       hexSalt
     );
 
-    if (address !== expectedAddress) return "";
+    if (interimAddress !== expectedAddress) return "";
 
-    return address;
+    const realDepositAddress = await this.getDepositAddress(fromChain, toChain, interimAddress, "uaxl");
+
+    return realDepositAddress;
   }
 
   async getDepositAddressFromRemote(
@@ -142,7 +146,7 @@ export class AxelarAssetTransfer {
           ]);
 
     const address = getCreate2Address(
-      "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+      "0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955", //confirmed deposit service address on testnet
       hexSalt,
       keccak256(
         solidityPack(
