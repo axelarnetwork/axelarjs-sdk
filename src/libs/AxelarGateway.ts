@@ -7,7 +7,6 @@ import {
   EvmChain,
   SendTokenArgs,
 } from "./types";
-import axelarGatewayAbi from "./abi/axelarGatewayAbi.json";
 import erc20Abi from "./abi/erc20Abi.json";
 import { GatewayTx } from "./GatewayTx";
 
@@ -43,7 +42,17 @@ export class AxelarGateway {
    */
   constructor(contractAddress: string, provider: ethers.providers.Provider) {
     this.provider = provider;
-    this.contract = new ethers.Contract(contractAddress, axelarGatewayAbi, provider);
+    this.contract = new ethers.Contract(
+      contractAddress,
+      [
+        "function callContract(uint256 destinationChain, address destinationContractAddress, bytes calldata payload) external",
+        "function callContractWithToken(uint256 destinationChain, address destinationContractAddress, bytes calldata payload, string calldata symbol, uint256 amount) external",
+        "function sendToken(uint256 destinationChain, address destinationAddress, string calldata symbol, uint256 amount) external",
+        "function tokenFrozen(string calldata symbol) external view returns (bool)",
+        "function isCommandExecuted(string calldata commandId) external view returns (bool)",
+      ],
+      provider
+    );
   }
 
   /**
