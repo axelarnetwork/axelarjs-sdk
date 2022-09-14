@@ -31,7 +31,7 @@ export class AxelarAssetTransfer {
   private gasReceiverContract: Record<string, string> = {};
   private depositServiceContract: Record<string, string> = {};
   private evmDenomMap: Record<string, string> = {};
-  private staticInfo: Record<string, any> = {};
+  private staticInfo: Record<string, any> | null = null;
 
   constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
