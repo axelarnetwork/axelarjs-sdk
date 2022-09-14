@@ -11,12 +11,11 @@ export function getDestinationChainFromTxReceipt(
   const signatureContractCall = ethers.utils.id(
     "ContractCall(address,string,string,bytes32,bytes)"
   );
-
   const event = findContractEvent(
     receipt,
     [signatureContractCall, signatureContractCallWithToken],
     new Interface([
-      "event ContractCallWithToken(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, bytes _data, string _token, uint256 _amount)",
+      "event ContractCallWithToken(address indexed sender, string destinationChain, string destinationContractAddress, bytes32 indexed payloadHash, bytes payload, string symbol, uint256 amount)",
       "event ContractCall(address indexed sender,string destinationChain,string destinationContractAddress,bytes32 indexed payloadHash,bytes payload)",
     ])
   );
@@ -37,7 +36,7 @@ export function getLogIndexFromTxReceipt(
     receipt,
     [signatureContractCall, signatureContractCallWithToken],
     new Interface([
-      "event ContractCallWithToken(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, bytes _data, string _token, uint256 _amount)",
+      "event ContractCallWithToken(address indexed sender, string destinationChain, string destinationContractAddress, bytes32 indexed payloadHash, bytes payload, string symbol, uint256 amount)",
       "event ContractCall(address indexed sender,string destinationChain,string destinationContractAddress,bytes32 indexed payloadHash,bytes payload)",
     ])
   );
@@ -58,8 +57,8 @@ export function getNativeGasAmountFromTxReceipt(
     receipt,
     [signatureGasPaidContractCall, signatureGasPaidContractCallWithToken],
     new Interface([
-      "event NativeGasPaidForContractCallWithToken(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, string _token, uint256 _amount, uint256 _gasUsed, address _gasToken)",
-      "event NativeGasPaidForContractCall(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, uint256 _gasUsed, address _gasToken)",
+      "event NativeGasPaidForContractCall(address indexed sourceAddress,string destinationChain,string destinationAddress,bytes32 indexed payloadHash,uint256 gasFeeAmount,address refundAddress)",
+      "event NativeGasPaidForContractCallWithToken(address indexed sourceAddress,string destinationChain,string destinationAddress,bytes32 indexed payloadHash,string symbol,uint256 amount,uint256 gasFeeAmount,address refundAddress)",
     ])
   );
   return event?.eventLog.args.slice(-2)[0].toString();
@@ -79,8 +78,8 @@ export function getGasAmountFromTxReceipt(
     receipt,
     [signatureGasPaidContractCall, signatureGasPaidContractCallWithToken],
     new Interface([
-      "event GasPaidForContractCallWithToken(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, string _token, uint256 _amount, address _gasToken, uint256 _gasUsed, address _gasTokenUsed)",
-      "event GasPaidForContractCall(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, uint256 _gasUsed, uint256 _gasTokenUsed, address _gasToken)",
+      "event GasPaidForContractCallWithToken(address indexed sourceAddress,string destinationChain,string destinationAddress,bytes32 indexed payloadHash,string symbol,uint256 amount,address gasToken,uint256 gasFeeAmount,address refundAddress)",
+      "event GasPaidForContractCall(address indexed sourceAddress,string destinationChain,string destinationAddress,bytes32 indexed payloadHash,address gasToken,uint256 gasFeeAmount,address refundAddress)",
     ])
   );
   return event?.eventLog.args.slice(-2)[0].toString();

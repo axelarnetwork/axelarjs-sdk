@@ -21,7 +21,6 @@ import {
 import EVMClient from "./client/EVMClient";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { ContractReceipt, ContractTransaction, ethers } from "ethers";
-import IAxelarGasService from "../abi/IAxelarGasService.json";
 import { NATIVE_GAS_TOKEN_SYMBOL } from "./constants/contract";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import rpcInfo from "./constants/chain";
@@ -52,6 +51,7 @@ import { callExecute, CALL_EXECUTE_ERROR } from "./helpers";
 import { asyncRetry, sleep } from "../../utils";
 import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import s3 from "./constants/s3";
+import { Interface } from "ethers/lib/utils";
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   axelarQueryApi: AxelarQueryAPI;
@@ -266,7 +266,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (gasFeeToAdd === "0") return AlreadyPaidGasFeeError();
 
     const refundAddress = options?.refundAddress || signerAddress;
-    const contract = new ethers.Contract(gasReceiverAddress, IAxelarGasService, signer);
+    const contract = new ethers.Contract(
+      gasReceiverAddress,
+      [
+        "function addNativeGas(bytes32 txHash,uint256 logIndex,address refundAddress) external payable",
+      ],
+      signer
+    );
     return contract
       .addNativeGas(txHash, logIndex, refundAddress, {
         value: gasFeeToAdd,
@@ -343,7 +349,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (gasFeeToAdd === "0") return AlreadyPaidGasFeeError();
 
     const refundAddress = options?.refundAddress || signerAddress;
-    const contract = new ethers.Contract(gasReceiverAddress, IAxelarGasService, signer);
+    const contract = new ethers.Contract(
+      gasReceiverAddress,
+      new Interface([
+        "function addGas(bytes32 txHash,uint256 txIndex,address gasToken,uint256 gasFeeAmount,address refundAddress) external",
+      ]),
+      signer
+    );
     return contract
       .addGas(txHash, logIndex, gasTokenAddress, gasFeeToAdd, refundAddress)
       .then((tx: ContractTransaction) => tx.wait())
