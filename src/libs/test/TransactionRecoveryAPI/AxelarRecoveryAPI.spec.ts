@@ -45,6 +45,8 @@ describe("AxelarDepositRecoveryAPI", () => {
           status: GasPaidStatus.GAS_PAID,
           details: txDetails.gas_paid,
         },
+        executed: txDetails.executed,
+        callback: undefined
       });
     });
 
@@ -79,6 +81,8 @@ describe("AxelarDepositRecoveryAPI", () => {
           status: GasPaidStatus.GAS_PAID_ENOUGH_GAS,
           details: txDetails.gas_paid,
         },
+        executed: txDetails.executed,
+        callback: undefined
       });
     });
 
@@ -146,6 +150,8 @@ describe("AxelarDepositRecoveryAPI", () => {
           status: GasPaidStatus.GAS_PAID_ENOUGH_GAS,
           details: txDetails.gas_paid,
         },
+        executed: txDetails.executed,
+        callback: undefined
       });
     });
 
@@ -179,6 +185,8 @@ describe("AxelarDepositRecoveryAPI", () => {
           status: GasPaidStatus.GAS_PAID_ENOUGH_GAS,
           details: txDetails.gas_paid,
         },
+        executed: txDetails.executed,
+        callback: undefined
       });
     });
 
