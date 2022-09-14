@@ -17,7 +17,7 @@ export function getDestinationChainFromTxReceipt(
     [signatureContractCall, signatureContractCallWithToken],
     new Interface([
       "event ContractCallWithToken(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, bytes _data, string _token, uint256 _amount)",
-      "event ContractCall(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, bytes _data)",
+      "event ContractCall(address indexed sender,string destinationChain,string destinationContractAddress,bytes32 indexed payloadHash,bytes payload)",
     ])
   );
   return event?.eventLog.args[1].toLowerCase();
@@ -38,7 +38,7 @@ export function getLogIndexFromTxReceipt(
     [signatureContractCall, signatureContractCallWithToken],
     new Interface([
       "event ContractCallWithToken(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, bytes _data, string _token, uint256 _amount)",
-      "event ContractCall(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, bytes _data)",
+      "event ContractCall(address indexed sender,string destinationChain,string destinationContractAddress,bytes32 indexed payloadHash,bytes payload)",
     ])
   );
   return event?.logIndex;

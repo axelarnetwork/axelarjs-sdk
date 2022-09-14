@@ -45,11 +45,14 @@ export class AxelarGateway {
     this.contract = new ethers.Contract(
       contractAddress,
       [
-        "function callContract(uint256 destinationChain, address destinationContractAddress, bytes calldata payload) external",
-        "function callContractWithToken(uint256 destinationChain, address destinationContractAddress, bytes calldata payload, string calldata symbol, uint256 amount) external",
-        "function sendToken(uint256 destinationChain, address destinationAddress, string calldata symbol, uint256 amount) external",
+        "event ContractCallWithToken(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, bytes _data, string _token, uint256 _amount)",
+        "event ContractCall(address indexed sender,string destinationChain,string destinationContractAddress,bytes32 indexed payloadHash,bytes payload)",
+        "function callContract(string calldata destinationChain, string calldata contractAddress, bytes calldata payload) external",
+        "function callContractWithToken(string calldata destinationChain, string calldata contractAddress, bytes calldata payload, string calldata symbol, uint256 amount) external",
+        "function sendToken(string calldata destinationChain, string calldata destinationAddress, string calldata symbol, uint256 amount) external",
         "function tokenFrozen(string calldata symbol) external view returns (bool)",
-        "function isCommandExecuted(string calldata commandId) external view returns (bool)",
+        "function isCommandExecuted(bytes32 commandId) view returns (bool)",
+        "function tokenAddresses(string calldata symbol) view returns (address)",
       ],
       provider
     );
