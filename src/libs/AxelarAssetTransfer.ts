@@ -54,7 +54,6 @@ export class AxelarAssetTransfer {
     salt?: number
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
-    console.log("hex salt", hexSalt);
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address } = await this.getDepositAddressFromRemote(
       "wrap",
@@ -106,8 +105,6 @@ export class AxelarAssetTransfer {
       hexSalt
     );
 
-    console.log("address and expected", unwrapAddress, expectedAddress);
-
     if (unwrapAddress !== expectedAddress) return "";
 
     const realDepositAddress = await this.getDepositAddress(
@@ -128,7 +125,6 @@ export class AxelarAssetTransfer {
     refundAddress: string,
     hexSalt: string
   ): Promise<{ address: string }> {
-    console.log("calling this");
     const endpoint = wrapOrUnWrap === "wrap" ? "/deposit/wrap" : "/deposit/unwrap";
     return await this.depositServiceApi
       .post(endpoint, {
