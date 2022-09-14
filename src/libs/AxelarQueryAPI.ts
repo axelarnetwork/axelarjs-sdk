@@ -187,7 +187,6 @@ export class AxelarQueryAPI {
     const destTxFee = parseEther(gas_price).mul(estimatedGasUsed);
 
     return destTxFee.add(baseFee).toString();
-
   }
 
   /**

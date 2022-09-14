@@ -348,7 +348,9 @@ describe("AxelarAssetTransfer", () => {
     describe("validateOfflineDepositAddress", () => {
       beforeEach(async () => {
         jest.clearAllMocks();
-        jest.spyOn(bridge, "getDepositServiceContractAddress").mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest
+          .spyOn(bridge, "getDepositServiceContractAddress")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
       });
       it("should be able to generate a deposit address offline", async () => {
         await expect(
@@ -359,7 +361,8 @@ describe("AxelarAssetTransfer", () => {
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
             hexZeroPad(hexlify(0), 32)
-          )).resolves.toBe("0xb24c3396aa90cae288b7f0771c88de4e180503e2");
+          )
+        ).resolves.toBe("0xb24c3396aa90cae288b7f0771c88de4e180503e2");
       });
     });
     describe("getDepositAddressForNativeWrap", () => {
@@ -368,7 +371,9 @@ describe("AxelarAssetTransfer", () => {
         address = "0xb24c3396aa90cae288b7f0771c88de4e180503e2";
         jest.clearAllMocks();
         jest.spyOn(bridge, "getDepositAddressFromRemote").mockResolvedValue({ address });
-        jest.spyOn(bridge, "getDepositServiceContractAddress").mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest
+          .spyOn(bridge, "getDepositServiceContractAddress")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
       });
       it("should be able to generate a deposit address offline", () => {
         const depositAddress = bridge.validateOfflineDepositAddress(
@@ -400,11 +405,14 @@ describe("AxelarAssetTransfer", () => {
         unwrapAddress = "0x34bd65b158b6b4cc539388842cb2447c0a28acc0";
         realDepositAddress = "realDepositAddress";
         jest.clearAllMocks();
-        jest.spyOn(bridge, "getDepositAddressFromRemote").mockResolvedValue({ address: unwrapAddress });
+        jest
+          .spyOn(bridge, "getDepositAddressFromRemote")
+          .mockResolvedValue({ address: unwrapAddress });
         jest.spyOn(bridge, "getDepositAddress").mockResolvedValue(realDepositAddress);
-        jest.spyOn(bridge, "getDepositServiceContractAddress").mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest
+          .spyOn(bridge, "getDepositServiceContractAddress")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
         jest.spyOn(bridge, "getERC20Denom").mockResolvedValue("wavax-wei");
-        
       });
       it("should be able to retrieve the deposit address from microservices for erc20 unwrap", async () => {
         await expect(
@@ -416,7 +424,12 @@ describe("AxelarAssetTransfer", () => {
             0
           )
         ).resolves.toBe(realDepositAddress);
-        expect(bridge.getDepositAddress).toHaveBeenCalledWith(EvmChain.AVALANCHE, EvmChain.FANTOM, unwrapAddress, "wavax-wei");
+        expect(bridge.getDepositAddress).toHaveBeenCalledWith(
+          EvmChain.AVALANCHE,
+          EvmChain.FANTOM,
+          unwrapAddress,
+          "wavax-wei"
+        );
       });
     });
   });
