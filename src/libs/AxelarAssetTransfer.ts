@@ -1,11 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
+import fetch from "cross-fetch";
 import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET, OTC } from "../services/types";
 
 import { RestService, SocketService } from "../services";
 import { createWallet, validateDestinationAddressByChainName } from "../utils";
 
 import { getConfigs } from "../constants";
-import { AxelarAssetTransferConfig, Environment } from "./types";
+import { AxelarAssetTransferConfig, Environment, EvmChain } from "./types";
 import {
   defaultAbiCoder,
   formatBytes32String,
@@ -17,9 +18,9 @@ import {
   solidityPack,
   toUtf8Bytes,
 } from "ethers/lib/utils";
-import DepositReceiver from "./abi/deposit-service/DepositReceiver.json";
-import DepositReceiverABI from "@axelar-network/axelar-cgp-solidity/interfaces/IAxelarDepositService.sol/IAxelarDepositService.json"
-import ReceiverImplementation from "./abi/deposit-service/ReceiverImplementation.json";
+import DepositReceiver from "@axelar-network/axelar-cgp-solidity/artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
+import ReceiverImplementation from "@axelar-network/axelar-cgp-solidity/artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
+import s3 from "./TransactionRecoveryApi/constants/s3";
 
 export class AxelarAssetTransfer {
   readonly environment: Environment;
@@ -27,6 +28,10 @@ export class AxelarAssetTransfer {
 
   readonly api: RestService;
   readonly depositServiceApi: RestService;
+  private gasReceiverContract: Record<string, string> = {};
+  private depositServiceContract: Record<string, string> = {};
+  private evmDenomMap: Record<string, string> = {};
+  private staticInfo: Record<string, any> = {};
 
   constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
@@ -42,13 +47,15 @@ export class AxelarAssetTransfer {
   }
 
   async getDepositAddressForNativeWrap(
-    fromChain: string,
-    toChain: string,
+    fromChain: EvmChain,
+    toChain: EvmChain,
     destinationAddress: string,
     refundAddress: string,
     salt?: number
   ): Promise<string> {
-    const hexSalt = hexZeroPad(hexlify((salt || salt === 0) ? salt : new Date().toString()), 32);
+    const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
+    console.log("hex salt", hexSalt);
+    refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address } = await this.getDepositAddressFromRemote(
       "wrap",
       fromChain,
@@ -58,8 +65,9 @@ export class AxelarAssetTransfer {
       hexSalt
     );
 
-    const expectedAddress = this.validateOfflineDepositAddress(
+    const expectedAddress = await this.validateOfflineDepositAddress(
       "wrap",
+      fromChain,
       toChain,
       destinationAddress,
       refundAddress,
@@ -72,46 +80,54 @@ export class AxelarAssetTransfer {
   }
 
   async getDepositAddressForNativeUnwrap(
-    fromChain: string,
-    toChain: string,
+    fromChain: EvmChain,
+    toChain: EvmChain,
     destinationAddress: string,
     refundAddress: string,
     salt?: number
   ): Promise<string> {
-    const hexSalt = hexZeroPad(hexlify((salt || salt === 0) ? salt : new Date().toString()), 32);
-    const { address: interimAddress } = await this.getDepositAddressFromRemote(
+    const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
+    refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
+    const { address: unwrapAddress } = await this.getDepositAddressFromRemote(
       "unwrap",
-      "",
+      undefined,
       toChain,
       destinationAddress,
       refundAddress,
       hexSalt
     );
 
-    const expectedAddress = this.validateOfflineDepositAddress(
+    const expectedAddress = await this.validateOfflineDepositAddress(
       "unwrap",
-      "",
+      fromChain,
+      toChain,
       destinationAddress,
       refundAddress,
       hexSalt
     );
 
-    if (interimAddress !== expectedAddress) return "";
+    console.log("address and expected", unwrapAddress, expectedAddress);
 
-    const realDepositAddress = await this.getDepositAddress(fromChain, toChain, interimAddress, "uaxl");
+    if (unwrapAddress !== expectedAddress) return "";
+
+    const realDepositAddress = await this.getDepositAddress(
+      fromChain,
+      toChain,
+      unwrapAddress,
+      await this.getERC20Denom(fromChain)
+    );
 
     return realDepositAddress;
   }
 
   async getDepositAddressFromRemote(
     wrapOrUnWrap: "wrap" | "unwrap",
-    fromChain: string,
-    toChain: string,
+    fromChain: EvmChain | undefined,
+    toChain: EvmChain,
     destinationAddress: string,
     refundAddress: string,
     hexSalt: string
   ): Promise<{ address: string }> {
-
     console.log("calling this");
     const endpoint = wrapOrUnWrap === "wrap" ? "/deposit/wrap" : "/deposit/unwrap";
     return await this.depositServiceApi
@@ -122,12 +138,14 @@ export class AxelarAssetTransfer {
         destination_address: destinationAddress,
         refund_address: refundAddress,
       })
+      .then((res) => ({ address: res.address.toLowerCase() }))
       .catch(() => ({ address: "" }));
   }
 
-  public validateOfflineDepositAddress(
+  async validateOfflineDepositAddress(
     wrapOrUnWrap: "wrap" | "unwrap",
-    toChain: string,
+    fromChain: EvmChain,
+    toChain: EvmChain,
     destinationAddress: string,
     refundAddress: string,
     hexSalt: string
@@ -146,7 +164,7 @@ export class AxelarAssetTransfer {
           ]);
 
     const address = getCreate2Address(
-      "0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955", //confirmed deposit service address on testnet
+      await this.getDepositServiceContractAddress(fromChain),
       hexSalt,
       keccak256(
         solidityPack(
@@ -158,7 +176,7 @@ export class AxelarAssetTransfer {
         )
       )
     );
-    return address;
+    return address.toLowerCase();
   }
 
   async getDepositAddress(
@@ -270,5 +288,41 @@ export class AxelarAssetTransfer {
 
   private extractDepositAddress(roomId: string) {
     return JSON.parse(roomId)?.depositAddress;
+  }
+
+  public async getGasReceiverContractAddress(chainName: EvmChain): Promise<string> {
+    if (!this.gasReceiverContract[chainName]) {
+      this.gasReceiverContract[chainName] = await this.getStaticInfo()
+        .then((body) => body.assets.network[chainName.toLowerCase()]?.gas_service)
+        .catch((e) => undefined);
+    }
+    return this.gasReceiverContract[chainName];
+  }
+
+  public async getERC20Denom(chainName: EvmChain): Promise<string> {
+    if (!this.evmDenomMap[chainName]) {
+      this.evmDenomMap[chainName] = await this.getStaticInfo()
+        .then((body) => body.assets.network[chainName.toLowerCase()]?.nativeAsset[0])
+        .catch((e) => undefined);
+    }
+    return this.evmDenomMap[chainName];
+  }
+
+  public async getDepositServiceContractAddress(chainName: EvmChain): Promise<string> {
+    if (!this.depositServiceContract[chainName]) {
+      this.depositServiceContract[chainName] = await this.getStaticInfo()
+        .then((body) => body.assets.network[chainName.toLowerCase()]?.deposit_service)
+        .catch((e) => undefined);
+    }
+    return this.depositServiceContract[chainName];
+  }
+
+  public async getStaticInfo(): Promise<Record<string, any>> {
+    if (!this.staticInfo) {
+      this.staticInfo = await fetch(s3[this.environment])
+        .then((res) => res.json())
+        .catch((e) => undefined);
+    }
+    return this.staticInfo;
   }
 }
