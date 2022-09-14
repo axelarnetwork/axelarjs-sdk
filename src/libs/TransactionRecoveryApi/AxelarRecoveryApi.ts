@@ -32,6 +32,8 @@ export interface GMPStatusResponse {
   gasPaidInfo?: GasPaidInfo;
   error?: any;
   callTx?: any;
+  executed?: any;
+  callback?: any;
 }
 
 export interface ExecuteParams {
@@ -97,7 +99,7 @@ export class AxelarRecoveryApi {
 
     if (!txDetails) return { status: GMPStatus.CANNOT_FETCH_STATUS };
 
-    const { call, gas_status, gas_paid, error } = txDetails;
+    const { call, gas_status, gas_paid, error, executed, callback } = txDetails;
 
     const gasPaidInfo: GasPaidInfo = {
       status: gas_status,
@@ -109,6 +111,8 @@ export class AxelarRecoveryApi {
       error,
       gasPaidInfo,
       callTx: call,
+      executed,
+      callback
     };
   }
 
