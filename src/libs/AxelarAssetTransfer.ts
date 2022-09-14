@@ -31,7 +31,7 @@ export class AxelarAssetTransfer {
   private gasReceiverContract: Record<string, string> = {};
   private depositServiceContract: Record<string, string> = {};
   private evmDenomMap: Record<string, string> = {};
-  private staticInfo: Record<string, any> | null = null;
+  private staticInfo: Record<string, any>;
 
   constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
@@ -307,7 +307,15 @@ export class AxelarAssetTransfer {
   public async getDepositServiceContractAddress(chainName: EvmChain): Promise<string> {
     if (!this.depositServiceContract[chainName]) {
       this.depositServiceContract[chainName] = await this.getStaticInfo()
-        .then((body) => body.assets.network[chainName.toLowerCase()]?.deposit_service)
+        .then((body) => {
+          console.log("body",body)
+          console.log("body.assets",body.assets);
+          console.log("body.assets.network",body.assets.network);
+          console.log("body.assets.network[chain]",chainName.toLowerCase(),body.assets.network[chainName.toLowerCase()]);
+          console.log("body.assets.network[chain].deposit_service",body.assets.network[chainName.toLowerCase()].deposit_service);
+          return body.assets.network[chainName.toLowerCase()]?.deposit_service
+
+        })
         .catch((e) => undefined);
     }
     return this.depositServiceContract[chainName];
