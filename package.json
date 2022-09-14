@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "build": "npm run compile-axelar-cgp-solidity && rimraf dist && tsc",
-    "compile-axelar-cgp-solidity": "cd node_modules/@axelar-network/axelar-cgp-solidity && npm install && npx hardhat compile && npm uninstall *",
+    "compile-axelar-cgp-solidity": "cd node_modules/@axelar-network/axelar-cgp-solidity && npm install && npx hardhat compile && cp -R artifacts ../../../artifacts && npm uninstall *",
     "dev:tsc": "tsc --watch -p .",
     "dev:serve": "nodemon -e js -w dist dist/index.js",
     "dev": "run-p dev:*",
