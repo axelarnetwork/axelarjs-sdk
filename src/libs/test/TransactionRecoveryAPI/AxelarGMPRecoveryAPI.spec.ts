@@ -11,9 +11,7 @@ import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
 import { Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
 import DistributionExecutable from "../abi/DistributionExecutable.json";
 import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGasToken.json";
-import GasServiceAbi from "../../abi/IAxelarGasService.json";
 import TestToken from "../abi/TestToken.json";
-import { AxelarQueryAPI } from "../../AxelarQueryAPI";
 import { findContractEvent, getLogIndexFromTxReceipt } from "../../TransactionRecoveryApi/helpers";
 import { Interface } from "ethers/lib/utils";
 import {
@@ -601,7 +599,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       const nativeGasAddedEvent = findContractEvent(
         response.transaction as ContractReceipt,
         [signatureNativeGasAdded],
-        new Interface(GasServiceAbi)
+        new Interface([
+          "event NativeGasAdded(bytes32 indexed txHash,  uint256 indexed logIndex, uint256 gasFeeAmount, address refundAddress)",
+        ])
       );
 
       // Validate event data
@@ -651,7 +651,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       const nativeGasAddedEvent = findContractEvent(
         response.transaction as ContractReceipt,
         [signatureNativeGasAdded],
-        new Interface(GasServiceAbi)
+        new Interface([
+          "event NativeGasAdded(bytes32 indexed txHash, uint256 indexed logIndex, uint256 gasFeeAmount, address refundAddress)",
+        ])
       );
 
       // Calculate how many gas we need to add more.
@@ -969,7 +971,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       const gasAddedEvent = findContractEvent(
         response.transaction as ContractReceipt,
         [signatureGasAdded],
-        new Interface(GasServiceAbi)
+        new Interface([
+          "event GasAdded(bytes32 indexed txHash, uint256 indexed logIndex, address gasToken, uint256 gasFeeAmount, address refundAddress)",
+        ])
       );
       const args = gasAddedEvent?.eventLog.args;
       const eventGasFeeAmount = args?.gasFeeAmount?.toString();
@@ -1009,7 +1013,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       const gasAddedEvent = findContractEvent(
         response.transaction as ContractReceipt,
         [signatureGasAdded],
-        new Interface(GasServiceAbi)
+        new Interface([
+          "event GasAdded(bytes32 indexed txHash, uint256 indexed logIndex, address gasToken, uint256 gasFeeAmount, address refundAddress)",
+        ])
       );
 
       // Calculate how many gas we need to add more.

@@ -1,7 +1,5 @@
 import { Interface } from "@ethersproject/abi";
 import { ethers } from "ethers";
-import AxelarGateway from "../../abi/axelarGatewayAbi.json";
-import IAxelarGasService from "../../abi/IAxelarGasService.json";
 import { EvmChain, EventLog } from "../../types";
 
 export function getDestinationChainFromTxReceipt(
@@ -13,11 +11,13 @@ export function getDestinationChainFromTxReceipt(
   const signatureContractCall = ethers.utils.id(
     "ContractCall(address,string,string,bytes32,bytes)"
   );
-
   const event = findContractEvent(
     receipt,
     [signatureContractCall, signatureContractCallWithToken],
-    new Interface(AxelarGateway)
+    new Interface([
+      "event ContractCallWithToken(address indexed sender, string destinationChain, string destinationContractAddress, bytes32 indexed payloadHash, bytes payload, string symbol, uint256 amount)",
+      "event ContractCall(address indexed sender,string destinationChain,string destinationContractAddress,bytes32 indexed payloadHash,bytes payload)",
+    ])
   );
   return event?.eventLog.args[1].toLowerCase();
 }
@@ -35,7 +35,10 @@ export function getLogIndexFromTxReceipt(
   const event = findContractEvent(
     receipt,
     [signatureContractCall, signatureContractCallWithToken],
-    new Interface(AxelarGateway)
+    new Interface([
+      "event ContractCallWithToken(address indexed sender, string destinationChain, string destinationContractAddress, bytes32 indexed payloadHash, bytes payload, string symbol, uint256 amount)",
+      "event ContractCall(address indexed sender,string destinationChain,string destinationContractAddress,bytes32 indexed payloadHash,bytes payload)",
+    ])
   );
   return event?.logIndex;
 }
@@ -53,7 +56,10 @@ export function getNativeGasAmountFromTxReceipt(
   const event = findContractEvent(
     receipt,
     [signatureGasPaidContractCall, signatureGasPaidContractCallWithToken],
-    new Interface(IAxelarGasService)
+    new Interface([
+      "event NativeGasPaidForContractCall(address indexed sourceAddress,string destinationChain,string destinationAddress,bytes32 indexed payloadHash,uint256 gasFeeAmount,address refundAddress)",
+      "event NativeGasPaidForContractCallWithToken(address indexed sourceAddress,string destinationChain,string destinationAddress,bytes32 indexed payloadHash,string symbol,uint256 amount,uint256 gasFeeAmount,address refundAddress)",
+    ])
   );
   return event?.eventLog.args.slice(-2)[0].toString();
 }
@@ -71,7 +77,10 @@ export function getGasAmountFromTxReceipt(
   const event = findContractEvent(
     receipt,
     [signatureGasPaidContractCall, signatureGasPaidContractCallWithToken],
-    new Interface(IAxelarGasService)
+    new Interface([
+      "event GasPaidForContractCallWithToken(address indexed sourceAddress,string destinationChain,string destinationAddress,bytes32 indexed payloadHash,string symbol,uint256 amount,address gasToken,uint256 gasFeeAmount,address refundAddress)",
+      "event GasPaidForContractCall(address indexed sourceAddress,string destinationChain,string destinationAddress,bytes32 indexed payloadHash,address gasToken,uint256 gasFeeAmount,address refundAddress)",
+    ])
   );
   return event?.eventLog.args.slice(-2)[0].toString();
 }
