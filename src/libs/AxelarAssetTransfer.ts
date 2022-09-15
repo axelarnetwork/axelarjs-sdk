@@ -111,7 +111,7 @@ export class AxelarAssetTransfer {
       fromChain,
       toChain,
       unwrapAddress,
-      await this.getERC20Denom(fromChain)
+      await this.getERC20Denom(toChain)
     );
 
     return realDepositAddress;
