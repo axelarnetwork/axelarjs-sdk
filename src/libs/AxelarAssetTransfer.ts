@@ -296,23 +296,23 @@ export class AxelarAssetTransfer {
   }
 
   public async getERC20Denom(chainName: EvmChain): Promise<string> {
-    if (!this.evmDenomMap[chainName]) {
-      this.evmDenomMap[chainName] = await this.getStaticInfo()
-        .then((body) => body.assets.network[chainName.toLowerCase()]?.nativeAsset[0])
-        .catch((e) => undefined);
+    if (!this.evmDenomMap[chainName.toLowerCase()]) {
+      const staticInfo = await this.getStaticInfo()
+      console.log("staticInfo",staticInfo);
+      const denom = staticInfo.chains[chainName.toLowerCase()]?.nativeAsset[0];
+      console.log("denom",denom);
+      if (denom) {
+        this.evmDenomMap[chainName.toLowerCase()] = denom;
+      }
+      return denom;
     }
-    return this.evmDenomMap[chainName];
+    return this.evmDenomMap[chainName.toLowerCase()];
   }
 
   public async getDepositServiceContractAddress(chainName: EvmChain): Promise<string> {
     if (!this.depositServiceContract[chainName]) {
       this.depositServiceContract[chainName] = await this.getStaticInfo()
         .then((body) => {
-          console.log("body",body)
-          console.log("body.assets",body.assets);
-          console.log("body.assets.network",body.assets.network);
-          console.log("body.assets.network[chain]",chainName.toLowerCase(),body.assets.network[chainName.toLowerCase()]);
-          console.log("body.assets.network[chain].deposit_service",body.assets.network[chainName.toLowerCase()].deposit_service);
           return body.assets.network[chainName.toLowerCase()]?.deposit_service
 
         })
