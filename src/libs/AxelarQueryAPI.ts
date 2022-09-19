@@ -4,8 +4,6 @@ import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
 import { AxelarQueryAPIConfig, BaseFeeResponse, Environment, EvmChain, GasToken } from "./types";
-import { BigNumber, ethers, FixedNumber } from "ethers";
-
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import {
