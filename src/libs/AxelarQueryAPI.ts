@@ -4,6 +4,8 @@ import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
 import { AxelarQueryAPIConfig, BaseFeeResponse, Environment, EvmChain, GasToken } from "./types";
+import { BigNumber, ethers, FixedNumber } from "ethers";
+
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import {
@@ -154,13 +156,15 @@ export class AxelarQueryAPI {
    * @param destinationChainName
    * @param sourceChainTokenSymbol
    * @param estimatedGasUsed (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which sufficients for most transaction.
+   * @param gasBufferInPercent (Optional) A multiplier used to create a buffer above the calculated gas fee, to account for potential slippage throughout tx execution, e.g. 10 == 10% buffer
    * @returns
    */
   public async estimateGasFee(
     sourceChainName: EvmChain,
     destinationChainName: EvmChain,
     sourceChainTokenSymbol: GasToken | string,
-    estimatedGasUsed = DEFAULT_ESTIMATED_GAS
+    estimatedGasUsed: number = DEFAULT_ESTIMATED_GAS,
+    gasBufferInPercent: number = 10
   ): Promise<string> {
     const response = await this.getNativeGasBaseFee(
       sourceChainName,
@@ -177,6 +181,10 @@ export class AxelarQueryAPI {
     const { gas_price } = sourceToken;
 
     const destTxFee = parseEther(gas_price).mul(estimatedGasUsed);
+
+    if (gasBufferInPercent > 1) {
+      return destTxFee.add(baseFee).mul(gasBufferInPercent).div(100).toString();
+    }
 
     return destTxFee.add(baseFee).toString();
   }
