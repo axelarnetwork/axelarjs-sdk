@@ -181,7 +181,7 @@ export class AxelarQueryAPI {
     const destTxFee = parseEther(gas_price).mul(estimatedGasUsed);
 
     if (gasBufferInPercent > 1) {
-      return destTxFee.add(baseFee).mul(gasBufferInPercent).div(100).toString();
+      return destTxFee.add(baseFee).mul(100 + gasBufferInPercent).div(100).toString();
     }
 
     return destTxFee.add(baseFee).toString();
