@@ -112,7 +112,7 @@ export class AxelarRecoveryApi {
       gasPaidInfo,
       callTx: call,
       executed,
-      callback
+      callback,
     };
   }
 

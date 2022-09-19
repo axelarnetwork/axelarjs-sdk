@@ -1,4 +1,4 @@
-import { Environment, EvmChain, GasToken } from "../../types";
+import { EvmChain, GasToken } from "../../types";
 
 export const NATIVE_GAS_TOKEN_SYMBOL = {
   [EvmChain.AVALANCHE]: GasToken.AVAX,

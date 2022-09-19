@@ -46,7 +46,7 @@ describe("AxelarDepositRecoveryAPI", () => {
           details: txDetails.gas_paid,
         },
         executed: txDetails.executed,
-        callback: undefined
+        callback: undefined,
       });
     });
 
@@ -82,7 +82,7 @@ describe("AxelarDepositRecoveryAPI", () => {
           details: txDetails.gas_paid,
         },
         executed: txDetails.executed,
-        callback: undefined
+        callback: undefined,
       });
     });
 
@@ -151,7 +151,7 @@ describe("AxelarDepositRecoveryAPI", () => {
           details: txDetails.gas_paid,
         },
         executed: txDetails.executed,
-        callback: undefined
+        callback: undefined,
       });
     });
 
@@ -186,7 +186,7 @@ describe("AxelarDepositRecoveryAPI", () => {
           details: txDetails.gas_paid,
         },
         executed: txDetails.executed,
-        callback: undefined
+        callback: undefined,
       });
     });
 

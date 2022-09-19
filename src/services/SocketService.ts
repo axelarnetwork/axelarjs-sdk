@@ -62,9 +62,12 @@ export class SocketService {
       this.socket.emit("room:join", roomId);
       this.socket.on("bridge-event", (data: any) => {
         const attributes = data.Attributes;
-        const sourceChainConfig: ChainInfo = this.supportedChains.find(chain => chain.chainName.toLowerCase() === sourceChain.toLowerCase()) as ChainInfo;
+        const sourceChainConfig: ChainInfo = this.supportedChains.find(
+          (chain) => chain.chainName.toLowerCase() === sourceChain.toLowerCase()
+        ) as ChainInfo;
         const isAxelarnet = sourceChainConfig?.module === "axelarnet";
-        const sourceChainMatch = isAxelarnet || attributes.sourceChain.toLowerCase() === sourceChain.toLowerCase();
+        const sourceChainMatch =
+          isAxelarnet || attributes.sourceChain.toLowerCase() === sourceChain.toLowerCase();
         const destChainMatch =
           attributes.destinationChain.toLowerCase() === destinationChain.toLowerCase();
         const destAddressMatch = attributes.destinationAddress === destinationAddress;

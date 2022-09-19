@@ -3,15 +3,7 @@ import { parseEther, parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
-import {
-  AxelarQueryAPIConfig,
-  BaseFeeResponse,
-  Environment,
-  EvmChain,
-  GasToken,
-  isNativeToken,
-} from "./types";
-import { ethers } from "ethers";
+import { AxelarQueryAPIConfig, BaseFeeResponse, Environment, EvmChain, GasToken } from "./types";
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import {
@@ -187,7 +179,6 @@ export class AxelarQueryAPI {
     const destTxFee = parseEther(gas_price).mul(estimatedGasUsed);
 
     return destTxFee.add(baseFee).toString();
-
   }
 
   /**
