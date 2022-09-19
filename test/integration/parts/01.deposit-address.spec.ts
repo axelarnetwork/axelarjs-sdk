@@ -31,6 +31,18 @@ export const depositAddressSource = () => {
           "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           "uausdc"
         ),
+        axelarAssetTransfer.getDepositAddress(
+          "osmosis",
+          "moonbeam",
+          "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
+          "uausdc"
+        ),
+        axelarAssetTransfer.getDepositAddress(
+          "comdex",
+          "moonbeam",
+          "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
+          "uausdc"
+        ),
       ]);
     });
 

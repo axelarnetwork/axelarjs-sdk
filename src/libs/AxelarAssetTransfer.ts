@@ -129,7 +129,7 @@ export class AxelarAssetTransfer {
   }
 
   private getSocketService() {
-    return new SocketService(this.resourceUrl);
+    return new SocketService(this.resourceUrl, this.environment);
   }
 
   private extractDepositAddress(roomId: string) {
