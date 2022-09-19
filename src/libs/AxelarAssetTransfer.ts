@@ -38,7 +38,7 @@ export class AxelarAssetTransfer {
     const traceId = options?._traceId || uuidv4();
 
     // verify destination address format
-    const isDestinationAddressValid = validateDestinationAddressByChainName(
+    const isDestinationAddressValid = await validateDestinationAddressByChainName(
       toChain,
       destinationAddress,
       this.environment
