@@ -162,7 +162,7 @@ export class AxelarQueryAPI {
     destinationChainName: EvmChain,
     sourceChainTokenSymbol: GasToken | string,
     estimatedGasUsed: number = DEFAULT_ESTIMATED_GAS,
-    gasMultiplier: number = 1.1
+    gasMultiplier = 1.1
   ): Promise<string> {
     const response = await this.getNativeGasBaseFee(
       sourceChainName,
@@ -181,7 +181,11 @@ export class AxelarQueryAPI {
     const destTxFee = parseEther(gas_price).mul(estimatedGasUsed);
 
     if (gasMultiplier > 1) {
-      return destTxFee.add(baseFee).mul(gasMultiplier * 10000).div(10000).toString();
+      return destTxFee
+        .add(baseFee)
+        .mul(gasMultiplier * 10000)
+        .div(10000)
+        .toString();
     }
 
     return destTxFee.add(baseFee).toString();

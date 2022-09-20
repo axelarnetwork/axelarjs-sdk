@@ -70,7 +70,9 @@ export class SocketService {
         const sourceChainMatch =
           sourceChainIsAxelarnet ||
           attributes.sourceChain.toLowerCase() === sourceChain.toLowerCase();
-        const destChainMatch = attributes.destinationChain.toLowerCase() === (destChainIsAxelar ? "axelarnet" : destinationChain.toLowerCase());
+        const destChainMatch =
+          attributes.destinationChain.toLowerCase() ===
+          (destChainIsAxelar ? "axelarnet" : destinationChain.toLowerCase());
         const destAddressMatch = attributes.destinationAddress === destinationAddress;
 
         if (sourceChainMatch && destChainMatch && destAddressMatch) {
