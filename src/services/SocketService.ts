@@ -65,11 +65,12 @@ export class SocketService {
         const sourceChainConfig: ChainInfo = this.supportedChains.find(
           (chain) => chain.chainName.toLowerCase() === sourceChain.toLowerCase()
         ) as ChainInfo;
-        const isAxelarnet = sourceChainConfig?.module === "axelarnet";
+        const sourceChainIsAxelarnet = sourceChainConfig?.module === "axelarnet";
+        const destChainIsAxelar = destinationChain.toLowerCase() === "axelar";
         const sourceChainMatch =
-          isAxelarnet || attributes.sourceChain.toLowerCase() === sourceChain.toLowerCase();
-        const destChainMatch =
-          attributes.destinationChain.toLowerCase() === destinationChain.toLowerCase();
+          sourceChainIsAxelarnet ||
+          attributes.sourceChain.toLowerCase() === sourceChain.toLowerCase();
+        const destChainMatch = attributes.destinationChain.toLowerCase() === (destChainIsAxelar ? "axelarnet" : destinationChain.toLowerCase());
         const destAddressMatch = attributes.destinationAddress === destinationAddress;
 
         if (sourceChainMatch && destChainMatch && destAddressMatch) {
