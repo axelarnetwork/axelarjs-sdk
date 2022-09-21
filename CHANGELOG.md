@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.11.2] - 2022-SEPTEMBER-20
+## [0.11.3] - 2022-SEPTEMBER-21
 
 - fixed a regression issue caused in 0.11.0 in `AxelarAssetTransfer`, where the `getDepositAddress` method is no longer able to generate deposit addresses for cosmos-based source chains, e.g. Axelar, Osmosis. Please update to this version if you are using this method.
 - added an additional default parameter in `estimateGasFee` on `AxelarQueryAPI` to include a buffer to pad the calculated gas fee. this accounts for slippage that may occur throughout a tx's execution
