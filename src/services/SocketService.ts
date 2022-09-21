@@ -1,12 +1,18 @@
 import { io, Socket } from "socket.io-client";
+import { loadChains } from "../chains";
+import { ChainInfo } from "../chains/types";
+import { Environment } from "../libs";
 
 export class SocketService {
   private socket: Socket;
   private resourceUrl: string;
   private testMode = false;
+  private supportedChains: ChainInfo[];
+  private environment: Environment;
 
-  constructor(resourceUrl: string, testMode = false) {
+  constructor(resourceUrl: string, environment: Environment, testMode = false) {
     this.resourceUrl = resourceUrl;
+    this.environment = environment;
     this.testMode = testMode;
   }
 
@@ -30,6 +36,7 @@ export class SocketService {
             "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0",
         },
       });
+      this.supportedChains = await loadChains({ environment: this.environment });
     }
 
     return new Promise((resolve) => {
@@ -55,9 +62,17 @@ export class SocketService {
       this.socket.emit("room:join", roomId);
       this.socket.on("bridge-event", (data: any) => {
         const attributes = data.Attributes;
-        const sourceChainMatch = attributes.sourceChain.toLowerCase() === sourceChain.toLowerCase();
+        const sourceChainConfig: ChainInfo = this.supportedChains.find(
+          (chain) => chain.chainName.toLowerCase() === sourceChain.toLowerCase()
+        ) as ChainInfo;
+        const sourceChainIsAxelarnet = sourceChainConfig?.module === "axelarnet";
+        const destChainIsAxelar = destinationChain.toLowerCase() === "axelar";
+        const sourceChainMatch =
+          sourceChainIsAxelarnet ||
+          attributes.sourceChain.toLowerCase() === sourceChain.toLowerCase();
         const destChainMatch =
-          attributes.destinationChain.toLowerCase() === destinationChain.toLowerCase();
+          attributes.destinationChain.toLowerCase() ===
+          (destChainIsAxelar ? "axelarnet" : destinationChain.toLowerCase());
         const destAddressMatch = attributes.destinationAddress === destinationAddress;
 
         if (sourceChainMatch && destChainMatch && destAddressMatch) {

@@ -38,7 +38,7 @@ export class AxelarAssetTransfer {
     const traceId = options?._traceId || uuidv4();
 
     // verify destination address format
-    const isDestinationAddressValid = validateDestinationAddressByChainName(
+    const isDestinationAddressValid = await validateDestinationAddressByChainName(
       toChain,
       destinationAddress,
       this.environment
@@ -129,7 +129,7 @@ export class AxelarAssetTransfer {
   }
 
   private getSocketService() {
-    return new SocketService(this.resourceUrl);
+    return new SocketService(this.resourceUrl, this.environment);
   }
 
   private extractDepositAddress(roomId: string) {

@@ -13,7 +13,6 @@ import DistributionExecutable from "../abi/DistributionExecutable.json";
 import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGasToken.json";
 import GasServiceAbi from "../../abi/IAxelarGasService.json";
 import TestToken from "../abi/TestToken.json";
-import { AxelarQueryAPI } from "../../AxelarQueryAPI";
 import { findContractEvent, getLogIndexFromTxReceipt } from "../../TransactionRecoveryApi/helpers";
 import { Interface } from "ethers/lib/utils";
 import {

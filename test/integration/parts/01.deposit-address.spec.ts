@@ -6,36 +6,72 @@ import { AxelarAssetTransfer, Environment } from "../../../src";
  */
 export const depositAddressSource = () => {
   jest.setTimeout(60000);
-  const axelarAssetTransfer = new AxelarAssetTransfer({
+  const axelarAssetTransferTestnet = new AxelarAssetTransfer({
     environment: Environment.TESTNET,
+  });
+  const axelarAssetTransferMainnet = new AxelarAssetTransfer({
+    environment: Environment.MAINNET,
   });
 
   test("bootstrap", () => {
-    expect(axelarAssetTransfer).toBeDefined();
+    expect(axelarAssetTransferTestnet).toBeDefined();
   });
 
   describe("deposit address generation", () => {
-    let results: string[];
-
-    beforeAll(async () => {
-      results = await Promise.all([
-        axelarAssetTransfer.getDepositAddress(
+    it("should generate unique deposit addresses", async () => {
+      const results = await Promise.all([
+        axelarAssetTransferTestnet.getDepositAddress(
           "avalanche",
           "moonbeam",
           "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           "uausdc"
         ),
-        axelarAssetTransfer.getDepositAddress(
+        axelarAssetTransferTestnet.getDepositAddress(
           "fantom",
           "moonbeam",
           "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           "uausdc"
         ),
+        axelarAssetTransferTestnet.getDepositAddress(
+          "osmosis",
+          "moonbeam",
+          "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
+          "uausdc"
+        ),
+        axelarAssetTransferTestnet.getDepositAddress(
+          "comdex",
+          "moonbeam",
+          "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
+          "uausdc"
+        ),
       ]);
+      expect(results.length).toBe(4);
+      expect(results[0]).not.toEqual(results[1]);
     });
 
-    it("should generate unique deposit addresses", () => {
-      expect(results[0]).not.toEqual(results[1]);
+    it("should be able to generate deposit addresses when the source chain is cosmos-based chain", async () => {
+      const results = await Promise.all([
+        axelarAssetTransferMainnet.getDepositAddress(
+          "terra",
+          "moonbeam",
+          "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
+          "uusdc"
+        ),
+        axelarAssetTransferMainnet.getDepositAddress(
+          "axelar",
+          "osmosis",
+          "osmo1x3z2vepjd7fhe30epncxjrk0lehq7xdqe8ltsn",
+          "uusdc"
+        ),
+        axelarAssetTransferMainnet.getDepositAddress(
+          "osmosis",
+          "axelar",
+          "axelar1dn9534a72h733m8andex5ufklql3hfsv8gdsrc",
+          "uusdc"
+        ),
+      ]);
+      console.log(results);
+      expect(results.length).toBe(3);
     });
   });
 };
