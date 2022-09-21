@@ -35,11 +35,12 @@ export class RestService {
         return response;
       })
       .then((response) => response.json())
-      .catch((err) => {
+      .catch(async (err) => {
+        const parsedError = await err.json();
         throw {
           message: "AxelarJS-SDK uncaught post error",
           uncaught: true,
-          fullMessage: err?.message || err,
+          fullMessage: parsedError?.message || err,
         };
       });
   }
