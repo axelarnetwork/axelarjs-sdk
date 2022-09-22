@@ -1,3 +1,5 @@
-import { depositAddressSource } from "./parts/01.deposit-address.spec";
+import { depositAddressSingle } from "./parts/00.deposit-address-single.spec";
+// import { depositAddressSource } from "./parts/01.deposit-address.spec";
 
-depositAddressSource();
+depositAddressSingle();
+// depositAddressSource();

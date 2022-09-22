@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.4] - 2022-SEPTEMBER-22
+
+- update `queryTransactionStatus` in `AxelarRecoveryApi` to include new `executing` status.
+- update GET requests in `AxelarRecoveryApi` to disable cache.
+- fixed a regression issue caused in 0.11.0 in `AxelarAssetTransfer`, where the `getDepositAddress` method is no longer able to generate deposit addresses for cosmos-based destination chains, e.g. Axelar, Osmosis. Please update to this version if you are using this method.
+- [technical fix]: improving error messaging of REST responses.
+
 ## [0.11.3] - 2022-SEPTEMBER-21
 
 - fixed a regression issue caused in 0.11.0 in `AxelarAssetTransfer`, where the `getDepositAddress` method is no longer able to generate deposit addresses for cosmos-based source chains, e.g. Axelar, Osmosis. Please update to this version if you are using this method.

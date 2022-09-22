@@ -6,11 +6,16 @@ import { AxelarAssetTransfer, Environment } from "../../../src";
  */
 export const depositAddressSource = () => {
   jest.setTimeout(60000);
-  const axelarAssetTransferTestnet = new AxelarAssetTransfer({
-    environment: Environment.TESTNET,
-  });
-  const axelarAssetTransferMainnet = new AxelarAssetTransfer({
-    environment: Environment.MAINNET,
+  let axelarAssetTransferTestnet: any;
+  let axelarAssetTransferMainnet: any;
+
+  beforeAll(() => {
+    axelarAssetTransferTestnet = new AxelarAssetTransfer({
+      environment: Environment.TESTNET,
+    });
+    axelarAssetTransferMainnet = new AxelarAssetTransfer({
+      environment: Environment.MAINNET,
+    });
   });
 
   test("bootstrap", () => {
@@ -44,12 +49,18 @@ export const depositAddressSource = () => {
           "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           "uausdc"
         ),
+        axelarAssetTransferTestnet.getDepositAddress(
+          "moonbeam",
+          "osmosis",
+          "osmo1x3z2vepjd7fhe30epncxjrk0lehq7xdqe8ltsn",
+          "uausdc"
+        ),
       ]);
-      expect(results.length).toBe(4);
+      expect(results.length).toBe(5);
       expect(results[0]).not.toEqual(results[1]);
     });
 
-    it("should be able to generate deposit addresses when the source chain is cosmos-based chain", async () => {
+    xit("should be able to generate deposit addresses when the source chain is cosmos-based chain", async () => {
       const results = await Promise.all([
         axelarAssetTransferMainnet.getDepositAddress(
           "terra",
