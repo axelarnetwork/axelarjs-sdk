@@ -1,8 +1,10 @@
 import { RestService } from "../RestService";
-import crossFetch from "cross-fetch";
+import fetch from "cross-fetch";
+
+const mockedFetch = fetch as jest.Mock;
 
 jest.mock("cross-fetch", () => {
-  //Mock the default export
+  // Mock the default export
   return {
     __esModule: true,
     default: jest.fn(),
@@ -17,25 +19,54 @@ describe("RestService", () => {
     jest.clearAllMocks();
   });
 
-  describe("get", () => {
-    test("It should get a proper GET response", async () => {
-      (crossFetch as jest.Mock).mockResolvedValue({
-        status: 200,
-        ok: true,
-        json: () => ({
-          foo: "bar",
-        }),
+  describe("execRest()", () => {
+    describe("when error", () => {
+      describe("when text response", () => {
+        beforeAll(() => {
+          mockedFetch.mockRejectedValue({
+            text: () => "hello world",
+          });
+        });
+
+        it("should return error", async () => {
+          await expect(api.get("/")).rejects.toMatchObject({
+            message: "AxelarJS-SDK uncaught post error",
+            uncaught: true,
+            fullMessage: "hello world",
+          });
+        });
       });
-      await api.get("/").then((res) => {
-        expect(res.foo).toEqual("bar");
+      describe("when json response", () => {
+        beforeAll(() => {
+          mockedFetch.mockRejectedValue({
+            json: () => ({
+              message: "Forbidden",
+            }),
+          });
+        });
+
+        it("should return error", async () => {
+          expect(api.get("/")).rejects.toMatchObject({
+            message: "AxelarJS-SDK uncaught post error",
+            uncaught: true,
+            fullMessage: "Forbidden",
+          });
+        });
       });
     });
-    test("It should catch", async () => {
-      (crossFetch as jest.Mock).mockRejectedValueOnce(new Error("network error"));
-      await expect(api.get("/")).rejects.toMatchObject({
-        message: "AxelarJS-SDK uncaught post error",
-        uncaught: true,
-        fullMessage: "network error",
+
+    describe("when success", () => {
+      let res: any;
+      beforeAll(async () => {
+        mockedFetch.mockResolvedValue({
+          ok: true,
+          json: () => ({ foo: "bar" }),
+        });
+
+        res = await api.get("/");
+      });
+      it("should return json", () => {
+        expect(res.foo).toEqual("bar");
       });
     });
   });
