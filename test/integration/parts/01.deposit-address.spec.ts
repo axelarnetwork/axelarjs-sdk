@@ -10,13 +10,12 @@ export const depositAddressSource = () => {
   let axelarAssetTransferMainnet: any;
 
   beforeAll(() => {
-    axelarAssetTransferTestnet= new AxelarAssetTransfer({
+    axelarAssetTransferTestnet = new AxelarAssetTransfer({
       environment: Environment.TESTNET,
     });
     axelarAssetTransferMainnet = new AxelarAssetTransfer({
       environment: Environment.MAINNET,
     });
-
   });
 
   test("bootstrap", () => {

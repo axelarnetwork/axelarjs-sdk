@@ -295,7 +295,7 @@ export class AxelarRecoveryApi {
     return await fetch(base + "?" + new URLSearchParams(params).toString(), {
       method: "GET",
       headers: { "Content-Type": "application/json" },
-      cache: "no-store"
+      cache: "no-store",
     })
       .then((res) => res.json())
       .then((res) => res.data);
