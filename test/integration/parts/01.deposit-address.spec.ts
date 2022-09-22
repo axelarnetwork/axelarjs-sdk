@@ -6,11 +6,17 @@ import { AxelarAssetTransfer, Environment } from "../../../src";
  */
 export const depositAddressSource = () => {
   jest.setTimeout(60000);
-  const axelarAssetTransferTestnet = new AxelarAssetTransfer({
-    environment: Environment.TESTNET,
-  });
-  const axelarAssetTransferMainnet = new AxelarAssetTransfer({
-    environment: Environment.MAINNET,
+  let axelarAssetTransferTestnet: any;
+  let axelarAssetTransferMainnet: any;
+
+  beforeAll(() => {
+    axelarAssetTransferTestnet= new AxelarAssetTransfer({
+      environment: Environment.TESTNET,
+    });
+    axelarAssetTransferMainnet = new AxelarAssetTransfer({
+      environment: Environment.MAINNET,
+    });
+
   });
 
   test("bootstrap", () => {
