@@ -44,12 +44,18 @@ export const depositAddressSource = () => {
           "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           "uausdc"
         ),
+        axelarAssetTransferTestnet.getDepositAddress(
+          "moonbeam",
+          "osmosis",
+          "osmo1x3z2vepjd7fhe30epncxjrk0lehq7xdqe8ltsn",
+          "uausdc"
+        ),
       ]);
-      expect(results.length).toBe(4);
+      expect(results.length).toBe(5);
       expect(results[0]).not.toEqual(results[1]);
     });
 
-    it("should be able to generate deposit addresses when the source chain is cosmos-based chain", async () => {
+    xit("should be able to generate deposit addresses when the source chain is cosmos-based chain", async () => {
       const results = await Promise.all([
         axelarAssetTransferMainnet.getDepositAddress(
           "terra",
