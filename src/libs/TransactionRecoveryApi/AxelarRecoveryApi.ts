@@ -14,6 +14,7 @@ export enum GMPStatus {
   DEST_GATEWAY_APPROVED = "destination_gateway_approved",
   DEST_EXECUTED = "destination_executed",
   DEST_EXECUTE_ERROR = "destination_execute_error",
+  DEST_EXECUTING = "executing",
   UNKNOWN_ERROR = "unknown_error",
   CANNOT_FETCH_STATUS = "cannot_fetch_status",
 }
@@ -84,14 +85,18 @@ export class AxelarRecoveryApi {
       .catch(() => undefined);
   }
 
-  private parseGMPStatus(response: any): GMPStatus {
+  private parseGMPStatus(response: any, txHash: string): GMPStatus {
     const { error, status } = response;
 
     if (status === "error" && error) return GMPStatus.DEST_EXECUTE_ERROR;
     else if (status === "executed") return GMPStatus.DEST_EXECUTED;
     else if (status === "approved") return GMPStatus.DEST_GATEWAY_APPROVED;
     else if (status === "called") return GMPStatus.SRC_GATEWAY_CALLED;
-    else return GMPStatus.UNKNOWN_ERROR;
+    else if (status === "executing") return GMPStatus.DEST_EXECUTING;
+    else {
+      console.info(`status of ${txHash}: ${status}`);
+      return GMPStatus.UNKNOWN_ERROR;
+    }
   }
 
   public async queryTransactionStatus(txHash: string): Promise<GMPStatusResponse> {
@@ -107,7 +112,7 @@ export class AxelarRecoveryApi {
     };
 
     return {
-      status: this.parseGMPStatus(txDetails),
+      status: this.parseGMPStatus(txDetails, txHash),
       error,
       gasPaidInfo,
       callTx: call,
@@ -290,6 +295,7 @@ export class AxelarRecoveryApi {
     return await fetch(base + "?" + new URLSearchParams(params).toString(), {
       method: "GET",
       headers: { "Content-Type": "application/json" },
+      cache: "no-store"
     })
       .then((res) => res.json())
       .then((res) => res.data);

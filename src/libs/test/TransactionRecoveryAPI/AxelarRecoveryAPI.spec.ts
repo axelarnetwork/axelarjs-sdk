@@ -50,6 +50,42 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
     });
 
+    test("it should return 'GMPStatus.DEST_EXECUTING' when the transaction is still in process", async () => {
+      const txHash = "0x123456789";
+      const txDetails = {
+        call: {
+          transactionHash: txHash,
+        },
+        gas_paid: {
+          transactionHash: txHash,
+        },
+        approved: {
+          transactionHash: txHash + "1",
+        },
+        executed: {
+          transactionHash: txHash + "2",
+        },
+        gas_status: "gas_paid",
+        status: "executing",
+      };
+
+      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+
+      const status = await api.queryTransactionStatus(txHash);
+
+      expect(status).toEqual({
+        status: GMPStatus.DEST_EXECUTING,
+        error: undefined,
+        callTx: txDetails.call,
+        gasPaidInfo: {
+          status: GasPaidStatus.GAS_PAID,
+          details: txDetails.gas_paid,
+        },
+        executed: txDetails.executed,
+        callback: undefined,
+      });
+    });
+
     test("it should return 'GMPStatus.DEST_EXECUTED' when the transaction is already executed", async () => {
       const txHash = "0x123456789";
       const txDetails = {
