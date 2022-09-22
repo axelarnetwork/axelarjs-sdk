@@ -75,7 +75,7 @@ export class SocketService {
           attributes.sourceChain.toLowerCase() === sourceChain.toLowerCase();
         const destChainMatch =
           attributes.destinationChain.toLowerCase() ===
-          (destChainIsAxelar ? "axelarnet" : destChainConfig.chainIdentifier[this.environment]);  //destinationChain.toLowerCase());
+          (destChainIsAxelar ? "axelarnet" : destChainConfig.chainIdentifier[this.environment]);
         const destAddressMatch = attributes.destinationAddress === destinationAddress;
 
         if (sourceChainMatch && destChainMatch && destAddressMatch) {
