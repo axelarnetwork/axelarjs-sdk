@@ -1,5 +1,7 @@
 import { depositAddressSingle } from "./parts/00.deposit-address-single.spec";
-// import { depositAddressSource } from "./parts/01.deposit-address.spec";
+import { depositAddressParallel } from "./parts/01.deposit-address.spec";
 
-depositAddressSingle();
-// depositAddressSource();
+describe("Integration Testing", () => {
+  depositAddressSingle();
+  depositAddressParallel();
+});
