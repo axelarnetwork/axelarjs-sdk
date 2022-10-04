@@ -8,10 +8,9 @@ import { getConfigs } from "../constants";
 import { AxelarAssetTransferConfig, Environment } from "./types";
 
 export class AxelarAssetTransfer {
-  readonly environment: Environment;
-  readonly resourceUrl: string;
-
-  readonly api: RestService;
+  private readonly environment: Environment;
+  private readonly resourceUrl: string;
+  private readonly api: RestService;
 
   constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
@@ -25,7 +24,7 @@ export class AxelarAssetTransfer {
     this.api = new RestService(this.resourceUrl);
   }
 
-  async getDepositAddress(
+  public async getDepositAddress(
     fromChain: string,
     toChain: string,
     destinationAddress: string,
@@ -71,7 +70,7 @@ export class AxelarAssetTransfer {
     return depositAddress;
   }
 
-  public async getOneTimeCode(signerAddress: string, traceId: string): Promise<OTC> {
+  private async getOneTimeCode(signerAddress: string, traceId: string): Promise<OTC> {
     const otc: OTC = await this.api
       .get(`${CLIENT_API_GET_OTC}?publicAddress=${signerAddress}`, traceId)
       .then((response) => response)
@@ -82,7 +81,7 @@ export class AxelarAssetTransfer {
     return otc;
   }
 
-  async getInitRoomId(
+  private async getInitRoomId(
     fromChain: string,
     toChain: string,
     destinationAddress: string,
@@ -113,7 +112,7 @@ export class AxelarAssetTransfer {
     return roomId;
   }
 
-  async getLinkEvent(
+  private async getLinkEvent(
     roomId: string,
     sourceChain: string,
     destinationChain: string,
