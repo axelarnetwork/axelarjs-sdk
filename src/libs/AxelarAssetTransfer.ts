@@ -16,7 +16,7 @@ export class AxelarAssetTransfer {
   constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
 
-    this.environment = config.environment;
+    this.environment = config.environment as Environment;
     this.resourceUrl = configs.resourceUrl;
 
     // handle resource url overwrite (for tests)
