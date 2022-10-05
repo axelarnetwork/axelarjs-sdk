@@ -42,6 +42,7 @@
     "cross-fetch": "^3.1.5",
     "ethers": "^5.4.7",
     "socket.io-client": "^4.2.0",
+    "standard-http-error": "^2.0.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -50,6 +51,7 @@
     "@babel/preset-typescript": "^7.16.0",
     "@types/clone-deep": "^4.0.1",
     "@types/jest": "^27.4.1",
+    "@types/standard-http-error": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "@typescript-eslint/parser": "^5.30.0",
     "eslint": "^8.24.0",
