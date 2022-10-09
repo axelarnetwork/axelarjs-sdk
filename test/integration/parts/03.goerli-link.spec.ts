@@ -1,14 +1,11 @@
 import { AxelarAssetTransfer, Environment } from "../../../src";
 
-/**
- * This test helps to check that a unique deposit address is generated for parallel requests
- * if the source chain is different but that the destination chain is the same
- */
-
 describe("Single Deposit Address Generation", () => {
   jest.setTimeout(20000);
+
   const axelarAssetTransfer = new AxelarAssetTransfer({
     environment: Environment.TESTNET,
+    // overwriteResourceUrl: "http://localhost:4000",
   });
 
   test("bootstrap", () => {
@@ -21,7 +18,7 @@ describe("Single Deposit Address Generation", () => {
     beforeAll(async () => {
       result = await axelarAssetTransfer.getDepositAddress(
         "avalanche",
-        "moonbeam",
+        "ethereum",
         "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
         "uausdc"
       );
