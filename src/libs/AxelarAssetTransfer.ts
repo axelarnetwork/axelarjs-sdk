@@ -18,8 +18,8 @@ import {
   solidityPack,
   toUtf8Bytes,
 } from "ethers/lib/utils";
-import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
-import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
+import DepositReceiver from "../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
+import ReceiverImplementation from "../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 
 export class AxelarAssetTransfer {
@@ -54,7 +54,13 @@ export class AxelarAssetTransfer {
     salt?: number
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
+    console.log({
+      refundAddress,
+    });
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
+    console.log({
+      refundAddress,
+    });
     const { address } = await this.getDepositAddressFromRemote(
       "wrap",
       fromChain,
@@ -289,7 +295,12 @@ export class AxelarAssetTransfer {
   public async getGasReceiverContractAddress(chainName: EvmChain): Promise<string> {
     if (!this.gasReceiverContract[chainName]) {
       this.gasReceiverContract[chainName] = await this.getStaticInfo()
-        .then((body) => body.assets.network[chainName.toLowerCase()]?.gas_service)
+        .then((body) => {
+          console.log({
+            network: body.assets.network,
+          });
+          return body.assets.network[chainName.toLowerCase()]?.gas_service;
+        })
         .catch((e) => undefined);
     }
     return this.gasReceiverContract[chainName];
@@ -297,10 +308,10 @@ export class AxelarAssetTransfer {
 
   public async getERC20Denom(chainName: EvmChain): Promise<string> {
     if (!this.evmDenomMap[chainName.toLowerCase()]) {
-      const staticInfo = await this.getStaticInfo()
-      console.log("staticInfo",staticInfo);
+      const staticInfo = await this.getStaticInfo();
+      console.log("staticInfo", staticInfo);
       const denom = staticInfo.chains[chainName.toLowerCase()]?.nativeAsset[0];
-      console.log("denom",denom);
+      console.log("denom", denom);
       if (denom) {
         this.evmDenomMap[chainName.toLowerCase()] = denom;
       }
@@ -313,8 +324,7 @@ export class AxelarAssetTransfer {
     if (!this.depositServiceContract[chainName]) {
       this.depositServiceContract[chainName] = await this.getStaticInfo()
         .then((body) => {
-          return body.assets.network[chainName.toLowerCase()]?.deposit_service
-
+          return body.assets.network[chainName.toLowerCase()]?.deposit_service;
         })
         .catch((e) => undefined);
     }
