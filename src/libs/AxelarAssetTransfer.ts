@@ -55,6 +55,7 @@ export class AxelarAssetTransfer {
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
     if (fromChain?.toLowerCase() === "ethereum") fromChain = "ethereum-2";
+    if (toChain?.toLowerCase() === "ethereum") toChain = "ethereum-2";
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address } = await this.getDepositAddressFromRemote(
       "wrap",
@@ -87,6 +88,8 @@ export class AxelarAssetTransfer {
     salt?: number
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
+    if (fromChain?.toLowerCase() === "ethereum") fromChain = "ethereum-2";
+    if (toChain?.toLowerCase() === "ethereum") toChain = "ethereum-2";
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address: unwrapAddress } = await this.getDepositAddressFromRemote(
       "unwrap",
@@ -198,6 +201,7 @@ export class AxelarAssetTransfer {
       throw new Error(`Invalid destination address for chain ${toChain}`);
 
     if (fromChain?.toLowerCase() === "ethereum") fromChain = "ethereum-2";
+    if (toChain?.toLowerCase() === "ethereum") toChain = "ethereum-2";
 
     // auth/rate limiting
     const wallet = createWallet();
