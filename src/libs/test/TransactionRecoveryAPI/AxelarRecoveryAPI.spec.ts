@@ -6,7 +6,7 @@ import {
 } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
 import { Environment, EvmChain } from "../../types";
 
-describe("AxelarDepositRecoveryAPI", () => {
+describe("AxelarRecoveryAPI", () => {
   const api = new AxelarRecoveryApi({ environment: Environment.TESTNET });
 
   beforeEach(() => {
@@ -40,6 +40,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(status).toEqual({
         status: GMPStatus.DEST_GATEWAY_APPROVED,
         error: undefined,
+        approved: txDetails.approved,
         callTx: txDetails.call,
         gasPaidInfo: {
           status: GasPaidStatus.GAS_PAID,
@@ -77,6 +78,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         status: GMPStatus.DEST_EXECUTING,
         error: undefined,
         callTx: txDetails.call,
+        approved: txDetails.approved,
         gasPaidInfo: {
           status: GasPaidStatus.GAS_PAID,
           details: txDetails.gas_paid,
@@ -113,6 +115,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         status: GMPStatus.DEST_EXECUTED,
         error: undefined,
         callTx: txDetails.call,
+        approved: txDetails.approved,
         gasPaidInfo: {
           status: GasPaidStatus.GAS_PAID_ENOUGH_GAS,
           details: txDetails.gas_paid,
@@ -150,6 +153,42 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
     });
 
+    test("it should return error when the transaction fee is not enough", async () => {
+      const txHash = "0x123456789";
+      const txDetails = {
+        call: {
+          transaction: {
+            hash: txHash,
+          },
+          chain: EvmChain.ETHEREUM,
+        },
+        gas_paid: {
+          transactionHash: txHash,
+        },
+        is_insufficient_fee: true,
+        gas_status: "gas_paid",
+        status: "called",
+      };
+
+      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+
+      const status = await api.queryTransactionStatus(txHash);
+
+      expect(status).toEqual({
+        status: GMPStatus.SRC_GATEWAY_CALLED,
+        error: {
+          message: "Insufficient fee",
+          txHash: txHash,
+          chain: EvmChain.ETHEREUM,
+        },
+        callTx: txDetails.call,
+        gasPaidInfo: {
+          status: GasPaidStatus.GAS_PAID,
+          details: txDetails.gas_paid,
+        },
+      });
+    });
+
     test("it should return 'GMPStatus.DEST_EXECUTE_ERROR' when the transaction is not executed", async () => {
       const txHash = "0x123456789";
       const txDetails = {
@@ -166,8 +205,10 @@ describe("AxelarDepositRecoveryAPI", () => {
           transactionHash: txHash + "2",
         },
         error: {
+          chain: "ethereum",
           error: {
-            reason: "execution reverted",
+            message: "execution reverted",
+            transactionHash: txHash + "2",
           },
         },
         gas_status: "gas_paid_enough_gas",
@@ -180,7 +221,12 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       expect(status).toEqual({
         status: GMPStatus.DEST_EXECUTE_ERROR,
-        error: txDetails.error,
+        error: {
+          chain: EvmChain.ETHEREUM,
+          message: "execution reverted",
+          txHash: txHash + "2",
+        },
+        approved: txDetails.approved,
         callTx: txDetails.call,
         gasPaidInfo: {
           status: GasPaidStatus.GAS_PAID_ENOUGH_GAS,
@@ -217,6 +263,8 @@ describe("AxelarDepositRecoveryAPI", () => {
       expect(status).toEqual({
         status: GMPStatus.UNKNOWN_ERROR,
         callTx: txDetails.call,
+        approved: txDetails.approved,
+        error: undefined,
         gasPaidInfo: {
           status: GasPaidStatus.GAS_PAID_ENOUGH_GAS,
           details: txDetails.gas_paid,
