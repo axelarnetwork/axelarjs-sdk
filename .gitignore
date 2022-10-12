@@ -3,5 +3,4 @@
 *.iml
 *.idea
 *.DS_store
-artifacts
 cache

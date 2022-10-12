@@ -18,8 +18,8 @@ import {
   solidityPack,
   toUtf8Bytes,
 } from "ethers/lib/utils";
-import DepositReceiver from "../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
-import ReceiverImplementation from "../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
+import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
+import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 
 export class AxelarAssetTransfer {
