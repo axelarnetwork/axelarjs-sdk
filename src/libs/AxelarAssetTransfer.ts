@@ -36,7 +36,7 @@ export class AxelarAssetTransfer {
   constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
 
-    this.environment = config.environment;
+    this.environment = config.environment as Environment;
     this.resourceUrl = configs.resourceUrl;
 
     // handle resource url overwrite (for tests)
@@ -181,7 +181,7 @@ export class AxelarAssetTransfer {
     return address.toLowerCase();
   }
 
-  async getDepositAddress(
+  public async getDepositAddress(
     fromChain: string,
     toChain: string,
     destinationAddress: string,
@@ -194,7 +194,7 @@ export class AxelarAssetTransfer {
     const traceId = options?._traceId || uuidv4();
 
     // verify destination address format
-    const isDestinationAddressValid = validateDestinationAddressByChainName(
+    const isDestinationAddressValid = await validateDestinationAddressByChainName(
       toChain,
       destinationAddress,
       this.environment
@@ -227,7 +227,7 @@ export class AxelarAssetTransfer {
     return depositAddress;
   }
 
-  public async getOneTimeCode(signerAddress: string, traceId: string): Promise<OTC> {
+  private async getOneTimeCode(signerAddress: string, traceId: string): Promise<OTC> {
     const otc: OTC = await this.api
       .get(`${CLIENT_API_GET_OTC}?publicAddress=${signerAddress}`, traceId)
       .then((response) => response)
@@ -238,7 +238,7 @@ export class AxelarAssetTransfer {
     return otc;
   }
 
-  async getInitRoomId(
+  private async getInitRoomId(
     fromChain: string,
     toChain: string,
     destinationAddress: string,
@@ -269,7 +269,7 @@ export class AxelarAssetTransfer {
     return roomId;
   }
 
-  async getLinkEvent(
+  private async getLinkEvent(
     roomId: string,
     sourceChain: string,
     destinationChain: string,
@@ -285,7 +285,7 @@ export class AxelarAssetTransfer {
   }
 
   private getSocketService() {
-    return new SocketService(this.resourceUrl);
+    return new SocketService(this.resourceUrl, this.environment);
   }
 
   private extractDepositAddress(roomId: string) {

@@ -3,15 +3,7 @@ import { parseEther, parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
-import {
-  AxelarQueryAPIConfig,
-  BaseFeeResponse,
-  Environment,
-  EvmChain,
-  GasToken,
-  isNativeToken,
-} from "./types";
-import { ethers } from "ethers";
+import { AxelarQueryAPIConfig, BaseFeeResponse, Environment, EvmChain, GasToken } from "./types";
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import {
@@ -110,7 +102,6 @@ export class AxelarQueryAPI {
    * @param sourceChainName
    * @param destinationChainName
    * @param sourceChainTokenSymbol
-   * @param estimatedGasUsed
    * @returns
    */
   public async getGasInfo(
@@ -161,14 +152,16 @@ export class AxelarQueryAPI {
    * @param sourceChainName
    * @param destinationChainName
    * @param sourceChainTokenSymbol
-   * @param estimatedGasUsed (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which sufficients for most transaction.
+   * @param gasLimit (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which should be sufficient for most transactions.
+   * @param gasMultiplier (Optional) A multiplier used to create a buffer above the calculated gas fee, to account for potential slippage throughout tx execution, e.g. 1.1 = 10% buffer. supports up to 3 decimal places
    * @returns
    */
   public async estimateGasFee(
     sourceChainName: EvmChain,
     destinationChainName: EvmChain,
     sourceChainTokenSymbol: GasToken | string,
-    estimatedGasUsed = DEFAULT_ESTIMATED_GAS
+    gasLimit: number = DEFAULT_ESTIMATED_GAS,
+    gasMultiplier = 1.1
   ): Promise<string> {
     const response = await this.getNativeGasBaseFee(
       sourceChainName,
@@ -184,7 +177,15 @@ export class AxelarQueryAPI {
 
     const { gas_price } = sourceToken;
 
-    const destTxFee = parseEther(gas_price).mul(estimatedGasUsed);
+    const destTxFee = parseEther(gas_price).mul(gasLimit);
+
+    if (gasMultiplier > 1) {
+      return destTxFee
+        .add(baseFee)
+        .mul(gasMultiplier * 10000)
+        .div(10000)
+        .toString();
+    }
 
     return destTxFee.add(baseFee).toString();
   }

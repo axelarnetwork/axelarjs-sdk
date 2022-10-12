@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.4] - 2022-SEPTEMBER-22
+
+- update `queryTransactionStatus` in `AxelarRecoveryApi` to include new `executing` status.
+- update GET requests in `AxelarRecoveryApi` to disable cache.
+- fixed a regression issue caused in 0.11.0 in `AxelarAssetTransfer`, where the `getDepositAddress` method is no longer able to generate deposit addresses for cosmos-based destination chains, e.g. Axelar, Osmosis. Please update to this version if you are using this method.
+- [technical fix]: improving error messaging of REST responses.
+
+## [0.11.3] - 2022-SEPTEMBER-21
+
+- fixed a regression issue caused in 0.11.0 in `AxelarAssetTransfer`, where the `getDepositAddress` method is no longer able to generate deposit addresses for cosmos-based source chains, e.g. Axelar, Osmosis. Please update to this version if you are using this method.
+- added an additional default parameter in `estimateGasFee` on `AxelarQueryAPI` to include a buffer to pad the calculated gas fee. this accounts for slippage that may occur throughout a tx's execution
+
 ## [0.11.1] - 2022-SEPTEMBER-14
 
 - update to `queryTransactionStatus` method on `AxelarRecoveryApi` to return additional optional fields for `executed` and `callback` objects from the Axelarscan API response
@@ -14,6 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - add `AxelarTransferAPI` to allow query transfer status for cross-chain transfer via deposit address or sendToken method. #154, addresses #143
 - rename `axelarCachingServiceUrl` to `axelarGMPApiUrl`
 - Fixed an issue where the deposit address can be the same in the case of two parallel requests with different source chain names. #157
+  - UPDATE: this version caused a regression issue for deposit address generation for cosmos-based based source chains, e.g. Axelar, Osmosis, etc. Please update to 0.11.2
 - updates `estimateGasFee` method to allow for input gastoken
 
 ## [0.10.3] - 2022-SEPTEMBER-5

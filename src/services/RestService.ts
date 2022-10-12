@@ -1,4 +1,5 @@
 import fetch from "cross-fetch";
+import HttpError from "standard-http-error";
 
 export class RestService {
   constructor(private host: string) {}
@@ -28,19 +29,25 @@ export class RestService {
     return this.execRest(url, requestOptions);
   }
 
-  private async execRest(endpoint: string, requestOptions: any) {
+  async execRest(endpoint: string, requestOptions: any) {
     return fetch(this.host + endpoint, requestOptions)
       .then((response) => {
         if (!response.ok) throw response;
         return response;
       })
       .then((response) => response.json())
-      .catch((err) => {
-        throw {
-          message: "AxelarJS-SDK uncaught post error",
-          uncaught: true,
-          fullMessage: err?.message || err,
-        };
+      .catch(async (err) => {
+        let msg;
+        try {
+          msg = await err.json();
+        } catch (_) {
+          msg = await err.text();
+        }
+        const error = new HttpError(
+          err.status,
+          msg?.message || Object.keys(msg).length > 0 ? msg : err.statusText
+        );
+        throw error;
       });
   }
 }
