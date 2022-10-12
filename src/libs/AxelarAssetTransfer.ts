@@ -47,20 +47,15 @@ export class AxelarAssetTransfer {
   }
 
   async getDepositAddressForNativeWrap(
-    fromChain: EvmChain,
-    toChain: EvmChain,
+    fromChain: string,
+    toChain: string,
     destinationAddress: string,
     refundAddress: string,
     salt?: number
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
-    console.log({
-      refundAddress,
-    });
+    if (fromChain?.toLowerCase() === "ethereum") fromChain = "ethereum-2";
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
-    console.log({
-      refundAddress,
-    });
     const { address } = await this.getDepositAddressFromRemote(
       "wrap",
       fromChain,
@@ -85,8 +80,8 @@ export class AxelarAssetTransfer {
   }
 
   async getDepositAddressForNativeUnwrap(
-    fromChain: EvmChain,
-    toChain: EvmChain,
+    fromChain: string,
+    toChain: string,
     destinationAddress: string,
     refundAddress: string,
     salt?: number
@@ -125,8 +120,8 @@ export class AxelarAssetTransfer {
 
   async getDepositAddressFromRemote(
     wrapOrUnWrap: "wrap" | "unwrap",
-    fromChain: EvmChain | undefined,
-    toChain: EvmChain,
+    fromChain: string | undefined,
+    toChain: string | undefined,
     destinationAddress: string,
     refundAddress: string,
     hexSalt: string
@@ -146,8 +141,8 @@ export class AxelarAssetTransfer {
 
   async validateOfflineDepositAddress(
     wrapOrUnWrap: "wrap" | "unwrap",
-    fromChain: EvmChain,
-    toChain: EvmChain,
+    fromChain: string,
+    toChain: string,
     destinationAddress: string,
     refundAddress: string,
     hexSalt: string
@@ -202,6 +197,8 @@ export class AxelarAssetTransfer {
     if (!isDestinationAddressValid)
       throw new Error(`Invalid destination address for chain ${toChain}`);
 
+    if (fromChain?.toLowerCase() === "ethereum") fromChain = "ethereum-2";
+
     // auth/rate limiting
     const wallet = createWallet();
 
@@ -227,7 +224,7 @@ export class AxelarAssetTransfer {
     return depositAddress;
   }
 
-  private async getOneTimeCode(signerAddress: string, traceId: string): Promise<OTC> {
+  async getOneTimeCode(signerAddress: string, traceId: string): Promise<OTC> {
     const otc: OTC = await this.api
       .get(`${CLIENT_API_GET_OTC}?publicAddress=${signerAddress}`, traceId)
       .then((response) => response)
@@ -238,7 +235,7 @@ export class AxelarAssetTransfer {
     return otc;
   }
 
-  private async getInitRoomId(
+  async getInitRoomId(
     fromChain: string,
     toChain: string,
     destinationAddress: string,
@@ -269,7 +266,7 @@ export class AxelarAssetTransfer {
     return roomId;
   }
 
-  private async getLinkEvent(
+  async getLinkEvent(
     roomId: string,
     sourceChain: string,
     destinationChain: string,
@@ -284,21 +281,18 @@ export class AxelarAssetTransfer {
     return newRoomId;
   }
 
-  private getSocketService() {
+  getSocketService() {
     return new SocketService(this.resourceUrl, this.environment);
   }
 
-  private extractDepositAddress(roomId: string) {
+  extractDepositAddress(roomId: string) {
     return JSON.parse(roomId)?.depositAddress;
   }
 
-  public async getGasReceiverContractAddress(chainName: EvmChain): Promise<string> {
+  async getGasReceiverContractAddress(chainName: string): Promise<string> {
     if (!this.gasReceiverContract[chainName]) {
       this.gasReceiverContract[chainName] = await this.getStaticInfo()
         .then((body) => {
-          console.log({
-            network: body.assets.network,
-          });
           return body.assets.network[chainName.toLowerCase()]?.gas_service;
         })
         .catch((e) => undefined);
@@ -306,7 +300,7 @@ export class AxelarAssetTransfer {
     return this.gasReceiverContract[chainName];
   }
 
-  public async getERC20Denom(chainName: EvmChain): Promise<string> {
+  async getERC20Denom(chainName: string): Promise<string> {
     if (!this.evmDenomMap[chainName.toLowerCase()]) {
       const staticInfo = await this.getStaticInfo();
       console.log("staticInfo", staticInfo);
@@ -320,7 +314,7 @@ export class AxelarAssetTransfer {
     return this.evmDenomMap[chainName.toLowerCase()];
   }
 
-  public async getDepositServiceContractAddress(chainName: EvmChain): Promise<string> {
+  async getDepositServiceContractAddress(chainName: string): Promise<string> {
     if (!this.depositServiceContract[chainName]) {
       this.depositServiceContract[chainName] = await this.getStaticInfo()
         .then((body) => {
@@ -331,7 +325,7 @@ export class AxelarAssetTransfer {
     return this.depositServiceContract[chainName];
   }
 
-  public async getStaticInfo(): Promise<Record<string, any>> {
+  async getStaticInfo(): Promise<Record<string, any>> {
     if (!this.staticInfo) {
       this.staticInfo = await fetch(s3[this.environment])
         .then((res) => res.json())
