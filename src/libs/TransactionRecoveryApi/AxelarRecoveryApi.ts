@@ -68,7 +68,7 @@ export class AxelarRecoveryApi {
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
   readonly config: AxelarRecoveryAPIConfig;
-  protected axelarQuerySvc: AxelarQueryClientType;
+  protected axelarQuerySvc: AxelarQueryClientType | null = null;
   protected evmClient: EVMClient;
 
   public constructor(config: AxelarRecoveryAPIConfig) {
