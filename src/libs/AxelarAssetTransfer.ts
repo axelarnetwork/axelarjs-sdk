@@ -1,31 +1,210 @@
 import { v4 as uuidv4 } from "uuid";
+import fetch from "cross-fetch";
 import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET, OTC } from "../services/types";
 
 import { RestService, SocketService } from "../services";
 import { createWallet, validateDestinationAddressByChainName } from "../utils";
 
 import { getConfigs } from "../constants";
-import { AxelarAssetTransferConfig, Environment } from "./types";
+import { AxelarAssetTransferConfig, Environment, EvmChain } from "./types";
+import {
+  defaultAbiCoder,
+  formatBytes32String,
+  getCreate2Address,
+  hexlify,
+  hexZeroPad,
+  Interface,
+  keccak256,
+  solidityPack,
+  toUtf8Bytes,
+} from "ethers/lib/utils";
+import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
+import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
+import s3 from "./TransactionRecoveryApi/constants/s3";
+import { loadChains } from "../chains";
 
 export class AxelarAssetTransfer {
   readonly environment: Environment;
   readonly resourceUrl: string;
 
   readonly api: RestService;
+  readonly depositServiceApi: RestService;
+  private gasReceiverContract: Record<string, string> = {};
+  private depositServiceContract: Record<string, string> = {};
+  private evmDenomMap: Record<string, string> = {};
+  private staticInfo: Record<string, any>;
 
   constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
 
-    this.environment = config.environment;
+    this.environment = config.environment as Environment;
     this.resourceUrl = configs.resourceUrl;
 
     // handle resource url overwrite (for tests)
     if (config.overwriteResourceUrl) this.resourceUrl = config.overwriteResourceUrl;
 
     this.api = new RestService(this.resourceUrl);
+    this.depositServiceApi = new RestService(configs.depositServiceUrl);
   }
 
-  async getDepositAddress(
+  async getDepositAddressForNativeWrap(
+    fromChain: string,
+    toChain: string,
+    destinationAddress: string,
+    refundAddress: string,
+    salt?: number
+  ): Promise<string> {
+    const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
+
+    const chains = await loadChains({
+      environment: this.environment,
+    });
+
+    const sourceChain = chains.find(
+      (chain) => chain.chainName?.toLowerCase() === fromChain?.toLowerCase()
+    );
+    const destChain = chains.find(
+      (chain) => chain.chainName?.toLowerCase() === toChain?.toLowerCase()
+    );
+
+    fromChain = sourceChain?.chainIdentifier[this.environment].toLowerCase() as string;
+    toChain = destChain?.chainIdentifier[this.environment].toLowerCase() as string;
+
+    refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
+    const { address } = await this.getDepositAddressFromRemote(
+      "wrap",
+      fromChain,
+      toChain,
+      destinationAddress,
+      refundAddress,
+      hexSalt
+    );
+
+    const expectedAddress = await this.validateOfflineDepositAddress(
+      "wrap",
+      fromChain,
+      toChain,
+      destinationAddress,
+      refundAddress,
+      hexSalt
+    );
+
+    if (address !== expectedAddress) return "";
+
+    return address;
+  }
+
+  async getDepositAddressForNativeUnwrap(
+    fromChain: string,
+    toChain: string,
+    destinationAddress: string,
+    refundAddress: string,
+    salt?: number
+  ): Promise<string> {
+    const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
+    const chains = await loadChains({
+      environment: this.environment,
+    });
+
+    const sourceChain = chains.find(
+      (chain) => chain.chainName?.toLowerCase() === fromChain?.toLowerCase()
+    );
+    const destChain = chains.find(
+      (chain) => chain.chainName?.toLowerCase() === toChain?.toLowerCase()
+    );
+
+    fromChain = sourceChain?.chainIdentifier[this.environment].toLowerCase() as string;
+    toChain = destChain?.chainIdentifier[this.environment].toLowerCase() as string;
+    refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
+    const { address: unwrapAddress } = await this.getDepositAddressFromRemote(
+      "unwrap",
+      undefined,
+      toChain,
+      destinationAddress,
+      refundAddress,
+      hexSalt
+    );
+
+    const expectedAddress = await this.validateOfflineDepositAddress(
+      "unwrap",
+      fromChain,
+      toChain,
+      destinationAddress,
+      refundAddress,
+      hexSalt
+    );
+
+    if (unwrapAddress !== expectedAddress) return "";
+
+    const realDepositAddress = await this.getDepositAddress(
+      fromChain,
+      toChain,
+      unwrapAddress,
+      await this.getERC20Denom(toChain)
+    );
+
+    return realDepositAddress;
+  }
+
+  async getDepositAddressFromRemote(
+    wrapOrUnWrap: "wrap" | "unwrap",
+    fromChain: string | undefined,
+    toChain: string | undefined,
+    destinationAddress: string,
+    refundAddress: string,
+    hexSalt: string
+  ): Promise<{ address: string }> {
+    const endpoint = wrapOrUnWrap === "wrap" ? "/deposit/wrap" : "/deposit/unwrap";
+    return await this.depositServiceApi
+      .post(endpoint, {
+        salt: hexSalt,
+        source_chain: fromChain,
+        destination_chain: toChain,
+        destination_address: destinationAddress,
+        refund_address: refundAddress,
+      })
+      .then((res) => ({ address: res.address.toLowerCase() }))
+      .catch(() => ({ address: "" }));
+  }
+
+  async validateOfflineDepositAddress(
+    wrapOrUnWrap: "wrap" | "unwrap",
+    fromChain: string,
+    toChain: string,
+    destinationAddress: string,
+    refundAddress: string,
+    hexSalt: string
+  ) {
+    const receiverInterface = new Interface(ReceiverImplementation.abi);
+    const functionData =
+      wrapOrUnWrap === "wrap"
+        ? receiverInterface.encodeFunctionData("receiveAndSendNative", [
+            refundAddress,
+            toChain,
+            destinationAddress,
+          ])
+        : receiverInterface.encodeFunctionData("receiveAndUnwrapNative", [
+            refundAddress,
+            destinationAddress,
+          ]);
+
+    const address = getCreate2Address(
+      await this.getDepositServiceContractAddress(fromChain),
+      hexSalt,
+      keccak256(
+        solidityPack(
+          ["bytes", "bytes"],
+          [
+            DepositReceiver.bytecode,
+            defaultAbiCoder.encode(["bytes", "address"], [functionData, refundAddress]),
+          ]
+        )
+      )
+    );
+    return address.toLowerCase();
+  }
+
+  public async getDepositAddress(
     fromChain: string,
     toChain: string,
     destinationAddress: string,
@@ -45,6 +224,23 @@ export class AxelarAssetTransfer {
     );
     if (!isDestinationAddressValid)
       throw new Error(`Invalid destination address for chain ${toChain}`);
+
+    const chains = await loadChains({
+      environment: this.environment,
+    });
+
+    const sourceChain = chains.find(
+      (chain) => chain.chainName?.toLowerCase() === fromChain?.toLowerCase()
+    );
+    const destChain = chains.find(
+      (chain) => chain.chainName?.toLowerCase() === toChain?.toLowerCase()
+    );
+
+    fromChain = sourceChain?.chainIdentifier[this.environment].toLowerCase() as string;
+    toChain = destChain?.chainIdentifier[this.environment].toLowerCase() as string;
+
+    // if (fromChain?.toLowerCase() === "ethereum") fromChain = "ethereum-2";
+    // if (toChain?.toLowerCase() === "ethereum") toChain = "ethereum-2";
 
     // auth/rate limiting
     const wallet = createWallet();
@@ -71,7 +267,7 @@ export class AxelarAssetTransfer {
     return depositAddress;
   }
 
-  public async getOneTimeCode(signerAddress: string, traceId: string): Promise<OTC> {
+  async getOneTimeCode(signerAddress: string, traceId: string): Promise<OTC> {
     const otc: OTC = await this.api
       .get(`${CLIENT_API_GET_OTC}?publicAddress=${signerAddress}`, traceId)
       .then((response) => response)
@@ -128,11 +324,56 @@ export class AxelarAssetTransfer {
     return newRoomId;
   }
 
-  private getSocketService() {
+  getSocketService() {
     return new SocketService(this.resourceUrl, this.environment);
   }
 
-  private extractDepositAddress(roomId: string) {
+  extractDepositAddress(roomId: string) {
     return JSON.parse(roomId)?.depositAddress;
+  }
+
+  async getGasReceiverContractAddress(chainName: string): Promise<string> {
+    if (!this.gasReceiverContract[chainName]) {
+      this.gasReceiverContract[chainName] = await this.getStaticInfo()
+        .then((body) => {
+          return body.assets.network[chainName.toLowerCase()]?.gas_service;
+        })
+        .catch((e) => undefined);
+    }
+    return this.gasReceiverContract[chainName];
+  }
+
+  async getERC20Denom(chainName: string): Promise<string> {
+    if (!this.evmDenomMap[chainName.toLowerCase()]) {
+      const staticInfo = await this.getStaticInfo();
+      console.log("staticInfo", staticInfo);
+      const denom = staticInfo.chains[chainName.toLowerCase()]?.nativeAsset[0];
+      console.log("denom", denom);
+      if (denom) {
+        this.evmDenomMap[chainName.toLowerCase()] = denom;
+      }
+      return denom;
+    }
+    return this.evmDenomMap[chainName.toLowerCase()];
+  }
+
+  async getDepositServiceContractAddress(chainName: string): Promise<string> {
+    if (!this.depositServiceContract[chainName]) {
+      this.depositServiceContract[chainName] = await this.getStaticInfo()
+        .then((body) => {
+          return body.assets.network[chainName.toLowerCase()]?.deposit_service;
+        })
+        .catch((e) => undefined);
+    }
+    return this.depositServiceContract[chainName];
+  }
+
+  async getStaticInfo(): Promise<Record<string, any>> {
+    if (!this.staticInfo) {
+      this.staticInfo = await fetch(s3[this.environment])
+        .then((res) => res.json())
+        .catch((e) => undefined);
+    }
+    return this.staticInfo;
   }
 }

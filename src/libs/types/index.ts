@@ -60,7 +60,7 @@ export interface TxOption {
 }
 
 export type AxelarAssetTransferConfig = {
-  environment: Environment;
+  environment: "mainnet" | "testnet" | "devnet";
   auth?: "local" | "metamask";
   overwriteResourceUrl?: string;
 };

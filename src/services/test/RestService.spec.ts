@@ -1,5 +1,6 @@
 import { RestService } from "../RestService";
 import fetch from "cross-fetch";
+import HttpError from "standard-http-error";
 
 const mockedFetch = fetch as jest.Mock;
 
@@ -24,21 +25,21 @@ describe("RestService", () => {
       describe("when text response", () => {
         beforeAll(() => {
           mockedFetch.mockRejectedValue({
+            status: 400,
             text: () => "hello world",
           });
         });
 
-        it("should return error", async () => {
-          await expect(api.get("/")).rejects.toMatchObject({
-            message: "AxelarJS-SDK uncaught post error",
-            uncaught: true,
-            fullMessage: "hello world",
-          });
+        it("should throw error", async () => {
+          const error = new HttpError(400, "hello world");
+          expect(api.get("/")).rejects.toThrow(error);
         });
       });
+
       describe("when json response", () => {
         beforeAll(() => {
           mockedFetch.mockRejectedValue({
+            status: 403,
             json: () => ({
               message: "Forbidden",
             }),
@@ -46,11 +47,8 @@ describe("RestService", () => {
         });
 
         it("should return error", async () => {
-          expect(api.get("/")).rejects.toMatchObject({
-            message: "AxelarJS-SDK uncaught post error",
-            uncaught: true,
-            fullMessage: "Forbidden",
-          });
+          const error = new HttpError(403, "Forbidden");
+          expect(api.get("/")).rejects.toThrow(error);
         });
       });
     });
@@ -59,6 +57,7 @@ describe("RestService", () => {
       let res: any;
       beforeAll(async () => {
         mockedFetch.mockResolvedValue({
+          status: 200,
           ok: true,
           json: () => ({ foo: "bar" }),
         });
