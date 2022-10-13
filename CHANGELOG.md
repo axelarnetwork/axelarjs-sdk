@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.5] - 2022-OCTOBER-12
+
+- [queryTransactionStatus] Changed error object type from `any` to `GMPError`
+- [queryTransactionStatus] Fixed error object is undefined when "insufficient fee"
+- [queryTransactionStatus] Added `approved` object for approval tx details
+
 ## [0.11.4] - 2022-SEPTEMBER-22
 
 - update `queryTransactionStatus` in `AxelarRecoveryApi` to include new `executing` status.

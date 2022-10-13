@@ -31,10 +31,17 @@ export interface GasPaidInfo {
 export interface GMPStatusResponse {
   status: GMPStatus;
   gasPaidInfo?: GasPaidInfo;
-  error?: any;
+  error?: GMPError;
   callTx?: any;
   executed?: any;
+  approved?: any;
   callback?: any;
+}
+
+export interface GMPError {
+  txHash: string;
+  chain: string;
+  message: string;
 }
 
 export interface ExecuteParams {
@@ -85,7 +92,7 @@ export class AxelarRecoveryApi {
       .catch(() => undefined);
   }
 
-  private parseGMPStatus(response: any, txHash: string): GMPStatus {
+  private parseGMPStatus(response: any): GMPStatus {
     const { error, status } = response;
 
     if (status === "error" && error) return GMPStatus.DEST_EXECUTE_ERROR;
@@ -94,8 +101,23 @@ export class AxelarRecoveryApi {
     else if (status === "called") return GMPStatus.SRC_GATEWAY_CALLED;
     else if (status === "executing") return GMPStatus.DEST_EXECUTING;
     else {
-      console.info(`status of ${txHash}: ${status}`);
       return GMPStatus.UNKNOWN_ERROR;
+    }
+  }
+
+  private parseGMPError(response: any): GMPError | undefined {
+    if (response.error) {
+      return {
+        message: response.error.error.message,
+        txHash: response.error.error.transactionHash,
+        chain: response.error.chain,
+      };
+    } else if (response.is_insufficient_fee) {
+      return {
+        message: "Insufficient fee",
+        txHash: response.call.transaction.hash,
+        chain: response.call.chain,
+      };
     }
   }
 
@@ -104,7 +126,7 @@ export class AxelarRecoveryApi {
 
     if (!txDetails) return { status: GMPStatus.CANNOT_FETCH_STATUS };
 
-    const { call, gas_status, gas_paid, error, executed, callback } = txDetails;
+    const { call, gas_status, gas_paid, executed, approved, callback } = txDetails;
 
     const gasPaidInfo: GasPaidInfo = {
       status: gas_status,
@@ -112,11 +134,12 @@ export class AxelarRecoveryApi {
     };
 
     return {
-      status: this.parseGMPStatus(txDetails, txHash),
-      error,
+      status: this.parseGMPStatus(txDetails),
+      error: this.parseGMPError(txDetails),
       gasPaidInfo,
       callTx: call,
       executed,
+      approved,
       callback,
     };
   }
