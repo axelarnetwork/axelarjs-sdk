@@ -1,18 +1,18 @@
 {
   "root": true,
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint/eslint-plugin", "prettier"],
-  "extends": ["plugin:@typescript-eslint/recommended"],
   "parserOptions": {
     "project": "tsconfig.json",
     "warnOnUnsupportedTypeScriptVersion": false,
     "sourceType": "module"
   },
+  "plugins": ["@typescript-eslint/eslint-plugin", "prettier"],
   "env": {
     "node": true,
     "jest": true
   },
-  "ignorePatterns": [".eslintrc", "hardhat.config.ts"],
+  "ignorePatterns": ["hardhat.config.ts"],
   "rules": {
     "prettier/prettier": "error",
     "@typescript-eslint/interface-name-prefix": "off",

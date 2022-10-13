@@ -4,8 +4,9 @@ import { AxelarAssetTransfer, Environment } from "../../../src";
  * This test helps to check that a unique deposit address is generated for parallel requests
  * if the source chain is different but that the destination chain is the same
  */
-export const depositAddressSource = () => {
-  jest.setTimeout(60000);
+
+describe("Parallel Deposit Address Generation", () => {
+  jest.setTimeout(30000);
   let axelarAssetTransferTestnet: any;
   let axelarAssetTransferMainnet: any;
 
@@ -85,4 +86,4 @@ export const depositAddressSource = () => {
       expect(results.length).toBe(3);
     });
   });
-};
+});

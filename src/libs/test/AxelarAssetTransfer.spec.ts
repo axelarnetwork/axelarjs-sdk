@@ -1,6 +1,7 @@
+import { hexlify, hexZeroPad } from "ethers/lib/utils";
 import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET } from "../..";
 import { AxelarAssetTransfer } from "../AxelarAssetTransfer";
-import { Environment } from "../types";
+import { Environment, EvmChain } from "../types";
 import {
   apiErrorStub,
   depositAddressPayloadStub,
@@ -331,6 +332,104 @@ describe("AxelarAssetTransfer", () => {
 
       it("should return deposit address", () => {
         expect(response).toBe(JSON.parse(newRoomIdStub())["depositAddress"]);
+      });
+    });
+  });
+
+  describe("offline deposit address methods", () => {
+    let bridge: AxelarAssetTransfer;
+
+    beforeEach(() => {
+      bridge = new AxelarAssetTransfer({
+        environment: Environment.TESTNET,
+      });
+    });
+
+    describe("validateOfflineDepositAddress", () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        jest
+          .spyOn(bridge, "getDepositServiceContractAddress")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+      });
+      it("should be able to generate a deposit address offline", async () => {
+        await expect(
+          bridge.validateOfflineDepositAddress(
+            "wrap",
+            EvmChain.AVALANCHE,
+            EvmChain.FANTOM,
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            hexZeroPad(hexlify(0), 32)
+          )
+        ).resolves.toBe("0xb24c3396aa90cae288b7f0771c88de4e180503e2");
+      });
+    });
+    describe("getDepositAddressForNativeWrap", () => {
+      let address: string;
+      beforeEach(async () => {
+        address = "0xb24c3396aa90cae288b7f0771c88de4e180503e2";
+        jest.clearAllMocks();
+        jest.spyOn(bridge, "getDepositAddressFromRemote").mockResolvedValue({ address });
+        jest
+          .spyOn(bridge, "getDepositServiceContractAddress")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+      });
+      it("should be able to generate a deposit address offline", () => {
+        const depositAddress = bridge.validateOfflineDepositAddress(
+          "wrap",
+          EvmChain.AVALANCHE,
+          EvmChain.FANTOM,
+          "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+          "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+          hexZeroPad(hexlify(0), 32)
+        );
+        expect(depositAddress).toBeDefined();
+      });
+      it("should be able to retrieve the deposit address from microservices for native wrap", async () => {
+        await expect(
+          bridge.getDepositAddressForNativeWrap(
+            EvmChain.AVALANCHE,
+            EvmChain.FANTOM,
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            0
+          )
+        ).resolves.toBe(address);
+      });
+    });
+    describe("getDepositAddressForNativeUnwrap", () => {
+      let unwrapAddress: string;
+      let realDepositAddress: string;
+      beforeEach(async () => {
+        unwrapAddress = "0x34bd65b158b6b4cc539388842cb2447c0a28acc0";
+        realDepositAddress = "realDepositAddress";
+        jest.clearAllMocks();
+        jest
+          .spyOn(bridge, "getDepositAddressFromRemote")
+          .mockResolvedValue({ address: unwrapAddress });
+        jest.spyOn(bridge, "getDepositAddress").mockResolvedValue(realDepositAddress);
+        jest
+          .spyOn(bridge, "getDepositServiceContractAddress")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest.spyOn(bridge, "getERC20Denom").mockResolvedValue("wavax-wei");
+      });
+      it("should be able to retrieve the deposit address from microservices for erc20 unwrap", async () => {
+        await expect(
+          bridge.getDepositAddressForNativeUnwrap(
+            EvmChain.AVALANCHE,
+            EvmChain.FANTOM,
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            0
+          )
+        ).resolves.toBe(realDepositAddress);
+        expect(bridge.getDepositAddress).toHaveBeenCalledWith(
+          EvmChain.AVALANCHE,
+          EvmChain.FANTOM,
+          unwrapAddress,
+          "wavax-wei"
+        );
       });
     });
   });

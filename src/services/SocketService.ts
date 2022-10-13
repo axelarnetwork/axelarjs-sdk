@@ -63,10 +63,12 @@ export class SocketService {
       this.socket.on("bridge-event", (data: any) => {
         const attributes = data.Attributes;
         const sourceChainConfig: ChainInfo = this.supportedChains.find(
-          (chain) => chain.chainName.toLowerCase() === sourceChain.toLowerCase()
+          (chain) =>
+            chain.chainIdentifier[this.environment].toLowerCase() === sourceChain.toLowerCase()
         ) as ChainInfo;
         const destChainConfig: ChainInfo = this.supportedChains.find(
-          (chain) => chain.chainName.toLowerCase() === destinationChain.toLowerCase()
+          (chain) =>
+            chain.chainIdentifier[this.environment].toLowerCase() === destinationChain.toLowerCase()
         ) as ChainInfo;
         const sourceChainIsAxelarnet = sourceChainConfig?.module === "axelarnet";
         const destChainIsAxelar = destinationChain.toLowerCase() === "axelar";
