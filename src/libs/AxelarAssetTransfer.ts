@@ -3,7 +3,11 @@ import fetch from "cross-fetch";
 import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET, OTC } from "../services/types";
 
 import { RestService, SocketService } from "../services";
-import { createWallet, validateDestinationAddressByChainName } from "../utils";
+import {
+  createWallet,
+  validateChainIdentifier,
+  validateDestinationAddressByChainName,
+} from "../utils";
 
 import { getConfigs } from "../constants";
 import { AxelarAssetTransferConfig, Environment } from "./types";
@@ -223,6 +227,9 @@ export class AxelarAssetTransfer {
     // use trace ID sent in by invoking user, or otherwise generate a new one
     const traceId = options?._traceId || uuidv4();
 
+    // validate chain identifiers
+    await this.validateChainIdentifiers(fromChain, toChain);
+
     // verify destination address format
     const isDestinationAddressValid = await validateDestinationAddressByChainName(
       toChain,
@@ -365,5 +372,22 @@ export class AxelarAssetTransfer {
         .catch((e) => undefined);
     }
     return this.staticInfo;
+  }
+
+  async validateChainIdentifiers(fromChain: string, toChain: string) {
+    const [fromChainValid, toChainValid] = await Promise.all([
+      validateChainIdentifier(fromChain, this.environment),
+      validateChainIdentifier(toChain, this.environment),
+    ]);
+    if (!fromChainValid.foundChain)
+      throw new Error(
+        `Invalid chain identifier for ${fromChain}. Did you mean ${fromChainValid.bestMatch}?`
+      );
+    if (!toChainValid.foundChain)
+      throw new Error(
+        `Invalid chain identifier for ${toChain}. Did you mean ${toChainValid.bestMatch}?`
+      );
+
+    return true;
   }
 }
