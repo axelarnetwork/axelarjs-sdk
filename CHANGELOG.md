@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.6] - 2022-OCTOBER-17
+
+- update `getDepositAddress` in `AxelarAssetTransfer` to use chain identifiers
+- update `getDepositAddress` in `AxelarAssetTransfer` to verify source & destination chain and provide suggestion
+- added chain identifiers list as object litteral
+- fixed destination address check bug
+
 ## [0.11.5] - 2022-OCTOBER-12
 
 - [queryTransactionStatus] Changed error object type from `any` to `GMPError`
