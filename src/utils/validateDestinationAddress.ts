@@ -24,7 +24,7 @@ export async function validateDestinationAddressByChainSymbol(
 }
 
 export async function validateDestinationAddressByChainName(
-  chainName: string,
+  chainIdentifier: string,
   destinationAddress: string,
   environment: Environment
 ) {
@@ -33,7 +33,7 @@ export async function validateDestinationAddressByChainName(
   });
 
   const targetChain = chains.find(
-    (chainInfo) => chainInfo.chainName.toLowerCase() === chainName.toLowerCase()
+    (chainInfo) => chainInfo.chainIdentifier[environment] === chainIdentifier.toLowerCase()
   );
 
   return targetChain?.module === "evm"
