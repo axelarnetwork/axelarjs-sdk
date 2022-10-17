@@ -53,24 +53,10 @@ export class AxelarAssetTransfer {
     fromChain: string,
     toChain: string,
     destinationAddress: string,
-    refundAddress: string,
+    refundAddress?: string,
     salt?: number
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
-
-    const chains = await loadChains({
-      environment: this.environment,
-    });
-
-    const sourceChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === fromChain?.toLowerCase()
-    );
-    const destChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === toChain?.toLowerCase()
-    );
-
-    fromChain = sourceChain?.chainIdentifier[this.environment].toLowerCase() as string;
-    toChain = destChain?.chainIdentifier[this.environment].toLowerCase() as string;
 
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address } = await this.getDepositAddressFromRemote(
@@ -104,19 +90,7 @@ export class AxelarAssetTransfer {
     salt?: number
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
-    const chains = await loadChains({
-      environment: this.environment,
-    });
 
-    const sourceChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === fromChain?.toLowerCase()
-    );
-    const destChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === toChain?.toLowerCase()
-    );
-
-    fromChain = sourceChain?.chainIdentifier[this.environment].toLowerCase() as string;
-    toChain = destChain?.chainIdentifier[this.environment].toLowerCase() as string;
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address: unwrapAddress } = await this.getDepositAddressFromRemote(
       "unwrap",
