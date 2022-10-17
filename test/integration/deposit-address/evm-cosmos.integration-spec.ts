@@ -1,4 +1,4 @@
-import { AxelarAssetTransfer } from "../../../src";
+import { AxelarAssetTransfer, CHAINS } from "../../../src";
 jest.setTimeout(20000);
 
 const sdk = new AxelarAssetTransfer({
@@ -13,8 +13,8 @@ describe("EVM - COSMOS", () => {
 
     beforeAll(async () => {
       depositAddress = await sdk.getDepositAddress(
-        "avalanche",
-        "osmosis-4",
+        CHAINS.TESTNET.AVALANCHE,
+        CHAINS.TESTNET.OSMOSIS,
         cosmosAddress,
         evmAsset
       );
