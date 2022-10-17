@@ -6,17 +6,15 @@ import { RestService, SocketService } from "../services";
 import { createWallet, validateDestinationAddressByChainName } from "../utils";
 
 import { getConfigs } from "../constants";
-import { AxelarAssetTransferConfig, Environment, EvmChain } from "./types";
+import { AxelarAssetTransferConfig, Environment } from "./types";
 import {
   defaultAbiCoder,
-  formatBytes32String,
   getCreate2Address,
   hexlify,
   hexZeroPad,
   Interface,
   keccak256,
   solidityPack,
-  toUtf8Bytes,
 } from "ethers/lib/utils";
 import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
@@ -204,6 +202,15 @@ export class AxelarAssetTransfer {
     return address.toLowerCase();
   }
 
+  /**
+   *
+   * @param fromChain Source chain identifier eg: avalanche, moonbeam ethereum-2, terra-2 ...
+   * @param toChain Destination chain identifier eg: avalanche, moonbeam ethereum-2, terra-2 ...
+   * @param destinationAddress Address where the asset should be transferred to on the destination chain
+   * @param asset Asset denomination eg: uausdc, uaxl ...
+   * @param options
+   * @returns
+   */
   public async getDepositAddress(
     fromChain: string,
     toChain: string,
@@ -224,23 +231,6 @@ export class AxelarAssetTransfer {
     );
     if (!isDestinationAddressValid)
       throw new Error(`Invalid destination address for chain ${toChain}`);
-
-    const chains = await loadChains({
-      environment: this.environment,
-    });
-
-    const sourceChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === fromChain?.toLowerCase()
-    );
-    const destChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === toChain?.toLowerCase()
-    );
-
-    fromChain = sourceChain?.chainIdentifier[this.environment].toLowerCase() as string;
-    toChain = destChain?.chainIdentifier[this.environment].toLowerCase() as string;
-
-    // if (fromChain?.toLowerCase() === "ethereum") fromChain = "ethereum-2";
-    // if (toChain?.toLowerCase() === "ethereum") toChain = "ethereum-2";
 
     // auth/rate limiting
     const wallet = createWallet();
