@@ -1,3 +1,5 @@
+export * from "./supported-chains-list";
+
 import fetch from "cross-fetch";
 import { loadAssets } from "../assets";
 import { AssetConfig, AssetInfo } from "../assets/types";
