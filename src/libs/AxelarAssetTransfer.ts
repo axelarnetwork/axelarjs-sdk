@@ -3,20 +3,22 @@ import fetch from "cross-fetch";
 import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET, OTC } from "../services/types";
 
 import { RestService, SocketService } from "../services";
-import { createWallet, validateDestinationAddressByChainName } from "../utils";
+import {
+  createWallet,
+  validateChainIdentifier,
+  validateDestinationAddressByChainName,
+} from "../utils";
 
 import { getConfigs } from "../constants";
-import { AxelarAssetTransferConfig, Environment, EvmChain } from "./types";
+import { AxelarAssetTransferConfig, Environment } from "./types";
 import {
   defaultAbiCoder,
-  formatBytes32String,
   getCreate2Address,
   hexlify,
   hexZeroPad,
   Interface,
   keccak256,
   solidityPack,
-  toUtf8Bytes,
 } from "ethers/lib/utils";
 import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
@@ -51,24 +53,10 @@ export class AxelarAssetTransfer {
     fromChain: string,
     toChain: string,
     destinationAddress: string,
-    refundAddress: string,
+    refundAddress?: string,
     salt?: number
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
-
-    const chains = await loadChains({
-      environment: this.environment,
-    });
-
-    const sourceChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === fromChain?.toLowerCase()
-    );
-    const destChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === toChain?.toLowerCase()
-    );
-
-    fromChain = sourceChain?.chainIdentifier[this.environment].toLowerCase() as string;
-    toChain = destChain?.chainIdentifier[this.environment].toLowerCase() as string;
 
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address } = await this.getDepositAddressFromRemote(
@@ -102,19 +90,7 @@ export class AxelarAssetTransfer {
     salt?: number
   ): Promise<string> {
     const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
-    const chains = await loadChains({
-      environment: this.environment,
-    });
 
-    const sourceChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === fromChain?.toLowerCase()
-    );
-    const destChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === toChain?.toLowerCase()
-    );
-
-    fromChain = sourceChain?.chainIdentifier[this.environment].toLowerCase() as string;
-    toChain = destChain?.chainIdentifier[this.environment].toLowerCase() as string;
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address: unwrapAddress } = await this.getDepositAddressFromRemote(
       "unwrap",
@@ -204,6 +180,15 @@ export class AxelarAssetTransfer {
     return address.toLowerCase();
   }
 
+  /**
+   *
+   * @param fromChain Source chain identifier eg: avalanche, moonbeam ethereum-2, terra-2 ...
+   * @param toChain Destination chain identifier eg: avalanche, moonbeam ethereum-2, terra-2 ...
+   * @param destinationAddress Address where the asset should be transferred to on the destination chain
+   * @param asset Asset denomination eg: uausdc, uaxl ...
+   * @param options
+   * @returns
+   */
   public async getDepositAddress(
     fromChain: string,
     toChain: string,
@@ -216,6 +201,9 @@ export class AxelarAssetTransfer {
     // use trace ID sent in by invoking user, or otherwise generate a new one
     const traceId = options?._traceId || uuidv4();
 
+    // validate chain identifiers
+    await this.validateChainIdentifiers(fromChain, toChain);
+
     // verify destination address format
     const isDestinationAddressValid = await validateDestinationAddressByChainName(
       toChain,
@@ -224,23 +212,6 @@ export class AxelarAssetTransfer {
     );
     if (!isDestinationAddressValid)
       throw new Error(`Invalid destination address for chain ${toChain}`);
-
-    const chains = await loadChains({
-      environment: this.environment,
-    });
-
-    const sourceChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === fromChain?.toLowerCase()
-    );
-    const destChain = chains.find(
-      (chain) => chain.chainName?.toLowerCase() === toChain?.toLowerCase()
-    );
-
-    fromChain = sourceChain?.chainIdentifier[this.environment].toLowerCase() as string;
-    toChain = destChain?.chainIdentifier[this.environment].toLowerCase() as string;
-
-    // if (fromChain?.toLowerCase() === "ethereum") fromChain = "ethereum-2";
-    // if (toChain?.toLowerCase() === "ethereum") toChain = "ethereum-2";
 
     // auth/rate limiting
     const wallet = createWallet();
@@ -375,5 +346,22 @@ export class AxelarAssetTransfer {
         .catch((e) => undefined);
     }
     return this.staticInfo;
+  }
+
+  async validateChainIdentifiers(fromChain: string, toChain: string) {
+    const [fromChainValid, toChainValid] = await Promise.all([
+      validateChainIdentifier(fromChain, this.environment),
+      validateChainIdentifier(toChain, this.environment),
+    ]);
+    if (!fromChainValid.foundChain)
+      throw new Error(
+        `Invalid chain identifier for ${fromChain}. Did you mean ${fromChainValid.bestMatch}?`
+      );
+    if (!toChainValid.foundChain)
+      throw new Error(
+        `Invalid chain identifier for ${toChain}. Did you mean ${toChainValid.bestMatch}?`
+      );
+
+    return true;
   }
 }

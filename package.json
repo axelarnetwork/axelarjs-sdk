@@ -1,6 +1,6 @@
 {
   "name": "@axelar-network/axelarjs-sdk",
-  "version": "0.11.5",
+  "version": "0.11.6",
   "description": "The JavaScript SDK for Axelar Network",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -45,6 +45,7 @@
     "ethers": "^5.4.7",
     "socket.io-client": "^4.2.0",
     "standard-http-error": "^2.0.1",
+    "string-similarity-js": "^2.1.4",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
