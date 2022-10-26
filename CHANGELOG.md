@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - update `getDepositAddress` in `AxelarAssetTransfer` to verify source & destination chain and provide suggestion
 - added chain identifiers list as object literal
 - fixed destination address check bug
+- added wrap/unwrap functionality
 
 ## [0.11.5] - 2022-OCTOBER-12
 
