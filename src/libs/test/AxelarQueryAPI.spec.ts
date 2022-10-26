@@ -3,6 +3,7 @@ import {
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { ethers } from "ethers";
+import { CHAINS } from "../../chains";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
 
@@ -80,8 +81,8 @@ describe("AxelarQueryAPI", () => {
 
     test("It should return estimated gas amount that makes sense for native token", async () => {
       const gasAmount = await api.estimateGasFee(
-        EvmChain.AVALANCHE,
-        EvmChain.ETHEREUM,
+        CHAINS.TESTNET.AVALANCHE as EvmChain,
+        CHAINS.TESTNET.ETHEREUM as EvmChain,
         GasToken.AVAX
       );
 
@@ -92,7 +93,10 @@ describe("AxelarQueryAPI", () => {
 
   describe("getNativeGasBaseFee", () => {
     test("It should return base fee for a certain source chain / destination chain combination", async () => {
-      const gasResult = await api.getNativeGasBaseFee(EvmChain.AVALANCHE, EvmChain.ETHEREUM);
+      const gasResult = await api.getNativeGasBaseFee(
+        CHAINS.TESTNET.AVALANCHE as EvmChain,
+        CHAINS.TESTNET.ETHEREUM as EvmChain
+      );
       expect(gasResult.success).toBeTruthy();
       expect(gasResult.baseFee).toBeDefined();
       expect(gasResult.error).toBeUndefined();

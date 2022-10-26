@@ -1,5 +1,5 @@
 import { hexlify, hexZeroPad } from "ethers/lib/utils";
-import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET } from "../..";
+import { CHAINS, CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET } from "../..";
 import { AxelarAssetTransfer } from "../AxelarAssetTransfer";
 import { Environment, EvmChain } from "../types";
 import {
@@ -318,8 +318,8 @@ describe("AxelarAssetTransfer", () => {
     });
 
     describe("when called", () => {
-      const fromChain = "terra";
-      const toChain = "avalanche";
+      const fromChain = CHAINS.TESTNET.TERRA;
+      const toChain = CHAINS.TESTNET.AVALANCHE;
       const depositAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
       const asset = "uusd";
       let response: any;
@@ -392,23 +392,20 @@ describe("AxelarAssetTransfer", () => {
             EvmChain.AVALANCHE,
             EvmChain.FANTOM,
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
-            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
-            0
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d"
           )
         ).resolves.toBe(address);
       });
     });
     describe("getDepositAddressForNativeUnwrap", () => {
       let unwrapAddress: string;
-      let realDepositAddress: string;
       beforeEach(async () => {
         unwrapAddress = "0x34bd65b158b6b4cc539388842cb2447c0a28acc0";
-        realDepositAddress = "realDepositAddress";
         jest.clearAllMocks();
         jest
           .spyOn(bridge, "getDepositAddressFromRemote")
           .mockResolvedValue({ address: unwrapAddress });
-        jest.spyOn(bridge, "getDepositAddress").mockResolvedValue(realDepositAddress);
+        jest.spyOn(bridge, "getDepositAddress").mockResolvedValue(unwrapAddress);
         jest
           .spyOn(bridge, "getDepositServiceContractAddress")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
@@ -420,10 +417,9 @@ describe("AxelarAssetTransfer", () => {
             EvmChain.AVALANCHE,
             EvmChain.FANTOM,
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
-            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
-            0
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d"
           )
-        ).resolves.toBe(realDepositAddress);
+        ).resolves.toBe(unwrapAddress);
         expect(bridge.getDepositAddress).toHaveBeenCalledWith(
           EvmChain.AVALANCHE,
           EvmChain.FANTOM,

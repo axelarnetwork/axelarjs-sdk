@@ -18,8 +18,7 @@ describe("Asset Wrap", () => {
         EvmChain.ETHEREUM,
         EvmChain.MOONBEAM,
         "0xa411977dd24F1547065C6630E468a43275cB4d7f",
-        "",
-        undefined
+        ""
       );
     });
 
