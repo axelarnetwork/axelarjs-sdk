@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.7] - 2022-OCTOBER-26
+
+- updated supported chains list
+- updated `getDepositAddressForNativeUnwrap` to expose intermediary deposit address
+- removed salt argument from `getDepositAddressForNativeUnwrap` and `getDepositAddressForNativeWrap`
+- use bytes32 `0x0` salt
+
 ## [0.11.6] - 2022-OCTOBER-17
 
 - update `getDepositAddress` in `AxelarAssetTransfer` to use chain identifiers
