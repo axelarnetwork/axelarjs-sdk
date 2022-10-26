@@ -392,8 +392,7 @@ describe("AxelarAssetTransfer", () => {
             EvmChain.AVALANCHE,
             EvmChain.FANTOM,
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
-            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
-            0
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d"
           )
         ).resolves.toBe(address);
       });
@@ -420,8 +419,7 @@ describe("AxelarAssetTransfer", () => {
             EvmChain.AVALANCHE,
             EvmChain.FANTOM,
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
-            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
-            0
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d"
           )
         ).resolves.toBe(realDepositAddress);
         expect(bridge.getDepositAddress).toHaveBeenCalledWith(
