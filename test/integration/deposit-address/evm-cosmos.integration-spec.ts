@@ -2,10 +2,10 @@ import { AxelarAssetTransfer, CHAINS } from "../../../src";
 jest.setTimeout(20000);
 
 const sdk = new AxelarAssetTransfer({
-  environment: "testnet",
+  environment: "mainnet",
 });
-const cosmosAddress = "osmo1x3z2vepjd7fhe30epncxjrk0lehq7xdqe8ltsn";
-const evmAsset = "uausdc";
+const cosmosAddress = "terra1u8xlzsfuxe0lv6u2ws2zymrnnlc9pmyynu7pym";
+const evmAsset = "uusdc";
 
 describe("EVM - COSMOS", () => {
   describe("getDepositAddress()", () => {
@@ -13,8 +13,8 @@ describe("EVM - COSMOS", () => {
 
     beforeAll(async () => {
       depositAddress = await sdk.getDepositAddress(
-        CHAINS.TESTNET.AVALANCHE,
-        CHAINS.TESTNET.OSMOSIS,
+        CHAINS.MAINNET.AVALANCHE,
+        CHAINS.MAINNET.TERRA,
         cosmosAddress,
         evmAsset
       );

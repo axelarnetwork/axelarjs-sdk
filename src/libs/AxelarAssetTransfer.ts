@@ -1,29 +1,28 @@
 import { v4 as uuidv4 } from "uuid";
 import fetch from "cross-fetch";
-import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET, OTC } from "../services/types";
+import {
+  defaultAbiCoder,
+  getCreate2Address,
+  Interface,
+  keccak256,
+  solidityPack,
+} from "ethers/lib/utils";
 
+import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET, OTC } from "../services/types";
 import { RestService, SocketService } from "../services";
 import {
   createWallet,
   validateChainIdentifier,
   validateDestinationAddressByChainName,
 } from "../utils";
-
 import { getConfigs } from "../constants";
 import { AxelarAssetTransferConfig, Environment } from "./types";
-import {
-  defaultAbiCoder,
-  getCreate2Address,
-  hexlify,
-  hexZeroPad,
-  Interface,
-  keccak256,
-  solidityPack,
-} from "ethers/lib/utils";
 import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
-import { loadChains } from "../chains";
+
+import { constants } from "ethers";
+const { HashZero } = constants;
 
 export class AxelarAssetTransfer {
   readonly environment: Environment;
@@ -53,19 +52,20 @@ export class AxelarAssetTransfer {
     fromChain: string,
     toChain: string,
     destinationAddress: string,
-    refundAddress?: string,
-    salt?: number
+    refundAddress?: string
   ): Promise<string> {
-    const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
-
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
+    console.log({
+      refundAddress,
+      HashZero,
+    });
     const { address } = await this.getDepositAddressFromRemote(
       "wrap",
       fromChain,
       toChain,
       destinationAddress,
       refundAddress,
-      hexSalt
+      HashZero
     );
 
     const expectedAddress = await this.validateOfflineDepositAddress(
@@ -74,10 +74,10 @@ export class AxelarAssetTransfer {
       toChain,
       destinationAddress,
       refundAddress,
-      hexSalt
+      HashZero
     );
 
-    if (address !== expectedAddress) return "";
+    if (address !== expectedAddress) throw new Error("Deposit address mismatch");
 
     return address;
   }
@@ -86,19 +86,20 @@ export class AxelarAssetTransfer {
     fromChain: string,
     toChain: string,
     destinationAddress: string,
-    refundAddress: string,
-    salt?: number
-  ): Promise<string> {
-    const hexSalt = hexZeroPad(hexlify(salt || 0), 32);
-
+    refundAddress?: string
+  ): Promise<{
+    finalDepositAddress: string;
+    intermediaryDepositAddress: string;
+  }> {
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
+
     const { address: unwrapAddress } = await this.getDepositAddressFromRemote(
       "unwrap",
       undefined,
       toChain,
       destinationAddress,
       refundAddress,
-      hexSalt
+      HashZero
     );
 
     const expectedAddress = await this.validateOfflineDepositAddress(
@@ -107,19 +108,23 @@ export class AxelarAssetTransfer {
       toChain,
       destinationAddress,
       refundAddress,
-      hexSalt
+      HashZero
     );
 
-    if (unwrapAddress !== expectedAddress) return "";
+    if (unwrapAddress !== expectedAddress) throw new Error("Deposit address mismatch");
 
-    const realDepositAddress = await this.getDepositAddress(
+    const denom = await this.getERC20Denom(toChain);
+    const finalDepositAddress = await this.getDepositAddress(
       fromChain,
       toChain,
       unwrapAddress,
-      await this.getERC20Denom(toChain)
+      denom
     );
 
-    return realDepositAddress;
+    return {
+      intermediaryDepositAddress: expectedAddress,
+      finalDepositAddress,
+    };
   }
 
   async getDepositAddressFromRemote(
@@ -317,9 +322,7 @@ export class AxelarAssetTransfer {
   async getERC20Denom(chainName: string): Promise<string> {
     if (!this.evmDenomMap[chainName.toLowerCase()]) {
       const staticInfo = await this.getStaticInfo();
-      console.log("staticInfo", staticInfo);
       const denom = staticInfo.chains[chainName.toLowerCase()]?.nativeAsset[0];
-      console.log("denom", denom);
       if (denom) {
         this.evmDenomMap[chainName.toLowerCase()] = denom;
       }
