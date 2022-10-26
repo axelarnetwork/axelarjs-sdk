@@ -399,15 +399,13 @@ describe("AxelarAssetTransfer", () => {
     });
     describe("getDepositAddressForNativeUnwrap", () => {
       let unwrapAddress: string;
-      let realDepositAddress: string;
       beforeEach(async () => {
         unwrapAddress = "0x34bd65b158b6b4cc539388842cb2447c0a28acc0";
-        realDepositAddress = "0x34bd65b158b6b4cc539388842cb2447c0a28acc1";
         jest.clearAllMocks();
         jest
           .spyOn(bridge, "getDepositAddressFromRemote")
           .mockResolvedValue({ address: unwrapAddress });
-        jest.spyOn(bridge, "getDepositAddress").mockResolvedValue(realDepositAddress);
+        jest.spyOn(bridge, "getDepositAddress").mockResolvedValue(unwrapAddress);
         jest
           .spyOn(bridge, "getDepositServiceContractAddress")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
@@ -421,10 +419,7 @@ describe("AxelarAssetTransfer", () => {
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d"
           )
-        ).resolves.toMatchObject({
-          finalDepositAddress: realDepositAddress,
-          intermediaryDepositAddress: unwrapAddress,
-        });
+        ).resolves.toBe(unwrapAddress);
         expect(bridge.getDepositAddress).toHaveBeenCalledWith(
           EvmChain.AVALANCHE,
           EvmChain.FANTOM,

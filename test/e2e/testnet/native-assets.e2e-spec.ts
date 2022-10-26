@@ -29,21 +29,18 @@ describe("AxelarAssetTransfer", () => {
   });
 
   describe("getDepositAddressForNativeUnwrap()", () => {
-    let finalDepositAddress: string;
-    let intermediaryDepositAddress: string;
+    let depositAddress: string;
     beforeAll(async () => {
       const result = await sdk.getDepositAddressForNativeUnwrap(
         "moonbeam",
         "avalanche",
         "0xA57ADCE1d2fE72949E4308867D894CD7E7DE0ef2"
       );
-      finalDepositAddress = result.finalDepositAddress;
-      intermediaryDepositAddress = result.intermediaryDepositAddress;
+      depositAddress = result;
     });
 
     it("should get native deposit address", () => {
-      expect(intermediaryDepositAddress).toBeTruthy();
-      expect(finalDepositAddress).toBeTruthy();
+      expect(depositAddress).toBeTruthy();
     });
   });
 });

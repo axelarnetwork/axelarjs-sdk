@@ -55,10 +55,6 @@ export class AxelarAssetTransfer {
     refundAddress?: string
   ): Promise<string> {
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
-    console.log({
-      refundAddress,
-      HashZero,
-    });
     const { address } = await this.getDepositAddressFromRemote(
       "wrap",
       fromChain,
@@ -87,10 +83,7 @@ export class AxelarAssetTransfer {
     toChain: string,
     destinationAddress: string,
     refundAddress?: string
-  ): Promise<{
-    finalDepositAddress: string;
-    intermediaryDepositAddress: string;
-  }> {
+  ): Promise<string> {
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
 
     const { address: unwrapAddress } = await this.getDepositAddressFromRemote(
@@ -121,10 +114,7 @@ export class AxelarAssetTransfer {
       denom
     );
 
-    return {
-      intermediaryDepositAddress: expectedAddress,
-      finalDepositAddress,
-    };
+    return finalDepositAddress;
   }
 
   async getDepositAddressFromRemote(
