@@ -58,7 +58,7 @@ export class AxelarQueryAPI {
         environment: this.environment,
         axelarRpcUrl: this.axelarRpcUrl,
       });
-    return await this.axelarQueryClient.nexus.FeeInfo({ chain: chainName, asset: assetDenom });
+    return this.axelarQueryClient.nexus.FeeInfo({ chain: chainName, asset: assetDenom });
   }
 
   /**
@@ -81,7 +81,7 @@ export class AxelarQueryAPI {
         environment: this.environment,
         axelarRpcUrl: this.axelarRpcUrl,
       });
-    return await this.axelarQueryClient.nexus.TransferFee({
+    return this.axelarQueryClient.nexus.TransferFee({
       sourceChain: sourceChainName,
       destinationChain: destinationChainName,
       amount: `${amountInDenom.toString()}${assetDenom}`,

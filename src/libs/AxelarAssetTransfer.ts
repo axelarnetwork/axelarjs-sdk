@@ -126,7 +126,7 @@ export class AxelarAssetTransfer {
     hexSalt: string
   ): Promise<{ address: string }> {
     const endpoint = wrapOrUnWrap === "wrap" ? "/deposit/wrap" : "/deposit/unwrap";
-    return await this.depositServiceApi
+    return this.depositServiceApi
       .post(endpoint, {
         salt: hexSalt,
         source_chain: fromChain,

@@ -44,7 +44,7 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
       module: "axelarnet",
     });
 
-    return await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+    return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 }
 
