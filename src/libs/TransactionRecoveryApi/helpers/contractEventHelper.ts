@@ -101,7 +101,8 @@ export function validateContractCallWithToken(gatewayEvent: EventLog, gasReceive
       gasReceiverEvent.eventLog.args.destinationAddress &&
     gatewayEvent.eventLog.args.payloadHash === gasReceiverEvent.eventLog.args.payloadHash &&
     gatewayEvent.eventLog.args.symbol === gasReceiverEvent.eventLog.args.symbol &&
-    gatewayEvent.eventLog.args.amount === gasReceiverEvent.eventLog.args.amount
+    gatewayEvent.eventLog.args.amount.toString() ===
+      gasReceiverEvent.eventLog.args.amount.toString()
   );
 }
 
