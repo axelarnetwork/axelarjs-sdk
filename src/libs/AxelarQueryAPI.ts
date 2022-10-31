@@ -53,16 +53,12 @@ export class AxelarQueryAPI {
     chainName: string,
     assetDenom: string
   ): Promise<FeeInfoResponse> {
-    try {
-      if (!this.axelarQueryClient)
-        this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
-          environment: this.environment,
-          axelarRpcUrl: this.axelarRpcUrl,
-        });
-      return await this.axelarQueryClient.nexus.FeeInfo({ chain: chainName, asset: assetDenom });
-    } catch (e: any) {
-      throw e;
-    }
+    if (!this.axelarQueryClient)
+      this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
+        environment: this.environment,
+        axelarRpcUrl: this.axelarRpcUrl,
+      });
+    return this.axelarQueryClient.nexus.FeeInfo({ chain: chainName, asset: assetDenom });
   }
 
   /**
@@ -80,20 +76,16 @@ export class AxelarQueryAPI {
     assetDenom: string,
     amountInDenom: number
   ): Promise<TransferFeeResponse> {
-    try {
-      if (!this.axelarQueryClient)
-        this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
-          environment: this.environment,
-          axelarRpcUrl: this.axelarRpcUrl,
-        });
-      return await this.axelarQueryClient.nexus.TransferFee({
-        sourceChain: sourceChainName,
-        destinationChain: destinationChainName,
-        amount: `${amountInDenom.toString()}${assetDenom}`,
+    if (!this.axelarQueryClient)
+      this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
+        environment: this.environment,
+        axelarRpcUrl: this.axelarRpcUrl,
       });
-    } catch (e: any) {
-      throw e;
-    }
+    return this.axelarQueryClient.nexus.TransferFee({
+      sourceChain: sourceChainName,
+      destinationChain: destinationChainName,
+      amount: `${amountInDenom.toString()}${assetDenom}`,
+    });
   }
 
   /**

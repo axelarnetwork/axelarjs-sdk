@@ -54,6 +54,6 @@ export default class EVMClient {
   }
 
   public async broadcastSignedTx(signedTx: string): Promise<ethers.providers.TransactionResponse> {
-    return await this.provider.sendTransaction(signedTx);
+    return this.provider.sendTransaction(signedTx);
   }
 }

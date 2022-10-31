@@ -83,7 +83,7 @@ export class AxelarRecoveryApi {
   }
 
   public async fetchGMPTransaction(txHash: string, txLogIndex?: number) {
-    return await this.execGet(this.axelarGMPApiUrl, {
+    return this.execGet(this.axelarGMPApiUrl, {
       method: "searchGMP",
       txHash,
       txLogIndex,
@@ -251,7 +251,7 @@ export class AxelarRecoveryApi {
   public async queryGatewayAddress({ chain }: { chain: string }) {
     if (!this.axelarQuerySvc)
       this.axelarQuerySvc = await AxelarQueryClient.initOrGetAxelarQueryClient(this.config);
-    return await this.axelarQuerySvc.evm.GatewayAddress({ chain });
+    return this.axelarQuerySvc.evm.GatewayAddress({ chain });
   }
 
   public async getSignedTxAndBroadcast(chain: EvmChain, data: string) {
@@ -280,7 +280,7 @@ export class AxelarRecoveryApi {
 
     const txRequest: TransactionRequest = evmClient.buildUnsignedTx(gatewayInfo.address, { data });
 
-    return await this.execRecoveryUrlFetch("/send_evm_tx", {
+    return this.execRecoveryUrlFetch("/send_evm_tx", {
       chain,
       gatewayAddress: gatewayInfo.address,
       txRequest,
@@ -297,15 +297,15 @@ export class AxelarRecoveryApi {
       rpcUrl: rpcInfo[this.environment].rpcMap[chain],
       evmWalletDetails,
     });
-    return await evmClient.broadcastToGateway(gatewayInfo.address, { data });
+    return evmClient.broadcastToGateway(gatewayInfo.address, { data });
   }
 
   public async execRecoveryUrlFetch(endpoint: string, params: any) {
-    return await this.execPost(this.recoveryApiUrl, endpoint, params);
+    return this.execPost(this.recoveryApiUrl, endpoint, params);
   }
 
   public async execPost(base: string, endpoint: string, params: any) {
-    return await fetch(base + endpoint, {
+    return fetch(base + endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(params),
@@ -315,7 +315,7 @@ export class AxelarRecoveryApi {
   }
 
   public async execGet(base: string, params?: any) {
-    return await fetch(base + "?" + new URLSearchParams(params).toString(), {
+    return fetch(base + "?" + new URLSearchParams(params).toString(), {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
