@@ -304,7 +304,7 @@ export class AxelarAssetTransfer {
         .then((body) => {
           return body.assets.network[chainName.toLowerCase()]?.gas_service;
         })
-        .catch((e) => undefined);
+        .catch(() => undefined);
     }
     return this.gasReceiverContract[chainName];
   }
@@ -327,7 +327,7 @@ export class AxelarAssetTransfer {
         .then((body) => {
           return body.assets.network[chainName.toLowerCase()]?.deposit_service;
         })
-        .catch((e) => undefined);
+        .catch(() => undefined);
     }
     return this.depositServiceContract[chainName];
   }
@@ -336,7 +336,7 @@ export class AxelarAssetTransfer {
     if (!this.staticInfo) {
       this.staticInfo = await fetch(s3[this.environment])
         .then((res) => res.json())
-        .catch((e) => undefined);
+        .catch(() => undefined);
     }
     return this.staticInfo;
   }
