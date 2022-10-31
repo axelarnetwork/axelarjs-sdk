@@ -30,36 +30,52 @@ describe("contractEventHelper", () => {
     it("should return false if the payloadHash is different", () => {
       expect(
         validateContractCall(gatewayEvent, {
-          ...gasReceiverEvent,
-          payloadHash: "0x1234567",
-        })
+          eventLog: {
+            args: {
+              ...gasReceiverEvent.eventLog.args,
+              payloadHash: "0x1234567",
+            },
+          },
+        } as any)
       ).toBe(false);
     });
 
     it("should return false if the sourceAddress is different", () => {
       expect(
         validateContractCall(gatewayEvent, {
-          ...gasReceiverEvent,
-          sourceAddress: "0x1234567",
-        })
+          eventLog: {
+            args: {
+              ...gasReceiverEvent.eventLog.args,
+              sourceAddress: "0x1234567",
+            },
+          },
+        } as any)
       ).toBe(false);
     });
 
     it("should return false if the destinationContractAddress is different", () => {
       expect(
         validateContractCall(gatewayEvent, {
-          ...gasReceiverEvent,
-          destinationAddress: "0x1234567",
-        })
+          eventLog: {
+            args: {
+              ...gasReceiverEvent.eventLog.args,
+              destinationAddress: "0x1234567",
+            },
+          },
+        } as any)
       ).toBe(false);
     });
 
     it("should return false if the destinationChain is different", () => {
       expect(
         validateContractCall(gatewayEvent, {
-          ...gasReceiverEvent,
-          destinationChain: 2,
-        })
+          eventLog: {
+            args: {
+              ...gasReceiverEvent.eventLog.args,
+              destinationChain: 2,
+            },
+          },
+        } as any)
       ).toBe(false);
     });
 
@@ -87,7 +103,7 @@ describe("contractEventHelper", () => {
           sourceAddress: "0x123",
           destinationChain: 1,
           destinationAddress: "0x123",
-          payloadHash: "0x1234",
+          payloadHash: "0x123",
           symbol: "AXL",
           amount: "1",
         },
@@ -97,54 +113,78 @@ describe("contractEventHelper", () => {
     it("should return false if the payloadHash is different", () => {
       expect(
         validateContractCallWithToken(gatewayEvent, {
-          ...gasReceiverEvent,
-          payloadHash: "0x1",
-        })
+          eventLog: {
+            args: {
+              ...gasReceiverEvent.eventLog.args,
+              payloadHash: "0x1234567",
+            },
+          },
+        } as any)
       ).toBe(false);
     });
 
     it("should return false if the sourceAddress is different", () => {
       expect(
         validateContractCallWithToken(gatewayEvent, {
-          ...gasReceiverEvent,
-          sourceAddress: "0x1",
-        })
+          eventLog: {
+            args: {
+              ...gasReceiverEvent.eventLog.args,
+              sourceAddress: "0x1234567",
+            },
+          },
+        } as any)
       ).toBe(false);
     });
 
     it("should return false if the destinationContractAddress is different", () => {
       expect(
         validateContractCallWithToken(gatewayEvent, {
-          ...gasReceiverEvent,
-          destinationAddress: "0x1",
-        })
+          eventLog: {
+            args: {
+              ...gasReceiverEvent.eventLog.args,
+              destinationAddress: "0x1234567",
+            },
+          },
+        } as any)
       ).toBe(false);
     });
 
     it("should return false if the destinationChain is different", () => {
       expect(
         validateContractCallWithToken(gatewayEvent, {
-          ...gasReceiverEvent,
-          destinationChain: 8,
-        })
+          eventLog: {
+            args: {
+              ...gasReceiverEvent.eventLog.args,
+              destinationChain: 8,
+            },
+          },
+        } as any)
       ).toBe(false);
     });
 
     it("should return false if the symbol is different", () => {
       expect(
         validateContractCallWithToken(gatewayEvent, {
-          ...gasReceiverEvent,
-          symbol: "ETH",
-        })
+          eventLog: {
+            args: {
+              ...gasReceiverEvent.eventLog.args,
+              symbol: "ETH",
+            },
+          },
+        } as any)
       ).toBe(false);
     });
 
     it("should return false if the amount is different", () => {
       expect(
         validateContractCallWithToken(gatewayEvent, {
-          ...gasReceiverEvent,
-          amount: "1234",
-        })
+          eventLog: {
+            args: {
+              ...gasReceiverEvent.eventLog.args,
+              amount: "1234",
+            },
+          },
+        } as any)
       ).toBe(false);
     });
 
