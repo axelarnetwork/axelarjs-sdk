@@ -3,7 +3,6 @@ import {
   validateContractCallWithToken,
   getNativeGasAmountFromTxReceipt,
 } from "../../../TransactionRecoveryApi/helpers";
-import { contractReceiptStub, executeParamsStub } from "../../stubs";
 
 describe("contractEventHelper", () => {
   describe("validateContractCall", () => {
