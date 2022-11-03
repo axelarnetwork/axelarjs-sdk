@@ -9,6 +9,7 @@ export const getTransferPayload = (
     signature: sig,
     publicAddr: publicAddress,
     sourceChainInfo: {
+      id: "terra-3",
       chainSymbol: "Terra",
       chainName: "Terra",
       estimatedWaitTime: 5,
@@ -33,6 +34,7 @@ export const getTransferPayload = (
       fullySupported: true,
     },
     destinationChainInfo: {
+      id: "avalanche",
       chainSymbol: "AVAX",
       chainName: "Avalanche",
       estimatedWaitTime: 5,

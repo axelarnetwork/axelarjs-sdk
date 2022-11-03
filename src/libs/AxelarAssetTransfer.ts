@@ -205,14 +205,14 @@ export class AxelarAssetTransfer {
     // use trace ID sent in by invoking user, or otherwise generate a new one
     const traceId = options?._traceId || uuidv4();
 
+    // validate chain identifiers
+    await this.validateChainIdentifiers(fromChain, toChain);
+
     const chainList: ChainInfo[] = await loadChains({ environment: this.environment });
 
     let destChainInfo: ChainInfo = chainList.find(
-      (chainInfo) => chainInfo.chainName.toLowerCase() === toChain.toLowerCase()
+      (chainInfo) => chainInfo.id === toChain.toLowerCase()
     ) as ChainInfo;
-    if (!destChainInfo) {
-      destChainInfo = chainList.find(chainInfo => chainInfo.chainIdentifier[this.environment] === toChain.toLowerCase()) as ChainInfo;
-    }
     if (!destChainInfo) throw new Error("cannot find chain" + toChain);
 
     /**if user has selected native cxy, e.g. ETH, AVAX, etc, assume it is to be wrapped into ERC20 on dest chain */
@@ -237,8 +237,6 @@ export class AxelarAssetTransfer {
       );
     }
 
-    // validate chain identifiers
-    await this.validateChainIdentifiers(fromChain, toChain);
 
     // verify destination address format
     const isDestinationAddressValid = await validateDestinationAddressByChainName(
