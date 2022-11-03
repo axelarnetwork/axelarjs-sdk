@@ -448,9 +448,6 @@ describe("AxelarAssetTransfer", () => {
         jest
           .spyOn(bridge, "getDepositAddressForNativeUnwrap")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
-        jest
-          .spyOn(bridge, "validateChainIdentifiers")
-          .mockResolvedValue(true);
         });
       it("should call getDepositAddressForNativeWrap and not getDepositAddressForNativeUnwrap", async () => {
         await expect(
@@ -466,7 +463,6 @@ describe("AxelarAssetTransfer", () => {
         ).resolves.toBe("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
         expect(bridge.getDepositAddressForNativeWrap).toHaveBeenCalled();
         expect(bridge.getDepositAddressForNativeUnwrap).not.toHaveBeenCalled();
-        expect(bridge.validateChainIdentifiers).not.toHaveBeenCalled();
       });
       it("should call getDepositAddressForNativeUnwrap and not getDepositAddressForNativeWrap", async () => {
         await expect(
@@ -482,7 +478,6 @@ describe("AxelarAssetTransfer", () => {
         ).resolves.toBe("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
         expect(bridge.getDepositAddressForNativeWrap).not.toHaveBeenCalled();
         expect(bridge.getDepositAddressForNativeUnwrap).toHaveBeenCalled();
-        expect(bridge.validateChainIdentifiers).not.toHaveBeenCalled();
       });
     });
   });
