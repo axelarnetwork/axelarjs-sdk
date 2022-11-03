@@ -210,13 +210,17 @@ export class AxelarAssetTransfer {
 
     const chainList: ChainInfo[] = await loadChains({ environment: this.environment });
 
+    let srcChainInfo: ChainInfo = chainList.find(
+      (chainInfo) => chainInfo.id === fromChain.toLowerCase()
+    ) as ChainInfo;
+    if (!srcChainInfo) throw new Error("cannot find chain" + fromChain);
     let destChainInfo: ChainInfo = chainList.find(
       (chainInfo) => chainInfo.id === toChain.toLowerCase()
     ) as ChainInfo;
     if (!destChainInfo) throw new Error("cannot find chain" + toChain);
 
     /**if user has selected native cxy, e.g. ETH, AVAX, etc, assume it is to be wrapped into ERC20 on dest chain */
-    if (isNativeToken(fromChain as EvmChain, asset as GasToken)) {
+    if (isNativeToken(srcChainInfo.chainName.toLowerCase() as EvmChain, asset as GasToken)) {
       return await this.getDepositAddressForNativeWrap(
         fromChain,
         toChain,
