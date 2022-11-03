@@ -29,6 +29,7 @@ export interface ChainInfo {
     mainnet: string;
   };
   addressPrefix: string;
+  nativeAsset: string[];
 }
 
 export interface AssetTransferObject {

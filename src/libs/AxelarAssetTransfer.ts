@@ -16,12 +16,14 @@ import {
   validateDestinationAddressByChainName,
 } from "../utils";
 import { getConfigs } from "../constants";
-import { AxelarAssetTransferConfig, Environment } from "./types";
+import { AxelarAssetTransferConfig, Environment, EvmChain, GasToken, isNativeToken } from "./types";
 import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 
 import { constants } from "ethers";
+import { ChainInfo } from "../chains/types";
+import { loadChains } from "../chains";
 const { HashZero } = constants;
 
 export class AxelarAssetTransfer {
@@ -188,13 +190,52 @@ export class AxelarAssetTransfer {
     fromChain: string,
     toChain: string,
     destinationAddress: string,
-    asset: string,
+    asset: string | GasToken,
     options?: {
-      _traceId: string;
+      _traceId?: string;
+      wrapOptions?: {
+        refundAddress: string;
+      };
+      unwrapOptions?: {
+        refundAddress: string;
+        shouldUnwrap: boolean;
+      };
     }
   ): Promise<string> {
     // use trace ID sent in by invoking user, or otherwise generate a new one
     const traceId = options?._traceId || uuidv4();
+
+    const chainList: ChainInfo[] = await loadChains({ environment: this.environment });
+
+    let destChainInfo: ChainInfo = chainList.find(
+      (chainInfo) => chainInfo.chainName.toLowerCase() === toChain.toLowerCase()
+    ) as ChainInfo;
+    if (!destChainInfo) {
+      destChainInfo = chainList.find(chainInfo => chainInfo.chainIdentifier[this.environment] === toChain.toLowerCase()) as ChainInfo;
+    }
+    if (!destChainInfo) throw new Error("cannot find chain" + toChain);
+
+    /**if user has selected native cxy, e.g. ETH, AVAX, etc, assume it is to be wrapped into ERC20 on dest chain */
+    if (isNativeToken(fromChain as EvmChain, asset as GasToken)) {
+      return await this.getDepositAddressForNativeWrap(
+        fromChain,
+        toChain,
+        destinationAddress,
+        options?.wrapOptions?.refundAddress
+      );
+    }
+    /**if user has selected native cxy wrapped asset, e.g. WETH, WAVAX, and selected to unwrap it */
+    if (
+      destChainInfo.nativeAsset.includes(asset as string) &&
+      options?.unwrapOptions?.shouldUnwrap
+    ) {
+      return await this.getDepositAddressForNativeUnwrap(
+        fromChain,
+        toChain,
+        destinationAddress,
+        options.unwrapOptions.refundAddress
+      );
+    }
 
     // validate chain identifiers
     await this.validateChainIdentifiers(fromChain, toChain);

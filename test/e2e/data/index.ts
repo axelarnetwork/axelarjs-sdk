@@ -21,6 +21,7 @@ export const getTransferPayload = (
         mainnet: "terra",
       },
       addressPrefix: "terra",
+      nativeAsset: []
     },
     selectedSourceAsset: {
       assetSymbol: "UST",
@@ -45,6 +46,7 @@ export const getTransferPayload = (
         mainnet: "avalanche",
       },
       addressPrefix: "",
+      nativeAsset: ["wavax-wei"]
     },
     selectedDestinationAsset: {
       assetAddress: destAddress,
