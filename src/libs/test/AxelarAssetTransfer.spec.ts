@@ -323,15 +323,18 @@ describe("AxelarAssetTransfer", () => {
       const depositAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
       const asset = "uusd";
       let response: any;
+      let responseWithObjectParams: any;
       beforeEach(async () => {
         jest.spyOn(bridge, "getOneTimeCode").mockResolvedValue(otcStub());
         jest.spyOn(bridge, "getInitRoomId").mockResolvedValue(roomIdStub().roomId);
         jest.spyOn(bridge, "getLinkEvent").mockResolvedValue(linkEventStub().newRoomId);
         response = await bridge.getDepositAddress(fromChain, toChain, depositAddress, asset);
+        responseWithObjectParams = await bridge.getDepositAddress({ fromChain, toChain, destinationAddress: depositAddress, asset});
       });
 
       it("should return deposit address", () => {
         expect(response).toBe(JSON.parse(newRoomIdStub())["depositAddress"]);
+        expect(responseWithObjectParams).toBe(JSON.parse(newRoomIdStub())["depositAddress"]);
       });
     });
   });
@@ -426,6 +429,56 @@ describe("AxelarAssetTransfer", () => {
           unwrapAddress,
           "wavax-wei"
         );
+      });
+    });
+  });
+
+  describe("offline deposit address integration into getDepositAddress()", () => {
+    let bridge: AxelarAssetTransfer;
+
+    beforeEach(() => {
+      bridge = new AxelarAssetTransfer({
+        environment: Environment.TESTNET,
+      });
+    });
+
+    describe("getDepositAddress - wrap", () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        jest
+          .spyOn(bridge, "getDepositAddressForNativeWrap")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest
+          .spyOn(bridge, "getDepositAddressForNativeUnwrap")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        });
+      it("should call getDepositAddressForNativeWrap and not getDepositAddressForNativeUnwrap", async () => {
+        await expect(
+          bridge.getDepositAddress(
+            EvmChain.AVALANCHE,
+            EvmChain.FANTOM,
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "AVAX",
+            {
+              wrapOptions: { refundAddress: "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d" },
+            }
+          )
+        ).resolves.toBe("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        expect(bridge.getDepositAddressForNativeWrap).toHaveBeenCalled();
+        expect(bridge.getDepositAddressForNativeUnwrap).not.toHaveBeenCalled();
+      });
+      it("should call getDepositAddressForNativeUnwrap and not getDepositAddressForNativeWrap", async () => {
+        await expect(
+          bridge.getDepositAddress(
+            EvmChain.FANTOM,
+            EvmChain.AVALANCHE,
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "wavax-wei",
+            { refundAddress: "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d", shouldUnwrapIntoNative: true }
+          )
+        ).resolves.toBe("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        expect(bridge.getDepositAddressForNativeWrap).not.toHaveBeenCalled();
+        expect(bridge.getDepositAddressForNativeUnwrap).toHaveBeenCalled();
       });
     });
   });
