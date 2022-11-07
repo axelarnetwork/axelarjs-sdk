@@ -10,6 +10,7 @@ import {
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
+import { validateAndReturn } from "../utils";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -119,10 +120,12 @@ export class AxelarQueryAPI {
    * @returns base fee in native token in wei, translated into the native gas token of choice
    */
   public async getNativeGasBaseFee(
-    sourceChainName: EvmChain,
-    destinationChainName: EvmChain,
+    sourceChainName: EvmChain | string,
+    destinationChainName: EvmChain | string,
     sourceTokenSymbol?: GasToken
   ): Promise<BaseFeeResponse> {
+    await validateAndReturn(sourceChainName, this.environment);
+    await validateAndReturn(destinationChainName, this.environment);
     return this.axelarGMPServiceApi
       .post("", {
         method: "getFees",
@@ -149,12 +152,14 @@ export class AxelarQueryAPI {
    * @returns
    */
   public async estimateGasFee(
-    sourceChainName: EvmChain,
-    destinationChainName: EvmChain,
+    sourceChainName: EvmChain | string,
+    destinationChainName: EvmChain | string,
     sourceChainTokenSymbol: GasToken | string,
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1
   ): Promise<string> {
+    await validateAndReturn(sourceChainName, this.environment);
+    await validateAndReturn(destinationChainName, this.environment);
     const response = await this.getNativeGasBaseFee(
       sourceChainName,
       destinationChainName,

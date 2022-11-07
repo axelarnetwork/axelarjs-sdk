@@ -1,3 +1,5 @@
+import { Environment } from "../libs";
+
 export const CHAINS = {
   TESTNET: {
     AURA: "aura",
@@ -45,3 +47,9 @@ export const CHAINS = {
     UMEEE: "umee",
   },
 };
+
+export const getChainIdsForEnvironment = (env: Environment) => {
+  if (![Environment.TESTNET, Environment.MAINNET].includes(env)) throw "environment must be TESTNET or MAINNET";
+
+  return CHAINS[(env as string).toUpperCase() as "TESTNET" | "MAINNET"];
+}

@@ -12,6 +12,7 @@ import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET, OTC } from "../serv
 import { RestService, SocketService } from "../services";
 import {
   createWallet,
+  validateAndReturn,
   validateChainIdentifier,
   validateDestinationAddressByChainName,
 } from "../utils";
@@ -54,6 +55,10 @@ export class AxelarAssetTransfer {
     destinationAddress: string,
     refundAddress?: string
   ): Promise<string> {
+
+    await validateAndReturn(fromChain, this.environment);
+    await validateAndReturn(toChain, this.environment);
+    
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address } = await this.getDepositAddressFromRemote(
       "wrap",
@@ -84,6 +89,10 @@ export class AxelarAssetTransfer {
     destinationAddress: string,
     refundAddress?: string
   ): Promise<string> {
+
+    await validateAndReturn(fromChain, this.environment);
+    await validateAndReturn(toChain, this.environment);
+
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
 
     const { address: unwrapAddress } = await this.getDepositAddressFromRemote(
@@ -125,7 +134,12 @@ export class AxelarAssetTransfer {
     refundAddress: string,
     hexSalt: string
   ): Promise<{ address: string }> {
+
     const endpoint = wrapOrUnWrap === "wrap" ? "/deposit/wrap" : "/deposit/unwrap";
+
+    if (fromChain) await validateAndReturn(fromChain, this.environment);
+    if (toChain) await validateAndReturn(toChain, this.environment);
+
     return this.depositServiceApi
       .post(endpoint, {
         salt: hexSalt,
@@ -146,6 +160,8 @@ export class AxelarAssetTransfer {
     refundAddress: string,
     hexSalt: string
   ) {
+    await validateAndReturn(fromChain, this.environment);
+    await validateAndReturn(toChain, this.environment);
     const receiverInterface = new Interface(ReceiverImplementation.abi);
     const functionData =
       wrapOrUnWrap === "wrap"
@@ -255,6 +271,9 @@ export class AxelarAssetTransfer {
   ): Promise<string> {
     type RoomIdResponse = Record<"data", Record<"roomId", string>>;
 
+    await validateAndReturn(fromChain, this.environment);
+    await validateAndReturn(toChain, this.environment);
+
     const payload = {
       fromChain,
       toChain,
@@ -281,6 +300,8 @@ export class AxelarAssetTransfer {
     destinationChain: string,
     destinationAddress: string
   ): Promise<string> {
+    await validateAndReturn(sourceChain, this.environment);
+    await validateAndReturn(destinationChain, this.environment);
     const { newRoomId } = await this.getSocketService()
       .joinRoomAndWaitForEvent(roomId, sourceChain, destinationChain, destinationAddress)
       .catch((error) => {
