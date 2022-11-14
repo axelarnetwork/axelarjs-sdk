@@ -33,7 +33,7 @@ function findSimilarInArray(array: Array<string>, wordsToFind: string) {
   return bestMatch;
 }
 
-export async function validateAndReturn(chain: string, environment: Environment) {
+export async function isValidChainIdentifier(chain: string, environment: Environment) {
   const [chainValid] = await Promise.all([
     validateChainIdentifier(chain, environment)
   ]);

@@ -48,7 +48,7 @@ import {
   UnsupportedGasTokenError,
 } from "./constants/error";
 import { callExecute, CALL_EXECUTE_ERROR } from "./helpers";
-import { asyncRetry, sleep, validateAndReturn } from "../../utils";
+import { asyncRetry, sleep, isValidChainIdentifier } from "../../utils";
 import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import s3 from "./constants/s3";
 import { Interface } from "ethers/lib/utils";
@@ -187,8 +187,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     options: QueryGasFeeOptions
   ): Promise<string> {
 
-    await validateAndReturn(sourceChain, this.environment);
-    await validateAndReturn(destinationChain, this.environment);
+    await isValidChainIdentifier(sourceChain, this.environment);
+    await isValidChainIdentifier(destinationChain, this.environment);
 
     const provider = options.provider || getDefaultProvider(sourceChain, this.environment);
     const receipt = await provider.getTransactionReceipt(txHash);
@@ -456,8 +456,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     options: QueryGasFeeOptions
   ) {
     
-    await validateAndReturn(sourceChain, this.environment);
-    await validateAndReturn(destinationChain, this.environment);
+    await isValidChainIdentifier(sourceChain, this.environment);
+    await isValidChainIdentifier(destinationChain, this.environment);
 
     const totalGasFee = await this.axelarQueryApi.estimateGasFee(
       sourceChain,

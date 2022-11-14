@@ -8,7 +8,7 @@ import {
   parseConfirmDepositCosmosResponse,
   parseConfirmDepositEvmResponse,
 } from "./helpers/axelarHelper";
-import { validateAndReturn } from "../../utils";
+import { isValidChainIdentifier } from "../../utils";
 
 export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   public constructor(config: AxelarRecoveryAPIConfig) {
@@ -17,7 +17,7 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
 
   public async confirmDeposit(params: ConfirmDepositRequest) {
 
-    await validateAndReturn(params.from, this.environment);
+    await isValidChainIdentifier(params.from, this.environment);
 
     const chain: ChainInfo = (
       await loadChains({
