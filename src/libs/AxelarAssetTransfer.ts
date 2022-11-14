@@ -27,13 +27,13 @@ import { loadChains } from "../chains";
 const { HashZero } = constants;
 
 interface GetDepositAddressParams {
-  fromChain: string,
-  toChain: string,
-  destinationAddress: string,
-  asset: string,
+  fromChain: string;
+  toChain: string;
+  destinationAddress: string;
+  asset: string;
   options?: {
     _traceId?: string;
-  }
+  };
 }
 
 export class AxelarAssetTransfer {
@@ -197,19 +197,25 @@ export class AxelarAssetTransfer {
    * @param {string}  requestParams.options._traceId
    * @param {boolean} requestParams.options.shouldUnwrapIntoNative - when sending wrapped native asset back to its home chain (e.g. WETH back to Ethereum), specify "true" to receive native ETH; otherwise will received ERC20 version
    * @param {string}  requestParams.options.refundAddress - recipient where funds can be refunded if wrong ERC20 asset is deposited; ONLY AVAILABLE FOR WRAP/UNWRAP SERVICE
-  */
-  public async getDepositAddress(requestParamsOrFromChain: GetDepositAddressParams | string, _toChain?: string, _destinationAddress?: string, _asset?: string, _options?: any): Promise<string> {
-
+   */
+  public async getDepositAddress(
+    requestParamsOrFromChain: GetDepositAddressParams | string,
+    _toChain?: string,
+    _destinationAddress?: string,
+    _asset?: string,
+    _options?: any
+  ): Promise<string> {
     let fromChain: string, toChain: string, destinationAddress: string, asset: string, options: any;
 
-    if (typeof requestParamsOrFromChain === 'string') {
+    if (typeof requestParamsOrFromChain === "string") {
       fromChain = requestParamsOrFromChain;
       toChain = _toChain as string;
       destinationAddress = _destinationAddress as string;
       asset = _asset as string;
       options = _options;
     } else {
-      ({ fromChain, toChain, destinationAddress, asset, options} = requestParamsOrFromChain as GetDepositAddressParams);
+      ({ fromChain, toChain, destinationAddress, asset, options } =
+        requestParamsOrFromChain as GetDepositAddressParams);
     }
 
     // use trace ID sent in by invoking user, or otherwise generate a new one
@@ -229,11 +235,11 @@ export class AxelarAssetTransfer {
 
     const chainList: ChainInfo[] = await loadChains({ environment: this.environment });
 
-    let srcChainInfo: ChainInfo = chainList.find(
+    const srcChainInfo = chainList.find(
       (chainInfo) => chainInfo.id === fromChain.toLowerCase()
     ) as ChainInfo;
     if (!srcChainInfo) throw new Error("cannot find chain" + fromChain);
-    let destChainInfo: ChainInfo = chainList.find(
+    const destChainInfo = chainList.find(
       (chainInfo) => chainInfo.id === toChain.toLowerCase()
     ) as ChainInfo;
     if (!destChainInfo) throw new Error("cannot find chain" + toChain);
@@ -248,10 +254,7 @@ export class AxelarAssetTransfer {
       );
     }
     /**if user has selected native cxy wrapped asset, e.g. WETH, WAVAX, and selected to unwrap it */
-    if (
-      destChainInfo.nativeAsset.includes(asset as string) &&
-      options?.shouldUnwrapIntoNative
-    ) {
+    if (destChainInfo.nativeAsset.includes(asset as string) && options?.shouldUnwrapIntoNative) {
       return await this.getDepositAddressForNativeUnwrap(
         fromChain,
         toChain,
