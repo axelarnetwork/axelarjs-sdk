@@ -5,7 +5,8 @@ import { loadAssets } from "../assets";
 import { AssetConfig, AssetInfo } from "../assets/types";
 import { ChainInfo, LoadChainConfig } from "./types";
 import cloneDeep from "clone-deep";
-import { Environment } from "src/libs";
+import { Environment } from "../libs";
+import { CHAINS as supportedChains } from "./supported-chains-list";
 
 export async function loadChains(config: LoadChainConfig) {
   const allAssets = await loadAssets(config);
@@ -63,4 +64,10 @@ async function execGet(url: string) {
     .catch((error) => {
       throw error;
     });
+}
+
+export function getChainIdsForEnvironment (env: Environment) {
+  if (![Environment.TESTNET, Environment.MAINNET].includes(env)) throw "environment must be TESTNET or MAINNET";
+
+  return supportedChains[(env as string).toUpperCase() as "TESTNET" | "MAINNET"];
 }
