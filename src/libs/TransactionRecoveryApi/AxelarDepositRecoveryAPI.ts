@@ -8,6 +8,7 @@ import {
   parseConfirmDepositCosmosResponse,
   parseConfirmDepositEvmResponse,
 } from "./helpers/axelarHelper";
+import { isValidChainIdentifier } from "../../utils";
 
 export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   public constructor(config: AxelarRecoveryAPIConfig) {
@@ -15,12 +16,15 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async confirmDeposit(params: ConfirmDepositRequest) {
+
+    await isValidChainIdentifier(params.from, this.environment);
+
     const chain: ChainInfo = (
       await loadChains({
         environment: this.environment,
       })
     ).find(
-      (chainInfo) => chainInfo.chainName.toLowerCase() === params.from.toLowerCase()
+      (chainInfo) => chainInfo.id.toLowerCase() === params.from.toLowerCase()
     ) as ChainInfo;
     if (!chain) throw new Error("cannot find chain" + params.from);
 

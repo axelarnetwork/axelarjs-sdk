@@ -8,6 +8,7 @@ import EVMClient from "./client/EVMClient";
 import { TransactionRequest } from "@ethersproject/providers";
 import rpcInfo from "./constants/chain";
 import { BigNumber } from "ethers";
+import { isValidChainIdentifier } from "../../utils";
 
 export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
@@ -92,7 +93,7 @@ export class AxelarRecoveryApi {
       .catch(() => undefined);
   }
 
-  private parseGMPStatus(response: any): GMPStatus {
+  private parseGMPStatus(response: any): GMPStatus | string {
     const { error, status } = response;
 
     if (status === "error" && error) return GMPStatus.DEST_EXECUTE_ERROR;
@@ -101,7 +102,7 @@ export class AxelarRecoveryApi {
     else if (status === "called") return GMPStatus.SRC_GATEWAY_CALLED;
     else if (status === "executing") return GMPStatus.DEST_EXECUTING;
     else {
-      return GMPStatus.UNKNOWN_ERROR;
+      return status;
     }
   }
 
@@ -134,7 +135,7 @@ export class AxelarRecoveryApi {
     };
 
     return {
-      status: this.parseGMPStatus(txDetails),
+      status: this.parseGMPStatus(txDetails) as GMPStatus,
       error: this.parseGMPError(txDetails),
       gasPaidInfo,
       callTx: call,
@@ -172,7 +173,7 @@ export class AxelarRecoveryApi {
       status: GMPStatus.DEST_GATEWAY_APPROVED,
       data: {
         commandId: approvalTx.returnValues.commandId,
-        destinationChain: approvalTx.chain.toLowerCase() as EvmChain,
+        destinationChain: approvalTx.chain.toLowerCase(),
         destinationContractAddress: callTx.returnValues.destinationContractAddress,
         isContractCallWithToken: callTx.event === "ContractCallWithToken",
         payload: callTx.returnValues.payload,
@@ -186,20 +187,20 @@ export class AxelarRecoveryApi {
     };
   }
 
-  private async getChainInfo(chain: string) {
+  private async getChainInfo(chainName: string) {
     const chainInfo = (
       await loadChains({
         environment: this.environment,
       })
-    ).find((chainInfo) => chainInfo.chainName.toLowerCase() === chain.toLowerCase());
+    ).find((chainInfo) => chainInfo.chainName.toLowerCase() === chainName.toLowerCase());
 
-    if (!chainInfo) throw new Error("cannot find chain" + chain);
+    if (!chainInfo) throw new Error("cannot find chain" + chainName);
 
     return chainInfo;
   }
 
-  public async confirmGatewayTx(txHash: string, chain: string) {
-    const { module, chainIdentifier } = await this.getChainInfo(chain);
+  public async confirmGatewayTx(txHash: string, chainName: string) {
+    const { module, chainIdentifier } = await this.getChainInfo(chainName);
 
     const txBytes = await this.execRecoveryUrlFetch("/confirm_gateway_tx", {
       txHash,
@@ -210,8 +211,8 @@ export class AxelarRecoveryApi {
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
-  public async createPendingTransfers(chain: string) {
-    const { module, chainIdentifier } = await this.getChainInfo(chain);
+  public async createPendingTransfers(chainName: string) {
+    const { module, chainIdentifier } = await this.getChainInfo(chainName);
 
     const txBytes = await this.execRecoveryUrlFetch("/create_pending_transfers", {
       chain: chainIdentifier[this.environment],
@@ -221,8 +222,8 @@ export class AxelarRecoveryApi {
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
-  public async executePendingTransfers(chain: string) {
-    const { module, chainIdentifier } = await this.getChainInfo(chain);
+  public async executePendingTransfers(chainName: string) {
+    const { module, chainIdentifier } = await this.getChainInfo(chainName);
     const txBytes = await this.execRecoveryUrlFetch("/execute_pending_transfers", {
       chain: chainIdentifier[this.environment],
       module,
@@ -231,8 +232,8 @@ export class AxelarRecoveryApi {
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
-  public async signCommands(chain: string) {
-    const { module, chainIdentifier } = await this.getChainInfo(chain);
+  public async signCommands(chainName: string) {
+    const { module, chainIdentifier } = await this.getChainInfo(chainName);
 
     const txBytes = await this.execRecoveryUrlFetch("/sign_commands", {
       chain: chainIdentifier[this.environment],
@@ -242,19 +243,22 @@ export class AxelarRecoveryApi {
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
-  public async queryBatchedCommands(chain: string, batchCommandId = "") {
+  public async queryBatchedCommands(chainId: string, batchCommandId = "") {
     if (!this.axelarQuerySvc)
       this.axelarQuerySvc = await AxelarQueryClient.initOrGetAxelarQueryClient(this.config);
-    return this.axelarQuerySvc.evm.BatchedCommands({ chain, id: batchCommandId });
+    await isValidChainIdentifier(chainId, this.environment);
+    return this.axelarQuerySvc.evm.BatchedCommands({ chain: chainId, id: batchCommandId });
   }
 
   public async queryGatewayAddress({ chain }: { chain: string }) {
     if (!this.axelarQuerySvc)
       this.axelarQuerySvc = await AxelarQueryClient.initOrGetAxelarQueryClient(this.config);
+    await isValidChainIdentifier(chain, this.environment);
     return this.axelarQuerySvc.evm.GatewayAddress({ chain });
   }
 
-  public async getSignedTxAndBroadcast(chain: EvmChain, data: string) {
+  public async getSignedTxAndBroadcast(chain: string, data: string) {
+    await isValidChainIdentifier(chain, this.environment);
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcInfo[this.environment].rpcMap[chain],
@@ -271,7 +275,8 @@ export class AxelarRecoveryApi {
     return tx;
   }
 
-  public async sendApproveTx(chain: EvmChain, data: string, evmWalletDetails: EvmWalletDetails) {
+  public async sendApproveTx(chain: string, data: string, evmWalletDetails: EvmWalletDetails) {
+    await isValidChainIdentifier(chain, this.environment);
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcInfo[this.environment].rpcMap[chain],
@@ -288,10 +293,11 @@ export class AxelarRecoveryApi {
   }
 
   public async broadcastEvmTx(
-    chain: EvmChain,
+    chain: string,
     data: string,
     evmWalletDetails = { useWindowEthereum: true }
   ) {
+    await isValidChainIdentifier(chain, this.environment);
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcInfo[this.environment].rpcMap[chain],

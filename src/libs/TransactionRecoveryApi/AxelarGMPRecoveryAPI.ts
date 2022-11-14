@@ -48,10 +48,11 @@ import {
   UnsupportedGasTokenError,
 } from "./constants/error";
 import { callExecute, CALL_EXECUTE_ERROR } from "./helpers";
-import { asyncRetry, sleep } from "../../utils";
+import { asyncRetry, sleep, isValidChainIdentifier } from "../../utils";
 import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import s3 from "./constants/s3";
 import { Interface } from "ethers/lib/utils";
+import { loadChains } from "../../chains";
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   axelarQueryApi: AxelarQueryAPI;
@@ -180,11 +181,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    */
   public async calculateNativeGasFee(
     txHash: string,
-    sourceChain: EvmChain,
-    destinationChain: EvmChain,
+    sourceChain: string,
+    destinationChain: string,
     gasTokenSymbol: GasToken | string,
     options: QueryGasFeeOptions
   ): Promise<string> {
+
+    await isValidChainIdentifier(sourceChain, this.environment);
+    await isValidChainIdentifier(destinationChain, this.environment);
+
     const provider = options.provider || getDefaultProvider(sourceChain, this.environment);
     const receipt = await provider.getTransactionReceipt(txHash);
     const paidGasFee = getNativeGasAmountFromTxReceipt(receipt) || "0";
@@ -444,12 +449,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   private async subtractGasFee(
-    sourceChain: EvmChain,
-    destinationChain: EvmChain,
+    sourceChain: string,
+    destinationChain: string,
     gasTokenSymbol: string,
     paidGasFee: string,
     options: QueryGasFeeOptions
   ) {
+    
+    await isValidChainIdentifier(sourceChain, this.environment);
+    await isValidChainIdentifier(destinationChain, this.environment);
+
     const totalGasFee = await this.axelarQueryApi.estimateGasFee(
       sourceChain,
       destinationChain,
@@ -462,7 +471,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   private getSigner(
-    chain: EvmChain,
+    chain: string,
     evmWalletDetails: EvmWalletDetails = { useWindowEthereum: true }
   ) {
     const { rpcMap, networkInfo } = rpcInfo[this.environment];
@@ -475,7 +484,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return evmClient.getSigner();
   }
 
-  public async getGasReceiverContractAddress(chainName: EvmChain): Promise<string> {
+  public async getGasReceiverContractAddress(chainId: string): Promise<string> {
+    const chains = await loadChains({ environment: this.environment})
+    const selectedChain = chains.find(chain => chain.id === chainId);
+    if (!selectedChain) throw `getGasReceiverContractAddress() ${chainId} not found`;
+    const { chainName } = selectedChain;
     return await fetch(s3[this.environment])
       .then((res) => res.json())
       .then((body) => body.assets.network[chainName.toLowerCase()]?.gas_service)

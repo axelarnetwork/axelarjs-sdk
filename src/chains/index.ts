@@ -5,7 +5,7 @@ import { loadAssets } from "../assets";
 import { AssetConfig, AssetInfo } from "../assets/types";
 import { ChainInfo, LoadChainConfig } from "./types";
 import cloneDeep from "clone-deep";
-import { Environment } from "src/libs";
+import { Environment } from "../libs";
 
 export async function loadChains(config: LoadChainConfig) {
   const allAssets = await loadAssets(config);

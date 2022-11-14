@@ -25,7 +25,7 @@ export const roomIdStub = () => ({
 });
 
 export const depositAddressPayloadStub = () => ({
-  fromChain: "terra",
+  fromChain: "terra-3",
   toChain: "avalanche",
   asset: "uusd",
   publicAddress: ethAddressStub(),
