@@ -34,6 +34,8 @@ interface GetDepositAddressParams {
   asset: string;
   options?: {
     _traceId?: string;
+    shouldUnwrapIntoNative: boolean;
+    refundAddress: string;
   };
 }
 
