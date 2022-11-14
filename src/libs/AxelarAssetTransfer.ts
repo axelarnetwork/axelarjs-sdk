@@ -16,13 +16,25 @@ import {
   validateDestinationAddressByChainName,
 } from "../utils";
 import { getConfigs } from "../constants";
-import { AxelarAssetTransferConfig, Environment } from "./types";
+import { AxelarAssetTransferConfig, Environment, EvmChain, GasToken, isNativeToken } from "./types";
 import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 
 import { constants } from "ethers";
+import { ChainInfo } from "../chains/types";
+import { loadChains } from "../chains";
 const { HashZero } = constants;
+
+interface GetDepositAddressParams {
+  fromChain: string;
+  toChain: string;
+  destinationAddress: string;
+  asset: string;
+  options?: {
+    _traceId?: string;
+  };
+}
 
 export class AxelarAssetTransfer {
   readonly environment: Environment;
@@ -176,23 +188,36 @@ export class AxelarAssetTransfer {
   }
 
   /**
-   *
-   * @param fromChain Source chain identifier eg: avalanche, moonbeam ethereum-2, terra-2 ...
-   * @param toChain Destination chain identifier eg: avalanche, moonbeam ethereum-2, terra-2 ...
-   * @param destinationAddress Address where the asset should be transferred to on the destination chain
-   * @param asset Asset denomination eg: uausdc, uaxl ...
-   * @param options
-   * @returns
+   * @param {Object}  requestParams
+   * @param {string}  requestParams.fromChain - Source chain identifier eg: avalanche, moonbeam ethereum-2, terra-2 ...
+   * @param {string}  requestParams.toChain - Destination chain identifier eg: avalanche, moonbeam ethereum-2, terra-2 ...
+   * @param {string}  requestParams.destinationAddress - Address where the asset should be transferred to on the destination chain
+   * @param {string}  requestParams.asset - Asset denomination eg: uausdc, uaxl ... If the asset specific is native cxy (e.g. ETH, AVAX, etc), the ERC20 version of the asset will appear on the dest chain
+   * @param {Object}  requestParams.options
+   * @param {string}  requestParams.options._traceId
+   * @param {boolean} requestParams.options.shouldUnwrapIntoNative - when sending wrapped native asset back to its home chain (e.g. WETH back to Ethereum), specify "true" to receive native ETH; otherwise will received ERC20 version
+   * @param {string}  requestParams.options.refundAddress - recipient where funds can be refunded if wrong ERC20 asset is deposited; ONLY AVAILABLE FOR WRAP/UNWRAP SERVICE
    */
   public async getDepositAddress(
-    fromChain: string,
-    toChain: string,
-    destinationAddress: string,
-    asset: string,
-    options?: {
-      _traceId: string;
-    }
+    requestParamsOrFromChain: GetDepositAddressParams | string,
+    _toChain?: string,
+    _destinationAddress?: string,
+    _asset?: string,
+    _options?: any
   ): Promise<string> {
+    let fromChain: string, toChain: string, destinationAddress: string, asset: string, options: any;
+
+    if (typeof requestParamsOrFromChain === "string") {
+      fromChain = requestParamsOrFromChain;
+      toChain = _toChain as string;
+      destinationAddress = _destinationAddress as string;
+      asset = _asset as string;
+      options = _options;
+    } else {
+      ({ fromChain, toChain, destinationAddress, asset, options } =
+        requestParamsOrFromChain as GetDepositAddressParams);
+    }
+
     // use trace ID sent in by invoking user, or otherwise generate a new one
     const traceId = options?._traceId || uuidv4();
 
@@ -207,6 +232,36 @@ export class AxelarAssetTransfer {
     );
     if (!isDestinationAddressValid)
       throw new Error(`Invalid destination address for chain ${toChain}`);
+
+    const chainList: ChainInfo[] = await loadChains({ environment: this.environment });
+
+    const srcChainInfo = chainList.find(
+      (chainInfo) => chainInfo.id === fromChain.toLowerCase()
+    ) as ChainInfo;
+    if (!srcChainInfo) throw new Error("cannot find chain" + fromChain);
+    const destChainInfo = chainList.find(
+      (chainInfo) => chainInfo.id === toChain.toLowerCase()
+    ) as ChainInfo;
+    if (!destChainInfo) throw new Error("cannot find chain" + toChain);
+
+    /**if user has selected native cxy, e.g. ETH, AVAX, etc, assume it is to be wrapped into ERC20 on dest chain */
+    if (isNativeToken(srcChainInfo.chainName.toLowerCase() as EvmChain, asset as GasToken)) {
+      return await this.getDepositAddressForNativeWrap(
+        fromChain,
+        toChain,
+        destinationAddress,
+        options?.refundAddress
+      );
+    }
+    /**if user has selected native cxy wrapped asset, e.g. WETH, WAVAX, and selected to unwrap it */
+    if (destChainInfo.nativeAsset.includes(asset as string) && options?.shouldUnwrapIntoNative) {
+      return await this.getDepositAddressForNativeUnwrap(
+        fromChain,
+        toChain,
+        destinationAddress,
+        options.refundAddress
+      );
+    }
 
     // auth/rate limiting
     const wallet = createWallet();
