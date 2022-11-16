@@ -1,5 +1,5 @@
 import { AssetConfig } from "../assets/types";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { formatUnits, parseEther, parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
@@ -15,6 +15,12 @@ import {
 import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
+import EVMClient from "./TransactionRecoveryApi/client/EVMClient";
+import rpcInfo from "./TransactionRecoveryApi/constants/chain";
+import { ethers } from "ethers";
+import { AxelarRecoveryApi } from "./TransactionRecoveryApi";
+import gatewayAbi from "../../artifacts/contracts/AxelarGateway.sol/AxelarGateway.json";
+import { ChainInfo } from "src/chains/types";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -308,4 +314,73 @@ export class AxelarQueryAPI {
       });
     }
   };
+
+  public async getTransferLimit({
+    chainId,
+    denom,
+  }: {
+    denom: string;
+    chainId: string;
+  }): Promise<string> {
+    try {
+      // verify chain params
+      await throwIfInvalidChainIds([chainId], this.environment);
+      const chains = await loadChains({ environment: this.environment });
+      const chain = chains.find((c) => c.id === chainId);
+      if (!chain) throw `Chain ${chainId} not found`;
+
+      // verify asset params
+      if (!this.allAssets) await this._initializeAssets();
+      const asset = this.allAssets.find((asset) => asset.common_key[this.environment] === denom);
+      if (!asset) throw `Asset ${denom} not found`;
+
+      // if chain is on evm module, query the contract directly on the EVM chain
+      // othewise if the chain is in the axelarnet module, query the nexus module
+      return formatUnits(
+        await (chain.module === "evm"
+          ? this.queryEVMTransferLimit(chainId, asset, chain)
+          : this.queryAxelarTransferLimit(chainId, denom)),
+        asset.decimals
+      );
+    } catch (e) {
+      console.error(e);
+      throw `could not fetch transfer limit for ${denom} on ${chainId}`;
+    }
+  }
+
+  private async queryAxelarTransferLimit(chainId: string, denom: string) {
+    const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient({
+      environment: this.environment,
+    });
+
+    // the "limit" response to the TransferRateLimit RPC query is of type Uint8Array, so need to decode it
+    return await api.nexus
+      .TransferRateLimit({ chain: chainId, asset: denom })
+      .then((res) => res.transferRateLimit?.limit)
+      .then((limit) => (limit ? new TextDecoder("utf-8").decode(new Uint8Array(limit)) : ""));
+  }
+
+  private async queryEVMTransferLimit(chainId: string, asset: AssetConfig, chain: ChainInfo) {
+    const { chain_aliases, decimals } = asset;
+    const { chainName } = chain;
+
+    // get the evm provider
+    const evmClient = new EVMClient({
+      rpcUrl: rpcInfo[this.environment].rpcMap[chainId],
+      evmWalletDetails: { useWindowEthereum: false },
+    });
+
+    // the on-chain query only accepts symbol, so translate the denom to symbol
+    const { assetSymbol } = chain_aliases[chainName.toLowerCase()];
+
+    // get the gateway address and instantiate the gateway contract for query
+    const axelarRecoveryAPI = new AxelarRecoveryApi({ environment: this.environment });
+    const gatewayAddr = await axelarRecoveryAPI
+      .queryGatewayAddress({ chain: chainId })
+      .then((res) => res.address);
+    const gateway = new ethers.Contract(gatewayAddr, gatewayAbi.abi, evmClient.getProvivider());
+
+    // query and format the token mint limit
+    return await gateway.tokenMintLimit(assetSymbol);
+  }
 }

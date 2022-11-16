@@ -26,6 +26,10 @@ export default class EVMClient {
     return this.signer;
   }
 
+  public getProvivider() {
+    return this.provider;
+  }
+
   public async broadcastToGateway(gatewayAddress: string, opts: TransactionRequest) {
     const { data, maxFeePerGas, maxPriorityFeePerGas } = opts;
     const txRequest: TransactionRequest = {

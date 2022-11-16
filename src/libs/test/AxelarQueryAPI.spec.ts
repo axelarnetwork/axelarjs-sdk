@@ -182,4 +182,25 @@ describe("AxelarQueryAPI", () => {
       });
     });
   });
+
+  describe("getTransferLimit", () => {
+    let api: AxelarQueryAPI;
+
+    beforeEach(async () => {
+      api = new AxelarQueryAPI({ environment: Environment.TESTNET });
+    });
+
+    test("it should return the transfer limit of an asset as a string for evm chains", async () => {
+      const chainId = "ethereum-2";
+      const denom = "uausdc";
+      const res = await api.getTransferLimit({ chainId, denom }).catch((e) => console.log(e));
+      expect(res).toBeDefined();
+    });
+    test("it should return the transfer limit of an asset as a string for axelarnet chains", async () => {
+      const chainId = "sei";
+      const denom = "uausdc";
+      const res = await api.getTransferLimit({ chainId, denom }).catch((e) => console.log(e));
+      expect(res).toBeDefined();
+    });
+  });
 });
