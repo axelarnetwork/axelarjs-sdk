@@ -10,7 +10,7 @@ import {
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
-import { isValidChainIdentifier } from "../utils";
+import { isValidChainIdentifier, validateChainIdentifier } from "../utils";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -46,45 +46,48 @@ export class AxelarQueryAPI {
   /**
    * Gets the fee for a chain and asset
    * example testnet query: https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/fee?chain=ethereum&asset=uusd
-   * @param chainName
+   * @param chainId
    * @param assetDenom
    * @returns
    */
   public async getFeeForChainAndAsset(
-    chainName: string,
+    chainId: string,
     assetDenom: string
   ): Promise<FeeInfoResponse> {
+    await validateChainIdentifier(chainId, this.environment);
     if (!this.axelarQueryClient)
       this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
         environment: this.environment,
         axelarRpcUrl: this.axelarRpcUrl,
       });
-    return this.axelarQueryClient.nexus.FeeInfo({ chain: chainName, asset: assetDenom });
+    return this.axelarQueryClient.nexus.FeeInfo({ chain: chainId, asset: assetDenom });
   }
 
   /**
    * Gest the transfer fee for a given transaction
    * example testnet query: "https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=ethereum&destination_chain=terra&amount=100000000uusd"
-   * @param sourceChainName
-   * @param destinationChainName
+   * @param sourceChainId
+   * @param destinationChainId
    * @param assetDenom
    * @param amountInDenom
    * @returns
    */
   public async getTransferFee(
-    sourceChainName: string,
-    destinationChainName: string,
+    sourceChainId: string,
+    destinationChainId: string,
     assetDenom: string,
     amountInDenom: number
   ): Promise<TransferFeeResponse> {
+    await validateChainIdentifier(sourceChainId, this.environment);
+    await validateChainIdentifier(destinationChainId, this.environment);
     if (!this.axelarQueryClient)
       this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
         environment: this.environment,
         axelarRpcUrl: this.axelarRpcUrl,
       });
     return this.axelarQueryClient.nexus.TransferFee({
-      sourceChain: sourceChainName,
-      destinationChain: destinationChainName,
+      sourceChain: sourceChainId,
+      destinationChain: destinationChainId,
       amount: `${amountInDenom.toString()}${assetDenom}`,
     });
   }
@@ -92,20 +95,22 @@ export class AxelarQueryAPI {
   /**
    * Gets the gas price for a destination chain to be paid to the gas receiver on a source chain
    * example testnet query: https://testnet.api.gmp.axelarscan.io/?method=getGasPrice&destinationChain=ethereum&sourceChain=avalanche&sourceTokenAddress=0x43F4600b552089655645f8c16D86A5a9Fa296bc3&sourceTokenSymbol=UST
-   * @param sourceChainName
-   * @param destinationChainName
+   * @param sourceChainId
+   * @param destinationChainId
    * @param sourceChainTokenSymbol
    * @returns
    */
   public async getGasInfo(
-    sourceChainName: EvmChain,
-    destinationChainName: EvmChain,
+    sourceChainId: EvmChain | string,
+    destinationChainId: EvmChain | string,
     sourceChainTokenSymbol: GasToken | string
   ): Promise<any> {
+    await validateChainIdentifier(sourceChainId, this.environment);
+    await validateChainIdentifier(destinationChainId, this.environment);
     const params = new URLSearchParams({
       method: "getGasPrice",
-      destinationChain: destinationChainName,
-      sourceChain: sourceChainName,
+      destinationChain: destinationChainId,
+      sourceChain: sourceChainId,
       sourceTokenSymbol: sourceChainTokenSymbol,
     });
 
@@ -120,17 +125,17 @@ export class AxelarQueryAPI {
    * @returns base fee in native token in wei, translated into the native gas token of choice
    */
   public async getNativeGasBaseFee(
-    sourceChainName: EvmChain | string,
-    destinationChainName: EvmChain | string,
+    sourceChainId: EvmChain | string,
+    destinationChainId: EvmChain | string,
     sourceTokenSymbol?: GasToken
   ): Promise<BaseFeeResponse> {
-    await isValidChainIdentifier(sourceChainName, this.environment);
-    await isValidChainIdentifier(destinationChainName, this.environment);
+    await isValidChainIdentifier(sourceChainId, this.environment);
+    await isValidChainIdentifier(destinationChainId, this.environment);
     return this.axelarGMPServiceApi
       .post("", {
         method: "getFees",
-        destinationChain: destinationChainName,
-        sourceChain: sourceChainName,
+        destinationChain: destinationChainId,
+        sourceChain: sourceChainId,
         sourceTokenSymbol,
       })
       .then((response) => {
@@ -144,25 +149,25 @@ export class AxelarQueryAPI {
 
   /**
    * Calculate estimated gas amount to pay for the gas receiver contract.
-   * @param sourceChainName
-   * @param destinationChainName
+   * @param sourceChainId
+   * @param destinationChainId
    * @param sourceChainTokenSymbol
    * @param gasLimit (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which should be sufficient for most transactions.
    * @param gasMultiplier (Optional) A multiplier used to create a buffer above the calculated gas fee, to account for potential slippage throughout tx execution, e.g. 1.1 = 10% buffer. supports up to 3 decimal places
    * @returns
    */
   public async estimateGasFee(
-    sourceChainName: EvmChain | string,
-    destinationChainName: EvmChain | string,
+    sourceChainId: EvmChain | string,
+    destinationChainId: EvmChain | string,
     sourceChainTokenSymbol: GasToken | string,
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1
   ): Promise<string> {
-    await isValidChainIdentifier(sourceChainName, this.environment);
-    await isValidChainIdentifier(destinationChainName, this.environment);
+    await isValidChainIdentifier(sourceChainId, this.environment);
+    await isValidChainIdentifier(destinationChainId, this.environment);
     const response = await this.getNativeGasBaseFee(
-      sourceChainName,
-      destinationChainName,
+      sourceChainId,
+      destinationChainId,
       sourceChainTokenSymbol as GasToken
     ).catch(() => undefined);
 
