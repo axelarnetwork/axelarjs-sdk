@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.0] - 2022-NOVEMBER-[]
+
+- changing all method signatures to require chain IDs (as recognized by Axelar) instead of chain name. For example, in testnet, Ethereums (Goerli) is recognized as `ethereum-2`
+- `getDepositAddress` updates:
+  1. update payload signature to accept a destructured object parameter. the method is still backwards compatible for previous invocations using regular parameters
+  2. merged `getDepositAddressForNativeUnwrap` and `getDepositAddressForNativeWrap` method functionality into `getDepositAddress` method
+
 ## [0.11.7] - 2022-OCTOBER-26
 
 - updated supported chains list
