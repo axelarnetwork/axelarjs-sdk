@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `getDepositAddress` updates:
   1. update payload signature to accept a destructured object parameter. the method is still backwards compatible for previous invocations using regular parameters
   2. merged `getDepositAddressForNativeUnwrap` and `getDepositAddressForNativeWrap` method functionality into `getDepositAddress` method
+- upgrade axelarjs-types dependency to `v0.27.0`
 
 ## [0.11.7] - 2022-OCTOBER-26
 
