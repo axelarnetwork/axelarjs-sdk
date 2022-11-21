@@ -329,7 +329,12 @@ describe("AxelarAssetTransfer", () => {
         jest.spyOn(bridge, "getInitRoomId").mockResolvedValue(roomIdStub().roomId);
         jest.spyOn(bridge, "getLinkEvent").mockResolvedValue(linkEventStub().newRoomId);
         response = await bridge.getDepositAddress(fromChain, toChain, depositAddress, asset);
-        responseWithObjectParams = await bridge.getDepositAddress({ fromChain, toChain, destinationAddress: depositAddress, asset});
+        responseWithObjectParams = await bridge.getDepositAddress({
+          fromChain,
+          toChain,
+          destinationAddress: depositAddress,
+          asset,
+        });
       });
 
       it("should return deposit address", () => {
@@ -451,7 +456,7 @@ describe("AxelarAssetTransfer", () => {
         jest
           .spyOn(bridge, "getDepositAddressForNativeUnwrap")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
-        });
+      });
       it("should call getDepositAddressForNativeWrap and not getDepositAddressForNativeUnwrap", async () => {
         await expect(
           bridge.getDepositAddress(
@@ -474,7 +479,10 @@ describe("AxelarAssetTransfer", () => {
             EvmChain.AVALANCHE,
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
             "wavax-wei",
-            { refundAddress: "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d", shouldUnwrapIntoNative: true }
+            {
+              refundAddress: "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+              shouldUnwrapIntoNative: true,
+            }
           )
         ).resolves.toBe("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
         expect(bridge.getDepositAddressForNativeWrap).not.toHaveBeenCalled();

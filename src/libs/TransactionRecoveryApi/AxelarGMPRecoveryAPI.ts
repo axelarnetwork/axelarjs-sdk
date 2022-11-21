@@ -186,7 +186,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     gasTokenSymbol: GasToken | string,
     options: QueryGasFeeOptions
   ): Promise<string> {
-
     await isValidChainIdentifier(sourceChain, this.environment);
     await isValidChainIdentifier(destinationChain, this.environment);
 
@@ -455,7 +454,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     paidGasFee: string,
     options: QueryGasFeeOptions
   ) {
-    
     await isValidChainIdentifier(sourceChain, this.environment);
     await isValidChainIdentifier(destinationChain, this.environment);
 
@@ -485,8 +483,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async getGasReceiverContractAddress(chainId: string): Promise<string> {
-    const chains = await loadChains({ environment: this.environment})
-    const selectedChain = chains.find(chain => chain.id === chainId);
+    const chains = await loadChains({ environment: this.environment });
+    const selectedChain = chains.find((chain) => chain.id === chainId);
     if (!selectedChain) throw `getGasReceiverContractAddress() ${chainId} not found`;
     const { chainName } = selectedChain;
     return await fetch(s3[this.environment])

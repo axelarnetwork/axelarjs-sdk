@@ -17,7 +17,7 @@ import {
   validateDestinationAddressByChainName,
 } from "../utils";
 import { getConfigs } from "../constants";
-import { AxelarAssetTransferConfig, Environment, EvmChain, GasToken, isNativeToken } from "./types";
+import { AxelarAssetTransferConfig, Environment, GasToken, isNativeToken } from "./types";
 import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
