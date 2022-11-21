@@ -11,6 +11,7 @@ export const getTransferPayload = (
     sourceChainInfo: {
       id: "terra-3",
       chainSymbol: "Terra",
+      assets: [],
       chainName: "Terra",
       estimatedWaitTime: 5,
       fullySupported: true,
@@ -36,6 +37,7 @@ export const getTransferPayload = (
     destinationChainInfo: {
       id: "avalanche",
       chainSymbol: "AVAX",
+      assets: [],
       chainName: "Avalanche",
       estimatedWaitTime: 5,
       fullySupported: true,
