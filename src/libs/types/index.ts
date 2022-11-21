@@ -221,13 +221,13 @@ export interface ApproveGatewayResponse {
 
 export const isNativeToken = (chain: string, selectedToken: GasToken): boolean => {
   const nativeTokenMap: Record<string, GasToken> = {
-    'ethereum': GasToken.ETH,
-    'avalanche': GasToken.AVAX,
-    'fantom': GasToken.FTM,
-    'polygon': GasToken.MATIC,
-    'moonbeam': GasToken.GLMR,
-    'aurora': GasToken.AURORA,
-    'biance': GasToken.BINANCE,
+    ethereum: GasToken.ETH,
+    avalanche: GasToken.AVAX,
+    fantom: GasToken.FTM,
+    polygon: GasToken.MATIC,
+    moonbeam: GasToken.GLMR,
+    aurora: GasToken.AURORA,
+    binance: GasToken.BINANCE,
   };
   return nativeTokenMap[chain] === selectedToken;
 };

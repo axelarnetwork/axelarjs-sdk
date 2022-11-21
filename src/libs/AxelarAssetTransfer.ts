@@ -17,7 +17,7 @@ import {
   validateDestinationAddressByChainName,
 } from "../utils";
 import { getConfigs } from "../constants";
-import { AxelarAssetTransferConfig, Environment, EvmChain, GasToken, isNativeToken } from "./types";
+import { AxelarAssetTransferConfig, Environment, GasToken, isNativeToken } from "./types";
 import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
@@ -67,10 +67,9 @@ export class AxelarAssetTransfer {
     destinationAddress: string,
     refundAddress?: string
   ): Promise<string> {
-
     await isValidChainIdentifier(fromChain, this.environment);
     await isValidChainIdentifier(toChain, this.environment);
-    
+
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address } = await this.getDepositAddressFromRemote(
       "wrap",
@@ -101,7 +100,6 @@ export class AxelarAssetTransfer {
     destinationAddress: string,
     refundAddress?: string
   ): Promise<string> {
-
     await isValidChainIdentifier(fromChain, this.environment);
     await isValidChainIdentifier(toChain, this.environment);
 
@@ -146,7 +144,6 @@ export class AxelarAssetTransfer {
     refundAddress: string,
     hexSalt: string
   ): Promise<{ address: string }> {
-
     const endpoint = wrapOrUnWrap === "wrap" ? "/deposit/wrap" : "/deposit/unwrap";
 
     if (fromChain) await isValidChainIdentifier(fromChain, this.environment);
@@ -261,7 +258,7 @@ export class AxelarAssetTransfer {
     if (!destChainInfo) throw new Error("cannot find chain" + toChain);
 
     /**if user has selected native cxy, e.g. ETH, AVAX, etc, assume it is to be wrapped into ERC20 on dest chain */
-    if (isNativeToken(srcChainInfo.chainName.toLowerCase() as EvmChain, asset as GasToken)) {
+    if (isNativeToken(srcChainInfo.chainName.toLowerCase(), asset as GasToken)) {
       return await this.getDepositAddressForNativeWrap(
         fromChain,
         toChain,

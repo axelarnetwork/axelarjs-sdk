@@ -16,16 +16,13 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async confirmDeposit(params: ConfirmDepositRequest) {
-
     await isValidChainIdentifier(params.from, this.environment);
 
     const chain: ChainInfo = (
       await loadChains({
         environment: this.environment,
       })
-    ).find(
-      (chainInfo) => chainInfo.id.toLowerCase() === params.from.toLowerCase()
-    ) as ChainInfo;
+    ).find((chainInfo) => chainInfo.id.toLowerCase() === params.from.toLowerCase()) as ChainInfo;
     if (!chain) throw new Error("cannot find chain" + params.from);
 
     const txBytes = await this.execRecoveryUrlFetch("/confirm_deposit_tx", {
