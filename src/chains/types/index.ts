@@ -16,7 +16,7 @@ export interface AssetAndChainInfo {
 
 export interface ChainInfo {
   id: string;
-  assets?: AssetInfo[];
+  assets: AssetInfo[];
   chainSymbol: string;
   chainName: string;
   fullySupported: boolean;
