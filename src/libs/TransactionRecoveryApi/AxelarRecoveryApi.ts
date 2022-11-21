@@ -187,14 +187,14 @@ export class AxelarRecoveryApi {
     };
   }
 
-  private async getChainInfo(chainName: string) {
+  private async getChainInfo(chainId: string) {
     const chainInfo = (
       await loadChains({
         environment: this.environment,
       })
-    ).find((chainInfo) => chainInfo.chainName.toLowerCase() === chainName.toLowerCase());
+    ).find((chainInfo) => chainInfo.id.toLowerCase() === chainId.toLowerCase());
 
-    if (!chainInfo) throw new Error("cannot find chain" + chainName);
+    if (!chainInfo) throw new Error("cannot find chain" + chainId);
 
     return chainInfo;
   }
