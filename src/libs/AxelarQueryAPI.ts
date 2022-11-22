@@ -7,6 +7,7 @@ import { AxelarQueryAPIConfig, BaseFeeResponse, Environment, EvmChain, GasToken 
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import {
+  ChainStatus,
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
@@ -55,11 +56,9 @@ export class AxelarQueryAPI {
     assetDenom: string
   ): Promise<FeeInfoResponse> {
     await validateChainIdentifier(chainId, this.environment);
-    if (!this.axelarQueryClient)
-      this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
-        environment: this.environment,
-        axelarRpcUrl: this.axelarRpcUrl,
-      });
+
+    await this.initQueryClientIfNeeded();
+
     return this.axelarQueryClient.nexus.FeeInfo({ chain: chainId, asset: assetDenom });
   }
 
@@ -80,11 +79,9 @@ export class AxelarQueryAPI {
   ): Promise<TransferFeeResponse> {
     await validateChainIdentifier(sourceChainId, this.environment);
     await validateChainIdentifier(destinationChainId, this.environment);
-    if (!this.axelarQueryClient)
-      this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
-        environment: this.environment,
-        axelarRpcUrl: this.axelarRpcUrl,
-      });
+
+    await this.initQueryClientIfNeeded();
+
     return this.axelarQueryClient.nexus.TransferFee({
       sourceChain: sourceChainId,
       destinationChain: destinationChainId,
@@ -240,4 +237,28 @@ export class AxelarQueryAPI {
     result.common_key = assetConfig.common_key[this.environment];
     return result;
   }
+
+  /**
+   * Get a list of active chains.
+   * @returns an array of active chains
+   */
+  public async getActiveChains(): Promise<string[]> {
+    await this.initQueryClientIfNeeded();
+
+    return this.axelarQueryClient.nexus
+      .Chains({ status: ChainStatus.CHAIN_STATUS_ACTIVATED })
+      .then((resp) => resp.chains);
+  }
+
+  /**
+   * Initialize the query client if it hasn't been initialized yet
+   */
+  private initQueryClientIfNeeded = async () => {
+    if (!this.axelarQueryClient) {
+      this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
+        environment: this.environment,
+        axelarRpcUrl: this.axelarRpcUrl,
+      });
+    }
+  };
 }
