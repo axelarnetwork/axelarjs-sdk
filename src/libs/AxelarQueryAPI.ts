@@ -250,7 +250,7 @@ export class AxelarQueryAPI {
 
     return this.axelarQueryClient.nexus
       .Chains({ status: ChainStatus.CHAIN_STATUS_ACTIVATED })
-      .then((resp) => resp.chains.map((chain) => chain.toLowerCase()));
+      .then((resp) => resp.chains);
   }
 
   /**
@@ -259,7 +259,9 @@ export class AxelarQueryAPI {
    * @returns true if the chain is active, false otherwise
    */
   public async isChainActive(chainId: EvmChain | string): Promise<boolean> {
-    return this.getActiveChains().then((chains) => chains.includes(chainId.toLowerCase()));
+    return this.getActiveChains()
+      .then((chains) => chains.map((chain) => chain.toLowerCase()))
+      .then((chains) => chains.includes(chainId.toLowerCase()));
   }
 
   /**
