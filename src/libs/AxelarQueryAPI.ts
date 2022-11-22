@@ -128,6 +128,8 @@ export class AxelarQueryAPI {
   ): Promise<BaseFeeResponse> {
     await isValidChainIdentifier(sourceChainId, this.environment);
     await isValidChainIdentifier(destinationChainId, this.environment);
+    await this.throwIfInactiveChain(sourceChainId);
+    await this.throwIfInactiveChain(destinationChainId);
     return this.axelarGMPServiceApi
       .post("", {
         method: "getFees",
@@ -162,6 +164,9 @@ export class AxelarQueryAPI {
   ): Promise<string> {
     await isValidChainIdentifier(sourceChainId, this.environment);
     await isValidChainIdentifier(destinationChainId, this.environment);
+    await this.throwIfInactiveChain(sourceChainId);
+    await this.throwIfInactiveChain(destinationChainId);
+
     const response = await this.getNativeGasBaseFee(
       sourceChainId,
       destinationChainId,
@@ -248,6 +253,27 @@ export class AxelarQueryAPI {
     return this.axelarQueryClient.nexus
       .Chains({ status: ChainStatus.CHAIN_STATUS_ACTIVATED })
       .then((resp) => resp.chains.map((chain) => chain.toLowerCase()));
+  }
+
+  /**
+   * Check if a chain is active.
+   * @param chainId the chain id to check
+   * @returns true if the chain is active, false otherwise
+   */
+  public async isChainActive(chainId: EvmChain | string): Promise<boolean> {
+    return this.getActiveChains().then((chains) => chains.includes(chainId));
+  }
+
+  /**
+   * Throw an error if a chain is not active.
+   * @param chainId the chainId to check
+   */
+  public async throwIfInactiveChain(chainId: EvmChain | string) {
+    const isActive = await this.isChainActive(chainId);
+    if (!isActive)
+      throw new Error(
+        `Chain ${chainId} is not active. Please check the list of active chains using the getActiveChains() method.`
+      );
   }
 
   /**
