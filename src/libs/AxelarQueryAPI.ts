@@ -247,7 +247,7 @@ export class AxelarQueryAPI {
 
     return this.axelarQueryClient.nexus
       .Chains({ status: ChainStatus.CHAIN_STATUS_ACTIVATED })
-      .then((resp) => resp.chains);
+      .then((resp) => resp.chains.map((chain) => chain.toLowerCase()));
   }
 
   /**
