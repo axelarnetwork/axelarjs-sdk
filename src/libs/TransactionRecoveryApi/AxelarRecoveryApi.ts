@@ -8,7 +8,7 @@ import EVMClient from "./client/EVMClient";
 import { TransactionRequest } from "@ethersproject/providers";
 import rpcInfo from "./constants/chain";
 import { BigNumber } from "ethers";
-import { isValidChainIdentifier } from "../../utils";
+import { throwIfInvalidChainId } from "../../utils";
 
 export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
@@ -246,19 +246,19 @@ export class AxelarRecoveryApi {
   public async queryBatchedCommands(chainId: string, batchCommandId = "") {
     if (!this.axelarQuerySvc)
       this.axelarQuerySvc = await AxelarQueryClient.initOrGetAxelarQueryClient(this.config);
-    await isValidChainIdentifier(chainId, this.environment);
+    await throwIfInvalidChainId(chainId, this.environment);
     return this.axelarQuerySvc.evm.BatchedCommands({ chain: chainId, id: batchCommandId });
   }
 
   public async queryGatewayAddress({ chain }: { chain: string }) {
     if (!this.axelarQuerySvc)
       this.axelarQuerySvc = await AxelarQueryClient.initOrGetAxelarQueryClient(this.config);
-    await isValidChainIdentifier(chain, this.environment);
+    await throwIfInvalidChainId(chain, this.environment);
     return this.axelarQuerySvc.evm.GatewayAddress({ chain });
   }
 
   public async getSignedTxAndBroadcast(chain: string, data: string) {
-    await isValidChainIdentifier(chain, this.environment);
+    await throwIfInvalidChainId(chain, this.environment);
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcInfo[this.environment].rpcMap[chain],
@@ -276,7 +276,7 @@ export class AxelarRecoveryApi {
   }
 
   public async sendApproveTx(chain: string, data: string, evmWalletDetails: EvmWalletDetails) {
-    await isValidChainIdentifier(chain, this.environment);
+    await throwIfInvalidChainId(chain, this.environment);
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcInfo[this.environment].rpcMap[chain],
@@ -297,7 +297,7 @@ export class AxelarRecoveryApi {
     data: string,
     evmWalletDetails = { useWindowEthereum: true }
   ) {
-    await isValidChainIdentifier(chain, this.environment);
+    await throwIfInvalidChainId(chain, this.environment);
     const gatewayInfo = await this.queryGatewayAddress({ chain });
     const evmClient = new EVMClient({
       rpcUrl: rpcInfo[this.environment].rpcMap[chain],

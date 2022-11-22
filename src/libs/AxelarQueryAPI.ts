@@ -11,7 +11,7 @@ import {
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
-import { isValidChainIdentifier, validateChainIdentifier } from "../utils";
+import { throwIfInvalidChainId, validateChainIdentifier } from "../utils";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -126,8 +126,8 @@ export class AxelarQueryAPI {
     destinationChainId: EvmChain | string,
     sourceTokenSymbol?: GasToken
   ): Promise<BaseFeeResponse> {
-    await isValidChainIdentifier(sourceChainId, this.environment);
-    await isValidChainIdentifier(destinationChainId, this.environment);
+    await throwIfInvalidChainId(sourceChainId, this.environment);
+    await throwIfInvalidChainId(destinationChainId, this.environment);
     await this.throwIfInactiveChain(sourceChainId);
     await this.throwIfInactiveChain(destinationChainId);
     return this.axelarGMPServiceApi
@@ -162,8 +162,8 @@ export class AxelarQueryAPI {
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1
   ): Promise<string> {
-    await isValidChainIdentifier(sourceChainId, this.environment);
-    await isValidChainIdentifier(destinationChainId, this.environment);
+    await throwIfInvalidChainId(sourceChainId, this.environment);
+    await throwIfInvalidChainId(destinationChainId, this.environment);
     await this.throwIfInactiveChain(sourceChainId);
     await this.throwIfInactiveChain(destinationChainId);
 

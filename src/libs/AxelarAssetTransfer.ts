@@ -12,7 +12,7 @@ import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET, OTC } from "../serv
 import { RestService, SocketService } from "../services";
 import {
   createWallet,
-  isValidChainIdentifier,
+  throwIfInvalidChainId,
   validateChainIdentifier,
   validateDestinationAddressByChainName,
 } from "../utils";
@@ -69,8 +69,8 @@ export class AxelarAssetTransfer {
     destinationAddress: string,
     refundAddress?: string
   ): Promise<string> {
-    await isValidChainIdentifier(fromChain, this.environment);
-    await isValidChainIdentifier(toChain, this.environment);
+    await throwIfInvalidChainId(fromChain, this.environment);
+    await throwIfInvalidChainId(toChain, this.environment);
 
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address } = await this.getDepositAddressFromRemote(
@@ -102,8 +102,8 @@ export class AxelarAssetTransfer {
     destinationAddress: string,
     refundAddress?: string
   ): Promise<string> {
-    await isValidChainIdentifier(fromChain, this.environment);
-    await isValidChainIdentifier(toChain, this.environment);
+    await throwIfInvalidChainId(fromChain, this.environment);
+    await throwIfInvalidChainId(toChain, this.environment);
 
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
 
@@ -148,8 +148,8 @@ export class AxelarAssetTransfer {
   ): Promise<{ address: string }> {
     const endpoint = wrapOrUnWrap === "wrap" ? "/deposit/wrap" : "/deposit/unwrap";
 
-    if (fromChain) await isValidChainIdentifier(fromChain, this.environment);
-    if (toChain) await isValidChainIdentifier(toChain, this.environment);
+    if (fromChain) await throwIfInvalidChainId(fromChain, this.environment);
+    if (toChain) await throwIfInvalidChainId(toChain, this.environment);
 
     return this.depositServiceApi
       .post(endpoint, {
@@ -171,8 +171,8 @@ export class AxelarAssetTransfer {
     refundAddress: string,
     hexSalt: string
   ) {
-    await isValidChainIdentifier(fromChain, this.environment);
-    await isValidChainIdentifier(toChain, this.environment);
+    await throwIfInvalidChainId(fromChain, this.environment);
+    await throwIfInvalidChainId(toChain, this.environment);
     const receiverInterface = new Interface(ReceiverImplementation.abi);
     const functionData =
       wrapOrUnWrap === "wrap"
@@ -325,8 +325,8 @@ export class AxelarAssetTransfer {
   ): Promise<string> {
     type RoomIdResponse = Record<"data", Record<"roomId", string>>;
 
-    await isValidChainIdentifier(fromChain, this.environment);
-    await isValidChainIdentifier(toChain, this.environment);
+    await throwIfInvalidChainId(fromChain, this.environment);
+    await throwIfInvalidChainId(toChain, this.environment);
 
     const payload = {
       fromChain,
@@ -354,8 +354,8 @@ export class AxelarAssetTransfer {
     destinationChain: string,
     destinationAddress: string
   ): Promise<string> {
-    await isValidChainIdentifier(sourceChain, this.environment);
-    await isValidChainIdentifier(destinationChain, this.environment);
+    await throwIfInvalidChainId(sourceChain, this.environment);
+    await throwIfInvalidChainId(destinationChain, this.environment);
     const { newRoomId } = await this.getSocketService()
       .joinRoomAndWaitForEvent(roomId, sourceChain, destinationChain, destinationAddress)
       .catch((error) => {
