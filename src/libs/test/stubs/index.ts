@@ -32,7 +32,7 @@ export const activeChainsStub = () => [
   "regen",
   "secret",
   "stargaze",
-  "terra-2",
+  "terra-3",
   "umee",
 ];
 

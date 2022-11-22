@@ -3,6 +3,7 @@ import { CHAINS, CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET } from "../.
 import { AxelarAssetTransfer } from "../AxelarAssetTransfer";
 import { Environment, EvmChain } from "../types";
 import {
+  activeChainsStub,
   apiErrorStub,
   depositAddressPayloadStub,
   ethAddressStub,
@@ -21,6 +22,7 @@ describe("AxelarAssetTransfer", () => {
     jest
       .spyOn(AxelarAssetTransfer.prototype as any, "getSocketService")
       .mockReturnValueOnce(socket);
+
     jest.clearAllMocks();
   });
 
@@ -31,6 +33,7 @@ describe("AxelarAssetTransfer", () => {
       bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
+      jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     describe("AxelarAssetTransfer", () => {
@@ -67,6 +70,7 @@ describe("AxelarAssetTransfer", () => {
       bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
+      jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     describe("on error", () => {
@@ -108,6 +112,9 @@ describe("AxelarAssetTransfer", () => {
 
         beforeEach(async () => {
           jest.spyOn(bridge.api, "get").mockResolvedValue(otcStub());
+          jest
+            .spyOn(bridge.axelarQueryApi, "getActiveChains")
+            .mockResolvedValue(activeChainsStub());
           otc = await bridge.getOneTimeCode(ethAddressStub(), uuidStub());
         });
 
@@ -136,6 +143,7 @@ describe("AxelarAssetTransfer", () => {
       bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
+      jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     describe("on error", () => {
@@ -231,6 +239,7 @@ describe("AxelarAssetTransfer", () => {
       bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
+      jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     describe("on error", () => {
@@ -328,6 +337,7 @@ describe("AxelarAssetTransfer", () => {
         jest.spyOn(bridge, "getOneTimeCode").mockResolvedValue(otcStub());
         jest.spyOn(bridge, "getInitRoomId").mockResolvedValue(roomIdStub().roomId);
         jest.spyOn(bridge, "getLinkEvent").mockResolvedValue(linkEventStub().newRoomId);
+        jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
         response = await bridge.getDepositAddress(fromChain, toChain, depositAddress, asset);
         responseWithObjectParams = await bridge.getDepositAddress({
           fromChain,
@@ -359,6 +369,7 @@ describe("AxelarAssetTransfer", () => {
         jest
           .spyOn(bridge, "getDepositServiceContractAddress")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
       });
       it("should be able to generate a deposit address offline", async () => {
         await expect(
@@ -382,6 +393,7 @@ describe("AxelarAssetTransfer", () => {
         jest
           .spyOn(bridge, "getDepositServiceContractAddress")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
       });
       it("should be able to generate a deposit address offline", () => {
         const depositAddress = bridge.validateOfflineDepositAddress(
@@ -418,6 +430,7 @@ describe("AxelarAssetTransfer", () => {
           .spyOn(bridge, "getDepositServiceContractAddress")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
         jest.spyOn(bridge, "getERC20Denom").mockResolvedValue("wavax-wei");
+        jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
       });
       it("should be able to retrieve the deposit address from microservices for erc20 unwrap", async () => {
         await expect(
@@ -456,6 +469,7 @@ describe("AxelarAssetTransfer", () => {
         jest
           .spyOn(bridge, "getDepositAddressForNativeUnwrap")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
       });
       it("should call getDepositAddressForNativeWrap and not getDepositAddressForNativeUnwrap", async () => {
         await expect(
