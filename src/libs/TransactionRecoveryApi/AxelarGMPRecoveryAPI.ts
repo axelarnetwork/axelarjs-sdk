@@ -212,6 +212,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     gasTokenSymbol: GasToken | string,
     options: QueryGasFeeOptions
   ): Promise<string> {
+    await isValidChainIdentifier(sourceChain, this.environment);
+    await isValidChainIdentifier(destinationChain, this.environment);
+
     const provider = options.provider || getDefaultProvider(sourceChain, this.environment);
     const receipt = await provider.getTransactionReceipt(txHash);
     const paidGasFee = getGasAmountFromTxReceipt(receipt) || "0";
@@ -454,9 +457,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     paidGasFee: string,
     options: QueryGasFeeOptions
   ) {
-    await isValidChainIdentifier(sourceChain, this.environment);
-    await isValidChainIdentifier(destinationChain, this.environment);
-
     const totalGasFee = await this.axelarQueryApi.estimateGasFee(
       sourceChain,
       destinationChain,
