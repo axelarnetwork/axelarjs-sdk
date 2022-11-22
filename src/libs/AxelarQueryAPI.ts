@@ -164,8 +164,6 @@ export class AxelarQueryAPI {
   ): Promise<string> {
     await throwIfInvalidChainId(sourceChainId, this.environment);
     await throwIfInvalidChainId(destinationChainId, this.environment);
-    await this.throwIfInactiveChain(sourceChainId);
-    await this.throwIfInactiveChain(destinationChainId);
 
     const response = await this.getNativeGasBaseFee(
       sourceChainId,
