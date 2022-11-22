@@ -7,10 +7,11 @@ import { AxelarQueryAPIConfig, BaseFeeResponse, Environment, EvmChain, GasToken 
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import {
+  ChainStatus,
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
-import { isValidChainIdentifier, validateChainIdentifier } from "../utils";
+import { throwIfInvalidChainId, validateChainIdentifier } from "../utils";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -55,11 +56,9 @@ export class AxelarQueryAPI {
     assetDenom: string
   ): Promise<FeeInfoResponse> {
     await validateChainIdentifier(chainId, this.environment);
-    if (!this.axelarQueryClient)
-      this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
-        environment: this.environment,
-        axelarRpcUrl: this.axelarRpcUrl,
-      });
+
+    await this.initQueryClientIfNeeded();
+
     return this.axelarQueryClient.nexus.FeeInfo({ chain: chainId, asset: assetDenom });
   }
 
@@ -80,11 +79,9 @@ export class AxelarQueryAPI {
   ): Promise<TransferFeeResponse> {
     await validateChainIdentifier(sourceChainId, this.environment);
     await validateChainIdentifier(destinationChainId, this.environment);
-    if (!this.axelarQueryClient)
-      this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
-        environment: this.environment,
-        axelarRpcUrl: this.axelarRpcUrl,
-      });
+
+    await this.initQueryClientIfNeeded();
+
     return this.axelarQueryClient.nexus.TransferFee({
       sourceChain: sourceChainId,
       destinationChain: destinationChainId,
@@ -129,8 +126,10 @@ export class AxelarQueryAPI {
     destinationChainId: EvmChain | string,
     sourceTokenSymbol?: GasToken
   ): Promise<BaseFeeResponse> {
-    await isValidChainIdentifier(sourceChainId, this.environment);
-    await isValidChainIdentifier(destinationChainId, this.environment);
+    await throwIfInvalidChainId(sourceChainId, this.environment);
+    await throwIfInvalidChainId(destinationChainId, this.environment);
+    await this.throwIfInactiveChain(sourceChainId);
+    await this.throwIfInactiveChain(destinationChainId);
     return this.axelarGMPServiceApi
       .post("", {
         method: "getFees",
@@ -163,8 +162,9 @@ export class AxelarQueryAPI {
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1
   ): Promise<string> {
-    await isValidChainIdentifier(sourceChainId, this.environment);
-    await isValidChainIdentifier(destinationChainId, this.environment);
+    await throwIfInvalidChainId(sourceChainId, this.environment);
+    await throwIfInvalidChainId(destinationChainId, this.environment);
+
     const response = await this.getNativeGasBaseFee(
       sourceChainId,
       destinationChainId,
@@ -240,4 +240,51 @@ export class AxelarQueryAPI {
     result.common_key = assetConfig.common_key[this.environment];
     return result;
   }
+
+  /**
+   * Get a list of active chains.
+   * @returns an array of active chains
+   */
+  public async getActiveChains(): Promise<string[]> {
+    await this.initQueryClientIfNeeded();
+
+    return this.axelarQueryClient.nexus
+      .Chains({ status: ChainStatus.CHAIN_STATUS_ACTIVATED })
+      .then((resp) => resp.chains);
+  }
+
+  /**
+   * Check if a chain is active.
+   * @param chainId the chain id to check
+   * @returns true if the chain is active, false otherwise
+   */
+  public async isChainActive(chainId: EvmChain | string): Promise<boolean> {
+    return this.getActiveChains()
+      .then((chains) => chains.map((chain) => chain.toLowerCase()))
+      .then((chains) => chains.includes(chainId.toLowerCase()));
+  }
+
+  /**
+   * Throw an error if a chain is not active.
+   * @param chainId the chainId to check
+   */
+  public async throwIfInactiveChain(chainId: EvmChain | string) {
+    const isActive = await this.isChainActive(chainId);
+    if (!isActive)
+      throw new Error(
+        `Chain ${chainId} is not active. Please check the list of active chains using the getActiveChains() method.`
+      );
+  }
+
+  /**
+   * Initialize the query client if it hasn't been initialized yet
+   */
+  private initQueryClientIfNeeded = async () => {
+    if (!this.axelarQueryClient) {
+      this.axelarQueryClient = await AxelarQueryClient.initOrGetAxelarQueryClient({
+        environment: this.environment,
+        axelarRpcUrl: this.axelarRpcUrl,
+      });
+    }
+  };
 }

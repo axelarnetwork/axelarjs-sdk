@@ -31,6 +31,7 @@ import { AXELAR_GATEWAY } from "../../AxelarGateway";
 import { GMPStatus } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
 import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contractCallHelper";
 import {
+  activeChainsStub,
   axelarTxResponseStub,
   batchedCommandResponseStub,
   contractReceiptStub,
@@ -292,6 +293,8 @@ describe("AxelarDepositRecoveryAPI", () => {
         .connect(userWallet)
         .approve(contract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
+
+      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     test("it should return 'gas required' - 'gas paid' given 'gas required' > 'gas paid'", async () => {
@@ -316,6 +319,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       jest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
         .mockResolvedValueOnce(gasRequired.toString());
+      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValueOnce(activeChainsStub());
 
       // Calculate how many gas we need to add more.
       const wantedGasFee = await api.calculateNativeGasFee(
@@ -382,6 +386,8 @@ describe("AxelarDepositRecoveryAPI", () => {
       jest
         .spyOn(api, "getGasReceiverContractAddress")
         .mockResolvedValue(gasReceiverContract.address);
+
+      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     beforeAll(async () => {
@@ -688,6 +694,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       jest
         .spyOn(api, "getGasReceiverContractAddress")
         .mockResolvedValueOnce(gasReceiverContract.address);
+      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     beforeAll(async () => {

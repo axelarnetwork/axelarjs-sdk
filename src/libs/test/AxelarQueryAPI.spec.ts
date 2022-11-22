@@ -6,6 +6,7 @@ import { ethers } from "ethers";
 import { CHAINS } from "../../chains";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
+import { activeChainsStub } from "./stubs";
 
 describe("AxelarQueryAPI", () => {
   const api = new AxelarQueryAPI({ environment: Environment.TESTNET });
@@ -93,6 +94,7 @@ describe("AxelarQueryAPI", () => {
 
   describe("getNativeGasBaseFee", () => {
     test("It should return base fee for a certain source chain / destination chain combination", async () => {
+      jest.spyOn(api, "getActiveChains").mockResolvedValueOnce(activeChainsStub());
       const gasResult = await api.getNativeGasBaseFee(
         CHAINS.TESTNET.AVALANCHE as EvmChain,
         CHAINS.TESTNET.ETHEREUM as EvmChain
@@ -131,6 +133,27 @@ describe("AxelarQueryAPI", () => {
         common_key: "uaxl",
         mintLimit: 0,
       });
+    });
+  });
+
+  describe("getActiveChains", () => {
+    test("It should get a list of active chains", async () => {
+      const activeChains = await api.getActiveChains();
+      expect(activeChains.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("throwIfInactiveChain", () => {
+    test("It should throw if the chain does not get included in a active-chains list", async () => {
+      jest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
+      await expect(api.throwIfInactiveChain("ethereum")).rejects.toThrowError(
+        "Chain ethereum is not active"
+      );
+    });
+
+    test("It should throw if the chain does not get included in a active-chains list", async () => {
+      jest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
+      await expect(api.throwIfInactiveChain("avalanche")).resolves.toBeUndefined();
     });
   });
 });

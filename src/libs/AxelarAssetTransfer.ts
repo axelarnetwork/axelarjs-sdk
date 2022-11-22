@@ -12,11 +12,11 @@ import { CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET, OTC } from "../serv
 import { RestService, SocketService } from "../services";
 import {
   createWallet,
-  isValidChainIdentifier,
+  throwIfInvalidChainId,
   validateChainIdentifier,
   validateDestinationAddressByChainName,
 } from "../utils";
-import { getConfigs } from "../constants";
+import { EnvironmentConfigs, getConfigs } from "../constants";
 import { AxelarAssetTransferConfig, Environment, GasToken, isNativeToken } from "./types";
 import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
@@ -25,6 +25,7 @@ import s3 from "./TransactionRecoveryApi/constants/s3";
 import { constants } from "ethers";
 import { ChainInfo } from "../chains/types";
 import { loadChains } from "../chains";
+import { AxelarQueryAPI } from "./AxelarQueryAPI";
 const { HashZero } = constants;
 
 interface GetDepositAddressParams {
@@ -45,6 +46,7 @@ export class AxelarAssetTransfer {
 
   readonly api: RestService;
   readonly depositServiceApi: RestService;
+  readonly axelarQueryApi: AxelarQueryAPI;
   private gasReceiverContract: Record<string, string> = {};
   private depositServiceContract: Record<string, string> = {};
   private evmDenomMap: Record<string, string> = {};
@@ -61,6 +63,13 @@ export class AxelarAssetTransfer {
 
     this.api = new RestService(this.resourceUrl);
     this.depositServiceApi = new RestService(configs.depositServiceUrl);
+
+    const links: EnvironmentConfigs = getConfigs(config.environment);
+    this.axelarQueryApi = new AxelarQueryAPI({
+      environment: config.environment,
+      axelarRpcUrl: links.axelarRpcUrl,
+      axelarLcdUrl: links.axelarLcdUrl,
+    });
   }
 
   async getDepositAddressForNativeWrap(
@@ -69,8 +78,10 @@ export class AxelarAssetTransfer {
     destinationAddress: string,
     refundAddress?: string
   ): Promise<string> {
-    await isValidChainIdentifier(fromChain, this.environment);
-    await isValidChainIdentifier(toChain, this.environment);
+    await throwIfInvalidChainId(fromChain, this.environment);
+    await throwIfInvalidChainId(toChain, this.environment);
+    await this.axelarQueryApi.throwIfInactiveChain(fromChain);
+    await this.axelarQueryApi.throwIfInactiveChain(toChain);
 
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
     const { address } = await this.getDepositAddressFromRemote(
@@ -102,8 +113,10 @@ export class AxelarAssetTransfer {
     destinationAddress: string,
     refundAddress?: string
   ): Promise<string> {
-    await isValidChainIdentifier(fromChain, this.environment);
-    await isValidChainIdentifier(toChain, this.environment);
+    await throwIfInvalidChainId(fromChain, this.environment);
+    await throwIfInvalidChainId(toChain, this.environment);
+    await this.axelarQueryApi.throwIfInactiveChain(fromChain);
+    await this.axelarQueryApi.throwIfInactiveChain(toChain);
 
     refundAddress = refundAddress || (await this.getGasReceiverContractAddress(fromChain));
 
@@ -148,8 +161,15 @@ export class AxelarAssetTransfer {
   ): Promise<{ address: string }> {
     const endpoint = wrapOrUnWrap === "wrap" ? "/deposit/wrap" : "/deposit/unwrap";
 
-    if (fromChain) await isValidChainIdentifier(fromChain, this.environment);
-    if (toChain) await isValidChainIdentifier(toChain, this.environment);
+    if (fromChain) {
+      await throwIfInvalidChainId(fromChain, this.environment);
+      await this.axelarQueryApi.throwIfInactiveChain(fromChain);
+    }
+
+    if (toChain) {
+      await throwIfInvalidChainId(toChain, this.environment);
+      await this.axelarQueryApi.throwIfInactiveChain(toChain);
+    }
 
     return this.depositServiceApi
       .post(endpoint, {
@@ -171,8 +191,11 @@ export class AxelarAssetTransfer {
     refundAddress: string,
     hexSalt: string
   ) {
-    await isValidChainIdentifier(fromChain, this.environment);
-    await isValidChainIdentifier(toChain, this.environment);
+    await throwIfInvalidChainId(fromChain, this.environment);
+    await throwIfInvalidChainId(toChain, this.environment);
+    await this.axelarQueryApi.throwIfInactiveChain(fromChain);
+    await this.axelarQueryApi.throwIfInactiveChain(toChain);
+
     const receiverInterface = new Interface(ReceiverImplementation.abi);
     const functionData =
       wrapOrUnWrap === "wrap"
@@ -325,8 +348,10 @@ export class AxelarAssetTransfer {
   ): Promise<string> {
     type RoomIdResponse = Record<"data", Record<"roomId", string>>;
 
-    await isValidChainIdentifier(fromChain, this.environment);
-    await isValidChainIdentifier(toChain, this.environment);
+    await throwIfInvalidChainId(fromChain, this.environment);
+    await throwIfInvalidChainId(toChain, this.environment);
+    await this.axelarQueryApi.throwIfInactiveChain(fromChain);
+    await this.axelarQueryApi.throwIfInactiveChain(toChain);
 
     const payload = {
       fromChain,
@@ -354,8 +379,10 @@ export class AxelarAssetTransfer {
     destinationChain: string,
     destinationAddress: string
   ): Promise<string> {
-    await isValidChainIdentifier(sourceChain, this.environment);
-    await isValidChainIdentifier(destinationChain, this.environment);
+    await throwIfInvalidChainId(sourceChain, this.environment);
+    await throwIfInvalidChainId(destinationChain, this.environment);
+    await this.axelarQueryApi.throwIfInactiveChain(sourceChain);
+    await this.axelarQueryApi.throwIfInactiveChain(destinationChain);
     const { newRoomId } = await this.getSocketService()
       .joinRoomAndWaitForEvent(roomId, sourceChain, destinationChain, destinationAddress)
       .catch((error) => {
