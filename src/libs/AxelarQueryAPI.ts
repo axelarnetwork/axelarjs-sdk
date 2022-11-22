@@ -259,7 +259,7 @@ export class AxelarQueryAPI {
    * @returns true if the chain is active, false otherwise
    */
   public async isChainActive(chainId: EvmChain | string): Promise<boolean> {
-    return this.getActiveChains().then((chains) => chains.includes(chainId));
+    return this.getActiveChains().then((chains) => chains.includes(chainId.toLowerCase()));
   }
 
   /**

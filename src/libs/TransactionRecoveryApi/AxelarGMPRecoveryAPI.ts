@@ -188,8 +188,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   ): Promise<string> {
     await throwIfInvalidChainId(sourceChain, this.environment);
     await throwIfInvalidChainId(destinationChain, this.environment);
-    await this.axelarQueryApi.throwIfInactiveChain(sourceChain);
-    await this.axelarQueryApi.throwIfInactiveChain(destinationChain);
 
     const provider = options.provider || getDefaultProvider(sourceChain, this.environment);
     const receipt = await provider.getTransactionReceipt(txHash);
@@ -216,8 +214,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   ): Promise<string> {
     await throwIfInvalidChainId(sourceChain, this.environment);
     await throwIfInvalidChainId(destinationChain, this.environment);
-    await this.axelarQueryApi.throwIfInactiveChain(sourceChain);
-    await this.axelarQueryApi.throwIfInactiveChain(destinationChain);
 
     const provider = options.provider || getDefaultProvider(sourceChain, this.environment);
     const receipt = await provider.getTransactionReceipt(txHash);
