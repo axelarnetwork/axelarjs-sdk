@@ -133,4 +133,11 @@ describe("AxelarQueryAPI", () => {
       });
     });
   });
+
+  describe("getActiveChains", () => {
+    test("It should get a list of active chains", async () => {
+      const activeChains = await api.getActiveChains();
+      expect(activeChains.length).toBeGreaterThan(0);
+    });
+  });
 });
