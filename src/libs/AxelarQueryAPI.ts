@@ -11,7 +11,7 @@ import {
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
-import { throwIfInvalidChainIds, validateChainIdentifier } from "../utils";
+import { throwIfInvalidChainIds } from "../utils";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
