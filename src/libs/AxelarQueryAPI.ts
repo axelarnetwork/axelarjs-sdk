@@ -11,7 +11,7 @@ import {
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
-import { throwIfInvalidChainId, validateChainIdentifier } from "../utils";
+import { throwIfInvalidChainIds, validateChainIdentifier } from "../utils";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -126,10 +126,8 @@ export class AxelarQueryAPI {
     destinationChainId: EvmChain | string,
     sourceTokenSymbol?: GasToken
   ): Promise<BaseFeeResponse> {
-    await throwIfInvalidChainId(sourceChainId, this.environment);
-    await throwIfInvalidChainId(destinationChainId, this.environment);
-    await this.throwIfInactiveChain(sourceChainId);
-    await this.throwIfInactiveChain(destinationChainId);
+    await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
+    await this.throwIfInactiveChains([sourceChainId, destinationChainId]);
     return this.axelarGMPServiceApi
       .post("", {
         method: "getFees",
@@ -162,8 +160,7 @@ export class AxelarQueryAPI {
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1
   ): Promise<string> {
-    await throwIfInvalidChainId(sourceChainId, this.environment);
-    await throwIfInvalidChainId(destinationChainId, this.environment);
+    await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
 
     const response = await this.getNativeGasBaseFee(
       sourceChainId,
@@ -265,15 +262,19 @@ export class AxelarQueryAPI {
   }
 
   /**
-   * Throw an error if a chain is not active.
-   * @param chainId the chainId to check
+   * Throw an error if any chain in the list is inactive.
+   * @param chainIds A list of chainIds to check
    */
-  public async throwIfInactiveChain(chainId: EvmChain | string) {
-    const isActive = await this.isChainActive(chainId);
-    if (!isActive)
-      throw new Error(
-        `Chain ${chainId} is not active. Please check the list of active chains using the getActiveChains() method.`
-      );
+  public async throwIfInactiveChains(chainIds: EvmChain[] | string[]) {
+    const results = await Promise.all(chainIds.map((chainId) => this.isChainActive(chainId)));
+
+    for (let i = 0; i < chainIds.length; i++) {
+      if (!results[i]) {
+        throw new Error(
+          `Chain ${chainIds[i]} is not active. Please check the list of active chains using the getActiveChains() method.`
+        );
+      }
+    }
   }
 
   /**
