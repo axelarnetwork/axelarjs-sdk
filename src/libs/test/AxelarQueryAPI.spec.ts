@@ -57,7 +57,9 @@ describe("AxelarQueryAPI", () => {
         "uusd",
         100000000,
       ];
-      await api.getTransferFee(sourceChainName, destinationChainName, assetDenom, amount);
+      expect(
+        api.getTransferFee(sourceChainName, destinationChainName, assetDenom, amount)
+      ).rejects.toThrow("Invalid chain identifier for osmosis. Did you mean osmosis-4");
     });
   });
 
@@ -156,14 +158,14 @@ describe("AxelarQueryAPI", () => {
   describe("throwIfInactiveChain", () => {
     test("It should throw if the chain does not get included in a active-chains list", async () => {
       jest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
-      await expect(api.throwIfInactiveChain("ethereum")).rejects.toThrowError(
+      await expect(api.throwIfInactiveChains(["ethereum"])).rejects.toThrowError(
         "Chain ethereum is not active"
       );
     });
 
     test("It should throw if the chain does not get included in a active-chains list", async () => {
       jest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
-      await expect(api.throwIfInactiveChain("avalanche")).resolves.toBeUndefined();
+      await expect(api.throwIfInactiveChains(["avalanche"])).resolves.toBeUndefined();
     });
   });
 });

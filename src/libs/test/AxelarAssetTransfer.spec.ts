@@ -327,7 +327,7 @@ describe("AxelarAssetTransfer", () => {
     });
 
     describe("when called", () => {
-      const fromChain = "osmosis";
+      const fromChain = "osmosis-4";
       const toChain = CHAINS.TESTNET.AVALANCHE;
       const depositAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
       const asset = "uusd";
