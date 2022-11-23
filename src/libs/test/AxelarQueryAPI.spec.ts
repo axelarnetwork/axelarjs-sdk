@@ -49,6 +49,16 @@ describe("AxelarQueryAPI", () => {
       expect(response.fee?.denom).toEqual(assetDenom);
       expect(response.fee?.amount).toBeDefined();
     });
+
+    test("it should suggest a chain id when passing chain name", async () => {
+      const [sourceChainName, destinationChainName, assetDenom, amount] = [
+        "osmosis",
+        "polygon",
+        "uusd",
+        100000000,
+      ];
+      await api.getTransferFee(sourceChainName, destinationChainName, assetDenom, amount);
+    });
   });
 
   describe("getGasPrice", () => {
