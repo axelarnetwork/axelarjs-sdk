@@ -48,7 +48,7 @@ import {
   UnsupportedGasTokenError,
 } from "./constants/error";
 import { callExecute, CALL_EXECUTE_ERROR } from "./helpers";
-import { asyncRetry, sleep, throwIfInvalidChainId } from "../../utils";
+import { asyncRetry, sleep, throwIfInvalidChainIds } from "../../utils";
 import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import s3 from "./constants/s3";
 import { Interface } from "ethers/lib/utils";
@@ -186,8 +186,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     gasTokenSymbol: GasToken | string,
     options: QueryGasFeeOptions
   ): Promise<string> {
-    await throwIfInvalidChainId(sourceChain, this.environment);
-    await throwIfInvalidChainId(destinationChain, this.environment);
+    await throwIfInvalidChainIds([sourceChain, destinationChain], this.environment);
 
     const provider = options.provider || getDefaultProvider(sourceChain, this.environment);
     const receipt = await provider.getTransactionReceipt(txHash);
@@ -212,8 +211,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     gasTokenSymbol: GasToken | string,
     options: QueryGasFeeOptions
   ): Promise<string> {
-    await throwIfInvalidChainId(sourceChain, this.environment);
-    await throwIfInvalidChainId(destinationChain, this.environment);
+    await throwIfInvalidChainIds([sourceChain, destinationChain], this.environment);
 
     const provider = options.provider || getDefaultProvider(sourceChain, this.environment);
     const receipt = await provider.getTransactionReceipt(txHash);
