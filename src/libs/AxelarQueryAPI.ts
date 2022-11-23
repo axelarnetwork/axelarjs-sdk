@@ -55,7 +55,7 @@ export class AxelarQueryAPI {
     chainId: string,
     assetDenom: string
   ): Promise<FeeInfoResponse> {
-    await validateChainIdentifier(chainId, this.environment);
+    await throwIfInvalidChainIds([chainId], this.environment);
 
     await this.initQueryClientIfNeeded();
 
@@ -77,8 +77,7 @@ export class AxelarQueryAPI {
     assetDenom: string,
     amountInDenom: number
   ): Promise<TransferFeeResponse> {
-    await validateChainIdentifier(sourceChainId, this.environment);
-    await validateChainIdentifier(destinationChainId, this.environment);
+    await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
 
     await this.initQueryClientIfNeeded();
 
@@ -102,8 +101,8 @@ export class AxelarQueryAPI {
     destinationChainId: EvmChain | string,
     sourceChainTokenSymbol: GasToken | string
   ): Promise<any> {
-    await validateChainIdentifier(sourceChainId, this.environment);
-    await validateChainIdentifier(destinationChainId, this.environment);
+    await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
+
     const params = new URLSearchParams({
       method: "getGasPrice",
       destinationChain: destinationChainId,
