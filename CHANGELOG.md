@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - changed all method signatures to require chain IDs (as recognized by Axelar) instead of chain name. For example, in testnet, Ethereums (Goerli) is recognized as `ethereum-2`
 - added a query to retrieve all active chains on the network (`getActiveChain`) and updates all method implementations to ensure that invocations are only made to live chains
+- added a chainId suggestion when passing wrong chainId e.g. chain name in `getTransferFee` api.
 - `getDepositAddress` updates:
   1. update payload signature to accept a destructured object parameter. the method is still backwards compatible for previous invocations using regular parameters
   2. merged `getDepositAddressForNativeUnwrap` and `getDepositAddressForNativeWrap` method functionality into `getDepositAddress` method

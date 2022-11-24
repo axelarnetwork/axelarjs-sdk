@@ -33,10 +33,16 @@ function findSimilarInArray(array: Array<string>, wordsToFind: string) {
   return bestMatch;
 }
 
-export async function throwIfInvalidChainId(chain: string, environment: Environment) {
-  const [chainValid] = await Promise.all([validateChainIdentifier(chain, environment)]);
-  if (!chainValid.foundChain)
-    throw new Error(`Invalid chain identifier for ${chain}. Did you mean ${chainValid.bestMatch}?`);
+export async function throwIfInvalidChainIds(chains: string[], environment: Environment) {
+  const validations = await Promise.all(
+    chains.map((chain) => validateChainIdentifier(chain, environment))
+  );
 
-  return true;
+  for (let i = 0; i < validations.length; i++) {
+    if (!validations[i].foundChain) {
+      throw new Error(
+        `Invalid chain identifier for ${chains[i]}. Did you mean ${validations[i].bestMatch}?`
+      );
+    }
+  }
 }

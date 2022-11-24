@@ -15,7 +15,7 @@ describe("Asset Wrap", () => {
 
     beforeAll(async () => {
       result = await axelarAssetTransfer.getDepositAddressForNativeWrap(
-        EvmChain.ETHEREUM,
+        "ethereum-2",
         EvmChain.MOONBEAM,
         "0xa411977dd24F1547065C6630E468a43275cB4d7f",
         ""

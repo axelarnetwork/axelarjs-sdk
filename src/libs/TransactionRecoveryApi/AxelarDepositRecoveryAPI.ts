@@ -8,7 +8,7 @@ import {
   parseConfirmDepositCosmosResponse,
   parseConfirmDepositEvmResponse,
 } from "./helpers/axelarHelper";
-import { throwIfInvalidChainId } from "../../utils";
+import { throwIfInvalidChainIds } from "../../utils";
 
 export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   public constructor(config: AxelarRecoveryAPIConfig) {
@@ -16,7 +16,7 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async confirmDeposit(params: ConfirmDepositRequest) {
-    await throwIfInvalidChainId(params.from, this.environment);
+    await throwIfInvalidChainIds([params.from], this.environment);
 
     const chain: ChainInfo = (
       await loadChains({
