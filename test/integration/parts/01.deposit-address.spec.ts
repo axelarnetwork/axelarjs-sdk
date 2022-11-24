@@ -1,4 +1,4 @@
-import { AxelarAssetTransfer, Environment } from "../../../src";
+import { AxelarAssetTransfer, CHAINS, Environment } from "../../../src";
 
 /**
  * This test helps to check that a unique deposit address is generated for parallel requests
@@ -27,32 +27,32 @@ describe("Parallel Deposit Address Generation", () => {
     it("should generate unique deposit addresses", async () => {
       const results = await Promise.all([
         axelarAssetTransferTestnet.getDepositAddress(
-          "avalanche",
-          "moonbeam",
+          CHAINS.TESTNET.AVALANCHE,
+          CHAINS.TESTNET.MOONBEAM,
           "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           "uausdc"
         ),
         axelarAssetTransferTestnet.getDepositAddress(
-          "fantom",
-          "moonbeam",
+          CHAINS.TESTNET.FANTOM,
+          CHAINS.TESTNET.MOONBEAM,
           "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           "uausdc"
         ),
         axelarAssetTransferTestnet.getDepositAddress(
-          "osmosis",
-          "moonbeam",
+          CHAINS.TESTNET.OSMOSIS,
+          CHAINS.TESTNET.MOONBEAM,
           "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           "uausdc"
         ),
         axelarAssetTransferTestnet.getDepositAddress(
-          "comdex",
-          "moonbeam",
+          CHAINS.TESTNET.AURORA,
+          CHAINS.TESTNET.MOONBEAM,
           "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           "uausdc"
         ),
         axelarAssetTransferTestnet.getDepositAddress(
-          "moonbeam",
-          "osmosis",
+          CHAINS.TESTNET.MOONBEAM,
+          CHAINS.TESTNET.OSMOSIS,
           "osmo1x3z2vepjd7fhe30epncxjrk0lehq7xdqe8ltsn",
           "uausdc"
         ),
@@ -64,20 +64,20 @@ describe("Parallel Deposit Address Generation", () => {
     xit("should be able to generate deposit addresses when the source chain is cosmos-based chain", async () => {
       const results = await Promise.all([
         axelarAssetTransferMainnet.getDepositAddress(
-          "terra",
-          "moonbeam",
+          CHAINS.TESTNET.TERRA,
+          CHAINS.TESTNET.MOONBEAM,
           "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           "uusdc"
         ),
         axelarAssetTransferMainnet.getDepositAddress(
-          "axelar",
-          "osmosis",
+          CHAINS.TESTNET.AXELAR,
+          CHAINS.TESTNET.OSMOSIS,
           "osmo1x3z2vepjd7fhe30epncxjrk0lehq7xdqe8ltsn",
           "uusdc"
         ),
         axelarAssetTransferMainnet.getDepositAddress(
-          "osmosis",
-          "axelar",
+          CHAINS.TESTNET.OSMOSIS,
+          CHAINS.TESTNET.AXELAR,
           "axelar1dn9534a72h733m8andex5ufklql3hfsv8gdsrc",
           "uusdc"
         ),
