@@ -277,7 +277,7 @@ export class AxelarAssetTransfer {
 
     /**if user has selected native cxy, e.g. ETH, AVAX, etc, assume it is to be wrapped into ERC20 on dest chain */
     if (isNativeToken(srcChainInfo.chainName.toLowerCase(), asset as GasToken)) {
-      return await this.getDepositAddressForNativeWrap(
+      return this.getDepositAddressForNativeWrap(
         fromChain,
         toChain,
         destinationAddress,
@@ -286,7 +286,7 @@ export class AxelarAssetTransfer {
     }
     /**if user has selected native cxy wrapped asset, e.g. WETH, WAVAX, and selected to unwrap it */
     if (destChainInfo.nativeAsset.includes(asset as string) && options?.shouldUnwrapIntoNative) {
-      return await this.getDepositAddressForNativeUnwrap(
+      return this.getDepositAddressForNativeUnwrap(
         fromChain,
         toChain,
         destinationAddress,
@@ -400,12 +400,20 @@ export class AxelarAssetTransfer {
     return this.gasReceiverContract[chainName];
   }
 
-  async getERC20Denom(chainName: string): Promise<string> {
+  async getERC20Denom(chainId: string): Promise<string> {
+    const chainList: ChainInfo[] = await loadChains({ environment: this.environment });
+    const chainName = chainList.find(
+      (chainInfo) => chainInfo.id === chainId?.toLowerCase()
+    )?.chainName;
+    if (!chainName) throw new Error(`Chain id ${chainId} does not fit any supported chain`);
+
     if (!this.evmDenomMap[chainName.toLowerCase()]) {
       const staticInfo = await this.getStaticInfo();
       const denom = staticInfo.chains[chainName.toLowerCase()]?.nativeAsset[0];
       if (denom) {
         this.evmDenomMap[chainName.toLowerCase()] = denom;
+      } else {
+        throw new Error(`Asset denom for ${chainId} not found`);
       }
       return denom;
     }
