@@ -277,7 +277,7 @@ export class AxelarAssetTransfer {
 
     /**if user has selected native cxy, e.g. ETH, AVAX, etc, assume it is to be wrapped into ERC20 on dest chain */
     if (isNativeToken(srcChainInfo.chainName.toLowerCase(), asset as GasToken)) {
-      return await this.getDepositAddressForNativeWrap(
+      return this.getDepositAddressForNativeWrap(
         fromChain,
         toChain,
         destinationAddress,
@@ -286,7 +286,7 @@ export class AxelarAssetTransfer {
     }
     /**if user has selected native cxy wrapped asset, e.g. WETH, WAVAX, and selected to unwrap it */
     if (destChainInfo.nativeAsset.includes(asset as string) && options?.shouldUnwrapIntoNative) {
-      return await this.getDepositAddressForNativeUnwrap(
+      return this.getDepositAddressForNativeUnwrap(
         fromChain,
         toChain,
         destinationAddress,
