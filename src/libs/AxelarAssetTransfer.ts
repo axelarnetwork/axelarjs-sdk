@@ -402,9 +402,9 @@ export class AxelarAssetTransfer {
 
   async getERC20Denom(chainId: string): Promise<string> {
     const chainList: ChainInfo[] = await loadChains({ environment: this.environment });
-    const chainName = chainList
-      .find((chainInfo) => chainInfo.id === chainId.toLowerCase())
-      ?.chainName.toLowerCase();
+    const chainName = chainList.find(
+      (chainInfo) => chainInfo.id === chainId?.toLowerCase()
+    )?.chainName;
     if (!chainName) throw new Error(`Chain id ${chainId} does not fit any supported chain`);
 
     if (!this.evmDenomMap[chainName.toLowerCase()]) {
