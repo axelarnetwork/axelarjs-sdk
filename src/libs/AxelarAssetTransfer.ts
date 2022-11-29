@@ -400,12 +400,20 @@ export class AxelarAssetTransfer {
     return this.gasReceiverContract[chainName];
   }
 
-  async getERC20Denom(chainName: string): Promise<string> {
+  async getERC20Denom(chainId: string): Promise<string> {
+    const chainList: ChainInfo[] = await loadChains({ environment: this.environment });
+    const chainName = chainList
+      .find((chainInfo) => chainInfo.id === chainId.toLowerCase())
+      ?.chainName.toLowerCase();
+    if (!chainName) throw new Error(`Chain id ${chainId} does not fit any supported chain`);
+
     if (!this.evmDenomMap[chainName.toLowerCase()]) {
       const staticInfo = await this.getStaticInfo();
       const denom = staticInfo.chains[chainName.toLowerCase()]?.nativeAsset[0];
       if (denom) {
         this.evmDenomMap[chainName.toLowerCase()] = denom;
+      } else {
+        throw new Error(`Asset denom for ${chainId} not found`);
       }
       return denom;
     }
