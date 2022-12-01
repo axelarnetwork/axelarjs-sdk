@@ -7,10 +7,9 @@ import {
   Erc20DepositAddressData,
 } from "./depositServiceResponse";
 import { Environment } from "../types";
-import { throwIfInvalidChainIds } from "src/utils";
+import { throwIfInvalidChainIds } from "../../utils";
 import { loadChains } from "../../chains";
 import { ChainInfo } from "../../chains/types";
-import { hexZeroPad } from "ethers/lib/utils";
 
 export class AxelarDepositServiceAPI {
   private environment: Environment;
@@ -98,7 +97,7 @@ export class AxelarDepositServiceAPI {
         destinationAddress,
         tokenSymbol
       )
-      .catch(() => null);
+      .catch((e: any) => console.log(e));
 
     if (!depositAddress) return getFailedResponse(DepositServiceError.CANNOT_GET_DEPOSIT_ADDRESS);
 
@@ -107,7 +106,7 @@ export class AxelarDepositServiceAPI {
       data: {
         address: depositAddress,
         waitForDeposit: () => {
-          return this.waitForErc20Deposit(depositAddress, tokenSymbol);
+          return this.waitForErc20Deposit(depositAddress, sourceChainId, tokenSymbol);
         },
       },
     };
@@ -119,9 +118,9 @@ export class AxelarDepositServiceAPI {
    * @param tokenSymbol - the token symbol
    * @returns the transaction receipt
    */
-  waitForErc20Deposit(depositAddress: string, tokenSymbol: string) {
+  waitForErc20Deposit(depositAddress: string, chainId: string, tokenSymbol: string) {
     const assetInfo = this.chains
-      .find((chain) => chain.id === "avalanche")
+      .find((chain) => chain.id === chainId)
       ?.assets.find((asset) => asset.assetSymbol === tokenSymbol);
 
     const erc20Address = assetInfo?.assetAddress;
@@ -134,7 +133,7 @@ export class AxelarDepositServiceAPI {
         topics: [
           ethers.utils.id("Transfer(address,address,uint256)"),
           null,
-          hexZeroPad(depositAddress, 32),
+          ethers.utils.hexZeroPad(depositAddress, 32),
         ],
       };
 
