@@ -31,6 +31,8 @@ export interface ChainInfo {
   };
   nativeAsset: string[];
   addressPrefix: string;
+  depositService: string;
+  gasService: string;
 }
 
 export interface AssetTransferObject {
