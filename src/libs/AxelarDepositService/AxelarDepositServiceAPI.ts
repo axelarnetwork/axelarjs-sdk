@@ -137,7 +137,7 @@ export class AxelarDepositServiceAPI {
         ],
       };
 
-      this.provider?.on(filter, (tx: ethers.providers.TransactionReceipt) => {
+      this.provider?.once(filter, (tx: ethers.providers.TransactionReceipt) => {
         resolve(tx);
       });
     });
