@@ -27,6 +27,6 @@ export function getSuccessResponse<T>(data: T) {
 }
 
 export interface Erc20DepositAddressData {
-  address: string;
+  depositAddress: string;
   waitForDeposit: () => Promise<ethers.providers.TransactionReceipt>;
 }

@@ -26,7 +26,7 @@ describe("[TESTNET] - Axelar Deposit Service E2E", () => {
     expect(response).toEqual({
       success: true,
       data: {
-        address: "0x8B52504Be53f16ef24578280Fb4677F7bF6B4748",
+        depositAddress: "0x8B52504Be53f16ef24578280Fb4677F7bF6B4748",
         waitForDeposit: expect.any(Function),
       },
     });

@@ -97,14 +97,14 @@ export class AxelarDepositServiceAPI {
         destinationAddress,
         tokenSymbol
       )
-      .catch((e: any) => console.log(e));
+      .catch(() => undefined);
 
     if (!depositAddress) return getFailedResponse(DepositServiceError.CANNOT_GET_DEPOSIT_ADDRESS);
 
     return {
       success: true,
       data: {
-        address: depositAddress,
+        depositAddress,
         waitForDeposit: () => {
           return this.waitForErc20Deposit(depositAddress, sourceChainId, tokenSymbol);
         },
