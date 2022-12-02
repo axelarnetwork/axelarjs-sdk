@@ -214,7 +214,7 @@ export class AxelarAssetTransfer {
           ]);
 
     const address = getCreate2Address(
-      await this.axelarQueryApi.getContractAddressFromConfig(fromChain, "gas_service"),
+      await this.axelarQueryApi.getContractAddressFromConfig(fromChain, "deposit_service"),
       hexSalt,
       keccak256(
         solidityPack(
