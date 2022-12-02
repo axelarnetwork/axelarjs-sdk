@@ -168,4 +168,18 @@ describe("AxelarQueryAPI", () => {
       await expect(api.throwIfInactiveChains(["avalanche"])).resolves.toBeUndefined();
     });
   });
+
+  describe("getGasReceiverContractAddress", () => {
+    let api: AxelarQueryAPI;
+
+    beforeEach(async () => {
+      api = new AxelarQueryAPI({ environment: Environment.TESTNET });
+    });
+
+    test("it should retrieve the gas receiver address remotely", async () => {
+      await api.getGasReceiverContractAddress(EvmChain.MOONBEAM).then((res) => {
+        expect(res).toBeDefined();
+      });
+    });
+  });
 });

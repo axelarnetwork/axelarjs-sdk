@@ -12,6 +12,8 @@ import {
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { throwIfInvalidChainIds } from "../utils";
+import { loadChains } from "../chains";
+import s3 from "./TransactionRecoveryApi/constants/s3";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -235,6 +237,17 @@ export class AxelarQueryAPI {
     result.decimals = assetConfig.decimals;
     result.common_key = assetConfig.common_key[this.environment];
     return result;
+  }
+
+  public async getGasReceiverContractAddress(chainId: string): Promise<string> {
+    const chains = await loadChains({ environment: this.environment });
+    const selectedChain = chains.find((chain) => chain.id === chainId);
+    if (!selectedChain) throw `getGasReceiverContractAddress() ${chainId} not found`;
+    const { chainName } = selectedChain;
+    return await fetch(s3[this.environment])
+      .then((res) => res.json())
+      .then((body) => body.assets.network[chainName.toLowerCase()]?.gas_service)
+      .catch(() => "");
   }
 
   /**
