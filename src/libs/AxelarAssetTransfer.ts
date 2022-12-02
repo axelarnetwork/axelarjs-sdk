@@ -80,7 +80,13 @@ export class AxelarAssetTransfer {
     await throwIfInvalidChainIds([fromChain, toChain], this.environment);
     await this.axelarQueryApi.throwIfInactiveChains([fromChain, toChain]);
 
-    refundAddress = refundAddress || (await this.getDepositServiceContractAddress(fromChain));
+    refundAddress =
+      refundAddress ||
+      (await this.axelarQueryApi.getContractAddressFromConfig(
+        fromChain,
+        "default_refund_collector"
+      ));
+
     const { address } = await this.getDepositAddressFromRemote(
       "wrap",
       fromChain,
@@ -114,7 +120,11 @@ export class AxelarAssetTransfer {
     await this.axelarQueryApi.throwIfInactiveChains([fromChain, toChain]);
 
     refundAddress =
-      refundAddress || (await this.axelarQueryApi.getGasReceiverContractAddress(fromChain));
+      refundAddress ||
+      (await this.axelarQueryApi.getContractAddressFromConfig(
+        fromChain,
+        "default_refund_collector"
+      ));
 
     const { address: unwrapAddress } = await this.getDepositAddressFromRemote(
       "unwrap",
@@ -204,7 +214,7 @@ export class AxelarAssetTransfer {
           ]);
 
     const address = getCreate2Address(
-      await this.getDepositServiceContractAddress(fromChain),
+      await this.axelarQueryApi.getContractAddressFromConfig(fromChain, "gas_service"),
       hexSalt,
       keccak256(
         solidityPack(
@@ -408,28 +418,6 @@ export class AxelarAssetTransfer {
       return denom;
     }
     return this.evmDenomMap[chainName.toLowerCase()];
-  }
-
-  async getDepositServiceContractAddress(chainName: string): Promise<string> {
-    if (!this.depositServiceContract[chainName]) {
-      this.depositServiceContract[chainName] = await this.getStaticInfo()
-        .then((body) => {
-          return body.assets.network[chainName.toLowerCase()]?.deposit_service;
-        })
-        .catch(() => undefined);
-    }
-    return this.depositServiceContract[chainName];
-  }
-
-  async getContractAddressFromConfig(chainName: string, contractKey: string): Promise<string> {
-    if (!this.depositServiceContract[chainName]) {
-      this.depositServiceContract[chainName] = await this.getStaticInfo()
-        .then((body) => {
-          return body.assets.network[chainName.toLowerCase()][contractKey];
-        })
-        .catch(() => undefined);
-    }
-    return this.depositServiceContract[chainName];
   }
 
   async getStaticInfo(): Promise<Record<string, any>> {
