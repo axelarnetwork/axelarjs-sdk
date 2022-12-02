@@ -239,17 +239,14 @@ export class AxelarQueryAPI {
     return result;
   }
 
-  public async getGasReceiverContractAddress(chainId: string): Promise<string> {
-    await throwIfInvalidChainIds([chainId], this.environment);
-    await this.throwIfInactiveChains([chainId]);
-
+  public async getContractAddressFromConfig(chainId: string, contractKey: string): Promise<string> {
     const chains = await loadChains({ environment: this.environment });
     const selectedChain = chains.find((chain) => chain.id === chainId);
     if (!selectedChain) throw `getGasReceiverContractAddress() ${chainId} not found`;
     const { chainName } = selectedChain;
     return await fetch(s3[this.environment])
       .then((res) => res.json())
-      .then((body) => body.assets.network[chainName.toLowerCase()]?.gas_service)
+      .then((body) => body.assets.network[chainName.toLowerCase()][contractKey])
       .catch(() => undefined);
   }
 

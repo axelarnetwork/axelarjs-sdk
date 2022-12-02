@@ -234,7 +234,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
     const signer = this.getSigner(chain, evmWalletDetails);
     const signerAddress = await signer.getAddress();
-    const gasReceiverAddress = await this.axelarQueryApi.getGasReceiverContractAddress(chain);
+    const gasReceiverAddress = await this.axelarQueryApi.getContractAddressFromConfig(
+      chain,
+      "gas_service"
+    );
     const nativeGasTokenSymbol = NATIVE_GAS_TOKEN_SYMBOL[chain];
     const receipt = await signer.provider.getTransactionReceipt(txHash);
 
@@ -307,7 +310,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
     const signer = this.getSigner(chain, evmWalletDetails);
     const signerAddress = await signer.getAddress();
-    const gasReceiverAddress = await this.axelarQueryApi.getGasReceiverContractAddress(chain);
+    const gasReceiverAddress = await this.axelarQueryApi.getContractAddressFromConfig(
+      chain,
+      "gas_service"
+    );
     const gasTokenContract = new ethers.Contract(gasTokenAddress, Erc20, signer.provider);
     const gasTokenSymbol = await gasTokenContract.symbol().catch(() => undefined);
 

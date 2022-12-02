@@ -177,7 +177,7 @@ describe("AxelarQueryAPI", () => {
     });
 
     test("it should retrieve the gas receiver address remotely", async () => {
-      await api.getGasReceiverContractAddress(EvmChain.MOONBEAM).then((res) => {
+      await api.getContractAddressFromConfig(EvmChain.MOONBEAM, "gas_service").then((res) => {
         expect(res).toBeDefined();
       });
     });
