@@ -240,6 +240,9 @@ export class AxelarQueryAPI {
   }
 
   public async getGasReceiverContractAddress(chainId: string): Promise<string> {
+    await throwIfInvalidChainIds([chainId], this.environment);
+    await this.throwIfInactiveChains([chainId]);
+
     const chains = await loadChains({ environment: this.environment });
     const selectedChain = chains.find((chain) => chain.id === chainId);
     if (!selectedChain) throw `getGasReceiverContractAddress() ${chainId} not found`;
@@ -247,7 +250,7 @@ export class AxelarQueryAPI {
     return await fetch(s3[this.environment])
       .then((res) => res.json())
       .then((body) => body.assets.network[chainName.toLowerCase()]?.gas_service)
-      .catch(() => "");
+      .catch(() => undefined);
   }
 
   /**
