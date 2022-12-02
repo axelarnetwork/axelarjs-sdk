@@ -169,7 +169,7 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
-  describe("getGasReceiverContractAddress", () => {
+  describe("getContractAddressFromConfig", () => {
     let api: AxelarQueryAPI;
 
     beforeEach(async () => {

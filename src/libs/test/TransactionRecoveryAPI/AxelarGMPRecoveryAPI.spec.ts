@@ -384,7 +384,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
       jest.clearAllMocks();
       jest
-        .spyOn(api.axelarQueryApi, "getGasReceiverContractAddress")
+        .spyOn(api.axelarQueryApi, "getContractAddressFromConfig")
         .mockResolvedValue(gasReceiverContract.address);
 
       jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
@@ -692,7 +692,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       jest.clearAllMocks();
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
       jest
-        .spyOn(api.axelarQueryApi, "getGasReceiverContractAddress")
+        .spyOn(api.axelarQueryApi, "getContractAddressFromConfig")
         .mockResolvedValueOnce(gasReceiverContract.address);
       jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });

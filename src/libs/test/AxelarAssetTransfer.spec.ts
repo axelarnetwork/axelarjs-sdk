@@ -367,7 +367,7 @@ describe("AxelarAssetTransfer", () => {
       beforeEach(async () => {
         jest.clearAllMocks();
         jest
-          .spyOn(bridge, "getDepositServiceContractAddress")
+          .spyOn(bridge.axelarQueryApi, "getContractAddressFromConfig")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
         jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
       });
@@ -391,7 +391,7 @@ describe("AxelarAssetTransfer", () => {
         jest.clearAllMocks();
         jest.spyOn(bridge, "getDepositAddressFromRemote").mockResolvedValue({ address });
         jest
-          .spyOn(bridge, "getDepositServiceContractAddress")
+          .spyOn(bridge.axelarQueryApi, "getContractAddressFromConfig")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
         jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
       });
@@ -427,7 +427,7 @@ describe("AxelarAssetTransfer", () => {
           .mockResolvedValue({ address: unwrapAddress });
         jest.spyOn(bridge, "getDepositAddress").mockResolvedValue(unwrapAddress);
         jest
-          .spyOn(bridge, "getDepositServiceContractAddress")
+          .spyOn(bridge.axelarQueryApi, "getContractAddressFromConfig")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
         jest.spyOn(bridge, "getERC20Denom").mockResolvedValue("wavax-wei");
         jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
