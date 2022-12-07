@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - upgrade axelarjs-types dependency to `v0.27.0`
 - update default axelar rpc & lcd endpoints in testnet/mainnet from quickapi to imperator
 - fix [native gas estimates](https://github.com/axelarnetwork/axelarjs-sdk/pull/193)
+- added `timeSpent` field to the `queryTransactionStatus` API.
+- added more possible values for `GMPStatus` enum.
 
 ## [0.11.7] - 2022-OCTOBER-26
 
