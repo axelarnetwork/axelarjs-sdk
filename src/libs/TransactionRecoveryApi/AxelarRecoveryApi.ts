@@ -31,6 +31,7 @@ export interface GasPaidInfo {
 }
 export interface GMPStatusResponse {
   status: GMPStatus;
+  timeSpent?: Record<string, number>;
   gasPaidInfo?: GasPaidInfo;
   error?: GMPError;
   callTx?: any;
@@ -134,9 +135,22 @@ export class AxelarRecoveryApi {
       details: gas_paid,
     };
 
+    // Note: Currently, the GMP API doesn't always return the `total` field in the `time_spent` object
+    // This is a temporary fix to ensure that the `total` field is always present
+    // TODO: Remove this once the API is fixed
+    const timeSpent: Record<string, number> = txDetails.time_spent;
+    if (timeSpent) {
+      timeSpent.total =
+        timeSpent.total ||
+        Object.values(timeSpent).reduce((acc: number, val: number) => {
+          return acc + val;
+        }, 0);
+    }
+
     return {
       status: this.parseGMPStatus(txDetails) as GMPStatus,
       error: this.parseGMPError(txDetails),
+      timeSpent,
       gasPaidInfo,
       callTx: call,
       executed,
