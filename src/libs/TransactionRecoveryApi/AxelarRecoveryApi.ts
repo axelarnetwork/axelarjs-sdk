@@ -11,14 +11,21 @@ import { BigNumber } from "ethers";
 import { throwIfInvalidChainIds } from "../../utils";
 
 export enum GMPStatus {
-  SRC_GATEWAY_CALLED = "source_gateway_called",
-  DEST_GATEWAY_APPROVED = "destination_gateway_approved",
-  DEST_EXECUTED = "destination_executed",
-  DEST_EXECUTE_ERROR = "destination_execute_error",
+  SRC_GATEWAY_CALLED = "called",
+  DEST_GATEWAY_APPROVED = "approved",
+  DEST_EXECUTED = "executed",
+  DEST_EXECUTE_ERROR = "error",
   DEST_EXECUTING = "executing",
+  APPROVING = "approving",
+  FORECALLED = "forecalled",
+  FORECALLED_WITHOUT_GAS_PAID = "forecalled_without_gas_paid",
+  NOT_EXECUTED = "not_executed",
+  NOT_EXECUTED_WITHOUT_GAS_PAID = "not_executed_without_gas_paid",
+  INSUFFICIENT_FEE = "insufficient_fee",
   UNKNOWN_ERROR = "unknown_error",
   CANNOT_FETCH_STATUS = "cannot_fetch_status",
 }
+
 export enum GasPaidStatus {
   GAS_UNPAID = "gas_unpaid",
   GAS_PAID = "gas_paid",
@@ -30,7 +37,7 @@ export interface GasPaidInfo {
   details?: any;
 }
 export interface GMPStatusResponse {
-  status: GMPStatus;
+  status: GMPStatus | string;
   timeSpent?: Record<string, number>;
   gasPaidInfo?: GasPaidInfo;
   error?: GMPError;
@@ -94,19 +101,6 @@ export class AxelarRecoveryApi {
       .catch(() => undefined);
   }
 
-  private parseGMPStatus(response: any): GMPStatus | string {
-    const { error, status } = response;
-
-    if (status === "error" && error) return GMPStatus.DEST_EXECUTE_ERROR;
-    else if (status === "executed") return GMPStatus.DEST_EXECUTED;
-    else if (status === "approved") return GMPStatus.DEST_GATEWAY_APPROVED;
-    else if (status === "called") return GMPStatus.SRC_GATEWAY_CALLED;
-    else if (status === "executing") return GMPStatus.DEST_EXECUTING;
-    else {
-      return status;
-    }
-  }
-
   private parseGMPError(response: any): GMPError | undefined {
     if (response.error) {
       return {
@@ -148,7 +142,7 @@ export class AxelarRecoveryApi {
     }
 
     return {
-      status: this.parseGMPStatus(txDetails) as GMPStatus,
+      status: txDetails.status,
       error: this.parseGMPError(txDetails),
       timeSpent,
       gasPaidInfo,
