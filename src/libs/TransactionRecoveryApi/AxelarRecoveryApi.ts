@@ -14,11 +14,18 @@ export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
   DEST_GATEWAY_APPROVED = "destination_gateway_approved",
   DEST_EXECUTED = "destination_executed",
-  DEST_EXECUTE_ERROR = "destination_execute_error",
+  DEST_EXECUTE_ERROR = "error",
   DEST_EXECUTING = "executing",
+  APPROVING = "approving",
+  FORECALLED = "forecalled",
+  FORECALLED_WITHOUT_GAS_PAID = "forecalled_without_gas_paid",
+  NOT_EXECUTED = "not_executed",
+  NOT_EXECUTED_WITHOUT_GAS_PAID = "not_executed_without_gas_paid",
+  INSUFFICIENT_FEE = "insufficient_fee",
   UNKNOWN_ERROR = "unknown_error",
   CANNOT_FETCH_STATUS = "cannot_fetch_status",
 }
+
 export enum GasPaidStatus {
   GAS_UNPAID = "gas_unpaid",
   GAS_PAID = "gas_paid",
@@ -30,7 +37,8 @@ export interface GasPaidInfo {
   details?: any;
 }
 export interface GMPStatusResponse {
-  status: GMPStatus;
+  status: GMPStatus | string;
+  timeSpent?: Record<string, number>;
   gasPaidInfo?: GasPaidInfo;
   error?: GMPError;
   callTx?: any;
@@ -134,9 +142,23 @@ export class AxelarRecoveryApi {
       details: gas_paid,
     };
 
+    // Note: Currently, the GMP API doesn't always return the `total` field in the `time_spent` object
+    // This is a temporary fix to ensure that the `total` field is always present
+    // TODO: Remove this once the API is fixed
+    const timeSpent: Record<string, number> = txDetails.time_spent;
+    if (timeSpent) {
+      timeSpent.total =
+        timeSpent.total ||
+        Object.values(timeSpent).reduce(
+          (accumulator: number, value: number) => accumulator + value,
+          0
+        );
+    }
+
     return {
-      status: this.parseGMPStatus(txDetails) as GMPStatus,
+      status: this.parseGMPStatus(txDetails),
       error: this.parseGMPError(txDetails),
+      timeSpent,
       gasPaidInfo,
       callTx: call,
       executed,
