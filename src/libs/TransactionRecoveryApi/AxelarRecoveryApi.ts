@@ -11,9 +11,9 @@ import { BigNumber } from "ethers";
 import { throwIfInvalidChainIds } from "../../utils";
 
 export enum GMPStatus {
-  SRC_GATEWAY_CALLED = "called",
-  DEST_GATEWAY_APPROVED = "approved",
-  DEST_EXECUTED = "executed",
+  SRC_GATEWAY_CALLED = "source_gateway_called",
+  DEST_GATEWAY_APPROVED = "destination_gateway_approved",
+  DEST_EXECUTED = "destination_executed",
   DEST_EXECUTE_ERROR = "error",
   DEST_EXECUTING = "executing",
   APPROVING = "approving",
@@ -101,6 +101,19 @@ export class AxelarRecoveryApi {
       .catch(() => undefined);
   }
 
+  private parseGMPStatus(response: any): GMPStatus | string {
+    const { error, status } = response;
+
+    if (status === "error" && error) return GMPStatus.DEST_EXECUTE_ERROR;
+    else if (status === "executed") return GMPStatus.DEST_EXECUTED;
+    else if (status === "approved") return GMPStatus.DEST_GATEWAY_APPROVED;
+    else if (status === "called") return GMPStatus.SRC_GATEWAY_CALLED;
+    else if (status === "executing") return GMPStatus.DEST_EXECUTING;
+    else {
+      return status;
+    }
+  }
+
   private parseGMPError(response: any): GMPError | undefined {
     if (response.error) {
       return {
@@ -136,13 +149,14 @@ export class AxelarRecoveryApi {
     if (timeSpent) {
       timeSpent.total =
         timeSpent.total ||
-        Object.values(timeSpent).reduce((acc: number, val: number) => {
-          return acc + val;
-        }, 0);
+        Object.values(timeSpent).reduce(
+          (accumulator: number, value: number) => accumulator + value,
+          0
+        );
     }
 
     return {
-      status: txDetails.status,
+      status: this.parseGMPStatus(txDetails),
       error: this.parseGMPError(txDetails),
       timeSpent,
       gasPaidInfo,
