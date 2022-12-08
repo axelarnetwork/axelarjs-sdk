@@ -50,9 +50,7 @@ import {
 import { callExecute, CALL_EXECUTE_ERROR } from "./helpers";
 import { asyncRetry, sleep, throwIfInvalidChainIds } from "../../utils";
 import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
-import s3 from "./constants/s3";
 import { Interface } from "ethers/lib/utils";
-import { loadChains } from "../../chains";
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   axelarQueryApi: AxelarQueryAPI;
@@ -236,7 +234,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
     const signer = this.getSigner(chain, evmWalletDetails);
     const signerAddress = await signer.getAddress();
-    const gasReceiverAddress = await this.getGasReceiverContractAddress(chain);
+    const gasReceiverAddress = await this.axelarQueryApi.getContractAddressFromConfig(
+      chain,
+      "gas_service"
+    );
     const nativeGasTokenSymbol = NATIVE_GAS_TOKEN_SYMBOL[chain];
     const receipt = await signer.provider.getTransactionReceipt(txHash);
 
@@ -309,7 +310,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
     const signer = this.getSigner(chain, evmWalletDetails);
     const signerAddress = await signer.getAddress();
-    const gasReceiverAddress = await this.getGasReceiverContractAddress(chain);
+    const gasReceiverAddress = await this.axelarQueryApi.getContractAddressFromConfig(
+      chain,
+      "gas_service"
+    );
     const gasTokenContract = new ethers.Contract(gasTokenAddress, Erc20, signer.provider);
     const gasTokenSymbol = await gasTokenContract.symbol().catch(() => undefined);
 
@@ -478,16 +482,5 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     };
     const evmClient = new EVMClient(evmClientConfig);
     return evmClient.getSigner();
-  }
-
-  public async getGasReceiverContractAddress(chainId: string): Promise<string> {
-    const chains = await loadChains({ environment: this.environment });
-    const selectedChain = chains.find((chain) => chain.id === chainId);
-    if (!selectedChain) throw `getGasReceiverContractAddress() ${chainId} not found`;
-    const { chainName } = selectedChain;
-    return await fetch(s3[this.environment])
-      .then((res) => res.json())
-      .then((body) => body.assets.network[chainName.toLowerCase()]?.gas_service)
-      .catch(() => "");
   }
 }

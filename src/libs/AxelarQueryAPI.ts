@@ -6,12 +6,15 @@ import { RestService } from "../services";
 import { AxelarQueryAPIConfig, BaseFeeResponse, Environment, EvmChain, GasToken } from "./types";
 import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
+import fetch from "cross-fetch";
 import {
   ChainStatus,
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { throwIfInvalidChainIds } from "../utils";
+import { loadChains } from "../chains";
+import s3 from "./TransactionRecoveryApi/constants/s3";
 
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -222,7 +225,7 @@ export class AxelarQueryAPI {
    * Get the asset config for an asset on a given chain given its denom
    * @param denom
    * @param chainName
-   * @returns
+   * @returns asset config
    */
   public async getAssetConfigFromDenom(denom: string, chainName: string) {
     if (!this.allAssets) await this._initializeAssets();
@@ -235,6 +238,24 @@ export class AxelarQueryAPI {
     result.decimals = assetConfig.decimals;
     result.common_key = assetConfig.common_key[this.environment];
     return result;
+  }
+
+  /**
+   * Get the contract address from the chainId and the contractKey
+   * @param chainId - the chainId of the chain
+   * @param contractKey - the key of the contract in the config file.
+   * A valid contractKey can be found here https://github.com/axelarnetwork/chains/blob/790f08350e792e27412ded6721c13ce78267fd72/testnet-config.json#L1951-L1954 e.g. ("gas_service", "deposit_service", "default_refund_collector")
+   * @returns the contract address
+   */
+  public async getContractAddressFromConfig(chainId: string, contractKey: string): Promise<string> {
+    const chains = await loadChains({ environment: this.environment });
+    const selectedChain = chains.find((chain) => chain.id === chainId);
+    if (!selectedChain) throw `getContractAddressFromConfig() ${chainId} not found`;
+    const { chainName } = selectedChain;
+    return await fetch(s3[this.environment])
+      .then((res) => res.json())
+      .then((body) => body.assets.network[chainName.toLowerCase()][contractKey])
+      .catch(() => undefined);
   }
 
   /**
