@@ -254,7 +254,7 @@ export class AxelarQueryAPI {
     const { chainName } = selectedChain;
     return await fetch(s3[this.environment])
       .then((res) => res.json())
-      .then((body) => body.assets.network[chainName.toLowerCase()][contractKey])
+      .then((body) => body.assets.network[chainId.toLowerCase()][contractKey])
       .catch(() => undefined);
   }
 
