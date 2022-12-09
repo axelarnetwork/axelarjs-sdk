@@ -251,7 +251,6 @@ export class AxelarQueryAPI {
     const chains = await loadChains({ environment: this.environment });
     const selectedChain = chains.find((chain) => chain.id === chainId);
     if (!selectedChain) throw `getContractAddressFromConfig() ${chainId} not found`;
-    const { chainName } = selectedChain;
     return await fetch(s3[this.environment])
       .then((res) => res.json())
       .then((body) => body.assets.network[chainId.toLowerCase()][contractKey])

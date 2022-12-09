@@ -221,8 +221,8 @@ export class AxelarRecoveryApi {
     return chainInfo;
   }
 
-  public async confirmGatewayTx(txHash: string, chainName: string) {
-    const { module, chainIdentifier } = await this.getChainInfo(chainName);
+  public async confirmGatewayTx(txHash: string, chainId: string) {
+    const { module, chainIdentifier } = await this.getChainInfo(chainId);
 
     const txBytes = await this.execRecoveryUrlFetch("/confirm_gateway_tx", {
       txHash,
@@ -233,8 +233,8 @@ export class AxelarRecoveryApi {
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
-  public async createPendingTransfers(chainName: string) {
-    const { module, chainIdentifier } = await this.getChainInfo(chainName);
+  public async createPendingTransfers(chainId: string) {
+    const { module, chainIdentifier } = await this.getChainInfo(chainId);
 
     const txBytes = await this.execRecoveryUrlFetch("/create_pending_transfers", {
       chain: chainIdentifier[this.environment],
@@ -244,8 +244,8 @@ export class AxelarRecoveryApi {
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
-  public async executePendingTransfers(chainName: string) {
-    const { module, chainIdentifier } = await this.getChainInfo(chainName);
+  public async executePendingTransfers(chainId: string) {
+    const { module, chainIdentifier } = await this.getChainInfo(chainId);
     const txBytes = await this.execRecoveryUrlFetch("/execute_pending_transfers", {
       chain: chainIdentifier[this.environment],
       module,
@@ -254,8 +254,8 @@ export class AxelarRecoveryApi {
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
-  public async signCommands(chainName: string) {
-    const { module, chainIdentifier } = await this.getChainInfo(chainName);
+  public async signCommands(chainId: string) {
+    const { module, chainIdentifier } = await this.getChainInfo(chainId);
 
     const txBytes = await this.execRecoveryUrlFetch("/sign_commands", {
       chain: chainIdentifier[this.environment],
