@@ -8,7 +8,9 @@ import {
   RouteIBCTransfersRequest,
   RegisterFeeCollectorRequest,
   protobufPackage,
+  ExecuteGeneralMessageWithTokenRequest,
 } from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/tx";
+import { GeneralMessageApprovedWithToken } from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/events";
 import { Registry } from "@cosmjs/proto-signing";
 
 const TxTypeUrlMap = {
@@ -20,6 +22,11 @@ const TxTypeUrlMap = {
   AxelarnetRegisterAssetRequest: `/${protobufPackage}.RegisterAssetRequest`,
   AxelarnetRouteIBCTransfersRequest: `/${protobufPackage}.RouteIBCTransfersRequest`,
   AxelarnetRegisterFeeCollectorRequest: `/${protobufPackage}.RegisterFeeCollectorRequest`,
+  AxelarnetExecuteGeneralMessageWithTokenRequest: `/${protobufPackage}.ExecuteGeneralMessageWithTokenRequest`,
+};
+
+const EventTypeUrlMap = {
+  AxelarnetGeneralMessageApprovedWithToken: `/${protobufPackage}.GeneralMessageApprovedWithToken`,
 };
 
 export const registerAxelarnetTxTypes = (registry: Registry) => {
@@ -34,4 +41,15 @@ export const registerAxelarnetTxTypes = (registry: Registry) => {
   registry.register(TxTypeUrlMap.AxelarnetRegisterAssetRequest, RegisterAssetRequest);
   registry.register(TxTypeUrlMap.AxelarnetRouteIBCTransfersRequest, RouteIBCTransfersRequest);
   registry.register(TxTypeUrlMap.AxelarnetRegisterFeeCollectorRequest, RegisterFeeCollectorRequest);
+  registry.register(
+    TxTypeUrlMap.AxelarnetExecuteGeneralMessageWithTokenRequest,
+    ExecuteGeneralMessageWithTokenRequest
+  );
+};
+
+export const registerAxelarnetEventTypes = (registry: Registry) => {
+  registry.register(
+    EventTypeUrlMap.AxelarnetGeneralMessageApprovedWithToken,
+    GeneralMessageApprovedWithToken
+  );
 };

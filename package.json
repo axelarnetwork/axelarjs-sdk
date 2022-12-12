@@ -36,7 +36,7 @@
   "license": "MIT",
   "dependencies": {
     "@axelar-network/axelar-cgp-solidity": "^4.3.0",
-    "@axelar-network/axelarjs-types": "^0.27.0",
+    "@axelar-network/axelarjs-types": "^0.28.0-alpha.0",
     "@cosmjs/stargate": "^0.28.4",
     "@types/uuid": "^8.3.1",
     "bech32": "^2.0.0",
