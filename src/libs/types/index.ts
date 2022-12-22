@@ -129,7 +129,7 @@ export enum GasToken {
   AURORA = "AURORA",
   BINANCE = "BNB",
   CELO = "CELO",
-  KAVA = "Kava",
+  KAVA = "KAVA",
 }
 
 export interface AddGasOptions {
