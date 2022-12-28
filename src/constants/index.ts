@@ -43,7 +43,7 @@ const testnetConfigs: EnvironmentConfigs = {
 };
 const mainnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-mainnet.axelar.dev`,
-  axelarRpcUrl: "https://rpc-axelar.imperator.co",
+  axelarRpcUrl: "https://mainnet-rpc-router.axelar-dev.workers.dev/chain/axelar",
   axelarLcdUrl: "https://lcd-axelar.imperator.co",
   axelarGMPApiUrl: "https://api.gmp.axelarscan.io",
   depositServiceUrl: "https://deposit-service.mainnet.axelar.dev",
