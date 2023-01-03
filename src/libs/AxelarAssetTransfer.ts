@@ -214,7 +214,10 @@ export class AxelarAssetTransfer {
           ]);
 
     const address = getCreate2Address(
-      await this.axelarQueryApi.getContractAddressFromConfig(fromChain, "deposit_service"),
+      await this.axelarQueryApi.getContractAddressFromConfig(
+        wrapOrUnWrap === "wrap" ? fromChain : toChain,
+        "deposit_service"
+      ),
       hexSalt,
       keccak256(
         solidityPack(
