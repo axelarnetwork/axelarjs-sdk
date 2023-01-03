@@ -114,6 +114,7 @@ export class AxelarAssetTransfer {
     fromChain: string,
     toChain: string,
     destinationAddress: string,
+    fromChainModule: "evm" | "axelarnet" = "evm",
     refundAddress?: string
   ): Promise<string> {
     await throwIfInvalidChainIds([fromChain, toChain], this.environment);
@@ -122,7 +123,7 @@ export class AxelarAssetTransfer {
     refundAddress =
       refundAddress ||
       (await this.axelarQueryApi.getContractAddressFromConfig(
-        fromChain,
+        fromChainModule === "evm" ? fromChain : toChain,
         "default_refund_collector"
       ));
 
@@ -304,6 +305,7 @@ export class AxelarAssetTransfer {
         fromChain,
         toChain,
         destinationAddress,
+        srcChainInfo.module,
         options.refundAddress
       );
     }
