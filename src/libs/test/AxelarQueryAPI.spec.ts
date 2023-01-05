@@ -3,6 +3,7 @@ import {
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { ethers } from "ethers";
+import { formatUnits } from "ethers/lib/utils";
 import { CHAINS } from "../../chains";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
@@ -188,19 +189,62 @@ describe("AxelarQueryAPI", () => {
 
     beforeEach(async () => {
       api = new AxelarQueryAPI({ environment: Environment.TESTNET });
+      jest.clearAllMocks();
+
+      /**
+       * in this mock below, we are setting:
+       * ethereum:
+       *  limit: 1000aUSDC
+       *  incoming: 20aUSDC
+       *  outgoing: 15aUSDC
+       * sei:
+       *  limit: 500aUSDC
+       *  incoming: 5aUSDC
+       *  outgoing: 10aUSDC
+       */
+      jest
+        .spyOn(api, "getTransferLimitNexusQuery")
+        .mockImplementation(({ chainId, denom }: { chainId: string; denom: string }) => {
+          let res = {
+            limit: "0",
+            outgoing: "0",
+            incoming: "0",
+          };
+          if (chainId === "ethereum-2") {
+            res.limit = "1000000000";
+            res.incoming = "20000000";
+            res.outgoing = "15000000";
+          }
+          if (chainId === "sei") {
+            res.limit = "500000000";
+            res.incoming = "5000000";
+            res.outgoing = "10000000";
+          }
+          return Promise.resolve(res);
+        });
     });
 
     test("it should return the transfer limit of an asset as a string for evm chains", async () => {
-      const chainId = "ethereum-2";
+      const fromChainId = "ethereum-2";
+      const toChainId = "sei";
       const denom = "uausdc";
-      const res = await api.getTransferLimit({ chainId, denom }).catch((e) => console.log(e));
+      const proportionOfTotalLimitPerTransfer = 1;
+      const res: number = await api
+        .getTransferLimit({ fromChainId, toChainId, denom, proportionOfTotalLimitPerTransfer })
+        .catch((e) => 0);
+      const expectedRes = 495_000_000;
+      /**
+       if we are sending from ethereum to sei, we expect res to be
+       Math.min( ethereumLimit, seiLimit ) * proportion
+       = Math.min( ethereumLimit minus ethereumOutgoing, seiLimit minus seiIncoming ) * proportion
+       = Math.min ( 1000aUSDC minus 15aUSDC, 500aUSDC minus 5aUSDC) * 1
+       = Math.min (985aUSDC, 495aUSDC) * 1
+       = 495
+       * 
+       * 
+       */
       expect(res).toBeDefined();
-    });
-    test("it should return the transfer limit of an asset as a string for axelarnet chains", async () => {
-      const chainId = "sei";
-      const denom = "uausdc";
-      const res = await api.getTransferLimit({ chainId, denom }).catch((e) => console.log(e));
-      expect(res).toBeDefined();
+      expect(res - expectedRes).toEqual(0);
     });
   });
 });

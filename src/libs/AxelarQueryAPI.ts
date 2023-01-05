@@ -1,5 +1,5 @@
 import { AssetConfig } from "../assets/types";
-import { formatUnits, parseEther, parseUnits } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
@@ -15,13 +15,13 @@ import {
 import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
-import EVMClient from "./TransactionRecoveryApi/client/EVMClient";
-import rpcInfo from "./TransactionRecoveryApi/constants/chain";
-import { ethers } from "ethers";
-import { AxelarRecoveryApi } from "./TransactionRecoveryApi";
-import gatewayAbi from "../../artifacts/contracts/AxelarGateway.sol/AxelarGateway.json";
-import { ChainInfo } from "src/chains/types";
+import { BigNumber } from "ethers";
 
+interface TranslatedTransferRateLimitResponse {
+  incoming: string;
+  outgoing: string;
+  limit: string;
+}
 export class AxelarQueryAPI {
   readonly environment: Environment;
   readonly lcdApi: RestService;
@@ -315,72 +315,98 @@ export class AxelarQueryAPI {
     }
   };
 
+  /**
+   * Check if a chain is active.
+   * @param fromChainId source chain id
+   * @param toChainId destination chain id
+   * @param denom denom of asset (e.g. for USDC, uusdc)
+   * @param proportionOfTotalLimitPerTransfer (optional) proportion of total limit you would like to limit users, e.g. for 25% of total, use 0.25
+   * @returns true if the chain is active, false otherwise
+   */
   public async getTransferLimit({
+    fromChainId,
+    toChainId,
+    denom,
+    proportionOfTotalLimitPerTransfer = 1,
+  }: {
+    fromChainId: string;
+    toChainId: string;
+    denom: string;
+    proportionOfTotalLimitPerTransfer?: number;
+  }): Promise<number> {
+    const fromChainNexusResponse = await this.getTransferLimitNexusQuery({
+      chainId: fromChainId,
+      denom,
+    });
+    const toChainNexusResponse = await this.getTransferLimitNexusQuery({
+      chainId: toChainId,
+      denom,
+    });
+
+    let fromChainLimit: number, toChainLimit: number;
+
+    try {
+      const { limit, outgoing } = fromChainNexusResponse;
+      fromChainLimit = BigNumber.from(limit).sub(BigNumber.from(outgoing)).toNumber();
+    } catch (e) {
+      throw `could not parse response from ${fromChainId} for ${denom}`;
+    }
+
+    try {
+      const { limit, incoming } = toChainNexusResponse;
+      toChainLimit = BigNumber.from(limit).sub(BigNumber.from(incoming)).toNumber();
+    } catch (e) {
+      throw `could not parse response from ${toChainId} for ${denom}`;
+    }
+
+    return Math.min(fromChainLimit, toChainLimit) * proportionOfTotalLimitPerTransfer;
+  }
+
+  async getTransferLimitNexusQuery({
     chainId,
     denom,
   }: {
     denom: string;
     chainId: string;
-  }): Promise<string> {
-    try {
-      // verify chain params
-      await throwIfInvalidChainIds([chainId], this.environment);
-      const chains = await loadChains({ environment: this.environment });
-      const chain = chains.find((c) => c.id === chainId);
-      if (!chain) throw `Chain ${chainId} not found`;
+  }): Promise<TranslatedTransferRateLimitResponse> {
+    // verify chain params
+    await throwIfInvalidChainIds([chainId], this.environment);
+    const chains = await loadChains({ environment: this.environment });
+    const chain = chains.find((c) => c.id === chainId);
+    if (!chain) throw `Chain ${chainId} not found`;
 
-      // verify asset params
-      if (!this.allAssets) await this._initializeAssets();
-      const asset = this.allAssets.find((asset) => asset.common_key[this.environment] === denom);
-      if (!asset) throw `Asset ${denom} not found`;
+    // verify asset params
+    if (!this.allAssets) await this._initializeAssets();
+    const asset = this.allAssets.find((asset) => asset.common_key[this.environment] === denom);
+    if (!asset) throw `Asset ${denom} not found`;
 
-      // if chain is on evm module, query the contract directly on the EVM chain
-      // othewise if the chain is in the axelarnet module, query the nexus module
-      return formatUnits(
-        await (chain.module === "evm"
-          ? this.queryEVMTransferLimit(chainId, asset, chain)
-          : this.queryAxelarTransferLimit(chainId, denom)),
-        asset.decimals
-      );
-    } catch (e) {
-      console.error(e);
-      throw `could not fetch transfer limit for ${denom} on ${chainId}`;
-    }
-  }
-
-  private async queryAxelarTransferLimit(chainId: string, denom: string) {
     const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient({
       environment: this.environment,
     });
 
-    // the "limit" response to the TransferRateLimit RPC query is of type Uint8Array, so need to decode it
-    return await api.nexus
-      .TransferRateLimit({ chain: chainId, asset: denom })
-      .then((res) => res.transferRateLimit?.limit)
-      .then((limit) => (limit ? new TextDecoder("utf-8").decode(new Uint8Array(limit)) : ""));
-  }
+    try {
+      // the "limit" response to the TransferRateLimit RPC query is of type Uint8Array, so need to decode it
+      return api.nexus.TransferRateLimit({ chain: chainId, asset: denom }).then((res) => {
+        const { transferRateLimit } = res;
+        if (
+          !transferRateLimit ||
+          !transferRateLimit.limit ||
+          !transferRateLimit.incoming ||
+          !transferRateLimit.outgoing
+        )
+          throw `getTransferLimit(): did not receive a valid response to ${chainId} / ${denom} transfer query`;
 
-  private async queryEVMTransferLimit(chainId: string, asset: AssetConfig, chain: ChainInfo) {
-    const { chain_aliases, decimals } = asset;
-    const { chainName } = chain;
+        const { limit, incoming, outgoing } = transferRateLimit;
 
-    // get the evm provider
-    const evmClient = new EVMClient({
-      rpcUrl: rpcInfo[this.environment].rpcMap[chainId],
-      evmWalletDetails: { useWindowEthereum: false },
-    });
-
-    // the on-chain query only accepts symbol, so translate the denom to symbol
-    const { assetSymbol } = chain_aliases[chainName.toLowerCase()];
-
-    // get the gateway address and instantiate the gateway contract for query
-    const axelarRecoveryAPI = new AxelarRecoveryApi({ environment: this.environment });
-    const gatewayAddr = await axelarRecoveryAPI
-      .queryGatewayAddress({ chain: chainId })
-      .then((res) => res.address);
-    const gateway = new ethers.Contract(gatewayAddr, gatewayAbi.abi, evmClient.getProvivider());
-
-    // query and format the token mint limit
-    return await gateway.tokenMintLimit(assetSymbol);
+        return {
+          limit: new TextDecoder("utf-8").decode(new Uint8Array(limit)),
+          outgoing: new TextDecoder("utf-8").decode(new Uint8Array(outgoing)),
+          incoming: new TextDecoder("utf-8").decode(new Uint8Array(incoming)),
+        };
+      });
+    } catch (e: any) {
+      console.error(e);
+      throw `getTransferLimit(): could not fetch transfer limit for ${denom} on ${chainId}: ${e.message}`;
+    }
   }
 }
