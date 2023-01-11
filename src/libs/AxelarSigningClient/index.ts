@@ -18,6 +18,7 @@ import { registerAxelarnetTxTypes, registerAxelarnetEventTypes } from "./types/A
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { registerEvmTxTypes } from "./types/EvmTxTypes";
+import { registerIBCTxTypes } from "./types/IBCTxTypes";
 
 interface IAxelarSigningClient extends SigningStargateClient {
   signThenBroadcast(
@@ -68,6 +69,7 @@ export class AxelarSigningClient extends SigningStargateClient implements IAxela
     registerAxelarnetTxTypes(registry);
     registerAxelarnetEventTypes(registry);
     registerEvmTxTypes(registry);
+    registerIBCTxTypes(registry);
     const newOpts = { ...options, registry };
 
     return new AxelarSigningClient(tmClient, wallet, account.address, newOpts);

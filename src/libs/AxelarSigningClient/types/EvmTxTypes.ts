@@ -15,6 +15,10 @@ import {
   RetryFailedEventRequest,
   protobufPackage,
 } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/tx";
+import {
+  ContractCallWithMintApproved,
+  ConfirmGatewayTxStarted,
+} from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/events";
 import { Registry } from "@cosmjs/proto-signing";
 
 const TxTypeUrlMap = {
@@ -32,6 +36,11 @@ const TxTypeUrlMap = {
   EvmSignCommandsRequest: `/${protobufPackage}.SignCommandsRequest`,
   EvmAddChainRequest: `/${protobufPackage}.AddChainRequest`,
   EvmRetryFailedEventRequest: `/${protobufPackage}.RetryFailedEventRequest`,
+};
+
+const EventTypeUrlMap = {
+  EvmContractCallWithMintApproved: `/${protobufPackage}.ContractCallWithMintApproved`,
+  EvmConfirmGatewayTxStarted: `/${protobufPackage}.ConfirmGatewayTxStarted`,
 };
 
 export const registerEvmTxTypes = (registry: Registry) => {
@@ -52,4 +61,9 @@ export const registerEvmTxTypes = (registry: Registry) => {
   registry.register(TxTypeUrlMap.EvmSignCommandsRequest, SignCommandsRequest);
   registry.register(TxTypeUrlMap.EvmAddChainRequest, AddChainRequest);
   registry.register(TxTypeUrlMap.EvmRetryFailedEventRequest, RetryFailedEventRequest);
+};
+
+export const registerEvmEventTypes = (registry: Registry) => {
+  registry.register(EventTypeUrlMap.EvmConfirmGatewayTxStarted, ConfirmGatewayTxStarted);
+  registry.register(EventTypeUrlMap.EvmContractCallWithMintApproved, ContractCallWithMintApproved);
 };
