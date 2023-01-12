@@ -3,7 +3,6 @@ import {
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { ethers } from "ethers";
-import { formatUnits } from "ethers/lib/utils";
 import { CHAINS } from "../../chains";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
@@ -234,10 +233,10 @@ describe("AxelarQueryAPI", () => {
       const expectedRes = 500_000_000 * 0.25;
       /**
        if we are sending from ethereum to sei, we expect res to be
-       Math.min( ethereumLimit, seiLimit )
-       = Math.min( ethereumLimit, seiLimit )
-       = Math.min ( 1000aUSDC, 500aUSDC)
-       = 500
+       Math.min( ethereumLimit, seiLimit ) * 0.25 (0.25 represents default proportion of total limit)
+       = Math.min( ethereumLimit, seiLimit ) * 0.25 (0.25 represents default proportion of total limit)
+       = Math.min ( 1000aUSDC, 500aUSDC) * 0.25 (0.25 represents default proportion of total limit)
+       = 125
        * 
        * 
        */
