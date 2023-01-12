@@ -344,12 +344,26 @@ export class AxelarQueryAPI {
     });
 
     try {
-      const fromChainLimit = BigNumber.from(fromChainNexusResponse.limit),
-        toChainLimit = BigNumber.from(toChainNexusResponse.limit);
-      const min = fromChainLimit.lt(toChainLimit) ? fromChainLimit : toChainLimit;
+      let { limit: fromChainLimit } = fromChainNexusResponse;
+      let { limit: toChainLimit } = toChainNexusResponse;
+
+      if (!fromChainLimit && !toChainLimit)
+        throw new Error(
+          `could not fetch transfer limit for transfer from ${fromChainId} to ${toChainId} for ${denom}`
+        );
+
+      let min;
+      if (fromChainLimit && toChainLimit) {
+        const fromBigNum = BigNumber.from(fromChainLimit);
+        const toBigNum = BigNumber.from(toChainLimit);
+        min = BigNumber.from(fromBigNum).lt(toBigNum) ? fromBigNum : toBigNum;
+      } else {
+        min = BigNumber.from(fromChainLimit || toChainLimit);
+      }
       return min.div(proportionOfTotalLimitPerTransfer).toString();
-    } catch (e) {
-      throw `could not fetch transfer limit for transfer from ${fromChainId} to ${toChainId} for ${denom}: ${e}`;
+    } catch (e: any) {
+      console.error(`getTransferLimit(): ${e.message}`);
+      return "";
     }
   }
 
@@ -377,27 +391,26 @@ export class AxelarQueryAPI {
 
     try {
       // the "limit" response to the TransferRateLimit RPC query is of type Uint8Array, so need to decode it
-      return api.nexus.TransferRateLimit({ chain: chainId, asset: denom }).then((res) => {
-        const { transferRateLimit } = res;
-        if (
-          !transferRateLimit ||
-          !transferRateLimit.limit ||
-          !transferRateLimit.incoming ||
-          !transferRateLimit.outgoing
-        )
-          throw `getTransferLimit(): did not receive a valid response to ${chainId} / ${denom} transfer query`;
-
-        const { limit, incoming, outgoing } = transferRateLimit;
-
-        return {
-          limit: new TextDecoder("utf-8").decode(new Uint8Array(limit)),
-          outgoing: new TextDecoder("utf-8").decode(new Uint8Array(outgoing)),
-          incoming: new TextDecoder("utf-8").decode(new Uint8Array(incoming)),
-        };
-      });
+      const res = await api.nexus.TransferRateLimit({ chain: chainId, asset: denom });
+      const { transferRateLimit } = res;
+      if (
+        !transferRateLimit ||
+        !transferRateLimit.limit ||
+        !transferRateLimit.incoming ||
+        !transferRateLimit.outgoing
+      )
+        throw new Error(`did not receive a valid response to ${chainId} / ${denom} transfer query`);
+      const { limit, incoming, outgoing } = transferRateLimit;
+      return {
+        limit: new TextDecoder("utf-8").decode(new Uint8Array(limit)),
+        outgoing: new TextDecoder("utf-8").decode(new Uint8Array(outgoing)),
+        incoming: new TextDecoder("utf-8").decode(new Uint8Array(incoming)),
+      };
     } catch (e: any) {
-      console.error(e);
-      throw `getTransferLimit(): could not fetch transfer limit for ${denom} on ${chainId}: ${e.message}`;
+      console.error(
+        `getTransferLimitNexusQuery(): could not fetch transfer limit for ${denom} on ${chainId}: ${e.message}`
+      );
+      return { limit: "", outgoing: "", incoming: "" };
     }
   }
 }
