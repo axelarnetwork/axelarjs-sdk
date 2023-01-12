@@ -327,7 +327,7 @@ export class AxelarQueryAPI {
     fromChainId,
     toChainId,
     denom,
-    proportionOfTotalLimitPerTransfer = 1,
+    proportionOfTotalLimitPerTransfer = 0.25,
   }: {
     fromChainId: string;
     toChainId: string;
@@ -343,23 +343,13 @@ export class AxelarQueryAPI {
       denom,
     });
 
-    let fromChainLimit: number, toChainLimit: number;
-
     try {
-      const { limit, outgoing } = fromChainNexusResponse;
-      fromChainLimit = BigNumber.from(limit).sub(BigNumber.from(outgoing)).toNumber();
+      const fromChainLimit = Number(fromChainNexusResponse.limit),
+        toChainLimit = Number(toChainNexusResponse.limit);
+      return Math.min(fromChainLimit, toChainLimit) * proportionOfTotalLimitPerTransfer;
     } catch (e) {
       throw `could not parse response from ${fromChainId} for ${denom}`;
     }
-
-    try {
-      const { limit, incoming } = toChainNexusResponse;
-      toChainLimit = BigNumber.from(limit).sub(BigNumber.from(incoming)).toNumber();
-    } catch (e) {
-      throw `could not parse response from ${toChainId} for ${denom}`;
-    }
-
-    return Math.min(fromChainLimit, toChainLimit) * proportionOfTotalLimitPerTransfer;
   }
 
   async getTransferLimitNexusQuery({

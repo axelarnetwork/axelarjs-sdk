@@ -60,7 +60,7 @@ describe("AxelarQueryAPI", () => {
       ];
       expect(
         api.getTransferFee(sourceChainName, destinationChainName, assetDenom, amount)
-      ).rejects.toThrow("Invalid chain identifier for osmosis. Did you mean osmosis-4");
+      ).rejects.toThrow("Invalid chain identifier for osmosis. Did you mean osmosis-5");
     });
   });
 
@@ -228,18 +228,16 @@ describe("AxelarQueryAPI", () => {
       const fromChainId = "ethereum-2";
       const toChainId = "sei";
       const denom = "uausdc";
-      const proportionOfTotalLimitPerTransfer = 1;
       const res: number = await api
-        .getTransferLimit({ fromChainId, toChainId, denom, proportionOfTotalLimitPerTransfer })
+        .getTransferLimit({ fromChainId, toChainId, denom })
         .catch((e) => 0);
-      const expectedRes = 495_000_000;
+      const expectedRes = 500_000_000 * 0.25;
       /**
        if we are sending from ethereum to sei, we expect res to be
-       Math.min( ethereumLimit, seiLimit ) * proportion
-       = Math.min( ethereumLimit minus ethereumOutgoing, seiLimit minus seiIncoming ) * proportion
-       = Math.min ( 1000aUSDC minus 15aUSDC, 500aUSDC minus 5aUSDC) * 1
-       = Math.min (985aUSDC, 495aUSDC) * 1
-       = 495
+       Math.min( ethereumLimit, seiLimit )
+       = Math.min( ethereumLimit, seiLimit )
+       = Math.min ( 1000aUSDC, 500aUSDC)
+       = 500
        * 
        * 
        */
