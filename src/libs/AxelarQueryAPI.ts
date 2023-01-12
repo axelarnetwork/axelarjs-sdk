@@ -320,20 +320,20 @@ export class AxelarQueryAPI {
    * @param fromChainId source chain id
    * @param toChainId destination chain id
    * @param denom denom of asset (e.g. for USDC, uusdc)
-   * @param proportionOfTotalLimitPerTransfer (optional) proportion of total limit you would like to limit users, e.g. for 25% of total, use 0.25
+   * @param proportionOfTotalLimitPerTransfer (optional) proportion of total limit you would like to limit users, e.g. for 25% of total, use 4
    * @returns true if the chain is active, false otherwise
    */
   public async getTransferLimit({
     fromChainId,
     toChainId,
     denom,
-    proportionOfTotalLimitPerTransfer = 0.25,
+    proportionOfTotalLimitPerTransfer = 4,
   }: {
     fromChainId: string;
     toChainId: string;
     denom: string;
     proportionOfTotalLimitPerTransfer?: number;
-  }): Promise<number> {
+  }): Promise<string> {
     const fromChainNexusResponse = await this.getTransferLimitNexusQuery({
       chainId: fromChainId,
       denom,
@@ -344,11 +344,12 @@ export class AxelarQueryAPI {
     });
 
     try {
-      const fromChainLimit = Number(fromChainNexusResponse.limit),
-        toChainLimit = Number(toChainNexusResponse.limit);
-      return Math.min(fromChainLimit, toChainLimit) * proportionOfTotalLimitPerTransfer;
+      const fromChainLimit = BigNumber.from(fromChainNexusResponse.limit),
+        toChainLimit = BigNumber.from(toChainNexusResponse.limit);
+      const min = fromChainLimit.lt(toChainLimit) ? fromChainLimit : toChainLimit;
+      return min.div(proportionOfTotalLimitPerTransfer).toString();
     } catch (e) {
-      throw `could not fetch transfer limit for transfer from ${fromChainId} to ${toChainId} for ${denom}`;
+      throw `could not fetch transfer limit for transfer from ${fromChainId} to ${toChainId} for ${denom}: ${e}`;
     }
   }
 

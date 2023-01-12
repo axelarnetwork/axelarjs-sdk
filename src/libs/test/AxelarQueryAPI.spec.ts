@@ -227,9 +227,9 @@ describe("AxelarQueryAPI", () => {
       const fromChainId = "ethereum-2";
       const toChainId = "sei";
       const denom = "uausdc";
-      const res: number = await api
+      const res: string = await api
         .getTransferLimit({ fromChainId, toChainId, denom })
-        .catch((e) => 0);
+        .catch((e) => "0");
       const expectedRes = 500_000_000 * 0.25;
       /**
        if we are sending from ethereum to sei, we expect res to be
@@ -241,7 +241,7 @@ describe("AxelarQueryAPI", () => {
        * 
        */
       expect(res).toBeDefined();
-      expect(res - expectedRes).toEqual(0);
+      expect(Number(res) - expectedRes).toEqual(0);
     });
   });
 });
