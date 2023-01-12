@@ -348,7 +348,7 @@ export class AxelarQueryAPI {
         toChainLimit = Number(toChainNexusResponse.limit);
       return Math.min(fromChainLimit, toChainLimit) * proportionOfTotalLimitPerTransfer;
     } catch (e) {
-      throw `could not parse response from ${fromChainId} for ${denom}`;
+      throw `could not fetch transfer limit for transfer from ${fromChainId} to ${toChainId} for ${denom}`;
     }
   }
 
