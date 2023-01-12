@@ -15,7 +15,13 @@ import {
 import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
+import { BigNumber } from "ethers";
 
+interface TranslatedTransferRateLimitResponse {
+  incoming: string;
+  outgoing: string;
+  limit: string;
+}
 export class AxelarQueryAPI {
   readonly environment: Environment;
   readonly lcdApi: RestService;
@@ -308,4 +314,90 @@ export class AxelarQueryAPI {
       });
     }
   };
+
+  /**
+   * Check if a chain is active.
+   * @param fromChainId source chain id
+   * @param toChainId destination chain id
+   * @param denom denom of asset (e.g. for USDC, uusdc)
+   * @param proportionOfTotalLimitPerTransfer (optional) proportion of total limit you would like to limit users, e.g. for 25% of total, use 4
+   * @returns true if the chain is active, false otherwise
+   */
+  public async getTransferLimit({
+    fromChainId,
+    toChainId,
+    denom,
+    proportionOfTotalLimitPerTransfer = 4,
+  }: {
+    fromChainId: string;
+    toChainId: string;
+    denom: string;
+    proportionOfTotalLimitPerTransfer?: number;
+  }): Promise<string> {
+    const fromChainNexusResponse = await this.getTransferLimitNexusQuery({
+      chainId: fromChainId,
+      denom,
+    });
+    const toChainNexusResponse = await this.getTransferLimitNexusQuery({
+      chainId: toChainId,
+      denom,
+    });
+
+    try {
+      const fromChainLimit = BigNumber.from(fromChainNexusResponse.limit),
+        toChainLimit = BigNumber.from(toChainNexusResponse.limit);
+      const min = fromChainLimit.lt(toChainLimit) ? fromChainLimit : toChainLimit;
+      return min.div(proportionOfTotalLimitPerTransfer).toString();
+    } catch (e) {
+      throw `could not fetch transfer limit for transfer from ${fromChainId} to ${toChainId} for ${denom}: ${e}`;
+    }
+  }
+
+  async getTransferLimitNexusQuery({
+    chainId,
+    denom,
+  }: {
+    denom: string;
+    chainId: string;
+  }): Promise<TranslatedTransferRateLimitResponse> {
+    // verify chain params
+    await throwIfInvalidChainIds([chainId], this.environment);
+    const chains = await loadChains({ environment: this.environment });
+    const chain = chains.find((c) => c.id === chainId);
+    if (!chain) throw `Chain ${chainId} not found`;
+
+    // verify asset params
+    if (!this.allAssets) await this._initializeAssets();
+    const asset = this.allAssets.find((asset) => asset.common_key[this.environment] === denom);
+    if (!asset) throw `Asset ${denom} not found`;
+
+    const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient({
+      environment: this.environment,
+    });
+
+    try {
+      // the "limit" response to the TransferRateLimit RPC query is of type Uint8Array, so need to decode it
+      return api.nexus.TransferRateLimit({ chain: chainId, asset: denom }).then((res) => {
+        const { transferRateLimit } = res;
+        if (
+          !transferRateLimit ||
+          !transferRateLimit.limit ||
+          !transferRateLimit.incoming ||
+          !transferRateLimit.outgoing
+        )
+          throw `getTransferLimit(): did not receive a valid response to ${chainId} / ${denom} transfer query`;
+
+        const { limit, incoming, outgoing } = transferRateLimit;
+
+        return {
+          limit: new TextDecoder("utf-8").decode(new Uint8Array(limit)),
+          outgoing: new TextDecoder("utf-8").decode(new Uint8Array(outgoing)),
+          incoming: new TextDecoder("utf-8").decode(new Uint8Array(incoming)),
+        };
+      });
+    } catch (e: any) {
+      console.error(e);
+      throw `getTransferLimit(): could not fetch transfer limit for ${denom} on ${chainId}: ${e.message}`;
+    }
+  }
 }

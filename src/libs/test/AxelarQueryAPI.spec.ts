@@ -59,7 +59,7 @@ describe("AxelarQueryAPI", () => {
       ];
       expect(
         api.getTransferFee(sourceChainName, destinationChainName, assetDenom, amount)
-      ).rejects.toThrow("Invalid chain identifier for osmosis. Did you mean osmosis-4");
+      ).rejects.toThrow("Invalid chain identifier for osmosis. Did you mean osmosis-5");
     });
   });
 
@@ -180,6 +180,68 @@ describe("AxelarQueryAPI", () => {
       await api.getContractAddressFromConfig(EvmChain.MOONBEAM, "gas_service").then((res) => {
         expect(res).toBeDefined();
       });
+    });
+  });
+
+  describe("getTransferLimit", () => {
+    let api: AxelarQueryAPI;
+
+    beforeEach(async () => {
+      api = new AxelarQueryAPI({ environment: Environment.TESTNET });
+      jest.clearAllMocks();
+
+      /**
+       * in this mock below, we are setting:
+       * ethereum:
+       *  limit: 1000aUSDC
+       *  incoming: 20aUSDC
+       *  outgoing: 15aUSDC
+       * sei:
+       *  limit: 500aUSDC
+       *  incoming: 5aUSDC
+       *  outgoing: 10aUSDC
+       */
+      jest
+        .spyOn(api, "getTransferLimitNexusQuery")
+        .mockImplementation(({ chainId, denom }: { chainId: string; denom: string }) => {
+          let res = {
+            limit: "0",
+            outgoing: "0",
+            incoming: "0",
+          };
+          if (chainId === "ethereum-2") {
+            res.limit = "1000000000";
+            res.incoming = "20000000";
+            res.outgoing = "15000000";
+          }
+          if (chainId === "sei") {
+            res.limit = "500000000";
+            res.incoming = "5000000";
+            res.outgoing = "10000000";
+          }
+          return Promise.resolve(res);
+        });
+    });
+
+    test("it should return the transfer limit of an asset as a string for evm chains", async () => {
+      const fromChainId = "ethereum-2";
+      const toChainId = "sei";
+      const denom = "uausdc";
+      const res: string = await api
+        .getTransferLimit({ fromChainId, toChainId, denom })
+        .catch((e) => "0");
+      const expectedRes = 500_000_000 * 0.25;
+      /**
+       if we are sending from ethereum to sei, we expect res to be
+       Math.min( ethereumLimit, seiLimit ) * 0.25 (0.25 represents default proportion of total limit)
+       = Math.min( ethereumLimit, seiLimit ) * 0.25 (0.25 represents default proportion of total limit)
+       = Math.min ( 1000aUSDC, 500aUSDC) * 0.25 (0.25 represents default proportion of total limit)
+       = 125
+       * 
+       * 
+       */
+      expect(res).toBeDefined();
+      expect(Number(res) - expectedRes).toEqual(0);
     });
   });
 });

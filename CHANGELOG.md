@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - fix [native gas estimates](https://github.com/axelarnetwork/axelarjs-sdk/pull/193)
 - added `timeSpent` field to the `queryTransactionStatus` API.
 - added more possible values for `GMPStatus` enum.
+- added `getTransferLimit` query to retrieve the maximum transfer for an asset on a chain
 
 ## [0.11.7] - 2022-OCTOBER-26
 
