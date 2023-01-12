@@ -356,13 +356,12 @@ export class AxelarQueryAPI {
       if (fromChainLimit && toChainLimit) {
         const fromBigNum = BigNumber.from(fromChainLimit);
         const toBigNum = BigNumber.from(toChainLimit);
-        min = BigNumber.from(fromBigNum).lt(toBigNum) ? fromBigNum : toBigNum;
+        min = fromBigNum.lt(toBigNum) ? fromBigNum : toBigNum;
       } else {
         min = BigNumber.from(fromChainLimit || toChainLimit);
       }
       return min.div(proportionOfTotalLimitPerTransfer).toString();
     } catch (e: any) {
-      console.error(`getTransferLimit(): ${e.message}`);
       return "";
     }
   }
@@ -407,9 +406,6 @@ export class AxelarQueryAPI {
         incoming: new TextDecoder("utf-8").decode(new Uint8Array(incoming)),
       };
     } catch (e: any) {
-      console.error(
-        `getTransferLimitNexusQuery(): could not fetch transfer limit for ${denom} on ${chainId}: ${e.message}`
-      );
       return { limit: "", outgoing: "", incoming: "" };
     }
   }
