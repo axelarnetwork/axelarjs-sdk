@@ -386,12 +386,11 @@ export class AxelarQueryAPI {
       environment: this.environment,
     });
 
+    const asset = await this._convertAssetDenom(denom);
+
     try {
       // the "limit" response to the TransferRateLimit RPC query is of type Uint8Array, so need to decode it
-      const res = await api.nexus.TransferRateLimit({
-        chain: chainId,
-        asset: await this._convertAssetDenom(denom),
-      });
+      const res = await api.nexus.TransferRateLimit({ chain: chainId, asset });
       const { transferRateLimit } = res;
       if (
         !transferRateLimit ||
