@@ -19,11 +19,14 @@ export interface AssetInfoForChain extends AssetInfo {
 }
 
 export interface AssetConfig {
+  id: string;
   common_key: { [env: string]: string };
   native_chain: string;
   fully_supported: boolean;
   decimals: number;
   chain_aliases: { [key: string]: AssetInfoForChain };
+  wrapped_erc20: string;
+  is_gas_token: boolean;
 }
 
 export type LoadAssetConfig = {

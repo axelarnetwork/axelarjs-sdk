@@ -68,7 +68,10 @@ export class AxelarQueryAPI {
 
     await this.initQueryClientIfNeeded();
 
-    return this.axelarQueryClient.nexus.FeeInfo({ chain: chainId, asset: assetDenom });
+    return this.axelarQueryClient.nexus.FeeInfo({
+      chain: chainId,
+      asset: await this._convertAssetDenom(assetDenom),
+    });
   }
 
   /**
@@ -93,7 +96,7 @@ export class AxelarQueryAPI {
     return this.axelarQueryClient.nexus.TransferFee({
       sourceChain: sourceChainId,
       destinationChain: destinationChainId,
-      amount: `${amountInDenom.toString()}${assetDenom}`,
+      amount: `${amountInDenom.toString()}${await this._convertAssetDenom(assetDenom)}`,
     });
   }
 
@@ -381,8 +384,10 @@ export class AxelarQueryAPI {
 
     // verify asset params
     if (!this.allAssets) await this._initializeAssets();
-    const asset = this.allAssets.find((asset) => asset.common_key[this.environment] === denom);
-    if (!asset) throw `Asset ${denom} not found`;
+    const assetConfig = this.allAssets.find(
+      (asset) => asset.common_key[this.environment] === denom.toLowerCase()
+    );
+    if (!assetConfig) throw `Asset ${denom} not found`;
 
     const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient({
       environment: this.environment,
@@ -390,7 +395,10 @@ export class AxelarQueryAPI {
 
     try {
       // the "limit" response to the TransferRateLimit RPC query is of type Uint8Array, so need to decode it
-      const res = await api.nexus.TransferRateLimit({ chain: chainId, asset: denom });
+      const res = await api.nexus.TransferRateLimit({
+        chain: chainId,
+        asset: await this._convertAssetDenom(denom),
+      });
       const { transferRateLimit } = res;
       if (
         !transferRateLimit ||
@@ -408,5 +416,14 @@ export class AxelarQueryAPI {
     } catch (e: any) {
       return { limit: "", outgoing: "", incoming: "" };
     }
+  }
+
+  private async _convertAssetDenom(denom: string): Promise<string> {
+    if (!this.allAssets) await this._initializeAssets();
+    const assetConfig = this.allAssets.find(
+      (asset) => asset.common_key[this.environment] === denom.toLowerCase()
+    );
+    if (!assetConfig) throw `Asset ${denom} not found`;
+    return assetConfig.wrapped_erc20 ? assetConfig.wrapped_erc20 : denom;
   }
 }
