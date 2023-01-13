@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.0] - 2022-NOVEMBER-[]
+
+- changed all method signatures to require chain IDs (as recognized by Axelar) instead of chain name. For example, in testnet, Ethereums (Goerli) is recognized as `ethereum-2`
+- added a query to retrieve all active chains on the network (`getActiveChain`) and updates all method implementations to ensure that invocations are only made to live chains
+- added a chainId suggestion when passing wrong chainId e.g. chain name in `getTransferFee` api.
+- `getDepositAddress` updates:
+  1. update payload signature to accept a destructured object parameter. the method is still backwards compatible for previous invocations using regular parameters
+  2. merged `getDepositAddressForNativeUnwrap` and `getDepositAddressForNativeWrap` method functionality into `getDepositAddress` method
+- upgrade axelarjs-types dependency to `v0.27.0`
+- update default axelar rpc & lcd endpoints in testnet/mainnet from quickapi to imperator
+- fix [native gas estimates](https://github.com/axelarnetwork/axelarjs-sdk/pull/193)
+- added `timeSpent` field to the `queryTransactionStatus` API.
+- added more possible values for `GMPStatus` enum.
+- added `getTransferLimit` query to retrieve the maximum transfer for an asset on a chain
+
 ## [0.11.7] - 2022-OCTOBER-26
 
 - updated supported chains list

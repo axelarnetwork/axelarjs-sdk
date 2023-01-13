@@ -1,4 +1,4 @@
-import { AxelarAssetTransfer } from "../../../src";
+import { AxelarAssetTransfer, Environment } from "../../../src";
 
 describe("[MAINNET] - Deposit Address E2E", () => {
   jest.setTimeout(60000);
@@ -6,7 +6,7 @@ describe("[MAINNET] - Deposit Address E2E", () => {
 
   beforeAll(() => {
     transferSdk = new AxelarAssetTransfer({
-      environment: "mainnet",
+      environment: Environment.MAINNET,
     });
   });
 

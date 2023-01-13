@@ -7,6 +7,35 @@ export const ethAddressStub = () => "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD"
 
 export const terraAddressStub = () => "terra1qem4njhac8azalrav7shvp06myhqldpmkk3p0t";
 
+export const activeChainsStub = () => [
+  "agoric",
+  "assetmantle",
+  "aurora",
+  "avalanche",
+  "axelarnet",
+  "binance",
+  "comdex",
+  "cosmoshub",
+  "crescent",
+  "e-money",
+  "ethereum",
+  "evmos",
+  "fantom",
+  "fetch",
+  "injective",
+  "juno",
+  "ki",
+  "kujira",
+  "moonbeam",
+  "osmosis",
+  "polygon",
+  "regen",
+  "secret",
+  "stargaze",
+  "terra-3",
+  "umee",
+];
+
 export const otcStub = () => ({
   otc: "hr64_XnjNE",
   validationMsg:
@@ -25,7 +54,7 @@ export const roomIdStub = () => ({
 });
 
 export const depositAddressPayloadStub = () => ({
-  fromChain: "terra",
+  fromChain: "terra-3",
   toChain: "avalanche",
   asset: "uusd",
   publicAddress: ethAddressStub(),

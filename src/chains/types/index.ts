@@ -15,7 +15,8 @@ export interface AssetAndChainInfo {
 }
 
 export interface ChainInfo {
-  assets?: AssetInfo[];
+  id: string;
+  assets: AssetInfo[];
   chainSymbol: string;
   chainName: string;
   fullySupported: boolean;
@@ -28,6 +29,7 @@ export interface ChainInfo {
     testnet: string;
     mainnet: string;
   };
+  nativeAsset: string[];
   addressPrefix: string;
 }
 

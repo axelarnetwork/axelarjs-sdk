@@ -10,7 +10,7 @@ export async function asyncRetry(
 ): Promise<any> {
   const retry = async () => {
     await sleep(secondsToRetry);
-    return await asyncRetry(
+    return asyncRetry(
       retryFunc,
       retryConditionMet,
       errorHandler,
@@ -22,10 +22,10 @@ export async function asyncRetry(
   try {
     if (count >= maxRetries) return null;
     const response = await retryFunc();
-    if (!retryConditionMet(response)) return await retry();
+    if (!retryConditionMet(response)) return retry();
     return response;
   } catch (e) {
     errorHandler && errorHandler(e as Error, count);
-    return await retry();
+    return retry();
   }
 }

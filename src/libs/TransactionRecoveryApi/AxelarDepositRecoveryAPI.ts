@@ -8,6 +8,7 @@ import {
   parseConfirmDepositCosmosResponse,
   parseConfirmDepositEvmResponse,
 } from "./helpers/axelarHelper";
+import { throwIfInvalidChainIds } from "../../utils";
 
 export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   public constructor(config: AxelarRecoveryAPIConfig) {
@@ -15,13 +16,13 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async confirmDeposit(params: ConfirmDepositRequest) {
+    await throwIfInvalidChainIds([params.from], this.environment);
+
     const chain: ChainInfo = (
       await loadChains({
         environment: this.environment,
       })
-    ).find(
-      (chainInfo) => chainInfo.chainName.toLowerCase() === params.from.toLowerCase()
-    ) as ChainInfo;
+    ).find((chainInfo) => chainInfo.id.toLowerCase() === params.from.toLowerCase()) as ChainInfo;
     if (!chain) throw new Error("cannot find chain" + params.from);
 
     const txBytes = await this.execRecoveryUrlFetch("/confirm_deposit_tx", {
@@ -44,7 +45,7 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
       module: "axelarnet",
     });
 
-    return await broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+    return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 }
 

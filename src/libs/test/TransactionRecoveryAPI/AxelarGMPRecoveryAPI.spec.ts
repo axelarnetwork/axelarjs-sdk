@@ -31,6 +31,7 @@ import { AXELAR_GATEWAY } from "../../AxelarGateway";
 import { GMPStatus } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
 import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contractCallHelper";
 import {
+  activeChainsStub,
   axelarTxResponseStub,
   batchedCommandResponseStub,
   contractReceiptStub,
@@ -292,6 +293,8 @@ describe("AxelarDepositRecoveryAPI", () => {
         .connect(userWallet)
         .approve(contract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
+
+      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     test("it should return 'gas required' - 'gas paid' given 'gas required' > 'gas paid'", async () => {
@@ -316,6 +319,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       jest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
         .mockResolvedValueOnce(gasRequired.toString());
+      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValueOnce(activeChainsStub());
 
       // Calculate how many gas we need to add more.
       const wantedGasFee = await api.calculateNativeGasFee(
@@ -380,8 +384,10 @@ describe("AxelarDepositRecoveryAPI", () => {
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
       jest.clearAllMocks();
       jest
-        .spyOn(api, "getGasReceiverContractAddress")
+        .spyOn(api.axelarQueryApi, "getContractAddressFromConfig")
         .mockResolvedValue(gasReceiverContract.address);
+
+      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     beforeAll(async () => {
@@ -686,8 +692,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       jest.clearAllMocks();
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
       jest
-        .spyOn(api, "getGasReceiverContractAddress")
+        .spyOn(api.axelarQueryApi, "getContractAddressFromConfig")
         .mockResolvedValueOnce(gasReceiverContract.address);
+      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     beforeAll(async () => {
@@ -1196,19 +1203,6 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
 
       expect(mockGMPApi).toHaveBeenCalledTimes(1);
-    });
-  });
-  describe("getGasReceiverContractAddress", () => {
-    let api: AxelarGMPRecoveryAPI;
-
-    beforeEach(async () => {
-      api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
-    });
-
-    test("it should retrieve the gas receiver address remotely", async () => {
-      await api.getGasReceiverContractAddress(EvmChain.MOONBEAM).then((res) => {
-        expect(res).toBeDefined();
-      });
     });
   });
 });

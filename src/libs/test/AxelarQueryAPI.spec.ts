@@ -6,6 +6,7 @@ import { ethers } from "ethers";
 import { CHAINS } from "../../chains";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
+import { activeChainsStub } from "./stubs";
 
 describe("AxelarQueryAPI", () => {
   const api = new AxelarQueryAPI({ environment: Environment.TESTNET });
@@ -47,6 +48,18 @@ describe("AxelarQueryAPI", () => {
       expect(response.fee).toBeDefined();
       expect(response.fee?.denom).toEqual(assetDenom);
       expect(response.fee?.amount).toBeDefined();
+    });
+
+    test("it should suggest a chain id when passing chain name", async () => {
+      const [sourceChainName, destinationChainName, assetDenom, amount] = [
+        "osmosis",
+        "polygon",
+        "uusd",
+        100000000,
+      ];
+      expect(
+        api.getTransferFee(sourceChainName, destinationChainName, assetDenom, amount)
+      ).rejects.toThrow("Invalid chain identifier for osmosis. Did you mean osmosis-5");
     });
   });
 
@@ -93,6 +106,7 @@ describe("AxelarQueryAPI", () => {
 
   describe("getNativeGasBaseFee", () => {
     test("It should return base fee for a certain source chain / destination chain combination", async () => {
+      jest.spyOn(api, "getActiveChains").mockResolvedValueOnce(activeChainsStub());
       const gasResult = await api.getNativeGasBaseFee(
         CHAINS.TESTNET.AVALANCHE as EvmChain,
         CHAINS.TESTNET.ETHEREUM as EvmChain
@@ -131,6 +145,103 @@ describe("AxelarQueryAPI", () => {
         common_key: "uaxl",
         mintLimit: 0,
       });
+    });
+  });
+
+  describe("getActiveChains", () => {
+    test("It should get a list of active chains", async () => {
+      const activeChains = await api.getActiveChains();
+      expect(activeChains.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("throwIfInactiveChain", () => {
+    test("It should throw if the chain does not get included in a active-chains list", async () => {
+      jest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
+      await expect(api.throwIfInactiveChains(["ethereum"])).rejects.toThrowError(
+        "Chain ethereum is not active"
+      );
+    });
+
+    test("It should throw if the chain does not get included in a active-chains list", async () => {
+      jest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
+      await expect(api.throwIfInactiveChains(["avalanche"])).resolves.toBeUndefined();
+    });
+  });
+
+  describe("getContractAddressFromConfig", () => {
+    let api: AxelarQueryAPI;
+
+    beforeEach(async () => {
+      api = new AxelarQueryAPI({ environment: Environment.TESTNET });
+    });
+
+    test("it should retrieve the gas receiver address remotely", async () => {
+      await api.getContractAddressFromConfig(EvmChain.MOONBEAM, "gas_service").then((res) => {
+        expect(res).toBeDefined();
+      });
+    });
+  });
+
+  describe("getTransferLimit", () => {
+    let api: AxelarQueryAPI;
+
+    beforeEach(async () => {
+      api = new AxelarQueryAPI({ environment: Environment.TESTNET });
+      jest.clearAllMocks();
+
+      /**
+       * in this mock below, we are setting:
+       * ethereum:
+       *  limit: 1000aUSDC
+       *  incoming: 20aUSDC
+       *  outgoing: 15aUSDC
+       * sei:
+       *  limit: 500aUSDC
+       *  incoming: 5aUSDC
+       *  outgoing: 10aUSDC
+       */
+      jest
+        .spyOn(api, "getTransferLimitNexusQuery")
+        .mockImplementation(({ chainId, denom }: { chainId: string; denom: string }) => {
+          let res = {
+            limit: "0",
+            outgoing: "0",
+            incoming: "0",
+          };
+          if (chainId === "ethereum-2") {
+            res.limit = "1000000000";
+            res.incoming = "20000000";
+            res.outgoing = "15000000";
+          }
+          if (chainId === "sei") {
+            res.limit = "500000000";
+            res.incoming = "5000000";
+            res.outgoing = "10000000";
+          }
+          return Promise.resolve(res);
+        });
+    });
+
+    test("it should return the transfer limit of an asset as a string for evm chains", async () => {
+      const fromChainId = "ethereum-2";
+      const toChainId = "sei";
+      const denom = "uausdc";
+      const res: string = await api
+        .getTransferLimit({ fromChainId, toChainId, denom })
+        .catch((e) => "0");
+      const expectedRes = 500_000_000 * 0.25;
+      /**
+       if we are sending from ethereum to sei, we expect res to be
+       Math.min( ethereumLimit, seiLimit ) * 0.25 (0.25 represents default proportion of total limit)
+       = Math.min( ethereumLimit, seiLimit ) * 0.25 (0.25 represents default proportion of total limit)
+       = Math.min ( 1000aUSDC, 500aUSDC) * 0.25 (0.25 represents default proportion of total limit)
+       = 125
+       * 
+       * 
+       */
+      expect(res).toBeDefined();
+      expect(Number(res) - expectedRes).toEqual(0);
     });
   });
 });

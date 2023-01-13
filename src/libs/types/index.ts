@@ -19,6 +19,9 @@ export enum EvmChain {
   MOONBEAM = "moonbeam",
   AURORA = "aurora",
   BINANCE = "binance",
+  ARBITRUM = "arbitrum",
+  CELO = "celo",
+  KAVA = "kava",
 }
 
 export enum CosmosChain {
@@ -60,7 +63,7 @@ export interface TxOption {
 }
 
 export type AxelarAssetTransferConfig = {
-  environment: "mainnet" | "testnet" | "devnet";
+  environment: Environment;
   auth?: "local" | "metamask";
   overwriteResourceUrl?: string;
 };
@@ -125,6 +128,8 @@ export enum GasToken {
   USDC = "USDC",
   AURORA = "AURORA",
   BINANCE = "BNB",
+  CELO = "CELO",
+  KAVA = "KAVA",
 }
 
 export interface AddGasOptions {
@@ -219,15 +224,15 @@ export interface ApproveGatewayResponse {
   approveTx?: any;
 }
 
-export const isNativeToken = (chain: EvmChain, selectedToken: GasToken) => {
-  const nativeTokenMap = {
-    [EvmChain.ETHEREUM]: GasToken.ETH,
-    [EvmChain.AVALANCHE]: GasToken.AVAX,
-    [EvmChain.FANTOM]: GasToken.FTM,
-    [EvmChain.POLYGON]: GasToken.MATIC,
-    [EvmChain.MOONBEAM]: GasToken.GLMR,
-    [EvmChain.AURORA]: GasToken.AURORA,
-    [EvmChain.BINANCE]: GasToken.BINANCE,
+export const isNativeToken = (chain: string, selectedToken: GasToken): boolean => {
+  const nativeTokenMap: Record<string, GasToken> = {
+    ethereum: GasToken.ETH,
+    avalanche: GasToken.AVAX,
+    fantom: GasToken.FTM,
+    polygon: GasToken.MATIC,
+    moonbeam: GasToken.GLMR,
+    aurora: GasToken.AURORA,
+    binance: GasToken.BINANCE,
   };
   return nativeTokenMap[chain] === selectedToken;
 };

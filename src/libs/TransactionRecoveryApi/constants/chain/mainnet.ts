@@ -9,6 +9,9 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.ETHEREUM]: "https://mainnet.infura.io/v3/510b6d5b3c56497b8070626a54f565a9",
   [EvmChain.AURORA]: "https://mainnet.aurora.dev",
   [EvmChain.BINANCE]: "https://bsc-dataseed.binance.org",
+  [EvmChain.ARBITRUM]: "https://arb1.arbitrum.io/rpc",
+  [EvmChain.CELO]: "https://forno.celo.org",
+  [EvmChain.KAVA]: "https://evm.kava.io",
 };
 
 export const networkInfo: Record<EvmChain, Network> = {
@@ -39,5 +42,17 @@ export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.BINANCE]: {
     chainId: 56,
     name: EvmChain.BINANCE,
+  },
+  [EvmChain.ARBITRUM]: {
+    chainId: 42161,
+    name: EvmChain.ARBITRUM,
+  },
+  [EvmChain.CELO]: {
+    chainId: 42220,
+    name: EvmChain.CELO,
+  },
+  [EvmChain.KAVA]: {
+    chainId: 2222,
+    name: EvmChain.KAVA,
   },
 };

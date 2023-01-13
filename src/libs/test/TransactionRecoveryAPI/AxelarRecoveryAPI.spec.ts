@@ -261,7 +261,7 @@ describe("AxelarRecoveryAPI", () => {
       const status = await api.queryTransactionStatus(txHash);
 
       expect(status).toEqual({
-        status: GMPStatus.UNKNOWN_ERROR,
+        status: "error",
         callTx: txDetails.call,
         approved: txDetails.approved,
         error: undefined,

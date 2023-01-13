@@ -1,8 +1,8 @@
-import { AxelarAssetTransfer, CHAINS } from "../../../src";
+import { AxelarAssetTransfer, CHAINS, Environment } from "../../../src";
 jest.setTimeout(20000);
 
 const sdk = new AxelarAssetTransfer({
-  environment: "mainnet",
+  environment: Environment.MAINNET,
 });
 const cosmosAddress = "terra1u8xlzsfuxe0lv6u2ws2zymrnnlc9pmyynu7pym";
 const evmAsset = "uusdc";
