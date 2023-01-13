@@ -382,13 +382,6 @@ export class AxelarQueryAPI {
     const chain = chains.find((c) => c.id === chainId);
     if (!chain) throw `Chain ${chainId} not found`;
 
-    // verify asset params
-    if (!this.allAssets) await this._initializeAssets();
-    const assetConfig = this.allAssets.find(
-      (asset) => asset.common_key[this.environment] === denom.toLowerCase()
-    );
-    if (!assetConfig) throw `Asset ${denom} not found`;
-
     const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient({
       environment: this.environment,
     });
