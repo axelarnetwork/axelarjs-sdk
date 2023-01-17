@@ -6,7 +6,7 @@ export const CHAINS = {
     EVMOS: "evmos",
     FETCH: "fetch",
     KUJIRA: "kujira",
-    OSMOSIS: "osmosis-4",
+    OSMOSIS: "osmosis-5",
     SEI: "sei",
     AURORA: "aurora",
     AVALANCHE: "Avalanche",
