@@ -17,7 +17,7 @@ describe("AxelarQueryAPI", () => {
 
   describe("getFeeForChainAndAsset", () => {
     test("It should generate a fee response", async () => {
-      const [chain, assetDenom] = ["avalanche", "uusd"];
+      const [chain, assetDenom] = ["avalanche", "uausdc"];
       const response: FeeInfoResponse = await api.getFeeForChainAndAsset(chain, assetDenom);
 
       expect(response.feeInfo).toBeDefined();
@@ -34,7 +34,7 @@ describe("AxelarQueryAPI", () => {
       const [sourceChainName, destinationChainName, assetDenom, amount] = [
         "avalanche",
         "polygon",
-        "uusd",
+        "uausdc",
         100000000,
       ];
       const response: TransferFeeResponse = await api.getTransferFee(
@@ -54,7 +54,7 @@ describe("AxelarQueryAPI", () => {
       const [sourceChainName, destinationChainName, assetDenom, amount] = [
         "osmosis",
         "polygon",
-        "uusd",
+        "uausdc",
         100000000,
       ];
       expect(
