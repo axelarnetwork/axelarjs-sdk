@@ -204,7 +204,7 @@ describe("AxelarQueryAPI", () => {
       jest
         .spyOn(api, "getTransferLimitNexusQuery")
         .mockImplementation(({ chainId, denom }: { chainId: string; denom: string }) => {
-          let res = {
+          const res = {
             limit: "0",
             outgoing: "0",
             incoming: "0",

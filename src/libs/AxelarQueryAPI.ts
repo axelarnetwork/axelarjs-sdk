@@ -347,8 +347,8 @@ export class AxelarQueryAPI {
     });
 
     try {
-      let { limit: fromChainLimit } = fromChainNexusResponse;
-      let { limit: toChainLimit } = toChainNexusResponse;
+      const { limit: fromChainLimit } = fromChainNexusResponse;
+      const { limit: toChainLimit } = toChainNexusResponse;
 
       if (!fromChainLimit && !toChainLimit)
         throw new Error(
