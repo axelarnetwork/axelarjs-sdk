@@ -209,10 +209,12 @@ export class AxelarQueryAPI {
   public async getDenomFromSymbol(symbol: string, chainName: string) {
     if (!this.allAssets) await this._initializeAssets();
     const assetConfig: AssetConfig | undefined = this.allAssets.find(
-      (assetConfig) => assetConfig.chain_aliases[chainName]?.assetSymbol === symbol
+      (ac) =>
+        ac.chain_aliases[chainName]?.assetSymbol?.toLowerCase() === symbol?.toLowerCase() &&
+        !ac.is_gas_token
     );
     if (!assetConfig) return null;
-    return assetConfig?.common_key[this.environment];
+    return assetConfig.common_key[this.environment];
   }
 
   /**
@@ -224,7 +226,7 @@ export class AxelarQueryAPI {
   public async getSymbolFromDenom(denom: string, chainName: string) {
     if (!this.allAssets) await this._initializeAssets();
     const assetConfig: AssetConfig | undefined = this.allAssets.find(
-      (assetConfig) => assetConfig.common_key[this.environment] === denom
+      (ac) => ac.common_key[this.environment] === denom && !ac.is_gas_token
     );
     if (!assetConfig) return null;
     return assetConfig.chain_aliases[chainName].assetSymbol;
@@ -239,7 +241,7 @@ export class AxelarQueryAPI {
   public async getAssetConfigFromDenom(denom: string, chainName: string) {
     if (!this.allAssets) await this._initializeAssets();
     const assetConfig: AssetConfig | undefined = this.allAssets.find(
-      (assetConfig) => assetConfig.common_key[this.environment] === denom
+      (ac) => ac.common_key[this.environment] === denom && !ac.is_gas_token
     );
     if (!assetConfig) return null;
     const result = assetConfig.chain_aliases[chainName];

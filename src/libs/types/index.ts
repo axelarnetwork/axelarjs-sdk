@@ -233,6 +233,8 @@ export const isNativeToken = (chain: string, selectedToken: GasToken): boolean =
     moonbeam: GasToken.GLMR,
     aurora: GasToken.AURORA,
     binance: GasToken.BINANCE,
+    celo: GasToken.CELO,
+    kava: GasToken.KAVA,
   };
   return nativeTokenMap[chain] === selectedToken;
 };
