@@ -1,17 +1,20 @@
 import { EvmChain } from "../../../types";
 import { Network } from "@ethersproject/networks";
 
-export const rpcMap: Record<EvmChain, string> = {
+export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.FANTOM]: "https://rpc.testnet.fantom.network",
   [EvmChain.POLYGON]: "https://nd-244-242-844.p2pify.com/a336ed852bfcb6dd53869c8626be64fd",
   [EvmChain.MOONBEAM]: "https://rpc.api.moonbase.moonbeam.network",
   [EvmChain.AVALANCHE]: "https://api.avax-test.network/ext/bc/C/rpc",
-  [EvmChain.ETHEREUM]: "https://ropsten.infura.io/v3/510b6d5b3c56497b8070626a54f565a9",
+  "ethereum-2": "https://goerli.infura.io/v3/510b6d5b3c56497b8070626a54f565a9",
   [EvmChain.AURORA]: "https://testnet.aurora.dev",
   [EvmChain.BINANCE]: "https://data-seed-prebsc-1-s1.binance.org:8545",
+  [EvmChain.ARBITRUM]: "https://goerli-rollup.arbitrum.io/rpc",
+  [EvmChain.CELO]: "https://alfajores-forno.celo-testnet.org",
+  [EvmChain.KAVA]: "https://evm.testnet.kava.io",
 };
 
-export const networkInfo: Record<EvmChain, Network> = {
+export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.FANTOM]: {
     chainId: 4002,
     name: EvmChain.FANTOM,
@@ -28,8 +31,8 @@ export const networkInfo: Record<EvmChain, Network> = {
     chainId: 43113,
     name: EvmChain.AVALANCHE,
   },
-  [EvmChain.ETHEREUM]: {
-    chainId: 3,
+  "ethereum-2": {
+    chainId: 5,
     name: EvmChain.ETHEREUM,
   },
   [EvmChain.AURORA]: {
@@ -39,5 +42,17 @@ export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.BINANCE]: {
     chainId: 97,
     name: EvmChain.BINANCE,
+  },
+  [EvmChain.ARBITRUM]: {
+    chainId: 421613,
+    name: EvmChain.ARBITRUM,
+  },
+  [EvmChain.CELO]: {
+    chainId: 44787,
+    name: EvmChain.CELO,
+  },
+  [EvmChain.KAVA]: {
+    chainId: 2221,
+    name: EvmChain.KAVA,
   },
 };

@@ -9,7 +9,9 @@ export const getTransferPayload = (
     signature: sig,
     publicAddr: publicAddress,
     sourceChainInfo: {
+      id: "terra-3",
       chainSymbol: "Terra",
+      assets: [],
       chainName: "Terra",
       estimatedWaitTime: 5,
       fullySupported: true,
@@ -20,6 +22,7 @@ export const getTransferPayload = (
         testnet: "terra",
         mainnet: "terra",
       },
+      nativeAsset: [],
       addressPrefix: "terra",
     },
     selectedSourceAsset: {
@@ -32,7 +35,9 @@ export const getTransferPayload = (
       fullySupported: true,
     },
     destinationChainInfo: {
+      id: "avalanche",
       chainSymbol: "AVAX",
+      assets: [],
       chainName: "Avalanche",
       estimatedWaitTime: 5,
       fullySupported: true,
@@ -44,6 +49,7 @@ export const getTransferPayload = (
         testnet: "avalanche",
         mainnet: "avalanche",
       },
+      nativeAsset: ["wavax-wei"],
       addressPrefix: "",
     },
     selectedDestinationAsset: {

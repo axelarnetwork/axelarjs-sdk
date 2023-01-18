@@ -32,3 +32,17 @@ function findSimilarInArray(array: Array<string>, wordsToFind: string) {
 
   return bestMatch;
 }
+
+export async function throwIfInvalidChainIds(chains: string[], environment: Environment) {
+  const validations = await Promise.all(
+    chains.map((chain) => validateChainIdentifier(chain, environment))
+  );
+
+  for (let i = 0; i < validations.length; i++) {
+    if (!validations[i].foundChain) {
+      throw new Error(
+        `Invalid chain identifier for ${chains[i]}. Did you mean ${validations[i].bestMatch}?`
+      );
+    }
+  }
+}

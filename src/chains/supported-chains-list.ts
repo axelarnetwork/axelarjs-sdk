@@ -6,7 +6,7 @@ export const CHAINS = {
     EVMOS: "evmos",
     FETCH: "fetch",
     KUJIRA: "kujira",
-    OSMOSIS: "osmosis-4",
+    OSMOSIS: "osmosis-5",
     SEI: "sei",
     AURORA: "aurora",
     AVALANCHE: "Avalanche",
@@ -16,6 +16,9 @@ export const CHAINS = {
     MOONBEAM: "Moonbeam",
     POLYGON: "Polygon",
     TERRA: "terra-3",
+    ARBITRUM: "arbitrum",
+    CELO: "celo",
+    KAVA: "kava",
   },
   MAINNET: {
     ASSETMANTLE: "assetmantle",
@@ -43,5 +46,8 @@ export const CHAINS = {
     EMONEY: "e-money",
     AGORIC: "agoric",
     UMEEE: "umee",
+    ARBITRUM: "arbitrum",
+    CELO: "celo",
+    KAVA: "kava",
   },
 };

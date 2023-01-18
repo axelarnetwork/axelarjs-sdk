@@ -3,6 +3,7 @@ import { CHAINS, CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET } from "../.
 import { AxelarAssetTransfer } from "../AxelarAssetTransfer";
 import { Environment, EvmChain } from "../types";
 import {
+  activeChainsStub,
   apiErrorStub,
   depositAddressPayloadStub,
   ethAddressStub,
@@ -21,6 +22,7 @@ describe("AxelarAssetTransfer", () => {
     jest
       .spyOn(AxelarAssetTransfer.prototype as any, "getSocketService")
       .mockReturnValueOnce(socket);
+
     jest.clearAllMocks();
   });
 
@@ -31,6 +33,7 @@ describe("AxelarAssetTransfer", () => {
       bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
+      jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     describe("AxelarAssetTransfer", () => {
@@ -67,6 +70,7 @@ describe("AxelarAssetTransfer", () => {
       bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
+      jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     describe("on error", () => {
@@ -108,6 +112,9 @@ describe("AxelarAssetTransfer", () => {
 
         beforeEach(async () => {
           jest.spyOn(bridge.api, "get").mockResolvedValue(otcStub());
+          jest
+            .spyOn(bridge.axelarQueryApi, "getActiveChains")
+            .mockResolvedValue(activeChainsStub());
           otc = await bridge.getOneTimeCode(ethAddressStub(), uuidStub());
         });
 
@@ -136,6 +143,7 @@ describe("AxelarAssetTransfer", () => {
       bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
+      jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     describe("on error", () => {
@@ -231,6 +239,7 @@ describe("AxelarAssetTransfer", () => {
       bridge = new AxelarAssetTransfer({
         environment: Environment.TESTNET,
       });
+      jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     describe("on error", () => {
@@ -318,20 +327,29 @@ describe("AxelarAssetTransfer", () => {
     });
 
     describe("when called", () => {
-      const fromChain = CHAINS.TESTNET.TERRA;
+      const fromChain = CHAINS.TESTNET.OSMOSIS;
       const toChain = CHAINS.TESTNET.AVALANCHE;
       const depositAddress = "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD";
       const asset = "uusd";
       let response: any;
+      let responseWithObjectParams: any;
       beforeEach(async () => {
         jest.spyOn(bridge, "getOneTimeCode").mockResolvedValue(otcStub());
         jest.spyOn(bridge, "getInitRoomId").mockResolvedValue(roomIdStub().roomId);
         jest.spyOn(bridge, "getLinkEvent").mockResolvedValue(linkEventStub().newRoomId);
+        jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
         response = await bridge.getDepositAddress(fromChain, toChain, depositAddress, asset);
+        responseWithObjectParams = await bridge.getDepositAddress({
+          fromChain,
+          toChain,
+          destinationAddress: depositAddress,
+          asset,
+        });
       });
 
       it("should return deposit address", () => {
         expect(response).toBe(JSON.parse(newRoomIdStub())["depositAddress"]);
+        expect(responseWithObjectParams).toBe(JSON.parse(newRoomIdStub())["depositAddress"]);
       });
     });
   });
@@ -349,8 +367,9 @@ describe("AxelarAssetTransfer", () => {
       beforeEach(async () => {
         jest.clearAllMocks();
         jest
-          .spyOn(bridge, "getDepositServiceContractAddress")
+          .spyOn(bridge.axelarQueryApi, "getContractAddressFromConfig")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
       });
       it("should be able to generate a deposit address offline", async () => {
         await expect(
@@ -372,8 +391,9 @@ describe("AxelarAssetTransfer", () => {
         jest.clearAllMocks();
         jest.spyOn(bridge, "getDepositAddressFromRemote").mockResolvedValue({ address });
         jest
-          .spyOn(bridge, "getDepositServiceContractAddress")
+          .spyOn(bridge.axelarQueryApi, "getContractAddressFromConfig")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
       });
       it("should be able to generate a deposit address offline", () => {
         const depositAddress = bridge.validateOfflineDepositAddress(
@@ -407,9 +427,10 @@ describe("AxelarAssetTransfer", () => {
           .mockResolvedValue({ address: unwrapAddress });
         jest.spyOn(bridge, "getDepositAddress").mockResolvedValue(unwrapAddress);
         jest
-          .spyOn(bridge, "getDepositServiceContractAddress")
+          .spyOn(bridge.axelarQueryApi, "getContractAddressFromConfig")
           .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
         jest.spyOn(bridge, "getERC20Denom").mockResolvedValue("wavax-wei");
+        jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
       });
       it("should be able to retrieve the deposit address from microservices for erc20 unwrap", async () => {
         await expect(
@@ -417,6 +438,7 @@ describe("AxelarAssetTransfer", () => {
             EvmChain.AVALANCHE,
             EvmChain.FANTOM,
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "evm",
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d"
           )
         ).resolves.toBe(unwrapAddress);
@@ -426,6 +448,60 @@ describe("AxelarAssetTransfer", () => {
           unwrapAddress,
           "wavax-wei"
         );
+      });
+    });
+  });
+
+  describe("offline deposit address integration into getDepositAddress()", () => {
+    let bridge: AxelarAssetTransfer;
+
+    beforeEach(() => {
+      bridge = new AxelarAssetTransfer({
+        environment: Environment.TESTNET,
+      });
+    });
+
+    describe("getDepositAddress - wrap", () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        jest
+          .spyOn(bridge, "getDepositAddressForNativeWrap")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest
+          .spyOn(bridge, "getDepositAddressForNativeUnwrap")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        jest.spyOn(bridge.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
+      });
+      it("should call getDepositAddressForNativeWrap and not getDepositAddressForNativeUnwrap", async () => {
+        await expect(
+          bridge.getDepositAddress(
+            EvmChain.AVALANCHE,
+            EvmChain.FANTOM,
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "AVAX",
+            {
+              wrapOptions: { refundAddress: "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d" },
+            }
+          )
+        ).resolves.toBe("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        expect(bridge.getDepositAddressForNativeWrap).toHaveBeenCalled();
+        expect(bridge.getDepositAddressForNativeUnwrap).not.toHaveBeenCalled();
+      });
+      it("should call getDepositAddressForNativeUnwrap and not getDepositAddressForNativeWrap", async () => {
+        await expect(
+          bridge.getDepositAddress(
+            EvmChain.FANTOM,
+            EvmChain.AVALANCHE,
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "wavax-wei",
+            {
+              refundAddress: "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+              shouldUnwrapIntoNative: true,
+            }
+          )
+        ).resolves.toBe("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        expect(bridge.getDepositAddressForNativeWrap).not.toHaveBeenCalled();
+        expect(bridge.getDepositAddressForNativeUnwrap).toHaveBeenCalled();
       });
     });
   });

@@ -33,8 +33,8 @@ const devnetConfigs: EnvironmentConfigs = {
 };
 const testnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-testnet.axelar.dev`,
-  axelarRpcUrl: "https://axelar-testnet-rpc.axelar-dev.workers.dev",
-  axelarLcdUrl: "https://axelar-testnet-lcd.axelar-dev.workers.dev",
+  axelarRpcUrl: "https://testnet.rpc.axelar.dev/chain/axelar",
+  axelarLcdUrl: "https://rpc-axelar-testnet.imperator.co",
   depositServiceUrl: "https://deposit-service.testnet.axelar.dev",
   axelarGMPApiUrl: "https://testnet.api.gmp.axelarscan.io",
   recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev",
@@ -43,8 +43,8 @@ const testnetConfigs: EnvironmentConfigs = {
 };
 const mainnetConfigs: EnvironmentConfigs = {
   resourceUrl: `https://nest-server-mainnet.axelar.dev`,
-  axelarRpcUrl: "https://axelar-rpc.quickapi.com",
-  axelarLcdUrl: "https://axelar-lcd.quickapi.com",
+  axelarRpcUrl: "https://mainnet.rpc.axelar.dev/chain/axelar",
+  axelarLcdUrl: "https://lcd-axelar.imperator.co",
   axelarGMPApiUrl: "https://api.gmp.axelarscan.io",
   depositServiceUrl: "https://deposit-service.mainnet.axelar.dev",
   recoveryApiUrl: "https://axelar-signing-relayer-mainnet.axelar.dev",

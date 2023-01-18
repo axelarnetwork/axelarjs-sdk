@@ -1,4 +1,4 @@
-import { AxelarAssetTransfer, Environment } from "../../../src";
+import { AxelarAssetTransfer, CHAINS, Environment } from "../../../src";
 
 describe("Single Deposit Address Generation", () => {
   jest.setTimeout(20000);
@@ -17,8 +17,8 @@ describe("Single Deposit Address Generation", () => {
 
     beforeAll(async () => {
       result = await axelarAssetTransfer.getDepositAddress(
-        "avalanche",
-        "ethereum",
+        CHAINS.TESTNET.OSMOSIS,
+        CHAINS.TESTNET.AVALANCHE,
         "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
         "uausdc"
       );

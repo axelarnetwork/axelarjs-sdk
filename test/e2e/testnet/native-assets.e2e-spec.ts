@@ -1,4 +1,4 @@
-import { AxelarAssetTransfer } from "../../../src";
+import { AxelarAssetTransfer, Environment } from "../../../src";
 
 describe("AxelarAssetTransfer", () => {
   jest.setTimeout(20000);
@@ -6,7 +6,7 @@ describe("AxelarAssetTransfer", () => {
 
   beforeAll(() => {
     sdk = new AxelarAssetTransfer({
-      environment: "testnet",
+      environment: Environment.TESTNET,
     });
   });
 
