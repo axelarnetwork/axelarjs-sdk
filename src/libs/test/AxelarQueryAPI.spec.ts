@@ -203,7 +203,7 @@ describe("AxelarQueryAPI", () => {
        */
       jest
         .spyOn(api, "getTransferLimitNexusQuery")
-        .mockImplementation(({ chainId, denom }: { chainId: string; denom: string }) => {
+        .mockImplementation(({ chainId }: { chainId: string; denom: string }) => {
           const res = {
             limit: "0",
             outgoing: "0",
@@ -229,7 +229,7 @@ describe("AxelarQueryAPI", () => {
       const denom = "uausdc";
       const res: string = await api
         .getTransferLimit({ fromChainId, toChainId, denom })
-        .catch((e) => "0");
+        .catch(() => "0");
       const expectedRes = 500_000_000 * 0.25;
       /**
        if we are sending from ethereum to sei, we expect res to be
