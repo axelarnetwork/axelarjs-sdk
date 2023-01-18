@@ -114,6 +114,7 @@ export class AxelarAssetTransfer {
     fromChain: string,
     toChain: string,
     destinationAddress: string,
+    fromChainModule: "evm" | "axelarnet" = "evm",
     refundAddress?: string
   ): Promise<string> {
     await throwIfInvalidChainIds([fromChain, toChain], this.environment);
@@ -122,7 +123,7 @@ export class AxelarAssetTransfer {
     refundAddress =
       refundAddress ||
       (await this.axelarQueryApi.getContractAddressFromConfig(
-        fromChain,
+        fromChainModule === "evm" ? fromChain : toChain,
         "default_refund_collector"
       ));
 
@@ -214,7 +215,10 @@ export class AxelarAssetTransfer {
           ]);
 
     const address = getCreate2Address(
-      await this.axelarQueryApi.getContractAddressFromConfig(fromChain, "deposit_service"),
+      await this.axelarQueryApi.getContractAddressFromConfig(
+        wrapOrUnWrap === "wrap" ? fromChain : toChain,
+        "deposit_service"
+      ),
       hexSalt,
       keccak256(
         solidityPack(
@@ -301,6 +305,7 @@ export class AxelarAssetTransfer {
         fromChain,
         toChain,
         destinationAddress,
+        srcChainInfo.module,
         options.refundAddress
       );
     }

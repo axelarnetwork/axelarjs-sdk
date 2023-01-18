@@ -438,6 +438,7 @@ describe("AxelarAssetTransfer", () => {
             EvmChain.AVALANCHE,
             EvmChain.FANTOM,
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "evm",
             "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d"
           )
         ).resolves.toBe(unwrapAddress);
