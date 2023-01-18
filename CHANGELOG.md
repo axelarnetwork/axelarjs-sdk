@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.12.1] - 2023-JANUARY-18
 
 - AxelarQueryAPI
-  - fixed `getDenomFromSymbol` method. bug was introduced when native assets were added to s3 asset configs
+  - fixed `getDenomFromSymbol` method that now erroneously returns native assets denom for erc20 input. bug was introduced when native assets were added to s3 asset configs
 
 ## [0.12.0] - 2023-JANUARY-17
 
