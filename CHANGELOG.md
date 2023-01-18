@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.1] - 2023-JANUARY-18
+
+- AxelarQueryAPI
+  - fixed `getDenomFromSymbol` method that now erroneously returns native assets denom for erc20 input. bug was introduced when native assets were added to s3 asset configs
+
 ## [0.12.0] - 2023-JANUARY-17
 
 - changed all method signatures to require chain IDs (as recognized by Axelar) instead of chain name. For example, in testnet, Ethereums (Goerli) is recognized as `ethereum-2`
