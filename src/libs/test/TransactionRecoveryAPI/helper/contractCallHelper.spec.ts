@@ -7,21 +7,21 @@ import { fork } from "../../testUtils/localChain";
 
 describe("contractCallHelper", () => {
   describe("callExecute", () => {
-    let mockWait: jest.Mock<any, any>;
+    let mockWait: vitest.Mock<any, any>;
     const stub = executeParamsStub();
 
     beforeEach(() => {
-      mockWait = jest.fn().mockResolvedValueOnce(contractReceiptStub());
+      mockWait = vitest.fn().mockResolvedValueOnce(contractReceiptStub());
     });
 
     test("it should call 'executeWithToken' given 'isContractCallWithToken' is true", async () => {
       stub.isContractCallWithToken = true;
 
       // Mock contract's executeWithTokenFunction
-      const mockExecuteWithToken = jest.fn().mockResolvedValueOnce({ wait: mockWait });
+      const mockExecuteWithToken = vitest.fn().mockResolvedValueOnce({ wait: mockWait });
       const contract: any = {
         executeWithToken: mockExecuteWithToken,
-        estimateGas: { executeWithToken: jest.fn().mockResolvedValueOnce(1) },
+        estimateGas: { executeWithToken: vitest.fn().mockResolvedValueOnce(1) },
       };
 
       await callExecute(stub, contract);
@@ -41,10 +41,10 @@ describe("contractCallHelper", () => {
       const stub = executeParamsStub();
 
       // Mock contract's execute function
-      const mockExecute = jest.fn().mockResolvedValueOnce({ wait: mockWait });
+      const mockExecute = vitest.fn().mockResolvedValueOnce({ wait: mockWait });
       const contract: any = {
         execute: mockExecute,
-        estimateGas: { execute: jest.fn().mockResolvedValueOnce(1) },
+        estimateGas: { execute: vitest.fn().mockResolvedValueOnce(1) },
       };
 
       stub.isContractCallWithToken = false;

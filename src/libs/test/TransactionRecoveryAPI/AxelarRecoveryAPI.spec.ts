@@ -10,7 +10,7 @@ describe("AxelarRecoveryAPI", () => {
   const api = new AxelarRecoveryApi({ environment: Environment.TESTNET });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vitest.clearAllMocks();
   });
 
   describe("queryTransactionStatus", () => {
@@ -24,16 +24,16 @@ describe("AxelarRecoveryAPI", () => {
           transactionHash: txHash,
         },
         approved: {
-          transactionHash: txHash + "1",
+          transactionHash: `${txHash}1`,
         },
         executed: {
-          transactionHash: txHash + "2",
+          transactionHash: `${txHash}2`,
         },
         gas_status: "gas_paid",
         status: "approved",
       };
 
-      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
 
       const status = await api.queryTransactionStatus(txHash);
 
@@ -61,16 +61,16 @@ describe("AxelarRecoveryAPI", () => {
           transactionHash: txHash,
         },
         approved: {
-          transactionHash: txHash + "1",
+          transactionHash: `${txHash}1`,
         },
         executed: {
-          transactionHash: txHash + "2",
+          transactionHash: `${txHash}2`,
         },
         gas_status: "gas_paid",
         status: "executing",
       };
 
-      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
 
       const status = await api.queryTransactionStatus(txHash);
 
@@ -98,16 +98,16 @@ describe("AxelarRecoveryAPI", () => {
           transactionHash: txHash,
         },
         approved: {
-          transactionHash: txHash + "1",
+          transactionHash: `${txHash}1`,
         },
         executed: {
-          transactionHash: txHash + "2",
+          transactionHash: `${txHash}2`,
         },
         gas_status: "gas_paid_enough_gas",
         status: "executed",
       };
 
-      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
 
       const status = await api.queryTransactionStatus(txHash);
 
@@ -138,7 +138,7 @@ describe("AxelarRecoveryAPI", () => {
         status: "called",
       };
 
-      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
 
       const status = await api.queryTransactionStatus(txHash);
 
@@ -170,7 +170,7 @@ describe("AxelarRecoveryAPI", () => {
         status: "called",
       };
 
-      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
 
       const status = await api.queryTransactionStatus(txHash);
 
@@ -199,23 +199,23 @@ describe("AxelarRecoveryAPI", () => {
           transactionHash: txHash,
         },
         approved: {
-          transactionHash: txHash + "1",
+          transactionHash: `${txHash}1`,
         },
         executed: {
-          transactionHash: txHash + "2",
+          transactionHash: `${txHash}2`,
         },
         error: {
           chain: "ethereum",
           error: {
             message: "execution reverted",
-            transactionHash: txHash + "2",
+            transactionHash: `${txHash}2`,
           },
         },
         gas_status: "gas_paid_enough_gas",
         status: "error",
       };
 
-      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
 
       const status = await api.queryTransactionStatus(txHash);
 
@@ -224,7 +224,7 @@ describe("AxelarRecoveryAPI", () => {
         error: {
           chain: EvmChain.ETHEREUM,
           message: "execution reverted",
-          txHash: txHash + "2",
+          txHash: `${txHash}2`,
         },
         approved: txDetails.approved,
         callTx: txDetails.call,
@@ -247,16 +247,16 @@ describe("AxelarRecoveryAPI", () => {
           transactionHash: txHash,
         },
         approved: {
-          transactionHash: txHash + "1",
+          transactionHash: `${txHash}1`,
         },
         executed: {
-          transactionHash: txHash + "2",
+          transactionHash: `${txHash}2`,
         },
         gas_status: "gas_paid_enough_gas",
         status: "error",
       };
 
-      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(txDetails);
 
       const status = await api.queryTransactionStatus(txHash);
 
@@ -275,7 +275,7 @@ describe("AxelarRecoveryAPI", () => {
     });
 
     test("it should return 'GMPStatus.CANNOT_FETCH_STATUS' when the axelarscan api is down", async () => {
-      jest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(undefined);
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(undefined);
 
       const status = await api.queryTransactionStatus("0x");
 
@@ -285,7 +285,7 @@ describe("AxelarRecoveryAPI", () => {
     });
   });
 
-  xdescribe("create pending transfers", () => {
+  describe.skip("create pending transfers", () => {
     test("It should create pending transfers", async () => {
       const confirmation = await api.createPendingTransfers("ethereum");
       console.log("confirmation", confirmation);
@@ -293,7 +293,7 @@ describe("AxelarRecoveryAPI", () => {
     }, 60000);
   });
 
-  xdescribe("create pending transfers", () => {
+  describe.skip("create pending transfers", () => {
     test("It should create pending transfers", async () => {
       const confirmation = await api.createPendingTransfers("ethereum");
       console.log("confirmation", confirmation);
@@ -301,7 +301,7 @@ describe("AxelarRecoveryAPI", () => {
     }, 60000);
   });
 
-  xdescribe("sign commands", () => {
+  describe.skip("sign commands", () => {
     test("It should sign commands", async () => {
       const confirmation = await api.signCommands("ethereum");
       console.log("confirmation", confirmation);
@@ -309,7 +309,7 @@ describe("AxelarRecoveryAPI", () => {
     }, 60000);
   });
 
-  xdescribe("execute pending transfers", () => {
+  describe.skip("execute pending transfers", () => {
     test("It should execute pending transfers", async () => {
       const confirmation = await api.executePendingTransfers("terra");
       console.log("confirmation", confirmation);
@@ -317,27 +317,27 @@ describe("AxelarRecoveryAPI", () => {
     }, 60000);
   });
 
-  xdescribe("query execute params", () => {
+  describe.skip("query execute params", () => {
     test("It should return null when the response is undefined", async () => {
-      jest.spyOn(api, "execGet").mockResolvedValueOnce(undefined);
+      vitest.spyOn(api, "execGet").mockResolvedValueOnce(undefined);
 
       const response = await api.queryExecuteParams("0x");
 
       expect(response).toBeUndefined();
     });
     test("It should return null when response array is empty", async () => {
-      jest.spyOn(api, "execGet").mockResolvedValueOnce([]);
+      vitest.spyOn(api, "execGet").mockResolvedValueOnce([]);
 
       const response = await api.queryExecuteParams("0x");
 
       expect(response).toBeUndefined();
     });
     test("It should return status: 'call' when the approve transaction hash is undefined", async () => {
-      jest.spyOn(api, "execGet").mockResolvedValueOnce([{}]);
+      vitest.spyOn(api, "execGet").mockResolvedValueOnce([{}]);
       const response = await api.queryExecuteParams("0x");
       expect(response?.status).toBe(GMPStatus.SRC_GATEWAY_CALLED);
 
-      jest.spyOn(api, "execGet").mockResolvedValueOnce([
+      vitest.spyOn(api, "execGet").mockResolvedValueOnce([
         {
           approved: {},
         },
@@ -346,7 +346,7 @@ describe("AxelarRecoveryAPI", () => {
       expect(response2?.status).toBe(GMPStatus.SRC_GATEWAY_CALLED);
     });
     test("It should return status: 'executed' when the execute transaction hash is defined", async () => {
-      jest.spyOn(api, "execGet").mockResolvedValueOnce([
+      vitest.spyOn(api, "execGet").mockResolvedValueOnce([
         {
           approved: {
             transactionHash: "0x",
@@ -361,7 +361,7 @@ describe("AxelarRecoveryAPI", () => {
     });
     test("It should get the execute params when the event type is 'ContractCallWithToken'", async () => {
       const txHash = "0x1";
-      jest.spyOn(api, "execGet").mockResolvedValueOnce([
+      vitest.spyOn(api, "execGet").mockResolvedValueOnce([
         {
           call: {
             chain: "Moonbeam",
@@ -409,7 +409,7 @@ describe("AxelarRecoveryAPI", () => {
 
     test("It should get the execute params when the event type is 'ContractCall'", async () => {
       const txHash = "0x1";
-      jest.spyOn(api, "execGet").mockResolvedValueOnce([
+      vitest.spyOn(api, "execGet").mockResolvedValueOnce([
         {
           call: {
             chain: "Moonbeam",

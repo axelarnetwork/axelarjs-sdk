@@ -16,7 +16,9 @@ import {
 describe("AxelarQueryClient", () => {
   const config: AxelarQueryClientConfig = { environment: Environment.TESTNET };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    vitest.clearAllMocks();
+  });
 
   describe("Axelar queries", () => {
     test("It should be able to query the evm module", async () => {

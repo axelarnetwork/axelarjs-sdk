@@ -1,14 +1,16 @@
-import { RestService } from "../RestService";
 import fetch from "cross-fetch";
 import HttpError from "standard-http-error";
+import { Mock } from "vitest";
 
-const mockedFetch = fetch as jest.Mock;
+import { RestService } from "../RestService";
 
-jest.mock("cross-fetch", () => {
+const mockedFetch = fetch as Mock;
+
+vitest.mock("cross-fetch", () => {
   // Mock the default export
   return {
     __esModule: true,
-    default: jest.fn(),
+    default: vitest.fn(),
   };
 });
 
@@ -17,7 +19,7 @@ describe("RestService", () => {
   const api = new RestService(host);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vitest.clearAllMocks();
   });
 
   describe("execRest()", () => {

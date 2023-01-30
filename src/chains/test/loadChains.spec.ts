@@ -7,8 +7,8 @@ const mock = {
 
 describe("loadChains()", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(mock, "loadChains");
+    vitest.clearAllMocks();
+    vitest.spyOn(mock, "loadChains");
   });
 
   describe("when loadChains is called with known env, but not mainnet", () => {

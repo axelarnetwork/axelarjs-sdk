@@ -6,14 +6,14 @@ import {
 import { AxelarDepositRecoveryAPI } from "../../TransactionRecoveryApi/AxelarDepositRecoveryAPI";
 import { Environment } from "../../types";
 
-xdescribe("AxelarDepositRecoveryAPI", () => {
+describe.skip("AxelarDepositRecoveryAPI", () => {
   const api = new AxelarDepositRecoveryAPI({ environment: Environment.TESTNET });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vitest.clearAllMocks();
   });
 
-  xdescribe("confirmDeposit", () => {
+  describe.skip("confirmDeposit", () => {
     test("It should confirm a deposit", async () => {
       const testParamsAxelarnet: ConfirmDepositRequest = {
         hash: "FD6F3C9E63A8A0F47092418CCF3A70D52642B77B940FB6D2BE5A797D7AA97BEB",

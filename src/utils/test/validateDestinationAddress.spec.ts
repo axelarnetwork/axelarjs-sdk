@@ -5,7 +5,7 @@ const mock = {
   validateDestinationAddressByChainSymbol: validateDestinationAddressByChainSymbol,
 };
 
-jest.mock("../../chains", () => ({
+vitest.mock("../../chains", () => ({
   loadChains: () => {
     return Promise.resolve([
       {
@@ -42,10 +42,10 @@ jest.mock("../../chains", () => ({
   },
 }));
 
-xdescribe("validateDestinationAddress() - evm chain", () => {
+describe.skip("validateDestinationAddress() - evm chain", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(mock, "validateDestinationAddressByChainSymbol");
+    vitest.clearAllMocks();
+    vitest.spyOn(mock, "validateDestinationAddressByChainSymbol");
   });
 
   describe("on correct address", () => {
@@ -99,8 +99,8 @@ xdescribe("validateDestinationAddress() - evm chain", () => {
 
 describe("validateDestinationAddress() - cosmos chain", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(mock, "validateDestinationAddressByChainSymbol");
+    vitest.clearAllMocks();
+    vitest.spyOn(mock, "validateDestinationAddressByChainSymbol");
   });
 
   describe("on correct address", () => {

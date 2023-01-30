@@ -1,7 +1,7 @@
 import { AxelarAssetTransfer, CHAINS, Environment } from "../../../src";
 
 describe("Single Deposit Address Generation", () => {
-  jest.setTimeout(20000);
+  vitest.setTimeout(20000);
 
   const axelarAssetTransfer = new AxelarAssetTransfer({
     environment: Environment.TESTNET,

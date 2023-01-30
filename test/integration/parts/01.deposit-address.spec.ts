@@ -6,7 +6,7 @@ import { AxelarAssetTransfer, CHAINS, Environment } from "../../../src";
  */
 
 describe("Parallel Deposit Address Generation", () => {
-  jest.setTimeout(30000);
+  vitest.setTimeout(30000);
   let axelarAssetTransferTestnet: any;
   let axelarAssetTransferMainnet: any;
 
