@@ -1,5 +1,8 @@
 import { CHAINS, Environment, throwIfInvalidChainIds } from "../../../src";
-jest.setTimeout(20000);
+
+vitest.setConfig({
+  testTimeout: 20000,
+});
 
 describe("Validations - Testnet", () => {
   const environment = Environment.TESTNET;

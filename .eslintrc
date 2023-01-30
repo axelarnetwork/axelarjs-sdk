@@ -9,8 +9,7 @@
   },
   "plugins": ["@typescript-eslint/eslint-plugin", "prettier"],
   "env": {
-    "node": true,
-    "jest": true
+    "node": true
   },
   "ignorePatterns": ["hardhat.config.ts"],
   "rules": {
