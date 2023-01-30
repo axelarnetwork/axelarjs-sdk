@@ -236,5 +236,5 @@ export const isNativeToken = (chain: string, selectedToken: GasToken): boolean =
     celo: GasToken.CELO,
     kava: GasToken.KAVA,
   };
-  return nativeTokenMap[chain] === selectedToken;
+  return nativeTokenMap[chain].toLowerCase() === selectedToken.toLowerCase();
 };
