@@ -171,7 +171,7 @@ export class AxelarQueryAPI {
     sourceChainTokenSymbol: GasToken | string,
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1,
-    minGasFee: string
+    minGasFee?: string
   ): Promise<string> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
 
