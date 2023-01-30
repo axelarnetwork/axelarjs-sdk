@@ -8,14 +8,3 @@ export default defineConfig({
     globals: true,
   },
 });
-
-// {
-//     "moduleFileExtensions": ["js", "json", "ts"],
-//     "rootDir": "src",
-//     "testEnvironment": "node",
-//     "testTimeout": 300000,
-//     "testRegex": ".spec.ts$",
-//     "transform": {
-//         "^.+\\.(t|j)s$": "ts-jest"
-//     }
-// }

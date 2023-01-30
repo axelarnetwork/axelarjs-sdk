@@ -36,5 +36,5 @@
   },
   "include": ["src", "test"],
   "exclude": ["node_modules", "dist"],
-  "files": ["src/global.d.ts"]
+  "files": ["src/global.d.ts", "vitest.config.ts"]
 }
