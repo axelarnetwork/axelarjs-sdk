@@ -102,7 +102,7 @@ describe("AxelarQueryAPI", () => {
         GasToken.AVAX,
         700000,
         1.1,
-        "200"
+        "5000000000"
       );
 
       // gasAmount should be greater than 0.0000001, otherwise we handle decimal conversion incorrectly.

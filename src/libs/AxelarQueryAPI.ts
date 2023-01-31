@@ -162,7 +162,7 @@ export class AxelarQueryAPI {
    * @param sourceChainTokenSymbol
    * @param gasLimit (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which should be sufficient for most transactions.
    * @param gasMultiplier (Optional) A multiplier used to create a buffer above the calculated gas fee, to account for potential slippage throughout tx execution, e.g. 1.1 = 10% buffer. supports up to 3 decimal places
-   * @param minGasFee (Optional) A floor set for the gas price in wei, used as override in case calculated gas fee is below desired minimum
+   * @param minGasPrice (Optional) A floor set for the gas price in wei, used as override in case estimated gas price is below specified minimum
    * @returns
    */
   public async estimateGasFee(
@@ -171,7 +171,7 @@ export class AxelarQueryAPI {
     sourceChainTokenSymbol: GasToken | string,
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1,
-    minGasFee?: string
+    minGasPrice?: string
   ): Promise<string> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
 
@@ -189,25 +189,28 @@ export class AxelarQueryAPI {
 
     const { gas_price } = sourceToken;
 
-    const destTxFee = parseEther(gas_price).mul(gasLimit);
+    const gasPriceEther = parseEther(gas_price);
 
-    const calculatedFee =
+    let _gasPrice;
+
+    if (minGasPrice) {
+      _gasPrice = gasPriceEther.sub(BigNumber.from(minGasPrice)).gt(0)
+        ? gasPriceEther
+        : BigNumber.from(minGasPrice);
+    } else {
+      _gasPrice = gasPriceEther;
+    }
+
+    const destTxFee = _gasPrice.mul(gasLimit);
+
+    return (
       gasMultiplier > 1
         ? destTxFee
             .add(baseFee)
             .mul(gasMultiplier * 10000)
             .div(10000)
-        : destTxFee.add(baseFee);
-
-    let finalFee = calculatedFee;
-
-    if (minGasFee) {
-      finalFee = calculatedFee.sub(BigNumber.from(minGasFee)).gt(0)
-        ? calculatedFee
-        : BigNumber.from(minGasFee);
-    }
-
-    return finalFee.toString();
+        : destTxFee.add(baseFee)
+    ).toString();
   }
 
   /**
