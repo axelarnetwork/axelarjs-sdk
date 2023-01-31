@@ -44,10 +44,10 @@ describe("AxelarDepositRecoveryAPI", () => {
   setLogger(() => null);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vitest.clearAllMocks();
   });
 
-  xdescribe("confirmGatewayTx", () => {
+  describe.skip("confirmGatewayTx", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     test("It should confirm a gateway tx", async () => {
@@ -64,12 +64,12 @@ describe("AxelarDepositRecoveryAPI", () => {
 
     beforeEach(() => {
       // Prevent sleep while testing
-      const mockSleep = jest.spyOn(Sleep, "sleep");
+      const mockSleep = vitest.spyOn(Sleep, "sleep");
       mockSleep.mockImplementation(() => Promise.resolve(undefined));
     });
 
     test("it shouldn't call approve given the gmp status cannot be fetched", async () => {
-      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.CANNOT_FETCH_STATUS });
 
       const response = await api.manualRelayToDestChain("0x");
@@ -80,7 +80,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
     });
     test("it shouldn't call approve given the 'batchedCommandId' cannot be fetched", async () => {
-      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
         status: GMPStatus.SRC_GATEWAY_CALLED,
         callTx: {
@@ -88,11 +88,11 @@ describe("AxelarDepositRecoveryAPI", () => {
           returnValues: { destinationChain: EvmChain.MOONBEAM },
         },
       });
-      const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
+      const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");
       mockConfirmGatewayTx.mockResolvedValueOnce(axelarTxResponseStub());
-      const mockcreatePendingTransfer = jest.spyOn(api, "createPendingTransfers");
+      const mockcreatePendingTransfer = vitest.spyOn(api, "createPendingTransfers");
       mockcreatePendingTransfer.mockResolvedValueOnce(axelarTxResponseStub());
-      const mockSignCommandTx = jest.spyOn(api, "signCommands");
+      const mockSignCommandTx = vitest.spyOn(api, "signCommands");
       const signCommandStub = axelarTxResponseStub([
         {
           events: [
@@ -110,7 +110,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       ]);
       mockSignCommandTx.mockResolvedValueOnce(signCommandStub);
 
-      const mockQueryBatchedCommand = jest.spyOn(api, "queryBatchedCommands");
+      const mockQueryBatchedCommand = vitest.spyOn(api, "queryBatchedCommands");
       mockQueryBatchedCommand.mockResolvedValue(batchedCommandResponseStub());
 
       const response = await api.manualRelayToDestChain("0x");
@@ -124,7 +124,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
     });
     test("it shouldn't call approve given the tx is already executed", async () => {
-      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.DEST_EXECUTED });
 
       const response = await api.manualRelayToDestChain("0x");
@@ -136,7 +136,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
 
     test("it shouldn't call approve given the tx is already approved", async () => {
-      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.DEST_GATEWAY_APPROVED });
 
       const response = await api.manualRelayToDestChain("0x");
@@ -148,7 +148,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
 
     test("it shouldn't call approve given the sign command returns 'no command to sign found'", async () => {
-      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
         status: GMPStatus.SRC_GATEWAY_CALLED,
         callTx: {
@@ -156,11 +156,11 @@ describe("AxelarDepositRecoveryAPI", () => {
           returnValues: { destinationChain: EvmChain.MOONBEAM },
         },
       });
-      const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
+      const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");
       mockConfirmGatewayTx.mockResolvedValueOnce(axelarTxResponseStub());
-      const mockcreatePendingTransfer = jest.spyOn(api, "createPendingTransfers");
+      const mockcreatePendingTransfer = vitest.spyOn(api, "createPendingTransfers");
       mockcreatePendingTransfer.mockResolvedValueOnce(axelarTxResponseStub());
-      const mockSignCommandTx = jest.spyOn(api, "signCommands");
+      const mockSignCommandTx = vitest.spyOn(api, "signCommands");
       const signCommandStub = axelarTxResponseStub([
         {
           events: [],
@@ -179,7 +179,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
     });
     test("it shouldn't call approve given the account sequence mismatch", async () => {
-      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
         status: GMPStatus.SRC_GATEWAY_CALLED,
         callTx: {
@@ -187,7 +187,7 @@ describe("AxelarDepositRecoveryAPI", () => {
           returnValues: { destinationChain: EvmChain.MOONBEAM },
         },
       });
-      const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
+      const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");
       mockConfirmGatewayTx.mockRejectedValueOnce(new Error("account sequence mismatch"));
 
       const response = await api.manualRelayToDestChain("0x");
@@ -198,7 +198,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
     });
     test("it shouldn't call approve given the error has thrown before finish", async () => {
-      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
         status: GMPStatus.SRC_GATEWAY_CALLED,
         callTx: {
@@ -206,7 +206,7 @@ describe("AxelarDepositRecoveryAPI", () => {
           returnValues: { destinationChain: EvmChain.MOONBEAM },
         },
       });
-      const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
+      const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");
       mockConfirmGatewayTx.mockRejectedValueOnce(new Error("unknown error"));
 
       const response = await api.manualRelayToDestChain("0x");
@@ -217,7 +217,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
     });
     test("it should call approve successfully", async () => {
-      const mockQueryTransactionStatus = jest.spyOn(api, "queryTransactionStatus");
+      const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
         status: GMPStatus.SRC_GATEWAY_CALLED,
         callTx: {
@@ -225,11 +225,11 @@ describe("AxelarDepositRecoveryAPI", () => {
           returnValues: { destinationChain: EvmChain.MOONBEAM },
         },
       });
-      const mockConfirmGatewayTx = jest.spyOn(api, "confirmGatewayTx");
+      const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");
       mockConfirmGatewayTx.mockResolvedValueOnce(axelarTxResponseStub());
-      const mockcreatePendingTransfer = jest.spyOn(api, "createPendingTransfers");
+      const mockcreatePendingTransfer = vitest.spyOn(api, "createPendingTransfers");
       mockcreatePendingTransfer.mockResolvedValueOnce(axelarTxResponseStub());
-      const mockSignCommandTx = jest.spyOn(api, "signCommands");
+      const mockSignCommandTx = vitest.spyOn(api, "signCommands");
       const signCommandStub = axelarTxResponseStub([
         {
           events: [
@@ -247,9 +247,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       ]);
       mockSignCommandTx.mockResolvedValueOnce(signCommandStub);
 
-      const mockQueryBatchedCommand = jest.spyOn(api, "queryBatchedCommands");
+      const mockQueryBatchedCommand = vitest.spyOn(api, "queryBatchedCommands");
       mockQueryBatchedCommand.mockResolvedValueOnce(batchedCommandResponseStub("0x456"));
-      const mockApproveTx = jest.spyOn(api, "sendApproveTx");
+      const mockApproveTx = vitest.spyOn(api, "sendApproveTx");
       const mockTransaction = { transactionHash: "0x123456" };
       mockApproveTx.mockResolvedValueOnce(mockTransaction);
 
@@ -294,7 +294,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         .approve(contract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
 
-      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
+      vitest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     test("it should return 'gas required' - 'gas paid' given 'gas required' > 'gas paid'", async () => {
@@ -316,10 +316,10 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      jest
+      vitest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
         .mockResolvedValueOnce(gasRequired.toString());
-      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValueOnce(activeChainsStub());
+      vitest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValueOnce(activeChainsStub());
 
       // Calculate how many gas we need to add more.
       const wantedGasFee = await api.calculateNativeGasFee(
@@ -352,7 +352,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      jest
+      vitest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
         .mockResolvedValueOnce(gasRequired.toString());
 
@@ -382,12 +382,12 @@ describe("AxelarDepositRecoveryAPI", () => {
 
     beforeEach(() => {
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
-      jest.clearAllMocks();
-      jest
+      vitest.clearAllMocks();
+      vitest
         .spyOn(api.axelarQueryApi, "getContractAddressFromConfig")
         .mockResolvedValue(gasReceiverContract.address);
 
-      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
+      vitest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     beforeAll(async () => {
@@ -444,7 +444,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         .then((tx: ContractTransaction) => tx.wait());
 
       // Mock that this transaction is already executed.
-      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(true));
+      vitest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(true));
 
       // Call addNativeGas function
       const response = await api.addNativeGas(
@@ -510,8 +510,8 @@ describe("AxelarDepositRecoveryAPI", () => {
           }
         )
         .then((tx: ContractTransaction) => tx.wait());
-      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
-      jest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValueOnce(gasPaid.toString());
+      vitest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
+      vitest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValueOnce(gasPaid.toString());
 
       // Call addNativeGas function
       const response = await api.addNativeGas(chain, tx.transactionHash, addNativeGasOptions);
@@ -547,10 +547,10 @@ describe("AxelarDepositRecoveryAPI", () => {
         .then((tx: ContractTransaction) => tx.wait());
 
       // Simulate gasPrice api error
-      jest
+      vitest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
         .mockRejectedValueOnce(() => Promise.reject());
-      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
+      vitest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
 
       // Call addNativeGas function
       const response = await api.addNativeGas(
@@ -587,8 +587,8 @@ describe("AxelarDepositRecoveryAPI", () => {
       };
 
       // Mock that this transaction is already executed.
-      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
-      const calculateNativeGasFeeFunction = jest
+      vitest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
+      const calculateNativeGasFeeFunction = vitest
         .spyOn(api, "calculateNativeGasFee")
         .mockResolvedValueOnce("9");
 
@@ -638,11 +638,11 @@ describe("AxelarDepositRecoveryAPI", () => {
         .then((tx: ContractTransaction) => tx.wait());
 
       // Mock that this transaction is already executed.
-      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
+      vitest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
 
       // Mock the this transaction requires 2 ETH gas to be paid.
       const mockedGasFee = ethers.utils.parseEther("2").toString();
-      jest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValueOnce(mockedGasFee);
+      vitest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValueOnce(mockedGasFee);
 
       // Call addNativeGas function
       const response = await api.addNativeGas(chain, tx.transactionHash, addNativeGasOptions);
@@ -689,12 +689,12 @@ describe("AxelarDepositRecoveryAPI", () => {
     let addGasOptions: AddGasOptions;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vitest.clearAllMocks();
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
-      jest
+      vitest
         .spyOn(api.axelarQueryApi, "getContractAddressFromConfig")
         .mockResolvedValueOnce(gasReceiverContract.address);
-      jest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
+      vitest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     beforeAll(async () => {
@@ -759,7 +759,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         .then((tx: ContractTransaction) => tx.wait());
 
       // Mock that this transaction is already executed.
-      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(true));
+      vitest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(true));
 
       // Call addGas function
       const response = await api.addGas(
@@ -821,10 +821,10 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      jest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
+      vitest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
 
       // Mock total gas fee is 0.1 USDC
-      jest
+      vitest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
         .mockResolvedValue(ethers.utils.parseUnits("0.1", decimals).toString());
 
@@ -850,9 +850,9 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      jest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
+      vitest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
       // Simulate gasPrice api error
-      jest
+      vitest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
         .mockRejectedValueOnce("unable to fetch gas price");
 
@@ -884,7 +884,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         .then((tx: ContractTransaction) => tx.wait());
 
       // Simulate gasPrice api error
-      jest
+      vitest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
         .mockRejectedValueOnce(() => Promise.reject());
 
@@ -920,7 +920,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         .then((tx: ContractTransaction) => tx.wait());
 
       // Simulate gasPrice api error
-      jest
+      vitest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
         .mockRejectedValueOnce(() => Promise.reject());
 
@@ -957,8 +957,8 @@ describe("AxelarDepositRecoveryAPI", () => {
         amount: ethers.utils.parseEther("10").toString(),
       };
 
-      jest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
-      const calculateGasFeeFunction = jest.spyOn(api, "calculateGasFee");
+      vitest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
+      const calculateGasFeeFunction = vitest.spyOn(api, "calculateGasFee");
 
       // Call addGas function
       const response = await api.addGas(
@@ -1003,9 +1003,9 @@ describe("AxelarDepositRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      jest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
+      vitest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
       const mockedGasFee = ethers.utils.parseEther("2").toString();
-      jest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValue(mockedGasFee);
+      vitest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValue(mockedGasFee);
 
       // Call addGas function
       const response = await api.addGas(chain, tx.transactionHash, usdc.address, addGasOptions);
@@ -1046,12 +1046,12 @@ describe("AxelarDepositRecoveryAPI", () => {
     };
 
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vitest.clearAllMocks();
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
     });
 
     test("it shouldn't call 'execute' given tx is already executed", async () => {
-      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      const mockApi = vitest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce({ status: GMPStatus.DEST_EXECUTED });
 
       const response = await api.execute(
@@ -1064,7 +1064,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
 
     test("it shouldn't call 'execute' given tx has not approved yet", async () => {
-      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      const mockApi = vitest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce({ status: GMPStatus.SRC_GATEWAY_CALLED });
 
       const response = await api.execute(
@@ -1077,7 +1077,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     });
 
     test("it shouldn't call 'execute' given gmp api error", async () => {
-      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      const mockApi = vitest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce(undefined);
 
       const response = await api.execute(
@@ -1092,7 +1092,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     test("it calls 'execute' and return revert error given 'callExecute' throws 'CALL_EXECUTE_ERROR.REVERT' error", async () => {
       // mock query api
       const executeParams = executeParamsStub();
-      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      const mockApi = vitest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce({
         status: GMPStatus.DEST_GATEWAY_APPROVED,
         data: executeParams,
@@ -1100,10 +1100,10 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       // Mock contract call is failed
       const error = new Error(ContractCallHelper.CALL_EXECUTE_ERROR.REVERT);
-      jest.spyOn(ContractCallHelper, "callExecute").mockRejectedValueOnce(error);
+      vitest.spyOn(ContractCallHelper, "callExecute").mockRejectedValueOnce(error);
 
       // Mock private saveGMP
-      const mockGMPApi = jest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
+      const mockGMPApi = vitest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
       mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
 
       const sourceTxHash = "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae";
@@ -1124,7 +1124,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     test("it calls 'execute' and return revert error given 'callExecute' throws 'CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS' error", async () => {
       // mock query api
       const executeParams = executeParamsStub();
-      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      const mockApi = vitest.spyOn(api, "queryExecuteParams");
       mockApi.mockResolvedValueOnce({
         status: GMPStatus.DEST_GATEWAY_APPROVED,
         data: executeParams,
@@ -1132,10 +1132,10 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       // Mock contract call is failed
       const error = new Error(ContractCallHelper.CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS);
-      jest.spyOn(ContractCallHelper, "callExecute").mockRejectedValueOnce(error);
+      vitest.spyOn(ContractCallHelper, "callExecute").mockRejectedValueOnce(error);
 
       // Mock private saveGMP
-      const mockGMPApi = jest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
+      const mockGMPApi = vitest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
       mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
 
       const sourceTxHash = "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae";
@@ -1155,7 +1155,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
     test("it should call 'execute' and return success = true", async () => {
       // mock query api
-      const mockApi = jest.spyOn(api, "queryExecuteParams");
+      const mockApi = vitest.spyOn(api, "queryExecuteParams");
       const executeParams = executeParamsStub();
       mockApi.mockResolvedValueOnce({
         status: GMPStatus.DEST_GATEWAY_APPROVED,
@@ -1163,10 +1163,10 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
 
       // Mock contract call is successful
-      jest.spyOn(ContractCallHelper, "callExecute").mockResolvedValueOnce(contractReceiptStub());
+      vitest.spyOn(ContractCallHelper, "callExecute").mockResolvedValueOnce(contractReceiptStub());
 
       // Mock private saveGMP
-      const mockGMPApi = jest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
+      const mockGMPApi = vitest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
       mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
 
       const response = await api.execute(

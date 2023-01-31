@@ -7,14 +7,14 @@ describe("AxelarTransferApi", () => {
   const api = new AxelarTransferApi({ environment: Environment.TESTNET });
 
   it("should return error given the transfer api could not be reached", async () => {
-    jest.spyOn(api.axelarCrosschainApi, "post").mockRejectedValueOnce(undefined);
+    vitest.spyOn(api.axelarCrosschainApi, "post").mockRejectedValueOnce(undefined);
     const response = await api.queryTransferStatus("0x123");
     expect(response.success).toBe(false);
     expect(response.error).toBe("Axelar Transfer API is not available");
   });
 
   it("should return error when no transfer is found", async () => {
-    jest.spyOn(api.axelarCrosschainApi, "post").mockResolvedValueOnce([]);
+    vitest.spyOn(api.axelarCrosschainApi, "post").mockResolvedValueOnce([]);
     const response = await api.queryTransferStatus("0x123");
     expect(response.success).toBe(false);
     expect(response.error).toBe("No transfer found");
@@ -22,7 +22,7 @@ describe("AxelarTransferApi", () => {
 
   it("should query transfer status successfully when given tx hash is valid", async () => {
     const mockResponse = transferResponseExecutedStub();
-    jest.spyOn(api.axelarCrosschainApi, "post").mockResolvedValueOnce(mockResponse);
+    vitest.spyOn(api.axelarCrosschainApi, "post").mockResolvedValueOnce(mockResponse);
     const response = await api.queryTransferStatus(
       "6D1B1CD4B754280461BD7AD43B4838BBD8A467AA346B7584052025F83B5EB90F"
     );

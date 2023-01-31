@@ -12,7 +12,7 @@ describe("AxelarQueryAPI", () => {
   const api = new AxelarQueryAPI({ environment: Environment.TESTNET });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vitest.clearAllMocks();
   });
 
   describe("getFeeForChainAndAsset", () => {
@@ -81,7 +81,7 @@ describe("AxelarQueryAPI", () => {
   });
 
   describe("estimateGasFee", () => {
-    xtest("It should return estimated gas amount that makes sense for USDC", async () => {
+    test.skip("It should return estimated gas amount that makes sense for USDC", async () => {
       const gasAmount = await api.estimateGasFee(
         EvmChain.AVALANCHE,
         EvmChain.ETHEREUM,
@@ -106,7 +106,7 @@ describe("AxelarQueryAPI", () => {
 
   describe("getNativeGasBaseFee", () => {
     test("It should return base fee for a certain source chain / destination chain combination", async () => {
-      jest.spyOn(api, "getActiveChains").mockResolvedValueOnce(activeChainsStub());
+      vitest.spyOn(api, "getActiveChains").mockResolvedValueOnce(activeChainsStub());
       const gasResult = await api.getNativeGasBaseFee(
         CHAINS.TESTNET.AVALANCHE as EvmChain,
         CHAINS.TESTNET.ETHEREUM as EvmChain
@@ -157,14 +157,14 @@ describe("AxelarQueryAPI", () => {
 
   describe("throwIfInactiveChain", () => {
     test("It should throw if the chain does not get included in a active-chains list", async () => {
-      jest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
+      vitest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
       await expect(api.throwIfInactiveChains(["ethereum"])).rejects.toThrowError(
         "Chain ethereum is not active"
       );
     });
 
     test("It should throw if the chain does not get included in a active-chains list", async () => {
-      jest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
+      vitest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
       await expect(api.throwIfInactiveChains(["avalanche"])).resolves.toBeUndefined();
     });
   });
@@ -188,7 +188,7 @@ describe("AxelarQueryAPI", () => {
 
     beforeEach(async () => {
       api = new AxelarQueryAPI({ environment: Environment.TESTNET });
-      jest.clearAllMocks();
+      vitest.clearAllMocks();
 
       /**
        * in this mock below, we are setting:
@@ -201,7 +201,7 @@ describe("AxelarQueryAPI", () => {
        *  incoming: 5aUSDC
        *  outgoing: 10aUSDC
        */
-      jest
+      vitest
         .spyOn(api, "getTransferLimitNexusQuery")
         .mockImplementation(({ chainId }: { chainId: string; denom: string }) => {
           const res = {

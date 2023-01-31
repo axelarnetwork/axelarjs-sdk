@@ -30,9 +30,11 @@
 
     /* Completeness */
     "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+
+    "types": ["vitest/globals"]
   },
   "include": ["src", "test"],
   "exclude": ["node_modules", "dist"],
-  "files": ["src/global.d.ts"]
+  "files": ["src/global.d.ts", "vitest.config.ts"]
 }

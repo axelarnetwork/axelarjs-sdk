@@ -16,7 +16,7 @@ import { toAccAddress } from "@cosmjs/stargate/build/queryclient/utils";
 import { STANDARD_FEE } from "../AxelarSigningClient/const";
 import { utils } from "ethers";
 
-xdescribe("AxelarSigningClient", () => {
+describe.skip("AxelarSigningClient", () => {
   // throwaway testnet account only, address should be axelar1dn9534a72h733m8andex5ufklql3hfsv8gdsrc
   const mnemonic = "grape kitchen depend dolphin elegant field hair ice bracket shell hover cover";
   const config: AxelarSigningClientConfig = {
@@ -26,7 +26,7 @@ xdescribe("AxelarSigningClient", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vitest.clearAllMocks();
   });
 
   describe("axelarnet getLinkAddress", () => {
