@@ -85,7 +85,10 @@ describe("AxelarQueryAPI", () => {
       const gasAmount = await api.estimateGasFee(
         EvmChain.AVALANCHE,
         EvmChain.ETHEREUM,
-        GasToken.USDC
+        GasToken.USDC,
+        700000,
+        1.1,
+        "500000"
       );
 
       // gasAmount should be less than 10k usd, otherwise we handle decimal conversion incorrectly.
@@ -96,7 +99,10 @@ describe("AxelarQueryAPI", () => {
       const gasAmount = await api.estimateGasFee(
         CHAINS.TESTNET.AVALANCHE as EvmChain,
         CHAINS.TESTNET.ETHEREUM as EvmChain,
-        GasToken.AVAX
+        GasToken.AVAX,
+        700000,
+        1.1,
+        "5000000000"
       );
 
       // gasAmount should be greater than 0.0000001, otherwise we handle decimal conversion incorrectly.

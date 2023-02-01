@@ -94,6 +94,7 @@ export type EvmWalletDetails = {
   privateKey?: string;
   useWindowEthereum?: boolean;
   provider?: ethers.providers.JsonRpcProvider;
+  gasLimitBuffer?: number;
 };
 export interface AxelarQueryClientConfig {
   axelarRpcUrl?: string;

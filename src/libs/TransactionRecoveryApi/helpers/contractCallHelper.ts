@@ -8,7 +8,8 @@ export enum CALL_EXECUTE_ERROR {
 
 export async function callExecute(
   params: ExecuteParams,
-  contract: Contract
+  contract: Contract,
+  gasLimitBuffer = 0
 ): Promise<ContractReceipt> {
   const {
     commandId,
@@ -29,7 +30,9 @@ export async function callExecute(
     if (!estimatedGas) throw new Error(CALL_EXECUTE_ERROR.REVERT);
 
     txReceipt = contract
-      .executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount)
+      .executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount, {
+        gasLimit: estimatedGas.add(gasLimitBuffer),
+      })
       .then((tx: ContractTransaction) => tx.wait())
       .catch(() => undefined);
   } else {
@@ -40,7 +43,9 @@ export async function callExecute(
     if (!estimatedGas) throw new Error(CALL_EXECUTE_ERROR.REVERT);
 
     txReceipt = contract
-      .execute(commandId, sourceChain, sourceAddress, payload)
+      .execute(commandId, sourceChain, sourceAddress, payload, {
+        gasLimit: estimatedGas.add(gasLimitBuffer),
+      })
       .then((tx: ContractTransaction) => tx.wait())
       .catch(() => undefined);
   }
