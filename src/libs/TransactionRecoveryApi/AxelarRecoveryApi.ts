@@ -76,6 +76,7 @@ export class AxelarRecoveryApi {
   readonly axelarGMPApiUrl: string;
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
+  readonly wssStatusUrl: string;
   readonly config: AxelarRecoveryAPIConfig;
   protected axelarQuerySvc: AxelarQueryClientType | null = null;
   protected evmClient: EVMClient;
@@ -85,6 +86,7 @@ export class AxelarRecoveryApi {
     const links: EnvironmentConfigs = getConfigs(environment);
     this.axelarGMPApiUrl = links.axelarGMPApiUrl;
     this.recoveryApiUrl = links.recoveryApiUrl;
+    this.wssStatusUrl = links.wssStatus;
     this.axelarRpcUrl = config.axelarRpcUrl || links.axelarRpcUrl;
     this.axelarLcdUrl = config.axelarLcdUrl || links.axelarLcdUrl;
     this.environment = environment;
@@ -128,6 +130,23 @@ export class AxelarRecoveryApi {
         chain: response.call.chain,
       };
     }
+  }
+
+  public async subscribeToTx(txHash: string) {
+    const exampleSocket = new WebSocket(this.wssStatusUrl);
+
+    exampleSocket.onopen = (event) => {
+      exampleSocket.send(
+        `{"action": "sendmessage", "topic":"subscribeToSrcChainTx", "srcTxHash": "${txHash}"}`
+      );
+    };
+
+    exampleSocket.onmessage = (event) => {
+      console.log(event.data);
+      if (event?.data?.toString()?.includes("destination_executed")) {
+        exampleSocket.close();
+      }
+    };
   }
 
   public async queryTransactionStatus(txHash: string): Promise<GMPStatusResponse> {
