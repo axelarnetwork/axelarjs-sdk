@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.4] - 2023-FEBRUARY-1
+- AxelarQueryAPI
+  - added `minGasPrice` parameter for the `estimateGasFee` function. `minGasPrice` is a floor set for the gas price in wei, used as override in case estimated gas price is below specified minimum.
+- AxelarGMPRecoveryAPI
+  - added `gasLimitBuffer` to `EvmWalletDetails` object. The `execute` function will now incorporate the use of `gasLimitBuffer`, providing an increased gas limit to the originally estimated gas value. As an example, if the estimated gas is `300k`, with a gasLimitBuffer of `100k`, the final gas limit will be `400k`.
+
 ## [0.12.3] - 2023-JANUARY-30
 
 - AxelarAssetTransfer
