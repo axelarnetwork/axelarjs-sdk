@@ -4,10 +4,11 @@ import { EvmChain } from "../../../types";
 import IAxelarExecutable from "../../../abi/IAxelarExecutable";
 import { ethers, Wallet } from "ethers";
 import { fork } from "../../testUtils/localChain";
+import type { Mock } from "vitest";
 
 describe("contractCallHelper", () => {
   describe("callExecute", () => {
-    let mockWait: vitest.Mock<any, any>;
+    let mockWait: Mock<any, any>;
     const stub = executeParamsStub();
 
     beforeEach(() => {
