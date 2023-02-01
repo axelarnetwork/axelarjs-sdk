@@ -171,7 +171,7 @@ export class AxelarQueryAPI {
     sourceChainTokenSymbol: GasToken | string,
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1,
-    minGasPrice?: string
+    minGasPrice = "0"
   ): Promise<string> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
 
@@ -187,19 +187,8 @@ export class AxelarQueryAPI {
 
     if (!success || !baseFee || !sourceToken) return "0";
 
-    const { gas_price } = sourceToken;
-
-    const gasPriceEther = parseEther(gas_price);
-
-    let _gasPrice;
-
-    if (minGasPrice) {
-      _gasPrice = gasPriceEther.sub(BigNumber.from(minGasPrice)).gt(0)
-        ? gasPriceEther
-        : BigNumber.from(minGasPrice);
-    } else {
-      _gasPrice = gasPriceEther;
-    }
+    let _gasPrice = parseEther(sourceToken.gas_price);
+    _gasPrice = _gasPrice.gt(minGasPrice) ? _gasPrice : BigNumber.from(minGasPrice);
 
     const destTxFee = _gasPrice.mul(gasLimit);
 
