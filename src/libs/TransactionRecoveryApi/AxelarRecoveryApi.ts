@@ -9,6 +9,7 @@ import { TransactionRequest } from "@ethersproject/providers";
 import rpcInfo from "./constants/chain";
 import { BigNumber } from "ethers";
 import { throwIfInvalidChainIds } from "../../utils";
+import WebSocket from "ws";
 
 export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
@@ -132,20 +133,21 @@ export class AxelarRecoveryApi {
     }
   }
 
-  public async subscribeToTx(txHash: string) {
-    const exampleSocket = new WebSocket(this.wssStatusUrl);
+  public async subscribeToTx(txHash: string, cb?: any) {
+    const conn = new WebSocket(this.wssStatusUrl);
 
-    exampleSocket.onopen = (event) => {
-      exampleSocket.send(
-        `{"action": "sendmessage", "topic":"subscribeToSrcChainTx", "srcTxHash": "${txHash}"}`
-      );
+    conn.onopen = (event: any) => {
+      const msg = `{"action": "sendmessage", "topic":"subscribeToSrcChainTx", "srcTxHash": "${txHash}"}`;
+      conn.send(msg);
     };
 
-    exampleSocket.onmessage = (event) => {
-      console.log(event.data);
-      if (event?.data?.toString()?.includes("destination_executed")) {
-        exampleSocket.close();
+    conn.onmessage = (event: any) => {
+      const resData = JSON.parse(event?.data);
+      if (resData?.txStatus) {
+        resData.txStatus = this.parseGMPStatus({ status: resData.txStatus, error: "" });
       }
+      if (resData?.txStatus === GMPStatus.DEST_EXECUTED) conn.close();
+      cb && cb(resData);
     };
   }
 
