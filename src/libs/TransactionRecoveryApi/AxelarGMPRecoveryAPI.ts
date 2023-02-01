@@ -395,12 +395,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (response?.status !== GMPStatus.DEST_GATEWAY_APPROVED) return NotApprovedError();
 
     const executeParams = response.data as ExecuteParams;
+    const gasLimitBuffer = evmWalletDetails?.gasLimitBuffer || 0;
     const { destinationChain, destinationContractAddress } = executeParams;
 
     const signer = this.getSigner(destinationChain, evmWalletDetails);
     const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
 
-    const txResult: TxResult = await callExecute(executeParams, contract)
+    const txResult: TxResult = await callExecute(executeParams, contract, gasLimitBuffer)
       .then((tx: ContractReceipt) => {
         const {
           commandId,
