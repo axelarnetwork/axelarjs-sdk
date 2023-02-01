@@ -21,10 +21,12 @@ describe("contractCallHelper", () => {
       const mockExecuteWithToken = vitest.fn().mockResolvedValueOnce({ wait: mockWait });
       const contract: any = {
         executeWithToken: mockExecuteWithToken,
-        estimateGas: { executeWithToken: vitest.fn().mockResolvedValueOnce(1) },
+        estimateGas: {
+          executeWithToken: vitest.fn().mockResolvedValueOnce(ethers.BigNumber.from(100000)),
+        },
       };
 
-      await callExecute(stub, contract);
+      await callExecute(stub, contract, 100000);
 
       expect(mockExecuteWithToken).toHaveBeenCalledWith(
         stub.commandId,
@@ -32,7 +34,10 @@ describe("contractCallHelper", () => {
         stub.sourceAddress,
         stub.payload,
         stub.symbol,
-        stub.amount
+        stub.amount,
+        {
+          gasLimit: ethers.BigNumber.from(200000),
+        }
       );
       expect(mockWait).toBeCalledTimes(1);
     });
