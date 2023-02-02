@@ -1,15 +1,15 @@
+import { TransactionRequest } from "@ethersproject/providers";
 import fetch from "cross-fetch";
+import { BigNumber } from "ethers";
+import WebSocket from "ws";
 import { loadChains } from "../../chains";
 import { EnvironmentConfigs, getConfigs } from "../../constants";
-import { AxelarRecoveryAPIConfig, Environment, EvmChain, EvmWalletDetails } from "../types";
-import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
-import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
-import EVMClient from "./client/EVMClient";
-import { TransactionRequest } from "@ethersproject/providers";
-import rpcInfo from "./constants/chain";
-import { BigNumber } from "ethers";
 import { throwIfInvalidChainIds } from "../../utils";
-import WebSocket from "ws";
+import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
+import { AxelarRecoveryAPIConfig, Environment, EvmChain, EvmWalletDetails } from "../types";
+import EVMClient from "./client/EVMClient";
+import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
+import rpcInfo from "./constants/chain";
 
 export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
@@ -70,6 +70,20 @@ export interface ExecuteParamsResponse {
   status: GMPStatus;
   data?: ExecuteParams;
 }
+
+export type SubscriptionStrategy =
+  | {
+      kind: "websocket";
+    }
+  | {
+      kind: "polling";
+      interval: number;
+    };
+
+const DEFAULT_SUBSCRIPTION_STRATEGY: SubscriptionStrategy = {
+  kind: "polling",
+  interval: 15000,
+};
 
 export class AxelarRecoveryApi {
   readonly environment: Environment;
@@ -133,24 +147,6 @@ export class AxelarRecoveryApi {
     }
   }
 
-  public async subscribeToTx(txHash: string, cb?: any) {
-    const conn = new WebSocket(this.wssStatusUrl);
-
-    conn.onopen = (event: any) => {
-      const msg = `{"action": "sendmessage", "topic":"subscribeToSrcChainTx", "srcTxHash": "${txHash}"}`;
-      conn.send(msg);
-    };
-
-    conn.onmessage = (event: any) => {
-      const resData = JSON.parse(event?.data);
-      if (resData?.txStatus) {
-        resData.txStatus = this.parseGMPStatus({ status: resData.txStatus, error: "" });
-      }
-      if (resData?.txStatus === GMPStatus.DEST_EXECUTED) conn.close();
-      cb && cb(resData);
-    };
-  }
-
   public async queryTransactionStatus(txHash: string): Promise<GMPStatusResponse> {
     const txDetails = await this.fetchGMPTransaction(txHash);
 
@@ -185,6 +181,63 @@ export class AxelarRecoveryApi {
       executed,
       approved,
       callback,
+    };
+  }
+
+  /**
+   * Subscribe to a transaction status using either a websocket or polling strategy
+   */
+  public async subscribeToTx(
+    txHash: string,
+    cb: (data: GMPStatusResponse) => void,
+    strategy = DEFAULT_SUBSCRIPTION_STRATEGY
+  ) {
+    if (strategy.kind === "websocket") {
+      this.subscribeToTxWSS_EXPERIMENTAL(txHash, cb);
+    } else {
+      this.subscribeToTxPOLLING(txHash, cb, strategy.interval);
+    }
+  }
+
+  /**
+   * Subscribe to a transaction status using a polling strategy
+   */
+  private async subscribeToTxPOLLING(
+    txHash: string,
+    cb: (data: GMPStatusResponse) => void,
+    interval = 30000 // 30 seconds
+  ) {
+    const intervalId = setInterval(async () => {
+      const response = await this.queryTransactionStatus(txHash);
+      cb(response);
+
+      if (response.status === GMPStatus.DEST_EXECUTED) {
+        clearInterval(intervalId);
+      }
+    }, interval);
+  }
+
+  /**
+   * Subscribe to a transaction status using a websocket strategy (Experimental)
+   */
+  private async subscribeToTxWSS_EXPERIMENTAL(
+    txHash: string,
+    cb: (data: GMPStatusResponse) => void
+  ) {
+    const conn = new WebSocket(this.wssStatusUrl);
+
+    conn.onopen = () => {
+      const msg = `{"action": "sendmessage", "topic":"subscribeToSrcChainTx", "srcTxHash": "${txHash}"}`;
+      conn.send(msg);
+    };
+
+    conn.onmessage = (event) => {
+      const resData = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+      if (resData?.txStatus) {
+        resData.txStatus = this.parseGMPStatus({ status: resData.txStatus, error: "" });
+      }
+      if (resData?.txStatus === GMPStatus.DEST_EXECUTED) conn.close();
+      cb?.(resData);
     };
   }
 
@@ -237,7 +290,9 @@ export class AxelarRecoveryApi {
       })
     ).find((chainInfo) => chainInfo.id.toLowerCase() === chainId.toLowerCase());
 
-    if (!chainInfo) throw new Error("cannot find chain" + chainId);
+    if (!chainInfo) {
+      throw new Error(`cannot find chain${chainId}`);
+    }
 
     return chainInfo;
   }
@@ -364,7 +419,7 @@ export class AxelarRecoveryApi {
   }
 
   public async execGet(base: string, params?: any) {
-    return fetch(base + "?" + new URLSearchParams(params).toString(), {
+    return fetch(`${base}?${new URLSearchParams(params).toString()}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
