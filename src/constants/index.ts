@@ -33,7 +33,7 @@ const devnetConfigs: EnvironmentConfigs = {
 };
 const testnetConfigs: EnvironmentConfigs = {
   resourceUrl: "https://nest-server-testnet.axelar.dev",
-  axelarRpcUrl: "https://testnet.rpc.axelar.dev/chain/axelar",
+  axelarRpcUrl: "https://rpc-axelar-testnet.imperator.co:443", // "https://testnet.rpc.axelar.dev/chain/axelar",
   axelarLcdUrl: "https://rpc-axelar-testnet.imperator.co",
   depositServiceUrl: "https://deposit-service.testnet.axelar.dev",
   axelarGMPApiUrl: "https://testnet.api.gmp.axelarscan.io",
