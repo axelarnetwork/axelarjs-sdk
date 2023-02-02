@@ -16,7 +16,7 @@
     "dev:serve": "nodemon -e js -w dist dist/index.js",
     "dev": "run-p dev:*",
     "test": "vitest run",
-    "test:watch": "vitest --no-cache",
+    "test:watch": "vitest",
     "test:e2e": "vitest run --config test/e2e/vitest.e2e.config.ts",
     "test:integration": "vitest run --config test/integration/vitest.integration.config.ts",
     "lint": "eslint . --ext .ts",
