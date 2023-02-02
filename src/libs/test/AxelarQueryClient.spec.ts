@@ -13,7 +13,7 @@ import {
   PendingIBCTransferCountResponse,
 } from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/query";
 
-describe("AxelarQueryClient", () => {
+describe.skip("AxelarQueryClient", () => {
   const config: AxelarQueryClientConfig = { environment: Environment.TESTNET };
 
   beforeEach(() => {

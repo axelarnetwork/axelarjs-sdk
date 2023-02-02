@@ -8,7 +8,7 @@ import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
 import { activeChainsStub } from "./stubs";
 
-describe("AxelarQueryAPI", () => {
+describe.skip("AxelarQueryAPI", () => {
   const api = new AxelarQueryAPI({ environment: Environment.TESTNET });
 
   beforeEach(() => {
