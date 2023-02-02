@@ -13,7 +13,7 @@ export interface EnvironmentConfigs {
 }
 
 const localConfigs: EnvironmentConfigs = {
-  resourceUrl: `http://localhost:4000`,
+  resourceUrl: "http://localhost:4000",
   axelarRpcUrl: "https://axelar-testnet-rpc.axelar-dev.workers.dev",
   axelarLcdUrl: "https://axelar-testnet-lcd.axelar-dev.workers.dev",
   axelarGMPApiUrl: "https://testnet.api.gmp.axelarscan.io",
@@ -24,7 +24,7 @@ const localConfigs: EnvironmentConfigs = {
   wssStatus: "",
 };
 const devnetConfigs: EnvironmentConfigs = {
-  resourceUrl: `https://nest-server-devnet.axelar.dev`,
+  resourceUrl: "https://nest-server-devnet.axelar.dev",
   axelarRpcUrl: "",
   axelarLcdUrl: "",
   axelarGMPApiUrl: "https://devnet.api.gmp.axelarscan.io",
@@ -35,8 +35,8 @@ const devnetConfigs: EnvironmentConfigs = {
   wssStatus: "",
 };
 const testnetConfigs: EnvironmentConfigs = {
-  resourceUrl: `https://nest-server-testnet.axelar.dev`,
-  axelarRpcUrl: "https://testnet.rpc.axelar.dev/chain/axelar",
+  resourceUrl: "https://nest-server-testnet.axelar.dev",
+  axelarRpcUrl: "https://rpc-axelar-testnet.imperator.co:443", // "https://testnet.rpc.axelar.dev/chain/axelar",
   axelarLcdUrl: "https://rpc-axelar-testnet.imperator.co",
   depositServiceUrl: "https://deposit-service.testnet.axelar.dev",
   axelarGMPApiUrl: "https://testnet.api.gmp.axelarscan.io",
@@ -46,7 +46,7 @@ const testnetConfigs: EnvironmentConfigs = {
   wssStatus: "wss://gopr1yb0jj.execute-api.us-east-2.amazonaws.com/Test",
 };
 const mainnetConfigs: EnvironmentConfigs = {
-  resourceUrl: `https://nest-server-mainnet.axelar.dev`,
+  resourceUrl: "https://nest-server-mainnet.axelar.dev",
   axelarRpcUrl: "https://mainnet.rpc.axelar.dev/chain/axelar",
   axelarLcdUrl: "https://lcd-axelar.imperator.co",
   axelarGMPApiUrl: "https://api.gmp.axelarscan.io",
