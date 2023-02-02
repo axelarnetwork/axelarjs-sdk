@@ -227,7 +227,12 @@ export class AxelarRecoveryApi {
     const conn = new WebSocket(this.wssStatusUrl);
 
     conn.onopen = () => {
-      const msg = `{"action": "sendmessage", "topic":"subscribeToSrcChainTx", "srcTxHash": "${txHash}"}`;
+      const msg = JSON.stringify({
+        action: "sendmessage",
+        topic: "subscribeToSrcChainTx",
+        srcTxHash: txHash,
+      });
+
       conn.send(msg);
     };
 
