@@ -55,7 +55,6 @@
     "@babel/preset-typescript": "^7.16.0",
     "@types/clone-deep": "^4.0.1",
     "@types/standard-http-error": "^2.0.1",
-    "@types/ws": "^8.5.4",
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "@typescript-eslint/parser": "^5.30.0",
     "eslint": "^8.24.0",

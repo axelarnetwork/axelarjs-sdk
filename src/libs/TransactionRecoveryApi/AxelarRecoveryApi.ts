@@ -1,7 +1,6 @@
 import { TransactionRequest } from "@ethersproject/providers";
 import fetch from "cross-fetch";
 import { BigNumber } from "ethers";
-import WebSocket from "ws";
 import { loadChains } from "../../chains";
 import { EnvironmentConfigs, getConfigs } from "../../constants";
 import { throwIfInvalidChainIds } from "../../utils";
