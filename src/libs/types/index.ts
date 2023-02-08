@@ -77,12 +77,16 @@ export interface AxelarQueryAPIConfig {
 export interface BaseFeeResponse {
   success: boolean;
   error?: string;
-  baseFee?: string;
-  sourceToken?: {
+  baseFee: string;
+  sourceToken: {
     gas_price: string;
     decimals: number;
     name: string;
     symbol: string;
+  };
+  destToken: {
+    gas_price: string;
+    gas_price_gwei: string;
   };
 }
 

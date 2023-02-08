@@ -224,3 +224,40 @@ export const transferResponseExecutedStub = () => {
     },
   ];
 };
+
+export const getFeeStub = () => ({
+  method: "getFees",
+  params: {
+    method: "getFees",
+    sourceChain: "avalanche",
+    destinationChain: "ethereum",
+    sourceTokenAddress: "0x0000000000000000000000000000000000000000",
+  },
+  result: {
+    base_fee: 0.418869692086198,
+    source_token: {
+      contract_address: "0x0000000000000000000000000000000000000000",
+      symbol: "AVAX",
+      name: "Avalanche",
+      decimals: 18,
+      token_price: {
+        usd: 20.56,
+      },
+      gas_price: "0.000001893353954513",
+    },
+    source_base_fee: 0.418869692086198,
+    destination_native_token: {
+      contract_address: "0x0000000000000000000000000000000000000000",
+      name: "Ethereum",
+      symbol: "ETH",
+      decimals: 18,
+      token_price: {
+        usd: 1674.72,
+      },
+      gas_price: "0.000000023244098897",
+      gas_price_gwei: "23.244098897",
+    },
+    destination_base_fee: 0.00514232878886753,
+  },
+  time_spent: 310,
+});
