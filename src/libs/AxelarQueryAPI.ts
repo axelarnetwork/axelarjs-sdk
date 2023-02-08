@@ -147,12 +147,19 @@ export class AxelarQueryAPI {
         sourceTokenSymbol,
       })
       .then((response) => {
-        const { base_fee, source_token } = response.result;
+        const { base_fee, source_token, destination_native_token } = response.result;
         const { decimals } = source_token;
         const baseFee = parseUnits(base_fee.toString(), decimals).toString();
-        return { baseFee, sourceToken: source_token, success: true };
-      })
-      .catch((error) => ({ success: false, error: error.message }));
+        return {
+          baseFee,
+          sourceToken: source_token,
+          destToken: {
+            gas_price: parseInt(destination_native_token.gas_price).toString(),
+            gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
+          },
+          success: true,
+        };
+      });
   }
 
   /**
@@ -183,14 +190,18 @@ export class AxelarQueryAPI {
 
     if (!response) return "0";
 
-    const { baseFee, sourceToken, success } = response;
+    const { baseFee, sourceToken, destToken, success } = response;
 
     if (!success || !baseFee || !sourceToken) return "0";
 
-    let _gasPrice = parseEther(sourceToken.gas_price);
-    _gasPrice = _gasPrice.gt(minGasPrice) ? _gasPrice : BigNumber.from(minGasPrice);
+    const destGasPrice = parseEther(destToken.gas_price_gwei);
+    let srcGasPrice = parseEther(sourceToken.gas_price);
 
-    const destTxFee = _gasPrice.mul(gasLimit);
+    srcGasPrice = destGasPrice.gt(minGasPrice)
+      ? srcGasPrice
+      : srcGasPrice.mul(minGasPrice).div(destGasPrice);
+
+    const destTxFee = srcGasPrice.mul(gasLimit);
 
     return (
       gasMultiplier > 1
