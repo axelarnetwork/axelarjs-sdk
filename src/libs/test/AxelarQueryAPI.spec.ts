@@ -6,7 +6,7 @@ import { ethers } from "ethers";
 import { CHAINS } from "../../chains";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
-import { activeChainsStub } from "./stubs";
+import { activeChainsStub, getFeeStub } from "./stubs";
 
 describe("AxelarQueryAPI", () => {
   const api = new AxelarQueryAPI({ environment: Environment.TESTNET });
@@ -107,6 +107,65 @@ describe("AxelarQueryAPI", () => {
 
       // gasAmount should be greater than 0.0000001, otherwise we handle decimal conversion incorrectly.
       expect(ethers.utils.parseEther("0.0000001").lt(gasAmount)).toBeTruthy();
+    });
+
+    test("It should use `minGasPrice` if it is greater than the destination chain's gas_price returned from the api", async () => {
+      const feeStub = getFeeStub();
+      vitest.spyOn(api.axelarGMPServiceApi, "post").mockResolvedValueOnce(feeStub);
+
+      const minGasPrice = ethers.utils.parseUnits("200", "gwei");
+      const gasLimit = ethers.BigNumber.from(700000);
+      const srcGasPrice = ethers.utils.parseEther(feeStub.result.source_token.gas_price);
+      const destGasPrice = ethers.utils.parseEther(
+        feeStub.result.destination_native_token.gas_price
+      );
+      const baseFee = ethers.utils.parseEther(feeStub.result.base_fee.toString());
+      const gasAmount = await api.estimateGasFee(
+        CHAINS.TESTNET.AVALANCHE as EvmChain,
+        CHAINS.TESTNET.ETHEREUM as EvmChain,
+        GasToken.AVAX,
+        gasLimit.toNumber(),
+        1.1,
+        minGasPrice.toString()
+      );
+
+      const expectedGasAmount = srcGasPrice
+        .mul(minGasPrice)
+        .div(destGasPrice)
+        .mul(gasLimit)
+        .mul(ethers.BigNumber.from(1.1 * 10000))
+        .div(10000)
+        .add(baseFee)
+        .toString();
+
+      expect(gasAmount).toEqual(expectedGasAmount);
+    });
+
+    test("It should not use `minGasPrice` if it is lesser than the destination chain's gas_price returned from the api", async () => {
+      const feeStub = getFeeStub();
+      vitest.spyOn(api.axelarGMPServiceApi, "post").mockResolvedValueOnce(feeStub);
+
+      const minGasPrice = ethers.utils.parseUnits("1", "gwei");
+      const gasLimit = ethers.BigNumber.from(700000);
+      const srcGasPrice = ethers.utils.parseEther(feeStub.result.source_token.gas_price);
+      const baseFee = ethers.utils.parseEther(feeStub.result.base_fee.toString());
+      const gasAmount = await api.estimateGasFee(
+        CHAINS.TESTNET.AVALANCHE as EvmChain,
+        CHAINS.TESTNET.ETHEREUM as EvmChain,
+        GasToken.AVAX,
+        gasLimit.toNumber(),
+        1.1,
+        minGasPrice.toString()
+      );
+
+      const expectedGasAmount = srcGasPrice
+        .mul(gasLimit)
+        .mul(ethers.BigNumber.from(1.1 * 10000))
+        .div(10000)
+        .add(baseFee)
+        .toString();
+
+      expect(gasAmount).toEqual(expectedGasAmount);
     });
   });
 
@@ -243,8 +302,8 @@ describe("AxelarQueryAPI", () => {
        = Math.min( ethereumLimit, seiLimit ) * 0.25 (0.25 represents default proportion of total limit)
        = Math.min ( 1000aUSDC, 500aUSDC) * 0.25 (0.25 represents default proportion of total limit)
        = 125
-       * 
-       * 
+       *
+       *
        */
       expect(res).toBeDefined();
       expect(Number(res) - expectedRes).toEqual(0);

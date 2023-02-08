@@ -154,7 +154,7 @@ export class AxelarQueryAPI {
           baseFee,
           sourceToken: source_token,
           destToken: {
-            gas_price: parseInt(destination_native_token.gas_price).toString(),
+            gas_price: destination_native_token.gas_price,
             gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
           },
           success: true,
@@ -206,9 +206,9 @@ export class AxelarQueryAPI {
     return (
       gasMultiplier > 1
         ? destTxFee
-            .add(baseFee)
             .mul(gasMultiplier * 10000)
             .div(10000)
+            .add(baseFee)
         : destTxFee.add(baseFee)
     ).toString();
   }
