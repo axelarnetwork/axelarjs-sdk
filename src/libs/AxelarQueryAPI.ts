@@ -169,7 +169,7 @@ export class AxelarQueryAPI {
    * @param sourceChainTokenSymbol
    * @param gasLimit (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which should be sufficient for most transactions.
    * @param gasMultiplier (Optional) A multiplier used to create a buffer above the calculated gas fee, to account for potential slippage throughout tx execution, e.g. 1.1 = 10% buffer. supports up to 3 decimal places
-   * @param minGasPrice (Optional) A floor set for the gas price in wei, used as override in case estimated gas price is below specified minimum
+   * @param minGasPriceGwei (Optional) A floor set for the gas price in gwei, used as override in case estimated gas price is below specified minimum
    * @returns
    */
   public async estimateGasFee(
@@ -178,7 +178,7 @@ export class AxelarQueryAPI {
     sourceChainTokenSymbol: GasToken | string,
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1,
-    minGasPrice = "0"
+    minGasPriceGwei = "0"
   ): Promise<string> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
 
@@ -197,9 +197,9 @@ export class AxelarQueryAPI {
     const destGasPrice = parseEther(destToken.gas_price_gwei);
     let srcGasPrice = parseEther(sourceToken.gas_price);
 
-    srcGasPrice = destGasPrice.gt(minGasPrice)
+    srcGasPrice = destGasPrice.gt(minGasPriceGwei)
       ? srcGasPrice
-      : srcGasPrice.mul(minGasPrice).div(destGasPrice);
+      : srcGasPrice.mul(minGasPriceGwei).div(destGasPrice);
 
     const destTxFee = srcGasPrice.mul(gasLimit);
 
