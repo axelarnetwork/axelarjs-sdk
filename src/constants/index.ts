@@ -9,6 +9,7 @@ export interface EnvironmentConfigs {
   recoveryApiUrl: string;
   axelarCrosschainApiUrl: string;
   axelarscanUrl: string;
+  wssStatus: string;
 }
 
 const localConfigs: EnvironmentConfigs = {
@@ -20,6 +21,7 @@ const localConfigs: EnvironmentConfigs = {
   recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev",
   axelarCrosschainApiUrl: "https://testnet.api.axelarscan.io/cross-chain",
   axelarscanUrl: "https://testnet.axelarscan.io",
+  wssStatus: "",
 };
 const devnetConfigs: EnvironmentConfigs = {
   resourceUrl: "https://nest-server-devnet.axelar.dev",
@@ -30,6 +32,7 @@ const devnetConfigs: EnvironmentConfigs = {
   recoveryApiUrl: "",
   axelarCrosschainApiUrl: "",
   axelarscanUrl: "",
+  wssStatus: "",
 };
 const testnetConfigs: EnvironmentConfigs = {
   resourceUrl: "https://nest-server-testnet.axelar.dev",
@@ -40,6 +43,7 @@ const testnetConfigs: EnvironmentConfigs = {
   recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev",
   axelarCrosschainApiUrl: "https://testnet.api.axelarscan.io/cross-chain",
   axelarscanUrl: "https://testnet.axelarscan.io",
+  wssStatus: "wss://gopr1yb0jj.execute-api.us-east-2.amazonaws.com/Test",
 };
 const mainnetConfigs: EnvironmentConfigs = {
   resourceUrl: "https://nest-server-mainnet.axelar.dev",
@@ -50,6 +54,7 @@ const mainnetConfigs: EnvironmentConfigs = {
   recoveryApiUrl: "https://axelar-signing-relayer-mainnet.axelar.dev",
   axelarCrosschainApiUrl: "https://api.axelarscan.io/cross-chain",
   axelarscanUrl: "https://axelarscan.io",
+  wssStatus: "wss://t36nphohri.execute-api.us-east-2.amazonaws.com/Prod",
 };
 
 configsMap["local"] = localConfigs;
