@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.5] - 2023-FEBRUARY-8
+
+- AxelarQueryAPI
+  - Fixed `estimateGasFee` function in how it handles the `minGasPrice` parameter, which should compare the min to the destination chain gas price, whereas it was comparing to the source chain price originally.
+- AxelarRecoveryAPI
+  - introduced wss subscription service (subscribeToTx) to invoke subscribe to specific transactions for updates
+
 ## [0.12.4] - 2023-FEBRUARY-1
+
 - AxelarQueryAPI
   - added `minGasPrice` parameter for the `estimateGasFee` function. `minGasPrice` is a floor set for the gas price in wei, used as override in case estimated gas price is below specified minimum.
 - AxelarGMPRecoveryAPI
