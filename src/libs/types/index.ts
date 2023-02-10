@@ -148,6 +148,7 @@ export interface EventLog {
   signature: string;
   eventLog: LogDescription;
   logIndex: number;
+  eventIndex: number;
 }
 
 export interface ExecuteArgs {

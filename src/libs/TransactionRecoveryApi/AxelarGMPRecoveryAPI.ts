@@ -25,6 +25,7 @@ import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import rpcInfo from "./constants/chain";
 import {
   getDestinationChainFromTxReceipt,
+  getEventIndexFromTxReceipt,
   getGasAmountFromTxReceipt,
   getLogIndexFromTxReceipt,
   getNativeGasAmountFromTxReceipt,
@@ -46,10 +47,11 @@ import {
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "./constants/error";
-import { callExecute, CALL_EXECUTE_ERROR } from "./helpers";
+import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
 import { asyncRetry, sleep, throwIfInvalidChainIds } from "../../utils";
 import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
-import { Interface } from "ethers/lib/utils";
+import { arrayify, Interface, keccak256 } from "ethers/lib/utils";
+import { fromHex } from "@cosmjs/encoding";
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   axelarQueryApi: AxelarQueryAPI;
@@ -75,6 +77,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       relayerAddress,
       error,
     });
+  }
+
+  public async hasBeenConfirmed() {
+    return false; //TODO
+  }
+
+  public async getCommandIdFromSrcTxHash(srcChainId: number, txHash: string, eventIndex: number) {
+    return getCommandId(srcChainId, txHash, eventIndex);
   }
 
   public async manualRelayToDestChain(
@@ -105,14 +115,19 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       return errorResponse(ApproveGatewayError.ALREADY_APPROVED);
 
     const srcChain = callTx.chain;
+    const srcChainId = callTx.transaction?.chainId;
     const destChain = callTx.returnValues.destinationChain;
+
+    /**should first confirm if command ID exists for tx. but also need event index */
+
+    if (await this.hasBeenConfirmed()) {
+      throw "already confirmed"; //TODO
+    }
 
     try {
       confirmTx = await this.confirmGatewayTx(txHash, srcChain);
-      await sleep(2);
-
-      createPendingTransferTx = await this.createPendingTransfers(destChain);
-      await sleep(2);
+      console.log("confirm tx", confirmTx);
+      await sleep(3);
 
       signCommandTx = await this.signCommands(destChain);
       const signEvent = signCommandTx.rawLog[0]?.events?.find(
@@ -120,11 +135,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
 
       if (!signEvent) return errorResponse(ApproveGatewayError.SIGN_COMMAND_FAILED);
+      console.log("signCommandTx tx", signCommandTx);
 
-      await sleep(2);
+      await sleep(10);
       const batchedCommandId = signEvent.attributes.find(
         (attr: any) => attr.key === "batchedCommandId"
       )?.value;
+
+      /**first check the gateway on the dest chain
+       * isCommandExecuted on gateway
+       * if not done yet, query axelarscan that indexes the command ID
+       */
 
       const batchedCommand = await asyncRetry(
         () => this.queryBatchedCommands(destChain, batchedCommandId),
@@ -132,7 +153,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
       if (!batchedCommand) return errorResponse(ApproveGatewayError.ERROR_BATCHED_COMMAND);
 
-      await sleep(2);
+      await sleep(10);
 
       const approveTx = await this.sendApproveTx(
         destChain,
@@ -215,6 +236,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const paidGasFee = getGasAmountFromTxReceipt(receipt) || "0";
 
     return this.subtractGasFee(sourceChain, destinationChain, gasTokenSymbol, paidGasFee, options);
+  }
+
+  public async getEventIndex(chain: EvmChain, txHash: string, options?: AddGasOptions) {
+    const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
+    const signer = this.getSigner(chain, evmWalletDetails);
+    const receipt = await signer.provider.getTransactionReceipt(txHash);
+    if (!receipt) return InvalidTransactionError(chain);
+    // console.log("receipt", receipt);
+    return getEventIndexFromTxReceipt(receipt);
+    // console.log("logIndex", logIndex);
   }
 
   /**
