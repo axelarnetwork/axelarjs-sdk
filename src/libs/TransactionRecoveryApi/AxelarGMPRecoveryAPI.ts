@@ -80,10 +80,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
   }
 
-  public async hasBeenConfirmed() {
-    return false; //TODO
-  }
-
   public getCommandIdFromSrcTxHash(srcChainId: number, txHash: string, eventIndex: number) {
     return getCommandId(srcChainId, txHash, eventIndex);
   }
