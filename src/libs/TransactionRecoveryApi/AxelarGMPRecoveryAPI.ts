@@ -104,6 +104,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       signCommandTx,
     });
 
+    /**
+     * 1. check if transaction is already executed or approved
+     */
     if (status === GMPStatus.CANNOT_FETCH_STATUS)
       return errorResponse(ApproveGatewayError.FETCHING_STATUS_FAILED);
     if (status === GMPStatus.DEST_EXECUTED)
@@ -116,8 +119,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const destChain = callTx.returnValues.destinationChain;
 
     /**
-     * 1. check if command ID exists. if it does, no need to reconfirm. if it doesn't, then move on to confirm
-     * 2. if command ID exists but command has not been executed, then execute it
+     * 3. check if command ID exists. if it does, no need to reconfirm. if it doesn't, then move on to confirm
+     * if command ID exists but command has not been executed, then execute it
      */
     try {
       const destChainId = rpcInfo[this.environment].networkInfo[destChainName]?.chainId;
@@ -150,6 +153,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     } catch (e) {
       console.error(e);
     }
+
+    /**
+     * 4. transaction was not confirmed by the network at all, so confirm it and bring through the rest of the pipeline
+     */
 
     try {
       confirmTx = await this.confirmGatewayTx(txHash, srcChain);
