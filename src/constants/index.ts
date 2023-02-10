@@ -5,6 +5,7 @@ export interface EnvironmentConfigs {
   axelarRpcUrl: string;
   axelarLcdUrl: string;
   axelarGMPApiUrl: string;
+  axelarscanBaseApiUrl: string;
   depositServiceUrl: string;
   recoveryApiUrl: string;
   axelarCrosschainApiUrl: string;
@@ -16,6 +17,7 @@ const localConfigs: EnvironmentConfigs = {
   axelarRpcUrl: "https://axelar-testnet-rpc.axelar-dev.workers.dev",
   axelarLcdUrl: "https://axelar-testnet-lcd.axelar-dev.workers.dev",
   axelarGMPApiUrl: "https://testnet.api.gmp.axelarscan.io",
+  axelarscanBaseApiUrl: "",
   depositServiceUrl: "https://deposit-service-devnet-release.devnet.axelar.dev",
   recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev",
   axelarCrosschainApiUrl: "https://testnet.api.axelarscan.io/cross-chain",
@@ -26,6 +28,7 @@ const devnetConfigs: EnvironmentConfigs = {
   axelarRpcUrl: "",
   axelarLcdUrl: "",
   axelarGMPApiUrl: "https://devnet.api.gmp.axelarscan.io",
+  axelarscanBaseApiUrl: "",
   depositServiceUrl: "https://deposit-service-devnet-release.devnet.axelar.dev",
   recoveryApiUrl: "",
   axelarCrosschainApiUrl: "",
@@ -37,6 +40,7 @@ const testnetConfigs: EnvironmentConfigs = {
   axelarLcdUrl: "https://rpc-axelar-testnet.imperator.co",
   depositServiceUrl: "https://deposit-service.testnet.axelar.dev",
   axelarGMPApiUrl: "https://testnet.api.gmp.axelarscan.io",
+  axelarscanBaseApiUrl: "https://testnet.api.axelarscan.io",
   recoveryApiUrl: "https://axelar-signing-relayer-testnet.axelar.dev",
   axelarCrosschainApiUrl: "https://testnet.api.axelarscan.io/cross-chain",
   axelarscanUrl: "https://testnet.axelarscan.io",
@@ -46,6 +50,7 @@ const mainnetConfigs: EnvironmentConfigs = {
   axelarRpcUrl: "https://mainnet.rpc.axelar.dev/chain/axelar",
   axelarLcdUrl: "https://lcd-axelar.imperator.co",
   axelarGMPApiUrl: "https://api.gmp.axelarscan.io",
+  axelarscanBaseApiUrl: "https://api.axelarscan.io",
   depositServiceUrl: "https://deposit-service.mainnet.axelar.dev",
   recoveryApiUrl: "https://axelar-signing-relayer-mainnet.axelar.dev",
   axelarCrosschainApiUrl: "https://api.axelarscan.io/cross-chain",
