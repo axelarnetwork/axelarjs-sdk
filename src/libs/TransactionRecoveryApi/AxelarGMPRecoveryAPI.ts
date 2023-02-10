@@ -52,7 +52,7 @@ import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
 import { asyncRetry, sleep, throwIfInvalidChainIds } from "../../utils";
 import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { arrayify, Interface, keccak256 } from "ethers/lib/utils";
-import { fromHex } from "@cosmjs/encoding";
+import fetch from "cross-fetch";
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   axelarQueryApi: AxelarQueryAPI;
@@ -82,6 +82,25 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   public getCommandIdFromSrcTxHash(srcChainId: number, txHash: string, eventIndex: number) {
     return getCommandId(srcChainId, txHash, eventIndex);
+  }
+
+  /**
+   * https://lcd-axelar.imperator.co/axelar/evm/v1beta1/event/fantom/0x6573980552420bb268202c384f869aa2c8cfa6f2bba2b755ff13c395d25d5576-13
+   */
+  public async checkIsEventConfirmed(
+    srcChainId: string,
+    srcTxHash: string,
+    srcEventId: number
+  ): Promise<boolean | undefined> {
+    const path = `/axelar/evm/v1beta1/event/${srcChainId}/${srcTxHash}-${srcEventId}`;
+    return await fetch(this.axelarLcdUrl + path, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    })
+      .then((res) => res.json())
+      .then((data) => data?.event?.status === "STATUS_COMPLETED")
+      .catch((e) => undefined);
   }
 
   public async manualRelayToDestChain(
