@@ -80,7 +80,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
   }
 
-  public getCommandIdFromSrcTxHash(srcChainId: number, txHash: string, eventIndex: number) {
+  public getCidFromSrcTxHash(srcChainId: number, txHash: string, eventIndex: number) {
     return getCommandId(srcChainId, txHash, eventIndex);
   }
 
@@ -91,18 +91,24 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       .catch((e) => undefined);
   }
 
-  public async isEventConfirmed(
+  public async isEVMEventConfirmed(
     srcChainId: string,
     srcTxHash: string,
     srcEventId: number
   ): Promise<boolean | undefined> {
     return this.axelarQueryApi
       .getEVMEvent(srcChainId, srcTxHash, srcEventId)
-      .then((res) =>
-        [Event_Status.STATUS_COMPLETED, Event_Status.STATUS_CONFIRMED].includes(
-          res.event?.status as Event_Status
-        )
-      )
+      .then((res) => res.event?.status === Event_Status.STATUS_CONFIRMED)
+      .catch((e) => undefined);
+  }
+  public async isEVMEventCompleted(
+    srcChainId: string,
+    srcTxHash: string,
+    srcEventId: number
+  ): Promise<boolean | undefined> {
+    return this.axelarQueryApi
+      .getEVMEvent(srcChainId, srcTxHash, srcEventId)
+      .then((res) => res.event?.status === Event_Status.STATUS_COMPLETED)
       .catch((e) => undefined);
   }
 
