@@ -29,7 +29,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     test("fetching event status", async () => {
       const txHash = "0xa290f800f2089535a0abb013cea9cb26e1cdb3f2a2f2a8dcef2f149eb7a4d3be";
       const eventIndex = await api.getEventIndex(EvmChain.MOONBEAM, txHash, evmWalletDetails);
-      const res = await api.checkIsEventConfirmed(EvmChain.MOONBEAM, txHash, eventIndex as number);
+      const res = await api.isEventConfirmed(EvmChain.MOONBEAM, txHash, eventIndex as number);
       expect(res).toBeTruthy();
     }, 60000);
   });
