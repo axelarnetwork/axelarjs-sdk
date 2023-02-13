@@ -1,6 +1,14 @@
 import { arrayify, keccak256 } from "ethers/lib/utils";
+import { Environment } from "src/libs/types";
+import rpcInfo from "../constants/chain";
 
-export const getCommandId = (chainID: number, txHash: string, sourceEventIndex: number) => {
+export const getCommandId = (
+  chainName: string,
+  txHash: string,
+  sourceEventIndex: number,
+  environment: Environment
+) => {
+  const chainID: number = rpcInfo[environment].networkInfo[chainName]?.chainId;
   const seiArr = arrayify(sourceEventIndex).reverse();
   const txHashWithEventIndex = new Uint8Array([
     ...arrayify(txHash),

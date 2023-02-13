@@ -13,7 +13,6 @@ import {
 } from "../types";
 import {
   AxelarRecoveryApi,
-  BatchedCommandsAxelarscanResponse,
   ExecuteParams,
   GMPStatus,
   GMPStatusResponse,
@@ -40,6 +39,8 @@ import {
   ContractCallError,
   ExecutionRevertedError,
   GasPriceAPIError,
+  // GMPErrorMap,
+  // GMPErrorResponse,
   GMPQueryError,
   InsufficientFundsError,
   InvalidGasTokenError,
@@ -49,10 +50,21 @@ import {
   UnsupportedGasTokenError,
 } from "./constants/error";
 import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
-import { asyncRetry, sleep, throwIfInvalidChainIds } from "../../utils";
-import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
+import { sleep, throwIfInvalidChainIds } from "../../utils";
+import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { Interface } from "ethers/lib/utils";
+
+export const GMPErrorMap: Record<string, ApproveGatewayError> = {
+  [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
+  [GMPStatus.DEST_EXECUTED]: ApproveGatewayError.ALREADY_EXECUTED,
+  [GMPStatus.DEST_GATEWAY_APPROVED]: ApproveGatewayError.ALREADY_APPROVED,
+};
+
+export const GMPErrorResponse = (error: ApproveGatewayError, errorDetails?: string) => ({
+  success: false,
+  error: errorDetails || error,
+});
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   axelarQueryApi: AxelarQueryAPI;
@@ -80,8 +92,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
   }
 
-  public getCidFromSrcTxHash(srcChainId: number, txHash: string, eventIndex: number) {
-    return getCommandId(srcChainId, txHash, eventIndex);
+  public getCidFromSrcTxHash(srcChainId: string, txHash: string, eventIndex: number) {
+    return getCommandId(srcChainId, txHash, eventIndex, this.environment);
   }
 
   public async doesTxMeetConfirmHt(chain: string, currHeight: number) {
@@ -91,142 +103,172 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       .catch((e) => undefined);
   }
 
-  public async isEVMEventConfirmed(
-    srcChainId: string,
-    srcTxHash: string,
-    srcEventId: number
-  ): Promise<boolean | undefined> {
-    return this.axelarQueryApi
-      .getEVMEvent(srcChainId, srcTxHash, srcEventId)
-      .then((res) => res.event?.status === Event_Status.STATUS_CONFIRMED)
-      .catch((e) => undefined);
+  public isEVMEventFailed(eventResponse: EventResponse): boolean | undefined {
+    if (!eventResponse) return undefined;
+    return [Event_Status.STATUS_FAILED, Event_Status.STATUS_UNSPECIFIED].includes(
+      eventResponse.event?.status as Event_Status
+    );
   }
-  public async isEVMEventCompleted(
+
+  public isEVMEventConfirmed(eventResponse: EventResponse): boolean | undefined {
+    if (!eventResponse) return undefined;
+    return eventResponse.event?.status === Event_Status.STATUS_CONFIRMED;
+  }
+  public isEVMEventCompleted(eventResponse: EventResponse): boolean | undefined {
+    if (!eventResponse) return undefined;
+    return eventResponse.event?.status === Event_Status.STATUS_COMPLETED;
+  }
+  public async getEvmEvent(
     srcChainId: string,
     srcTxHash: string,
-    srcEventId: number
-  ): Promise<boolean | undefined> {
-    return this.axelarQueryApi
-      .getEVMEvent(srcChainId, srcTxHash, srcEventId)
-      .then((res) => res.event?.status === Event_Status.STATUS_COMPLETED)
-      .catch((e) => undefined);
+    evmWalletDetails?: EvmWalletDetails
+  ): Promise<{ commandId: string; eventResponse: EventResponse }> {
+    let eventIndex: number;
+
+    try {
+      eventIndex = (await this.getEventIndex(
+        srcChainId as EvmChain,
+        srcTxHash,
+        evmWalletDetails
+      )) as number;
+    } catch (e) {
+      throw `could not find event index for ${srcTxHash}`;
+    }
+    if (!eventIndex || eventIndex < 0) throw `could not find event index for ${srcTxHash}`;
+
+    const commandId = this.getCidFromSrcTxHash(srcChainId, srcTxHash, eventIndex);
+
+    const eventResponse = await this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex);
+    if (!eventResponse) throw `could not determine status of event: ${srcTxHash}`;
+
+    if (this.isEVMEventFailed(eventResponse))
+      throw `event on source chain is not successful: ${srcTxHash}`;
+
+    return {
+      commandId,
+      eventResponse,
+    };
+  }
+
+  public async findBatchAndSignIfNeeded(
+    commandId: string,
+    destChainId: string,
+    _evmWalletDetails: EvmWalletDetails
+  ): Promise<AxelarTxResponse | null> {
+    let signCommandTx = null;
+    if (!commandId) return signCommandTx;
+
+    try {
+      if (!(await this.fetchBatchData(commandId))) {
+        signCommandTx = await this.signCommands(destChainId);
+        await sleep(20);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return signCommandTx;
+  }
+
+  public async findBatchAndBroadcastIfNeeded(
+    commandId: string,
+    destChainId: string,
+    _evmWalletDetails: EvmWalletDetails
+  ): Promise<AxelarTxResponse | null> {
+    let approveTx = null;
+
+    if (!commandId) return approveTx;
+
+    try {
+      const batchData = await this.fetchBatchData(commandId);
+      if (!batchData) return approveTx;
+
+      const commandData = batchData.commands.find((command) => command.id === commandId);
+      if (!commandData) return approveTx;
+
+      if (!commandData?.executed) {
+        approveTx = await this.sendApproveTx(
+          destChainId,
+          batchData.execute_data,
+          _evmWalletDetails
+        );
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return approveTx;
+  }
+
+  public async findEventAndConfirmIfNeeded(
+    eventResponse: EventResponse,
+    srcChain: EvmChain,
+    txHash: string,
+    evmWalletDetails: EvmWalletDetails
+  ) {
+    let confirmTx = null;
+
+    if (!this.isEVMEventCompleted(eventResponse) && !this.isEVMEventConfirmed(eventResponse)) {
+      /**todo, need to check whether tx is finalized */
+      // const confirmationHeight = await this.axelarQueryApi.getConfirmationHeight(srcChain);
+
+      confirmTx = await this.confirmGatewayTx(txHash, srcChain);
+      await sleep(30);
+
+      const updatedEvent = await this.getEvmEvent(srcChain, txHash, evmWalletDetails);
+
+      if (!this.isEVMEventCompleted(updatedEvent?.eventResponse))
+        throw `could not confirm event successfully: ${txHash}`;
+    }
+
+    return confirmTx;
   }
 
   public async manualRelayToDestChain(
     txHash: string,
     evmWalletDetails?: EvmWalletDetails
-  ): Promise<ApproveGatewayResponse> {
+  ): Promise<ApproveGatewayResponse | null> {
+    let confirmTx: AxelarTxResponse | null = null;
+    let signCommandTx: AxelarTxResponse | null = null;
+    let approveTx: any = null;
+    let success: boolean = false;
+
     const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
     const { callTx, status } = await this.queryTransactionStatus(txHash);
 
-    let confirmTx: Nullable<AxelarTxResponse>;
-    let createPendingTransferTx: Nullable<AxelarTxResponse>;
-    let signCommandTx: Nullable<AxelarTxResponse>;
-
-    const errorResponse = (error: ApproveGatewayError, errorDetails?: string) => ({
-      success: false,
-      error: errorDetails || error,
-      confirmTx,
-      createPendingTransferTx,
-      signCommandTx,
-    });
-
-    /**
-     * 1. check if transaction is already executed or approved
-     */
-    if (status === GMPStatus.CANNOT_FETCH_STATUS)
-      return errorResponse(ApproveGatewayError.FETCHING_STATUS_FAILED);
-    if (status === GMPStatus.DEST_EXECUTED)
-      return errorResponse(ApproveGatewayError.ALREADY_EXECUTED);
-    if (status === GMPStatus.DEST_GATEWAY_APPROVED)
-      return errorResponse(ApproveGatewayError.ALREADY_APPROVED);
-
+    /**first check if transaction is already executed */
+    if (GMPErrorMap[status]) return GMPErrorResponse(GMPErrorMap[status]);
     const srcChain = callTx.chain;
-    const destChainName = callTx.returnValues.destinationChain.toLowerCase();
     const destChain = callTx.returnValues.destinationChain;
 
-    /**
-     * 3. check if command ID exists. if it does, no need to reconfirm. if it doesn't, then move on to confirm
-     * if command ID exists but command has not been executed, then execute it
-     */
+    const { commandId, eventResponse } = await this.getEvmEvent(srcChain, txHash, evmWalletDetails);
+
+    /**find event and confirm if needed */
     try {
-      const destChainId = rpcInfo[this.environment].networkInfo[destChainName]?.chainId;
-      const eventIndex = await this.getEventIndex(srcChain, txHash, evmWalletDetails);
-      if (!eventIndex || eventIndex < 0) throw `could not find event index for ${txHash}`;
-
-      const commandId = this.getCommandIdFromSrcTxHash(destChainId, txHash, eventIndex);
-      if (commandId) {
-        const batchData = await this.fetchBatchData(commandId);
-        if (batchData) {
-          const command = batchData.commands.find((command) => command.id === commandId);
-          if (command && !command?.executed) {
-            const approveTx = await this.sendApproveTx(
-              destChain,
-              batchData.execute_data,
-              _evmWalletDetails
-            );
-            return {
-              success: true,
-              approveTx,
-            };
-          }
-          return { success: false, error: "Transaction is already confirmed" };
-        }
-        return {
-          success: false,
-          error: "Already confirmed but unable to send to destination chain",
-        };
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    /**
-     * 4. transaction was not confirmed by the network at all, so confirm it and bring through the rest of the pipeline
-     */
-
-    try {
-      confirmTx = await this.confirmGatewayTx(txHash, srcChain);
-      await sleep(3);
-
-      signCommandTx = await this.signCommands(destChain);
-      const signEvent = signCommandTx.rawLog[0]?.events?.find(
-        (event: any) => event.type === "sign"
-      );
-      await sleep(3);
-
-      const batchedCommandId = signEvent.attributes.find(
-        (attr: any) => attr.key === "batchedCommandId"
-      )?.value;
-
-      const batchedCommand = await asyncRetry(
-        () => this.queryBatchedCommands(destChain, batchedCommandId),
-        (res?: BatchedCommandsResponse) => !!res && res.executeData?.length > 0
-      );
-      if (!batchedCommand) return errorResponse(ApproveGatewayError.ERROR_BATCHED_COMMAND);
-
-      await sleep(3);
-
-      const approveTx = await this.sendApproveTx(
-        destChain,
-        batchedCommand.executeData,
+      confirmTx = await this.findEventAndConfirmIfNeeded(
+        eventResponse,
+        srcChain,
+        txHash,
         _evmWalletDetails
       );
+    } catch (e) {}
 
-      return {
-        success: true,
-        confirmTx,
-        createPendingTransferTx,
-        signCommandTx,
-        approveTx,
-      };
-    } catch (e: any) {
-      if (e.message.includes("account sequence mismatch")) {
-        return errorResponse(ApproveGatewayError.ERROR_ACCOUNT_SEQUENCE_MISMATCH);
-      }
-      return errorResponse(ApproveGatewayError.ERROR_UNKNOWN, e.message);
-    }
+    /**find batch and sign if needed */
+    try {
+      signCommandTx = await this.findBatchAndSignIfNeeded(commandId, destChain, _evmWalletDetails);
+    } catch (e) {}
+
+    /**find batch and manually execute if needed */
+    try {
+      await this.findBatchAndBroadcastIfNeeded(commandId, destChain, _evmWalletDetails);
+      success = true;
+    } catch (e) {}
+
+    return {
+      success,
+      confirmTx,
+      signCommandTx,
+      approveTx,
+    };
   }
 
   /**
