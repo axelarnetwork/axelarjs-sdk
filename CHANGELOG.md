@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - AxelarRecoveryAPI
   - introduced wss subscription service (subscribeToTx) to invoke subscribe to specific transactions for updates
 - AxelarGMPRecoveryAPI
-  - fixes to manualRelayToDestinationChain to first check is transaction is already confirmed but not broadcast, and broadcast the transaction (as identified by command ID) if so
+  - fixes to manualRelayToDestinationChain to first check if transaction is already confirmed but not broadcasted, and broadcast the transaction (as identified by command ID) if so
 
 ## [0.12.4] - 2023-FEBRUARY-1
 
