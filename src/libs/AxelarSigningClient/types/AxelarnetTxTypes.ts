@@ -8,9 +8,12 @@ import {
   RouteIBCTransfersRequest,
   RegisterFeeCollectorRequest,
   protobufPackage,
-  ExecuteGeneralMessageWithTokenRequest,
+  ExecuteMessageRequest,
 } from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/tx";
-import { GeneralMessageApprovedWithToken } from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/events";
+import {
+  ContractCallSubmitted,
+  ContractCallWithTokenSubmitted,
+} from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/events";
 import { Registry } from "@cosmjs/proto-signing";
 
 const TxTypeUrlMap = {
@@ -22,11 +25,12 @@ const TxTypeUrlMap = {
   AxelarnetRegisterAssetRequest: `/${protobufPackage}.RegisterAssetRequest`,
   AxelarnetRouteIBCTransfersRequest: `/${protobufPackage}.RouteIBCTransfersRequest`,
   AxelarnetRegisterFeeCollectorRequest: `/${protobufPackage}.RegisterFeeCollectorRequest`,
-  AxelarnetExecuteGeneralMessageWithTokenRequest: `/${protobufPackage}.ExecuteGeneralMessageWithTokenRequest`,
+  AxelarnetExecuteMessageRequest: `/${protobufPackage}.ExecuteMessageRequest`,
 };
 
 const EventTypeUrlMap = {
-  AxelarnetGeneralMessageApprovedWithToken: `/${protobufPackage}.GeneralMessageApprovedWithToken`,
+  AxelarnetContractCallSubmitted: `/${protobufPackage}.ContractCallSubmitted`,
+  AxelarnetContractCallWithTokenSubmitted: `/${protobufPackage}.ContractCallWithTokenSubmitted}`,
 };
 
 export const registerAxelarnetTxTypes = (registry: Registry) => {
@@ -41,15 +45,10 @@ export const registerAxelarnetTxTypes = (registry: Registry) => {
   registry.register(TxTypeUrlMap.AxelarnetRegisterAssetRequest, RegisterAssetRequest);
   registry.register(TxTypeUrlMap.AxelarnetRouteIBCTransfersRequest, RouteIBCTransfersRequest);
   registry.register(TxTypeUrlMap.AxelarnetRegisterFeeCollectorRequest, RegisterFeeCollectorRequest);
-  registry.register(
-    TxTypeUrlMap.AxelarnetExecuteGeneralMessageWithTokenRequest,
-    ExecuteGeneralMessageWithTokenRequest
-  );
+  registry.register(TxTypeUrlMap.AxelarnetExecuteMessageRequest, ExecuteMessageRequest);
 };
 
 export const registerAxelarnetEventTypes = (registry: Registry) => {
-  registry.register(
-    EventTypeUrlMap.AxelarnetGeneralMessageApprovedWithToken,
-    GeneralMessageApprovedWithToken
-  );
+  registry.register(EventTypeUrlMap.AxelarnetContractCallSubmitted, ContractCallSubmitted);
+  registry.register(EventTypeUrlMap.AxelarnetContractCallWithTokenSubmitted, ContractCallWithTokenSubmitted);
 };

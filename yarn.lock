@@ -30,10 +30,10 @@
     "typescript" "^4.6.4"
     "waffle" "^0.0.0"
 
-"@axelar-network/axelarjs-types@^0.28.0-alpha.4":
-  "integrity" "sha512-ZcdjCJH4v3wXNATsgbDYEv1bugFyDMEnPyjKkWcT+mqS/PwRFBWNb0rzXk+gUOMsDF14IS5yIuhNXFHDMW3L+w=="
-  "resolved" "https://registry.npmjs.org/@axelar-network/axelarjs-types/-/axelarjs-types-0.28.0-alpha.4.tgz"
-  "version" "0.28.0-alpha.4"
+"@axelar-network/axelarjs-types@^0.28.0-alpha.6":
+  "integrity" "sha512-2ZylrvfOWSLx+0/cFbhGmuy9MHtB1PWEzQ1AU6PKVuatbZH+biDf/NfWVYnYgtQcsyO8QHc6s++RxIuBrOF5YQ=="
+  "resolved" "https://registry.npmjs.org/@axelar-network/axelarjs-types/-/axelarjs-types-0.28.0-alpha.6.tgz"
+  "version" "0.28.0-alpha.6"
   dependencies:
     "long" "^4.0.0"
     "protobufjs" "~6.11.2"
@@ -4418,16 +4418,16 @@
   "version" "1.0.1"
 
 "json5@^1.0.1":
-  "integrity" "sha512-aKS4WQjPenRxiQsC93MNfjx+nbF4PAdYzmd/1JIj8HYzqfbu86beTuNgXDzPknWk0n0uARlyewZo4s++ES36Ow=="
-  "resolved" "https://registry.npmjs.org/json5/-/json5-1.0.1.tgz"
-  "version" "1.0.1"
+  "integrity" "sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA=="
+  "resolved" "https://registry.npmjs.org/json5/-/json5-1.0.2.tgz"
+  "version" "1.0.2"
   dependencies:
     "minimist" "^1.2.0"
 
 "json5@^2.2.1", "json5@2.x":
-  "integrity" "sha512-1hqLFMSrGHRHxav9q9gNjJ5EXznIxGVO09xQRrwplcS8qs28pZ8s8hupZAmqDwZUmVZ2Qb2jnyPOWcDH8m8dlA=="
-  "resolved" "https://registry.npmjs.org/json5/-/json5-2.2.1.tgz"
-  "version" "2.2.1"
+  "integrity" "sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg=="
+  "resolved" "https://registry.npmjs.org/json5/-/json5-2.2.3.tgz"
+  "version" "2.2.3"
 
 "jsonfile@^6.0.1":
   "integrity" "sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ=="
