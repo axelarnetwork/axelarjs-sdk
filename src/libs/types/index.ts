@@ -148,6 +148,7 @@ export interface EventLog {
   signature: string;
   eventLog: LogDescription;
   logIndex: number;
+  eventIndex: number;
 }
 
 export interface ExecuteArgs {
@@ -223,9 +224,8 @@ export enum ApproveGatewayError {
 export interface ApproveGatewayResponse {
   success: boolean;
   error?: ApproveGatewayError | string;
-  confirmTx?: AxelarTxResponse;
-  createPendingTransferTx?: AxelarTxResponse;
-  signCommandTx?: AxelarTxResponse;
+  confirmTx?: AxelarTxResponse | null;
+  signCommandTx?: AxelarTxResponse | null;
   approveTx?: any;
 }
 

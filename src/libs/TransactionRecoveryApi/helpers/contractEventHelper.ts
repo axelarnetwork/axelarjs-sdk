@@ -30,6 +30,14 @@ export function getLogIndexFromTxReceipt(
   );
 }
 
+export function getEventIndexFromTxReceipt(
+  receipt: ethers.providers.TransactionReceipt
+): Nullable<number> {
+  return (
+    getContractCallEvent(receipt)?.eventIndex || getContractCallWithTokenEvent(receipt)?.eventIndex
+  );
+}
+
 export function isContractCallWithToken(receipt: ethers.providers.TransactionReceipt): boolean {
   return !!getContractCallWithTokenEvent(receipt);
 }
@@ -173,7 +181,7 @@ export function findContractEvent(
   eventSignatures: string[],
   abiInterface: Interface
 ): Nullable<EventLog> {
-  for (const log of receipt.logs) {
+  for (const [index, log] of receipt.logs.entries()) {
     const eventIndex = eventSignatures.indexOf(log.topics[0]);
     if (eventIndex > -1) {
       const eventLog = abiInterface.parseLog(log);
@@ -181,6 +189,7 @@ export function findContractEvent(
         signature: eventSignatures[eventIndex],
         eventLog,
         logIndex: log.logIndex,
+        eventIndex: index,
       };
     }
   }

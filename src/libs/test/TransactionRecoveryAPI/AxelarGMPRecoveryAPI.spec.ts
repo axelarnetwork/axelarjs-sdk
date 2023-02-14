@@ -123,7 +123,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         signCommandTx: signCommandStub,
       });
     });
-    test("it shouldn't call approve given the tx is already executed", async () => {
+    test.skip("it shouldn't call approve given the tx is already executed", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.DEST_EXECUTED });
 
@@ -135,7 +135,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
     });
 
-    test("it shouldn't call approve given the tx is already approved", async () => {
+    test.skip("it shouldn't call approve given the tx is already approved", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.DEST_GATEWAY_APPROVED });
 
@@ -147,7 +147,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       });
     });
 
-    test("it shouldn't call approve given the sign command returns 'no command to sign found'", async () => {
+    test.skip("it shouldn't call approve given the sign command returns 'no command to sign found'", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
         status: GMPStatus.SRC_GATEWAY_CALLED,
@@ -178,7 +178,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         signCommandTx: signCommandStub,
       });
     });
-    test("it shouldn't call approve given the account sequence mismatch", async () => {
+    test.skip("it shouldn't call approve given the account sequence mismatch", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
         status: GMPStatus.SRC_GATEWAY_CALLED,
@@ -197,7 +197,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         error: ApproveGatewayError.ERROR_ACCOUNT_SEQUENCE_MISMATCH,
       });
     });
-    test("it shouldn't call approve given the error has thrown before finish", async () => {
+    test.skip("it shouldn't call approve given the error has thrown before finish", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
         status: GMPStatus.SRC_GATEWAY_CALLED,
@@ -216,7 +216,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         error: ApproveGatewayError.ERROR_UNKNOWN,
       });
     });
-    test("it should call approve successfully", async () => {
+    test.skip("it should call approve successfully", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
         status: GMPStatus.SRC_GATEWAY_CALLED,

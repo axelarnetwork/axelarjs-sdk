@@ -70,6 +70,33 @@ export interface ExecuteParamsResponse {
   data?: ExecuteParams;
 }
 
+export interface CommandObj {
+  id: string;
+  type: string;
+  key_id: string;
+  max_gas_cost: number;
+  executed: boolean;
+  transactionHash: string;
+  transactionIndex: string;
+  logIndex: number;
+  block_timestamp: number;
+}
+export interface BatchedCommandsAxelarscanResponse {
+  data: string;
+  status: string;
+  key_id: string;
+  execute_data: string;
+  prev_batched_commands_id: string;
+  command_ids: string[];
+  proof: Record<string, string[]>;
+  weights: string[];
+  threshold: string;
+  signatures: string[];
+  batch_id: string;
+  chain: string;
+  commands: CommandObj[];
+  id: string;
+}
 export type SubscriptionStrategy =
   | {
       kind: "websocket";
@@ -88,6 +115,7 @@ export class AxelarRecoveryApi {
   readonly environment: Environment;
   readonly recoveryApiUrl: string;
   readonly axelarGMPApiUrl: string;
+  readonly axelarscanBaseApiUrl: string;
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
   readonly wssStatusUrl: string;
@@ -99,6 +127,7 @@ export class AxelarRecoveryApi {
     const { environment } = config;
     const links: EnvironmentConfigs = getConfigs(environment);
     this.axelarGMPApiUrl = links.axelarGMPApiUrl;
+    this.axelarscanBaseApiUrl = links.axelarscanBaseApiUrl;
     this.recoveryApiUrl = links.recoveryApiUrl;
     this.wssStatusUrl = links.wssStatus;
     this.axelarRpcUrl = config.axelarRpcUrl || links.axelarRpcUrl;
@@ -114,6 +143,14 @@ export class AxelarRecoveryApi {
       txLogIndex,
     })
       .then((data) => data.find((gmpTx: any) => gmpTx.id.indexOf(txHash) > -1))
+      .catch(() => undefined);
+  }
+
+  public async fetchBatchData(commandId: string): Promise<BatchedCommandsAxelarscanResponse> {
+    return this.execPost(this.axelarscanBaseApiUrl, "/batches", {
+      commandId,
+    })
+      .then((res) => res[0])
       .catch(() => undefined);
   }
 
