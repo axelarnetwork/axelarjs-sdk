@@ -2,6 +2,10 @@
   "name": "@axelar-network/axelarjs-sdk",
   "version": "0.12.4",
   "description": "The JavaScript SDK for Axelar Network",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/axelarnetwork/axelarjs-sdk"
+  },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "files": [
