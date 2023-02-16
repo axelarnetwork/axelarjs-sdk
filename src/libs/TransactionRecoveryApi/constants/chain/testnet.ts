@@ -45,7 +45,7 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   },
   [EvmChain.ARBITRUM]: {
     chainId: 421613,
-    name: EvmChain.ARBITRUM,
+    name: `${EvmChain.ARBITRUM}-goerli`,
   },
   [EvmChain.CELO]: {
     chainId: 44787,
