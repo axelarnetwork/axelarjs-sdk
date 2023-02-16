@@ -72,6 +72,7 @@ export interface AxelarQueryAPIConfig {
   axelarRpcUrl?: string;
   axelarLcdUrl?: string;
   environment: Environment;
+  debug?: boolean;
 }
 
 export interface BaseFeeResponse {
@@ -229,6 +230,7 @@ export interface ApproveGatewayResponse {
   confirmTx?: AxelarTxResponse | null;
   signCommandTx?: AxelarTxResponse | null;
   approveTx?: any;
+  infoLogs?: string[];
 }
 
 export const isNativeToken = (chain: string, selectedToken: GasToken): boolean => {

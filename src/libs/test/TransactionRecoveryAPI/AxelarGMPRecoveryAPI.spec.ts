@@ -45,6 +45,7 @@ import {
 import * as Sleep from "../../../utils/sleep";
 import Long from "long";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
+import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 
 describe("AxelarDepositRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -75,8 +76,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       const stub = axelarTxResponseStub();
       mockConfirmGatewayTx.mockImplementation(() => Promise.resolve(stub));
       const confirmation = await api.findEventAndConfirmIfNeeded(
-        { event: { ...evmEvent.event, status: Event_Status.STATUS_UNSPECIFIED } },
+        // { event: { ...evmEvent.event, status: Event_Status.STATUS_UNSPECIFIED } },
         EvmChain.AVALANCHE,
+        EvmChain.POLYGON,
         "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
         evmWalletDetails,
         1
@@ -92,8 +94,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       const stub = axelarTxResponseStub();
       mockConfirmGatewayTx.mockImplementation(() => Promise.resolve(stub));
       const confirmation = await api.findEventAndConfirmIfNeeded(
-        { event: { ...evmEvent.event, status: Event_Status.STATUS_COMPLETED } },
+        // { event: { ...evmEvent.event, status: Event_Status.STATUS_COMPLETED } },
         EvmChain.AVALANCHE,
+        EvmChain.POLYGON,
         "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
         evmWalletDetails,
         1
@@ -115,8 +118,9 @@ describe("AxelarDepositRecoveryAPI", () => {
       mockisEVMEventCompleted.mockReturnValue(false);
 
       const confirmation = await api.findEventAndConfirmIfNeeded(
-        evmEvent,
+        // evmEvent,
         EvmChain.AVALANCHE,
+        EvmChain.POLYGON,
         "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
         evmWalletDetails,
         1
@@ -137,7 +141,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const stub = axelarTxResponseStub();
       mockSignCommandTx.mockImplementation(() => Promise.resolve(stub));
       const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
-      mockFetchBatchData.mockImplementation(() => Promise.resolve(undefined));
+      mockFetchBatchData.mockImplementation(() => Promise.resolve(null));
 
       const commandId = "",
         destChainId = EvmChain.MOONBEAM;
@@ -214,14 +218,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       mockSendApproveTx.mockImplementation(() => Promise.resolve(stub));
       const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
       mockFetchBatchData.mockImplementation(() =>
-        Promise.resolve({
-          commands: [
-            {
-              id: commandId,
-              executed: false,
-            },
-          ],
-        } as BatchedCommandsAxelarscanResponse)
+        Promise.resolve({} as BatchedCommandsAxelarscanResponse)
       );
 
       const approveTx = await api.findBatchAndBroadcastIfNeeded(
@@ -243,7 +240,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const stub = axelarTxResponseStub();
       mockSendApproveTx.mockImplementation(() => Promise.resolve(stub));
       const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
-      mockFetchBatchData.mockImplementation(() => Promise.resolve(undefined));
+      mockFetchBatchData.mockImplementation(() => Promise.resolve(null));
 
       const approveTx = await api.findBatchAndBroadcastIfNeeded(
         commandId,
@@ -266,14 +263,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       mockSendApproveTx.mockImplementation(() => Promise.resolve(stub));
       const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
       mockFetchBatchData.mockImplementation(() =>
-        Promise.resolve({
-          commands: [
-            {
-              id: "OTHER_COMMAND_ID",
-              executed: false,
-            },
-          ],
-        } as BatchedCommandsAxelarscanResponse)
+        Promise.resolve({} as BatchedCommandsAxelarscanResponse)
       );
 
       const approveTx = await api.findBatchAndBroadcastIfNeeded(
@@ -350,7 +340,10 @@ describe("AxelarDepositRecoveryAPI", () => {
       mockFindEventAndConfirmIfNeeded.mockResolvedValueOnce({
         success: false,
         errorMessage: `findEventAndConfirmIfNeeded(): could not confirm event successfully`,
+        commandId: "",
+        eventResponse: {} as EventResponse,
         confirmTx: null,
+        infoLog: "",
       });
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
@@ -375,7 +368,10 @@ describe("AxelarDepositRecoveryAPI", () => {
       mockFindEventAndConfirmIfNeeded.mockResolvedValueOnce({
         success: true,
         errorMessage: "findBatchAndSignIfNeeded(): issue retrieving and signing command data",
+        commandId: "",
+        eventResponse: {} as EventResponse,
         confirmTx: {} as AxelarTxResponse,
+        infoLog: "",
       });
       const mockFindBatchAndSignIfNeeded = vitest.spyOn(api, "findBatchAndSignIfNeeded");
       mockFindBatchAndSignIfNeeded.mockResolvedValueOnce({
@@ -406,7 +402,10 @@ describe("AxelarDepositRecoveryAPI", () => {
       mockFindEventAndConfirmIfNeeded.mockResolvedValueOnce({
         success: true,
         errorMessage: "",
+        commandId: "",
+        eventResponse: {} as EventResponse,
         confirmTx: {} as AxelarTxResponse,
+        infoLog: "",
       });
       const mockFindBatchAndSignIfNeeded = vitest.spyOn(api, "findBatchAndSignIfNeeded");
       mockFindBatchAndSignIfNeeded.mockResolvedValueOnce({

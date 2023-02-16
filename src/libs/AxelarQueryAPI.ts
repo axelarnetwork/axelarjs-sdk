@@ -77,10 +77,12 @@ export class AxelarQueryAPI {
   public async getEVMEvent(sourceChainId: string, srcTxHash: string, srcEventId: number) {
     await throwIfInvalidChainIds([sourceChainId], this.environment);
     await this.initQueryClientIfNeeded();
-    return this.axelarQueryClient.evm.Event({
-      chain: sourceChainId,
-      eventId: `${srcTxHash}-${srcEventId}`,
-    });
+    return this.axelarQueryClient.evm
+      .Event({
+        chain: sourceChainId,
+        eventId: `${srcTxHash}-${srcEventId}`,
+      })
+      .catch((e) => undefined);
   }
 
   public async getConfirmationHeight(chain: string) {

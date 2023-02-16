@@ -25,17 +25,21 @@ export function getDestinationChainFromTxReceipt(
 export function getLogIndexFromTxReceipt(
   receipt: ethers.providers.TransactionReceipt
 ): Nullable<number> {
-  return (
-    getContractCallEvent(receipt)?.logIndex || getContractCallWithTokenEvent(receipt)?.logIndex
-  );
+  const contractCallEvent = getContractCallEvent(receipt);
+  const contractCallWithTokenEvent = getContractCallWithTokenEvent(receipt);
+  return contractCallEvent?.logIndex || contractCallEvent?.logIndex === 0
+    ? contractCallEvent.logIndex
+    : contractCallWithTokenEvent?.logIndex;
 }
 
 export function getEventIndexFromTxReceipt(
   receipt: ethers.providers.TransactionReceipt
 ): Nullable<number> {
-  return (
-    getContractCallEvent(receipt)?.eventIndex || getContractCallWithTokenEvent(receipt)?.eventIndex
-  );
+  const contractCallEvent = getContractCallEvent(receipt);
+  const contractCallWithTokenEvent = getContractCallWithTokenEvent(receipt);
+  return contractCallEvent?.eventIndex || contractCallEvent?.eventIndex === 0
+    ? contractCallEvent.eventIndex
+    : contractCallWithTokenEvent?.eventIndex;
 }
 
 export function isContractCallWithToken(receipt: ethers.providers.TransactionReceipt): boolean {

@@ -1,14 +1,17 @@
+import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
+import { BatchedCommandsStatus } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { TransactionRequest } from "@ethersproject/providers";
 import fetch from "cross-fetch";
 import { BigNumber } from "ethers";
 import { loadChains } from "../../chains";
 import { EnvironmentConfigs, getConfigs } from "../../constants";
-import { throwIfInvalidChainIds } from "../../utils";
+import { sleep, throwIfInvalidChainIds } from "../../utils";
 import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
 import { AxelarRecoveryAPIConfig, Environment, EvmChain, EvmWalletDetails } from "../types";
 import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import rpcInfo from "./constants/chain";
+import { mapIntoAxelarscanResponseType } from "./helpers/mappers";
 
 export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
@@ -88,13 +91,8 @@ export interface BatchedCommandsAxelarscanResponse {
   execute_data: string;
   prev_batched_commands_id: string;
   command_ids: string[];
-  proof: Record<string, string[]>;
-  weights: string[];
-  threshold: string;
-  signatures: string[];
   batch_id: string;
   chain: string;
-  commands: CommandObj[];
   id: string;
 }
 export type SubscriptionStrategy =
@@ -147,13 +145,45 @@ export class AxelarRecoveryApi {
   }
 
   public async fetchBatchData(
+    chainId: string,
     commandId: string
-  ): Promise<BatchedCommandsAxelarscanResponse | undefined> {
-    return this.execPost(this.axelarscanBaseApiUrl, "/batches", {
+  ): Promise<BatchedCommandsAxelarscanResponse | null> {
+    /**first check axelarscan API */
+    let batchData;
+    batchData = await this.execPost(this.axelarscanBaseApiUrl, "/batches", {
       commandId,
     })
       .then((res) => res[0])
-      .catch(() => undefined);
+      .catch(() => null);
+
+    /**if not found, check last few batches on core in case it is an issue of delayed indexing of data on the axelarscan API */
+    if (!batchData) batchData = this.searchRecentBatchesFromCore(chainId, commandId);
+
+    return batchData;
+  }
+
+  private async searchRecentBatchesFromCore(
+    chainId: string,
+    commandId: string,
+    iteration: number = 0,
+    maxTries: number = 3,
+    batchId?: string
+  ): Promise<BatchedCommandsAxelarscanResponse | null> {
+    if (iteration > maxTries) return null;
+    let batchData = await this.queryBatchedCommands(chainId, batchId).catch((e) => null);
+    if (!batchData) return null;
+    console.log("searchRecentBatchesFromCore", iteration, maxTries, batchData);
+    if (batchData.commandIds.includes(commandId)) {
+      return mapIntoAxelarscanResponseType(batchData, chainId);
+    }
+    sleep(2);
+    return this.searchRecentBatchesFromCore(
+      chainId,
+      commandId,
+      iteration + 1,
+      maxTries,
+      batchData.prevBatchedCommandsId
+    );
   }
 
   private parseGMPStatus(response: any): GMPStatus | string {
