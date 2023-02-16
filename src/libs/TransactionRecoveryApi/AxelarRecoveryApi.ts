@@ -146,7 +146,9 @@ export class AxelarRecoveryApi {
       .catch(() => undefined);
   }
 
-  public async fetchBatchData(commandId: string): Promise<BatchedCommandsAxelarscanResponse> {
+  public async fetchBatchData(
+    commandId: string
+  ): Promise<BatchedCommandsAxelarscanResponse | undefined> {
     return this.execPost(this.axelarscanBaseApiUrl, "/batches", {
       commandId,
     })

@@ -217,6 +217,8 @@ export enum ApproveGatewayError {
   SIGN_COMMAND_FAILED = "cannot sign command",
   FETCHING_STATUS_FAILED = "cannot fetching status",
   ERROR_BATCHED_COMMAND = "cannot find batch command",
+  ERROR_GET_EVM_EVENT = "cannot get evm event",
+  ERROR_BROADCAST_EVENT = "cannot broadcast event to destination chain",
   ERROR_UNKNOWN = "unknown error",
   ERROR_ACCOUNT_SEQUENCE_MISMATCH = "account sequence mismatch",
 }
