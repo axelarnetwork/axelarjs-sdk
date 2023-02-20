@@ -216,11 +216,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       infoLog: getEvmEventInfoLog,
     } = evmEventResponse;
 
-    if (!getEvmEventSuccess) {
-      (res.success = getEvmEventSuccess), (res.errorMessage = getEvmEventErrorMessage);
-      return res;
-    }
-
     if (
       this.isEVMEventCompleted(res.eventResponse) ||
       this.isEVMEventConfirmed(res.eventResponse)
