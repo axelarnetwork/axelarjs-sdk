@@ -343,7 +343,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         commandId: "",
         eventResponse: {} as EventResponse,
         confirmTx: null,
-        infoLog: "",
+        infoLogs: [""],
       });
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
@@ -371,7 +371,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         commandId: "",
         eventResponse: {} as EventResponse,
         confirmTx: {} as AxelarTxResponse,
-        infoLog: "",
+        infoLogs: [""],
       });
       const mockFindBatchAndSignIfNeeded = vitest.spyOn(api, "findBatchAndSignIfNeeded");
       mockFindBatchAndSignIfNeeded.mockResolvedValueOnce({
@@ -405,7 +405,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         commandId: "",
         eventResponse: {} as EventResponse,
         confirmTx: {} as AxelarTxResponse,
-        infoLog: "",
+        infoLogs: [""],
       });
       const mockFindBatchAndSignIfNeeded = vitest.spyOn(api, "findBatchAndSignIfNeeded");
       mockFindBatchAndSignIfNeeded.mockResolvedValueOnce({

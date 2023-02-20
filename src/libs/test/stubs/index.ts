@@ -115,6 +115,7 @@ export const evmEventStubResponse = () => ({
   success: true,
   errorMessage: "",
   commandId: "",
+  infoLog: "",
   eventResponse: {
     event: {
       chain: "Moonbeam",

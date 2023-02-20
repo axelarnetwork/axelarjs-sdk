@@ -62,6 +62,15 @@ export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.DEST_GATEWAY_APPROVED]: ApproveGatewayError.ALREADY_APPROVED,
 };
 
+interface ConfirmTxSDKResponse {
+  confirmTx: AxelarTxResponse | null;
+  success: boolean;
+  errorMessage: string;
+  infoLogs: string[];
+  commandId: string;
+  eventResponse: EventResponse | null;
+}
+
 export const GMPErrorResponse = (error: ApproveGatewayError, errorDetails?: string) => ({
   success: false,
   error: errorDetails || error,
@@ -129,10 +138,12 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     eventResponse: EventResponse;
     success: boolean;
     errorMessage: string;
+    infoLog: string;
   }> {
     let eventIndex: number = -1,
       success = false,
-      errorMessage = "";
+      errorMessage = "",
+      infoLog = "";
 
     try {
       eventIndex = (await this.getEventIndex(
@@ -146,14 +157,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         errorMessage: `getEvmEvent(): could not find event index for ${srcTxHash}`,
         commandId: "",
         eventResponse: {},
+        infoLog,
       };
     }
 
     const commandId = this.getCidFromSrcTxHash(destChainId, srcTxHash, eventIndex);
-    console.log("command ID", commandId);
 
     const eventResponse = await this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex);
     if (!eventResponse || this.isEVMEventFailed(eventResponse)) {
+      console.log("event response", eventResponse);
       errorMessage = this.isEVMEventFailed(eventResponse)
         ? `getEvmEvent(): event on source chain is not successful for: ${srcTxHash}`
         : `getEvmEvent(): could not determine status of event: ${srcTxHash}`;
@@ -162,16 +174,19 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         errorMessage,
         commandId,
         eventResponse: {},
+        infoLog,
       };
     }
 
     success = true;
+    infoLog = `${srcTxHash} correspondes to command ID: ${commandId}`;
 
     return {
       commandId,
       eventResponse,
       success,
       errorMessage,
+      infoLog,
     };
   }
 
@@ -181,54 +196,60 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txHash: string,
     evmWalletDetails: EvmWalletDetails,
     sleepSeconds: number = 30
-  ) {
-    let confirmTx = null,
-      success = true,
-      errorMessage,
-      infoLog,
-      commandId,
-      eventResponse;
+  ): Promise<ConfirmTxSDKResponse> {
+    const res: ConfirmTxSDKResponse = {
+      confirmTx: null,
+      success: true,
+      errorMessage: "",
+      infoLogs: [],
+      commandId: "",
+      eventResponse: null,
+    };
+    let confirmLog = "";
 
     const evmEventResponse = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
-    commandId = evmEventResponse.commandId;
-    eventResponse = evmEventResponse.eventResponse;
-    const { success: erSuccess, errorMessage: evmEventErrorMessage } = evmEventResponse;
+    res.commandId = evmEventResponse.commandId;
+    res.eventResponse = evmEventResponse.eventResponse;
+    const {
+      success: getEvmEventSuccess,
+      errorMessage: getEvmEventErrorMessage,
+      infoLog: getEvmEventInfoLog,
+    } = evmEventResponse;
+
+    if (!getEvmEventSuccess) {
+      (res.success = getEvmEventSuccess), (res.errorMessage = getEvmEventErrorMessage);
+      return res;
+    }
 
     if (
-      !eventResponse ||
-      (!this.isEVMEventCompleted(eventResponse) && !this.isEVMEventConfirmed(eventResponse))
+      this.isEVMEventCompleted(res.eventResponse) ||
+      this.isEVMEventConfirmed(res.eventResponse)
     ) {
+      confirmLog = `confirmation: event was already detected on the network and did not need to be confirmed`;
+    } else {
       /**todo, need to check whether tx is finalized */
       // const confirmationHeight = await this.axelarQueryApi.getConfirmationHeight(srcChain);
-      console.log("findEventAndConfirmIfNeeded confirming");
 
-      confirmTx = await this.confirmGatewayTx(txHash, srcChain);
-      console.log("findEventAndConfirmIfNeeded confirmed");
-      infoLog = `successfully confirmed the transaction on the Axelar network`;
+      res.confirmTx = await this.confirmGatewayTx(txHash, srcChain);
+      confirmLog = `confirmation: successfully confirmed the transaction on the Axelar network`;
+
       await sleep(sleepSeconds);
 
       const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
 
-      if (!this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
-        success = false;
-        errorMessage = `findEventAndConfirmIfNeeded(): could not confirm and finalize event successfully: ${txHash}`;
-        infoLog += `; although confirmed event was unable to be finalized`;
+      if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
+        res.eventResponse = updatedEvent.eventResponse;
       } else {
-        eventResponse = updatedEvent.eventResponse;
+        res.success = false;
+        res.errorMessage = `findEventAndConfirmIfNeeded(): could not confirm and finalize event successfully: ${txHash}`;
+        confirmLog += `; although confirmed event was unable to be finalized`;
       }
-    } else {
-      console.log("findEventAndConfirmIfNeeded do not need to confirm");
-      infoLog = `event was already detected on the network and did not need to be confirmed`;
     }
 
-    return {
-      success,
-      confirmTx,
-      errorMessage,
-      commandId,
-      eventResponse,
-      infoLog,
-    };
+    getEvmEventInfoLog && res.infoLogs.push(getEvmEventInfoLog);
+    res.infoLogs.push(confirmLog);
+
+    return res;
   }
 
   public async findBatchAndSignIfNeeded(
@@ -373,7 +394,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       confirmTx = confirmTxRequest.confirmTx;
       commandId = confirmTxRequest.commandId;
       eventResponse = confirmTxRequest.eventResponse;
-      if (confirmTxRequest.infoLog) infoLogs.push(confirmTxRequest.infoLog);
+      if (confirmTxRequest.infoLogs) infoLogs = [...infoLogs, ...confirmTxRequest.infoLogs];
     } catch (e) {
       throw `error determining event to confirm, ${e}`;
     }
