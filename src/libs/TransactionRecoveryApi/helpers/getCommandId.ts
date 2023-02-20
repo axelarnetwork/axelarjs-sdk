@@ -8,7 +8,6 @@ export const getCommandId = (
   sourceEventIndex: number,
   environment: Environment
 ) => {
-  console.log("chainName", chainName);
   const chainID: number = rpcInfo[environment].networkInfo[chainName.toLowerCase()]?.chainId;
   const seiArr = arrayify(sourceEventIndex).reverse();
   const txHashWithEventIndex = new Uint8Array([

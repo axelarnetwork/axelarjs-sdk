@@ -71,6 +71,13 @@ interface ConfirmTxSDKResponse {
   eventResponse: EventResponse | null;
 }
 
+interface SignTxSDKResponse {
+  success: boolean;
+  errorMessage: string;
+  signCommandTx: AxelarTxResponse | null;
+  infoLogs: string[];
+}
+
 export const GMPErrorResponse = (error: ApproveGatewayError, errorDetails?: string) => ({
   success: false,
   error: errorDetails || error,
@@ -162,10 +169,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     const commandId = this.getCidFromSrcTxHash(destChainId, srcTxHash, eventIndex);
+    infoLog = `srcTxHash: ${srcTxHash}, generated commandId: ${commandId}`;
 
     const eventResponse = await this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex);
     if (!eventResponse || this.isEVMEventFailed(eventResponse)) {
-      console.log("event response", eventResponse);
       errorMessage = this.isEVMEventFailed(eventResponse)
         ? `getEvmEvent(): event on source chain is not successful for: ${srcTxHash}`
         : `getEvmEvent(): could not determine status of event: ${srcTxHash}`;
@@ -210,11 +217,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const evmEventResponse = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
     res.commandId = evmEventResponse.commandId;
     res.eventResponse = evmEventResponse.eventResponse;
-    const {
-      success: getEvmEventSuccess,
-      errorMessage: getEvmEventErrorMessage,
-      infoLog: getEvmEventInfoLog,
-    } = evmEventResponse;
+    const { infoLog: getEvmEventInfoLog } = evmEventResponse;
 
     if (
       this.isEVMEventCompleted(res.eventResponse) ||
@@ -250,33 +253,32 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async findBatchAndSignIfNeeded(
     commandId: string,
     destChainId: string,
-    _evmWalletDetails: EvmWalletDetails,
     sleepSeconds: number = 60
   ) {
-    let success = true,
-      errorMessage = "",
-      signCommandTx = null;
+    let signTxLog = "";
+    let res: SignTxSDKResponse = {
+      success: true,
+      errorMessage: "",
+      signCommandTx: null,
+      infoLogs: [],
+    };
 
     try {
-      console.log("findBatchAndSignIfNeeded method");
-      if (!(await this.fetchBatchData(destChainId, commandId))) {
-        console.log("findBatchAndSignIfNeeded signing");
-        signCommandTx = await this.signCommands(destChainId);
-        console.log("findBatchAndSignIfNeeded signed");
-        success = true;
+      const batchData = await this.fetchBatchData(destChainId, commandId);
+      if (batchData) {
+        signTxLog = `signing: batch data exists so do not need to sign. commandId: ${commandId}, batchId: ${batchData.batch_id}`;
       } else {
-        console.log("findBatchAndSignIfNeeded do not need to sign");
+        res.signCommandTx = await this.signCommands(destChainId);
+        signTxLog = `signing: signed batch for commandId (${commandId}) in tx: ${res.signCommandTx.transactionHash}`;
       }
       await sleep(sleepSeconds);
     } catch (e) {
-      errorMessage = `findBatchAndSignIfNeeded(): issue retrieving and signing command data: ${commandId}`;
-      success = false;
+      console.error(e);
+      res.errorMessage = `findBatchAndSignIfNeeded(): issue retrieving and signing command data: ${commandId}`;
+      res.success = false;
     }
-    return {
-      success,
-      signCommandTx,
-      errorMessage,
-    };
+    res.infoLogs.push(signTxLog);
+    return res;
   }
 
   public async findBatchAndBroadcastIfNeeded(
@@ -352,7 +354,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   public async manualRelayToDestChain(
     txHash: string,
-    evmWalletDetails?: EvmWalletDetails
+    evmWalletDetails?: EvmWalletDetails,
+    escapeAfterConfirm: boolean = true
   ): Promise<ApproveGatewayResponse | null> {
     let confirmTx: AxelarTxResponse | null = null;
     let signCommandTx: AxelarTxResponse | null = null;
@@ -368,11 +371,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (GMPErrorMap[status]) return GMPErrorResponse(GMPErrorMap[status]);
     const srcChain = callTx.chain;
     const destChain = callTx.returnValues.destinationChain;
-
-    // const evmEventResponse = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
-    // const { commandId, eventResponse, success: erSuccess, errorMessage } = evmEventResponse;
-
-    // if (!erSuccess) return GMPErrorResponse(ApproveGatewayError.ERROR_GET_EVM_EVENT, errorMessage);
 
     let commandId = "",
       eventResponse;
@@ -399,7 +397,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         ApproveGatewayError.ERROR_BATCHED_COMMAND,
         confirmTxRequest.errorMessage
       );
-    else if (confirmTx) {
+    else if (confirmTx && escapeAfterConfirm) {
       return {
         success,
         confirmTx,
@@ -410,8 +408,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     /**find batch and sign if needed */
     let signTxRequest;
     try {
-      signTxRequest = await this.findBatchAndSignIfNeeded(commandId, destChain, _evmWalletDetails);
+      signTxRequest = await this.findBatchAndSignIfNeeded(commandId, destChain);
       signCommandTx = signTxRequest.signCommandTx;
+      if (signTxRequest.infoLogs) infoLogs = [...infoLogs, ...signTxRequest.infoLogs];
     } catch (e) {
       throw `error finding batch to sign, ${e}`;
     }
@@ -512,7 +511,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const receipt = await signer.provider.getTransactionReceipt(txHash);
     if (!receipt) return -1;
     const eventIndex = getEventIndexFromTxReceipt(receipt);
-    console.log("getEventIndex", eventIndex);
     return eventIndex;
   }
 

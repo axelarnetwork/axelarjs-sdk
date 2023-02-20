@@ -145,12 +145,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       const commandId = "",
         destChainId = EvmChain.MOONBEAM;
-      const signResult = await api.findBatchAndSignIfNeeded(
-        commandId,
-        destChainId,
-        evmWalletDetails,
-        1
-      );
+      const signResult = await api.findBatchAndSignIfNeeded(commandId, destChainId, 1);
       expect(mockSignCommandTx).toHaveBeenCalled();
       expect(signResult).toBeTruthy();
       expect(signResult.errorMessage).toBeFalsy();
@@ -168,12 +163,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       const commandId = "",
         destChainId = EvmChain.MOONBEAM;
-      const signResult = await api.findBatchAndSignIfNeeded(
-        commandId,
-        destChainId,
-        evmWalletDetails,
-        1
-      );
+      const signResult = await api.findBatchAndSignIfNeeded(commandId, destChainId, 1);
       expect(mockSignCommandTx).not.toHaveBeenCalled();
       expect(signResult).toBeTruthy();
       expect(signResult.errorMessage).toBeFalsy();
@@ -191,12 +181,7 @@ describe("AxelarDepositRecoveryAPI", () => {
 
       const commandId = "",
         destChainId = EvmChain.MOONBEAM;
-      const signResult = await api.findBatchAndSignIfNeeded(
-        commandId,
-        destChainId,
-        evmWalletDetails,
-        1
-      );
+      const signResult = await api.findBatchAndSignIfNeeded(commandId, destChainId, 1);
       expect(mockSignCommandTx).not.toHaveBeenCalled();
       expect(signResult).toBeTruthy();
       expect(signResult.errorMessage).toContain(
@@ -378,6 +363,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         success: false,
         errorMessage: "findBatchAndSignIfNeeded(): issue retrieving and signing command data",
         signCommandTx: {} as AxelarTxResponse,
+        infoLogs: [],
       });
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
@@ -412,6 +398,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         success: true,
         errorMessage: "",
         signCommandTx: {} as AxelarTxResponse,
+        infoLogs: [],
       });
       const mockfindBatchAndBroadcastIfNeeded = vitest.spyOn(api, "findBatchAndBroadcastIfNeeded");
       mockfindBatchAndBroadcastIfNeeded.mockResolvedValueOnce({

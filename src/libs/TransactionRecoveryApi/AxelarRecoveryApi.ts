@@ -172,7 +172,7 @@ export class AxelarRecoveryApi {
     if (iteration > maxTries) return null;
     let batchData = await this.queryBatchedCommands(chainId, batchId).catch((e) => null);
     if (!batchData) return null;
-    console.log("searchRecentBatchesFromCore", iteration, maxTries, batchData);
+    // console.log("searchRecentBatchesFromCore", iteration, maxTries, batchData);
     if (batchData.commandIds.includes(commandId)) {
       return mapIntoAxelarscanResponseType(batchData, chainId);
     }
