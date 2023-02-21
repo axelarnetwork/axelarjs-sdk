@@ -206,11 +206,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         Promise.resolve({} as BatchedCommandsAxelarscanResponse)
       );
 
-      const approveTx = await api.findBatchAndBroadcastIfNeeded(
-        commandId,
-        destChainId,
-        evmWalletDetails
-      );
+      const approveTx = await api.findBatchAndBroadcast(commandId, destChainId, evmWalletDetails);
       expect(mockSendApproveTx).toHaveBeenCalled();
       expect(approveTx).toBeTruthy();
       expect(approveTx.errorMessage).toBeFalsy();
@@ -227,11 +223,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
       mockFetchBatchData.mockImplementation(() => Promise.resolve(null));
 
-      const approveTx = await api.findBatchAndBroadcastIfNeeded(
-        commandId,
-        destChainId,
-        evmWalletDetails
-      );
+      const approveTx = await api.findBatchAndBroadcast(commandId, destChainId, evmWalletDetails);
       expect(mockSendApproveTx).not.toHaveBeenCalled();
       expect(approveTx).toBeTruthy();
       expect(approveTx.errorMessage).toContain(
@@ -251,11 +243,7 @@ describe("AxelarDepositRecoveryAPI", () => {
         Promise.resolve({} as BatchedCommandsAxelarscanResponse)
       );
 
-      const approveTx = await api.findBatchAndBroadcastIfNeeded(
-        commandId,
-        destChainId,
-        evmWalletDetails
-      );
+      const approveTx = await api.findBatchAndBroadcast(commandId, destChainId, evmWalletDetails);
       expect(mockSendApproveTx).not.toHaveBeenCalled();
       expect(approveTx).toBeTruthy();
       expect(approveTx.errorMessage).toContain(
@@ -400,11 +388,12 @@ describe("AxelarDepositRecoveryAPI", () => {
         signCommandTx: {} as AxelarTxResponse,
         infoLogs: [],
       });
-      const mockfindBatchAndBroadcastIfNeeded = vitest.spyOn(api, "findBatchAndBroadcastIfNeeded");
-      mockfindBatchAndBroadcastIfNeeded.mockResolvedValueOnce({
+      const mockfindBatchAndBroadcast = vitest.spyOn(api, "findBatchAndBroadcast");
+      mockfindBatchAndBroadcast.mockResolvedValueOnce({
         success: false,
-        errorMessage: "findBatchAndBroadcastIfNeeded(): unable to retrieve command ID",
+        errorMessage: "findBatchAndBroadcast(): unable to retrieve command ID",
         approveTx: {} as AxelarTxResponse,
+        infoLogs: [],
       });
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());

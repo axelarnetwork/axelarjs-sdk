@@ -117,6 +117,7 @@ export class AxelarRecoveryApi {
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
   readonly wssStatusUrl: string;
+  readonly debugMode: boolean;
   readonly config: AxelarRecoveryAPIConfig;
   protected axelarQuerySvc: AxelarQueryClientType | null = null;
   protected evmClient: EVMClient;
@@ -125,6 +126,7 @@ export class AxelarRecoveryApi {
     const { environment } = config;
     const links: EnvironmentConfigs = getConfigs(environment);
     this.axelarGMPApiUrl = links.axelarGMPApiUrl;
+    this.debugMode = !!config.debug;
     this.axelarscanBaseApiUrl = links.axelarscanBaseApiUrl;
     this.recoveryApiUrl = links.recoveryApiUrl;
     this.wssStatusUrl = links.wssStatus;

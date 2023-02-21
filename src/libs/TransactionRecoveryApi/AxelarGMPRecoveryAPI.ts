@@ -78,6 +78,13 @@ interface SignTxSDKResponse {
   infoLogs: string[];
 }
 
+interface BroadcastTxSDKResponse {
+  success: boolean;
+  errorMessage: string;
+  approveTx: AxelarTxResponse | null;
+  infoLogs: string[];
+}
+
 export const GMPErrorResponse = (error: ApproveGatewayError, errorDetails?: string) => ({
   success: false,
   error: errorDetails || error,
@@ -214,22 +221,27 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     };
     let confirmLog = "";
 
+    if (this.debugMode)
+      console.debug(`confirmation: checking whether ${txHash} needs to be confirmed on Axelar`);
+
     const evmEventResponse = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
     res.commandId = evmEventResponse.commandId;
     res.eventResponse = evmEventResponse.eventResponse;
     const { infoLog: getEvmEventInfoLog } = evmEventResponse;
+    if (this.debugMode) console.debug(`confirmation: ${getEvmEventInfoLog}`);
 
     if (
       this.isEVMEventCompleted(res.eventResponse) ||
       this.isEVMEventConfirmed(res.eventResponse)
     ) {
-      confirmLog = `confirmation: event was already detected on the network and did not need to be confirmed`;
+      confirmLog = `confirmation: event for ${txHash} was already detected on the network and did not need to be confirmed`;
     } else {
       /**todo, need to check whether tx is finalized */
       // const confirmationHeight = await this.axelarQueryApi.getConfirmationHeight(srcChain);
 
       res.confirmTx = await this.confirmGatewayTx(txHash, srcChain);
-      confirmLog = `confirmation: successfully confirmed the transaction on the Axelar network`;
+      confirmLog = `confirmation: successfully confirmed ${txHash} on Axelar; waiting ${sleepSeconds} seconds for network confirmation`;
+      if (this.debugMode) console.debug(confirmLog);
 
       await sleep(sleepSeconds);
 
@@ -237,12 +249,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
       if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
         res.eventResponse = updatedEvent.eventResponse;
+        confirmLog += `; confirmed event was finalized`;
       } else {
         res.success = false;
         res.errorMessage = `findEventAndConfirmIfNeeded(): could not confirm and finalize event successfully: ${txHash}`;
-        confirmLog += `; although confirmed event was unable to be finalized`;
+        confirmLog += `; confirmed event was unable to be finalized`;
       }
     }
+    if (this.debugMode) console.debug(confirmLog);
 
     getEvmEventInfoLog && res.infoLogs.push(getEvmEventInfoLog);
     res.infoLogs.push(confirmLog);
@@ -263,14 +277,18 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       infoLogs: [],
     };
 
+    if (this.debugMode)
+      console.debug(`signing: checking whether command ID: ${commandId} needs to be signed`);
+
     try {
       const batchData = await this.fetchBatchData(destChainId, commandId);
       if (batchData) {
-        signTxLog = `signing: batch data exists so do not need to sign. commandId: ${commandId}, batchId: ${batchData.batch_id}`;
+        signTxLog = `signing: batch data exists so do not need to sign. commandId: ${commandId}, batchId: ${batchData.batch_id}; waiting ${sleepSeconds} seconds to attempt broadcast`;
       } else {
         res.signCommandTx = await this.signCommands(destChainId);
-        signTxLog = `signing: signed batch for commandId (${commandId}) in tx: ${res.signCommandTx.transactionHash}`;
+        signTxLog = `signing: signed batch for commandId (${commandId}) in tx: ${res.signCommandTx.transactionHash}; waiting ${sleepSeconds} seconds to attempt broadcast`;
       }
+      if (this.debugMode) console.debug(signTxLog);
       await sleep(sleepSeconds);
     } catch (e) {
       console.error(e);
@@ -281,75 +299,77 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return res;
   }
 
-  public async findBatchAndBroadcastIfNeeded(
+  public async findBatchAndBroadcast(
     commandId: string,
     destChainId: string,
-    _evmWalletDetails: EvmWalletDetails,
-    iteration = 0,
+    wallet: EvmWalletDetails,
+    iter = 0,
     maxTries = 2
-  ) {
-    if (iteration > maxTries)
+  ): Promise<BroadcastTxSDKResponse> {
+    if (iter > maxTries)
       return {
         success: false,
-        errorMessage: `findBatchAndBroadcastIfNeeded(): this recovery stalled out on waiting for signing. please try again later. `,
+        errorMessage: `findBatchAndBroadcast(): this recovery stalled out on waiting for signing. please try again later. `,
+        approveTx: null,
+        infoLogs: [],
       };
 
-    let success = true,
-      errorMessage = "",
-      approveTx = null;
+    if (this.debugMode)
+      console.debug(`broadcasting: checking for command ID: ${commandId} to broadcast`);
+
+    let broadcastTxLog = "";
+    let res: BroadcastTxSDKResponse = {
+      success: true,
+      errorMessage: "",
+      approveTx: null,
+      infoLogs: [],
+    };
 
     try {
-      console.log("findBatchAndBroadcastIfNeeded method");
       const batchData = await this.fetchBatchData(destChainId, commandId);
-      if (!batchData)
-        return {
-          success: false,
-          errorMessage: `findBatchAndBroadcastIfNeeded(): unable to retrieve batch data for ${commandId}`,
-          approveTx,
-        };
 
-      console.log("batchData", commandId, batchData);
+      if (!batchData) {
+        res.success = false;
+        res.errorMessage = `findBatchAndBroadcast(): unable to retrieve batch data for ${commandId}`;
+        return res;
+      }
 
       const commandData = batchData.command_ids.find((t) => t === commandId);
-      if (!commandData)
-        return {
-          success: false,
-          errorMessage: `findBatchAndBroadcastIfNeeded(): unable to retrieve command ID (${commandId}) in batch data`,
-          approveTx,
-        };
+      if (!commandData) {
+        res.success = false;
+        res.errorMessage = `findBatchAndBroadcast(): unable to retrieve command ID (${commandId}) in batch data`;
+        return res;
+      }
 
-      if (batchData.status === "BATCHED_COMMANDS_STATUS_SIGNED") {
-        console.log("findBatchAndBroadcastIfNeeded attempting to broadcast");
-        approveTx = await this.sendApproveTx(
-          destChainId,
-          batchData.execute_data,
-          _evmWalletDetails
-        );
-        console.log("findBatchAndBroadcastIfNeeded broadcasted");
-      } else if (batchData.status === "BATCHED_COMMANDS_STATUS_SIGNING") {
-        console.log("findBatchAndBroadcastIfNeeded still signing, checking again in 15 seconds");
-        sleep(15);
-        this.findBatchAndBroadcastIfNeeded(
-          commandId,
-          destChainId,
-          _evmWalletDetails,
-          iteration + 1,
-          maxTries
-        );
-      } else {
-        errorMessage = `findBatchAndBroadcastIfNeeded(): status unsuccessful for command data: ${commandId}`;
-        console.log("findBatchAndBroadcastIfNeeded() " + errorMessage);
-        success = false;
+      switch (batchData.status) {
+        case "BATCHED_COMMANDS_STATUS_SIGNED":
+          res.approveTx = await this.sendApproveTx(destChainId, batchData.execute_data, wallet);
+          broadcastTxLog = `broadcasting: batch ID ${batchData.batch_id} broadcasted to ${destChainId}`;
+          res.infoLogs.push(broadcastTxLog);
+          break;
+        case "BATCHED_COMMANDS_STATUS_SIGNING":
+          broadcastTxLog = `broadcasting: batch ID ${batchData.batch_id} signing in process, checking again in 15 seconds`;
+          if (this.debugMode) console.debug(broadcastTxLog);
+          res.infoLogs.push(broadcastTxLog);
+          sleep(15);
+          const retry = await this.findBatchAndBroadcast(
+            commandId,
+            destChainId,
+            wallet,
+            iter + 1,
+            maxTries
+          );
+          if (retry.infoLogs) res.infoLogs = [...res.infoLogs, ...retry.infoLogs];
+          break;
+        default:
+          res.errorMessage = `findBatchAndBroadcastIfNeeded(): status unsuccessful for command data: ${commandId}`;
+          res.success = false;
       }
     } catch (e) {
-      errorMessage = `findBatchAndBroadcastIfNeeded(): issue retrieving and broadcasting command data: ${commandId}`;
-      success = false;
+      res.errorMessage = `findBatchAndBroadcastIfNeeded(): issue retrieving and broadcasting command data: ${commandId}`;
+      res.success = false;
     }
-    return {
-      success,
-      approveTx,
-      errorMessage,
-    };
+    return res;
   }
 
   public async manualRelayToDestChain(
@@ -420,12 +440,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     /**find batch and manually execute if needed */
     let broadcastTxRequest;
     try {
-      broadcastTxRequest = await this.findBatchAndBroadcastIfNeeded(
+      broadcastTxRequest = await this.findBatchAndBroadcast(
         commandId,
         destChain,
         _evmWalletDetails
       );
       approveTx = broadcastTxRequest.approveTx;
+      if (broadcastTxRequest.infoLogs) infoLogs = [...infoLogs, ...broadcastTxRequest.infoLogs];
     } catch (e) {
       throw `error finding batch to broadcast, ${e}`;
     }
