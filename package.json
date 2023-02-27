@@ -2,6 +2,10 @@
   "name": "@axelar-network/axelarjs-sdk",
   "version": "0.12.5-alph.3",
   "description": "The JavaScript SDK for Axelar Network",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/axelarnetwork/axelarjs-sdk"
+  },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "files": [
@@ -35,7 +39,7 @@
   "author": "Axelar Network",
   "license": "MIT",
   "dependencies": {
-    "@axelar-network/axelar-cgp-solidity": "^4.3.0",
+    "@axelar-network/axelar-cgp-solidity": "^4.5.0",
     "@axelar-network/axelarjs-types": "^0.27.0",
     "@cosmjs/stargate": "^0.28.4",
     "@types/uuid": "^8.3.1",
