@@ -458,6 +458,53 @@ describe("AxelarAssetTransfer", () => {
         );
       });
     });
+    describe("getOfflineDepositAddressForERC20Transfer", () => {
+      let unwrapAddress: string;
+      beforeEach(async () => {
+        unwrapAddress = "0x34bd65b158b6b4cc539388842cb2447c0a28acc0";
+        vitest.clearAllMocks();
+        vitest
+          .spyOn(bridge, "getDepositAddressFromRemote")
+          .mockResolvedValue({ address: unwrapAddress });
+        vitest.spyOn(bridge, "getDepositAddress").mockResolvedValue(unwrapAddress);
+        vitest
+          .spyOn(bridge.axelarQueryApi, "getContractAddressFromConfig")
+          .mockResolvedValue("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
+        vitest.spyOn(bridge, "getERC20Denom").mockResolvedValue("wavax-wei");
+        vitest
+          .spyOn(bridge.axelarQueryApi, "getActiveChains")
+          .mockResolvedValue(activeChainsStub());
+      });
+      it("should be able to retrieve the deposit address from microservices for erc20 address", async () => {
+        await expect(
+          bridge.getDepositAddressForNativeUnwrap(
+            EvmChain.AVALANCHE,
+            EvmChain.FANTOM,
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            "evm",
+            "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d"
+          )
+        ).resolves.toBe(unwrapAddress);
+      });
+      it("should be able to retrieve the deposit address from microservices for erc20 address", async () => {
+        vitest.clearAllMocks();
+        vitest
+          .spyOn(bridge, "getOfflineDepositAddressForERC20Transfer")
+          .mockResolvedValue(unwrapAddress);
+        await expect(
+          bridge.getDepositAddress({
+            fromChain: CHAINS.TESTNET.AVALANCHE,
+            toChain: CHAINS.TESTNET.FANTOM,
+            destinationAddress: "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
+            asset: "wavax-wei",
+            options: {
+              erc20DepositAddressType: "offline",
+            },
+          })
+        ).resolves.toBe(unwrapAddress);
+        expect(bridge.getOfflineDepositAddressForERC20Transfer).toHaveBeenCalled();
+      });
+    });
   });
 
   describe("offline deposit address integration into getDepositAddress()", () => {

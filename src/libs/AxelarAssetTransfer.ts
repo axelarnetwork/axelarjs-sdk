@@ -282,7 +282,7 @@ export class AxelarAssetTransfer {
     _toChain?: string,
     _destinationAddress?: string,
     _asset?: string,
-    _options?: any
+    _options?: GetDepositAddressOptions
   ): Promise<string> {
     let fromChain: string, toChain: string, destinationAddress: string, asset: string, options: any;
 
@@ -343,13 +343,15 @@ export class AxelarAssetTransfer {
       );
     }
 
-    if (options?.erc20DepositAddressType === "offline") {
+    console.log("dataaaa", srcChainInfo.chainName, options);
+
+    if (srcChainInfo.module === "evm" && options?.erc20DepositAddressType === "offline") {
       return await this.getOfflineDepositAddressForERC20Transfer(
         fromChain,
         toChain,
         destinationAddress,
         "evm",
-        (await this.axelarQueryApi.getSymbolFromDenom(asset, fromChain)) as string,
+        (await this.axelarQueryApi.getSymbolFromDenom(asset, fromChain.toLowerCase())) as string,
         options?.refundAddress
       );
     }
