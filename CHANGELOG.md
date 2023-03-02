@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Fixed `estimateGasFee` function in how it handles the `minGasPrice` parameter, which should compare the min to the destination chain gas price, whereas it was comparing to the source chain price originally.
 - AxelarRecoveryAPI
   - introduced wss subscription service (subscribeToTx) to invoke subscribe to specific transactions for updates
+- AxelarAssetTransfer
+  - adding feature to generate deposit addresses "offline"
 
 ## [0.12.4] - 2023-FEBRUARY-1
 
