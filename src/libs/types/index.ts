@@ -19,6 +19,7 @@ export enum EvmChain {
   MOONBEAM = "moonbeam",
   AURORA = "aurora",
   BINANCE = "binance",
+  BNBCHAIN = "binance",
   ARBITRUM = "arbitrum",
   CELO = "celo",
   KAVA = "kava",
@@ -134,6 +135,7 @@ export enum GasToken {
   USDC = "USDC",
   AURORA = "AURORA",
   BINANCE = "BNB",
+  BNBCHAIN = "BNB",
   CELO = "CELO",
   KAVA = "KAVA",
 }
@@ -242,6 +244,7 @@ export const isNativeToken = (chain: string, selectedToken: GasToken): boolean =
     moonbeam: GasToken.GLMR,
     aurora: GasToken.AURORA,
     binance: GasToken.BINANCE,
+    bnbchain: GasToken.BINANCE,
     celo: GasToken.CELO,
     kava: GasToken.KAVA,
   };

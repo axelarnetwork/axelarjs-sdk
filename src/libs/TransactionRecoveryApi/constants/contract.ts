@@ -8,6 +8,7 @@ export const NATIVE_GAS_TOKEN_SYMBOL = {
   [EvmChain.FANTOM]: GasToken.FTM,
   [EvmChain.AURORA]: GasToken.AURORA,
   [EvmChain.BINANCE]: GasToken.BINANCE,
+  [EvmChain.BNBCHAIN]: GasToken.BNBCHAIN,
   [EvmChain.ARBITRUM]: GasToken.ETH,
   [EvmChain.CELO]: GasToken.CELO,
   [EvmChain.KAVA]: GasToken.KAVA,
