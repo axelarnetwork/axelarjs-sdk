@@ -74,6 +74,23 @@ export class AxelarQueryAPI {
     });
   }
 
+  public async getEVMEvent(sourceChainId: string, srcTxHash: string, srcEventId: number) {
+    await throwIfInvalidChainIds([sourceChainId], this.environment);
+    await this.initQueryClientIfNeeded();
+    return this.axelarQueryClient.evm
+      .Event({
+        chain: sourceChainId,
+        eventId: `${srcTxHash}-${srcEventId}`,
+      })
+      .catch((e) => undefined);
+  }
+
+  public async getConfirmationHeight(chain: string) {
+    await throwIfInvalidChainIds([chain], this.environment);
+    await this.initQueryClientIfNeeded();
+    return this.axelarQueryClient.evm.ConfirmationHeight({ chain });
+  }
+
   /**
    * Gest the transfer fee for a given transaction
    * example testnet query: "https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=ethereum&destination_chain=terra&amount=100000000uusd"

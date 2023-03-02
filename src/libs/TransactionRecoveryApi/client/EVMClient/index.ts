@@ -13,7 +13,7 @@ export default class EVMClient {
       this.provider = provider;
     } else {
       this.provider =
-        useWindowEthereum && window?.ethereum
+        useWindowEthereum && typeof window !== "undefined" && window?.ethereum
           ? new ethers.providers.Web3Provider(window.ethereum, networkOptions)
           : new ethers.providers.JsonRpcProvider(rpcUrl, networkOptions);
     }
