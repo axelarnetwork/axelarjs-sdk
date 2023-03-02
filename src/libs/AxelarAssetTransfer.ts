@@ -343,8 +343,6 @@ export class AxelarAssetTransfer {
       );
     }
 
-    console.log("dataaaa", srcChainInfo.chainName, options);
-
     if (srcChainInfo.module === "evm" && options?.erc20DepositAddressType === "offline") {
       return await this.getOfflineDepositAddressForERC20Transfer(
         fromChain,
