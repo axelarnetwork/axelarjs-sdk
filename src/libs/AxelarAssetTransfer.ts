@@ -81,7 +81,7 @@ export class AxelarAssetTransfer {
     await throwIfInvalidChainIds([fromChain, toChain], this.environment);
     await this.axelarQueryApi.throwIfInactiveChains([fromChain, toChain]);
 
-    refundAddress =
+    const _refundAddress =
       refundAddress ||
       (await this.axelarQueryApi.getContractAddressFromConfig(
         fromChain,
@@ -93,7 +93,7 @@ export class AxelarAssetTransfer {
       fromChain,
       toChain,
       destinationAddress,
-      refundAddress,
+      _refundAddress,
       HashZero
     );
 
@@ -102,7 +102,7 @@ export class AxelarAssetTransfer {
       fromChain,
       toChain,
       destinationAddress,
-      refundAddress,
+      _refundAddress,
       HashZero
     );
 
@@ -121,7 +121,7 @@ export class AxelarAssetTransfer {
     await throwIfInvalidChainIds([fromChain, toChain], this.environment);
     await this.axelarQueryApi.throwIfInactiveChains([fromChain, toChain]);
 
-    refundAddress =
+    const _refundAddress =
       refundAddress ||
       (await this.axelarQueryApi.getContractAddressFromConfig(
         fromChainModule === "evm" ? fromChain : toChain,
@@ -133,7 +133,7 @@ export class AxelarAssetTransfer {
       undefined,
       toChain,
       destinationAddress,
-      refundAddress,
+      _refundAddress,
       HashZero
     );
 
@@ -142,7 +142,7 @@ export class AxelarAssetTransfer {
       fromChain,
       toChain,
       destinationAddress,
-      refundAddress,
+      _refundAddress,
       HashZero
     );
 
@@ -170,7 +170,7 @@ export class AxelarAssetTransfer {
     await throwIfInvalidChainIds([fromChain, toChain], this.environment);
     await this.axelarQueryApi.throwIfInactiveChains([fromChain, toChain]);
 
-    refundAddress =
+    const _refundAddress =
       refundAddress ||
       (await this.axelarQueryApi.getContractAddressFromConfig(
         fromChainModule === "evm" ? fromChain : toChain,
@@ -181,7 +181,7 @@ export class AxelarAssetTransfer {
       fromChain,
       toChain,
       destinationAddress,
-      refundAddress,
+      _refundAddress,
       HashZero,
       tokenSymbol
     );
