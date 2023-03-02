@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - introduced wss subscription service (subscribeToTx) to invoke subscribe to specific transactions for updates
 - AxelarAssetTransfer
   - adding feature to generate deposit addresses "offline"
+- AxelarGMPRecoveryAPI
+  - fixes to manualRelayToDestinationChain to first check if transaction is already confirmed but not broadcasted, and broadcast the transaction (as identified by command ID) if so
 
 ## [0.12.4] - 2023-FEBRUARY-1
 

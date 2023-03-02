@@ -25,9 +25,21 @@ export function getDestinationChainFromTxReceipt(
 export function getLogIndexFromTxReceipt(
   receipt: ethers.providers.TransactionReceipt
 ): Nullable<number> {
-  return (
-    getContractCallEvent(receipt)?.logIndex || getContractCallWithTokenEvent(receipt)?.logIndex
-  );
+  const contractCallEvent = getContractCallEvent(receipt);
+  const contractCallWithTokenEvent = getContractCallWithTokenEvent(receipt);
+  return contractCallEvent?.logIndex || contractCallEvent?.logIndex === 0
+    ? contractCallEvent.logIndex
+    : contractCallWithTokenEvent?.logIndex;
+}
+
+export function getEventIndexFromTxReceipt(
+  receipt: ethers.providers.TransactionReceipt
+): Nullable<number> {
+  const contractCallEvent = getContractCallEvent(receipt);
+  const contractCallWithTokenEvent = getContractCallWithTokenEvent(receipt);
+  return contractCallEvent?.eventIndex || contractCallEvent?.eventIndex === 0
+    ? contractCallEvent.eventIndex
+    : contractCallWithTokenEvent?.eventIndex;
 }
 
 export function isContractCallWithToken(receipt: ethers.providers.TransactionReceipt): boolean {
@@ -173,7 +185,7 @@ export function findContractEvent(
   eventSignatures: string[],
   abiInterface: Interface
 ): Nullable<EventLog> {
-  for (const log of receipt.logs) {
+  for (const [index, log] of receipt.logs.entries()) {
     const eventIndex = eventSignatures.indexOf(log.topics[0]);
     if (eventIndex > -1) {
       const eventLog = abiInterface.parseLog(log);
@@ -181,6 +193,7 @@ export function findContractEvent(
         signature: eventSignatures[eventIndex],
         eventLog,
         logIndex: log.logIndex,
+        eventIndex: index,
       };
     }
   }

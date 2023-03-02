@@ -1,4 +1,5 @@
 import { BigNumber } from "ethers";
+import Long from "long";
 import { EvmChain } from "../../types";
 
 export const uuidStub = () => "83462f97-63cf-4205-a659-6f54bec623f6";
@@ -110,6 +111,27 @@ export const contractReceiptStub = () => ({
   transactionIndex: 1,
 });
 
+export const evmEventStubResponse = () => ({
+  success: true,
+  errorMessage: "",
+  commandId: "",
+  infoLog: "",
+  eventResponse: {
+    event: {
+      chain: "Moonbeam",
+      txId: new Uint8Array(),
+      index: Long.fromNumber(1),
+      status: 2,
+      tokenSent: undefined,
+      contractCall: undefined,
+      contractCallWithToken: undefined,
+      transfer: undefined,
+      tokenDeployed: undefined,
+      multisigOwnershipTransferred: undefined,
+      multisigOperatorshipTransferred: undefined,
+    },
+  },
+});
 export const axelarTxResponseStub = (rawLog: any = []) => ({
   height: 1,
   code: 0,
