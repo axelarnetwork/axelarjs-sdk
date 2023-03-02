@@ -47,7 +47,7 @@ import Long from "long";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 
-describe("AxelarDepositRecoveryAPI", () => {
+describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
   setLogger(() => null);
   let evmWalletDetails: EvmWalletDetails;
@@ -298,7 +298,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const res = await api.manualRelayToDestChain("0x");
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
-      expect(res?.error).toEqual(`getEvmEvent(): could not find event index for 0x`);
+      expect(res?.error).toEqual(ApproveGatewayError.ERROR_GET_EVM_EVENT);
     });
     test("it should fail if it confirms the tx and event still incomplete", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
@@ -356,7 +356,7 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x");
+      const res = await api.manualRelayToDestChain("0x", undefined, false);
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(
@@ -398,10 +398,10 @@ describe("AxelarDepositRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x");
+      const res = await api.manualRelayToDestChain("0x", undefined, false);
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
-      expect(res?.error).toEqual(`findBatchAndBroadcastIfNeeded(): unable to retrieve command ID`);
+      expect(res?.error).toEqual(`findBatchAndBroadcast(): unable to retrieve command ID`);
     });
 
     // test.skip("it shouldn't call approve given the 'batchedCommandId' cannot be fetched", async () => {

@@ -117,7 +117,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public getCidFromSrcTxHash(destChainId: string, txHash: string, eventIndex: number) {
-    return getCommandId(destChainId, txHash, eventIndex, this.environment);
+    return getCommandId(destChainId, txHash, eventIndex, this.environment, rpcInfo);
   }
 
   public async doesTxMeetConfirmHt(chain: string, currHeight: number) {
@@ -408,8 +408,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       commandId = confirmTxRequest.commandId;
       eventResponse = confirmTxRequest.eventResponse;
       if (confirmTxRequest.infoLogs) infoLogs = [...infoLogs, ...confirmTxRequest.infoLogs];
-    } catch (e) {
-      throw `error determining event to confirm, ${e}`;
+    } catch (e: any) {
+      return GMPErrorResponse(ApproveGatewayError.ERROR_GET_EVM_EVENT, e.errorMessage);
     }
 
     if (!confirmTxRequest?.success)

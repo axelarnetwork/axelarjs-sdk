@@ -1,8 +1,8 @@
 import { rpcMap as testnetRpcMap, networkInfo as testnetNetworkInfo } from "./testnet";
 import { rpcMap as mainnetRpcMap, networkInfo as mainnetNetworkInfo } from "./mainnet";
 
-type rpcInfo = Record<string, Record<string, any>>;
-const rpc: rpcInfo = {
+export type RPCInfoType = Record<string, Record<string, any>>;
+const rpc: RPCInfoType = {
   devnet: {
     rpcMap: testnetRpcMap,
     networkInfo: testnetNetworkInfo,
