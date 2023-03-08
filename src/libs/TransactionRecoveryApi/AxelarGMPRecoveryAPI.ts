@@ -784,7 +784,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       options.estimatedGas
     );
 
-    const topupGasAmount = ethers.BigNumber.from(totalGasFee).sub(paidGasFee);
+    const topupGasAmount = ethers.BigNumber.from(totalGasFee);
     return topupGasAmount.gt(0) ? topupGasAmount.toString() : "0";
   }
 
