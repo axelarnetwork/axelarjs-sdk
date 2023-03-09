@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { EvmChain } from "../../types";
+import { AxelarTxResponse, EvmChain } from "../../types";
 
 export const uuidStub = () => "83462f97-63cf-4205-a659-6f54bec623f6";
 
@@ -110,14 +110,15 @@ export const contractReceiptStub = () => ({
   transactionIndex: 1,
 });
 
-export const axelarTxResponseStub = (rawLog: any = []) => ({
-  height: 1,
-  code: 0,
-  transactionHash: "0x",
-  rawLog,
-  gasUsed: 1,
-  gasWanted: 1,
-});
+export const axelarTxResponseStub = (rawLog: any = []) =>
+  ({
+    height: 1,
+    code: 0,
+    transactionHash: "0x",
+    rawLog,
+    gasUsed: 1,
+    gasWanted: 1,
+  } as AxelarTxResponse);
 
 export const batchedCommandResponseStub = (executeData = "") => ({
   executeData,

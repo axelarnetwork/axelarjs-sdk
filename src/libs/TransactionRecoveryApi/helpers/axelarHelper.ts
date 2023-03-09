@@ -176,7 +176,7 @@ export function createBaseRequest(): JsonRpcRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function convertRpcTxToBroadcastTxSuccess(tx: any): DeliverTxResponse {
+export function convertRpcTxToBroadcastTxSuccess(tx: any) {
   return {
     height: parseInt(tx.height),
     transactionHash: tx.hash,
@@ -185,7 +185,7 @@ export function convertRpcTxToBroadcastTxSuccess(tx: any): DeliverTxResponse {
     data: tx.tx_result.data,
     rawLog: tx.tx_result.log,
     code: 0,
-  };
+  } as DeliverTxResponse;
 }
 
 export function getAmountFromAmountSymbol(amountSymbol: string) {
