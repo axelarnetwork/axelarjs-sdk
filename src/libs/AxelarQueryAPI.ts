@@ -164,11 +164,13 @@ export class AxelarQueryAPI {
         sourceTokenSymbol,
       })
       .then((response) => {
-        const { base_fee, source_token, destination_native_token } = response.result;
+        const { base_fee, source_token, destination_native_token, express_fee } = response.result;
         const { decimals } = source_token;
         const baseFee = parseUnits(base_fee.toString(), decimals).toString();
+        const expressFee = parseUnits(express_fee.toString(), decimals).toString();
         return {
           baseFee,
+          expressFee,
           sourceToken: source_token,
           destToken: {
             gas_price: destination_native_token.gas_price,
@@ -209,7 +211,7 @@ export class AxelarQueryAPI {
 
     if (!response) return "0";
 
-    const { baseFee, sourceToken, destToken, success } = response;
+    const { baseFee, expressFee, sourceToken, destToken, success } = response;
 
     if (!success || !baseFee || !sourceToken) return "0";
 
@@ -229,7 +231,7 @@ export class AxelarQueryAPI {
             .div(10000)
             .add(baseFee)
         : destTxFee.add(baseFee);
-    if (isGMPExpressTransaction) fee.add(baseFee);
+    if (isGMPExpressTransaction) fee.add(expressFee);
 
     return fee.toString();
   }
