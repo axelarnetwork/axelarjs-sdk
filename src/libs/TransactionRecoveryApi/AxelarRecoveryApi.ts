@@ -27,6 +27,7 @@ export enum GMPStatus {
   INSUFFICIENT_FEE = "insufficient_fee",
   UNKNOWN_ERROR = "unknown_error",
   CANNOT_FETCH_STATUS = "cannot_fetch_status",
+  SRC_GATEWAY_CONFIRMED = "confirmed",
 }
 
 export enum GasPaidStatus {

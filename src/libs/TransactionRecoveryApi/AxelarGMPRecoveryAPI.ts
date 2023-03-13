@@ -54,7 +54,7 @@ import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
 import { sleep, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
-import { Interface } from "ethers/lib/utils";
+import { formatEther, Interface } from "ethers/lib/utils";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -476,6 +476,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     );
     return txStatus?.status === GMPStatus.DEST_EXECUTED;
   }
+  /**
+   * Check if given transaction is already confirmed.
+   * @param txHash string - transaction hash
+   * @returns Promise<boolean> - true if transaction is already executed
+   */
+  public async isConfirmed(txHash: string): Promise<boolean> {
+    const txStatus: GMPStatusResponse | undefined = await this.queryTransactionStatus(txHash).catch(
+      () => undefined
+    );
+    return txStatus?.status === GMPStatus.SRC_GATEWAY_CONFIRMED;
+  }
 
   /**
    * Calculate the gas fee in native token for executing a transaction at the destination chain using the source chain's gas price.
@@ -498,6 +509,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const provider = options.provider || getDefaultProvider(sourceChain, this.environment);
     const receipt = await provider.getTransactionReceipt(txHash);
     const paidGasFee = getNativeGasAmountFromTxReceipt(receipt) || "0";
+    const hasTxBeenConfirmed = (await this.isConfirmed(txHash)) || false;
+    options.shouldSubtractBaseFee = hasTxBeenConfirmed;
 
     return this.subtractGasFee(sourceChain, destinationChain, gasTokenSymbol, paidGasFee, options);
   }
@@ -566,7 +579,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     // Check if given txHash is valid
     if (!destinationChain) return NotGMPTransactionError();
 
-    // Check if the transaction status is already executed or not.
+    // // Check if the transaction status is already executed or not.
     const _isExecuted = await this.isExecuted(txHash);
     if (_isExecuted) return AlreadyExecutedError();
 
@@ -578,7 +591,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         chain,
         destinationChain,
         nativeGasTokenSymbol,
-        { estimatedGas: options?.estimatedGasUsed, provider: evmWalletDetails.provider }
+        {
+          estimatedGas: options?.estimatedGasUsed,
+          gasMultipler: options?.gasMultipler,
+          provider: evmWalletDetails.provider,
+        }
       ).catch(() => undefined);
     }
 
@@ -781,10 +798,21 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       sourceChain,
       destinationChain,
       gasTokenSymbol,
-      options.estimatedGas
+      options.estimatedGas,
+      options.gasMultipler,
+      undefined,
+      false
     );
 
-    const topupGasAmount = ethers.BigNumber.from(totalGasFee);
+    let topupGasAmount = ethers.BigNumber.from(totalGasFee);
+    if (options.shouldSubtractBaseFee) {
+      const response = await this.axelarQueryApi
+        .getNativeGasBaseFee(sourceChain, destinationChain, gasTokenSymbol as GasToken)
+        .catch(() => undefined);
+      if (response && response.baseFee) {
+        topupGasAmount = topupGasAmount.sub(response.baseFee);
+      }
+    }
     return topupGasAmount.gt(0) ? topupGasAmount.toString() : "0";
   }
 
