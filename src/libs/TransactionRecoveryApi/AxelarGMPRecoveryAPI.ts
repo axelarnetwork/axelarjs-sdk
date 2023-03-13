@@ -13,7 +13,6 @@ import {
 } from "../types";
 import {
   AxelarRecoveryApi,
-  BatchedCommandsAxelarscanResponse,
   ExecuteParams,
   GMPStatus,
   GMPStatusResponse,
@@ -54,7 +53,7 @@ import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
 import { sleep, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
-import { formatEther, Interface } from "ethers/lib/utils";
+import { Interface } from "ethers/lib/utils";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -479,13 +478,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   /**
    * Check if given transaction is already confirmed.
    * @param txHash string - transaction hash
-   * @returns Promise<boolean> - true if transaction is already executed
+   * @returns Promise<boolean> - true if transaction is already confirmed
    */
   public async isConfirmed(txHash: string): Promise<boolean> {
     const txStatus: GMPStatusResponse | undefined = await this.queryTransactionStatus(txHash).catch(
       () => undefined
     );
-    return txStatus?.status === GMPStatus.SRC_GATEWAY_CONFIRMED;
+    return [GMPStatus.SRC_GATEWAY_CONFIRMED, GMPStatus.DEST_GATEWAY_APPROVED].includes(
+      this.parseGMPStatus(txStatus?.status) as GMPStatus
+    );
   }
 
   /**
@@ -579,7 +580,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     // Check if given txHash is valid
     if (!destinationChain) return NotGMPTransactionError();
 
-    // // Check if the transaction status is already executed or not.
+    // Check if the transaction status is already executed or not.
     const _isExecuted = await this.isExecuted(txHash);
     if (_isExecuted) return AlreadyExecutedError();
 

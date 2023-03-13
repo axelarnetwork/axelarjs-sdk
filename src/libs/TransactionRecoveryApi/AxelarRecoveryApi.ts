@@ -189,7 +189,7 @@ export class AxelarRecoveryApi {
     );
   }
 
-  private parseGMPStatus(response: any): GMPStatus | string {
+  public parseGMPStatus(response: any): GMPStatus | string {
     const { error, status } = response;
 
     if (status === "error" && error) return GMPStatus.DEST_EXECUTE_ERROR;
