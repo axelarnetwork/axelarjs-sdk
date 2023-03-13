@@ -80,6 +80,7 @@ export interface BaseFeeResponse {
   success: boolean;
   error?: string;
   baseFee: string;
+  expressFee: string;
   sourceToken: {
     gas_price: string;
     decimals: number;
