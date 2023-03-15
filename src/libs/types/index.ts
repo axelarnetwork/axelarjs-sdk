@@ -134,7 +134,7 @@ export enum GasToken {
   MATIC = "MATIC",
   UST = "UST",
   USDC = "USDC",
-  AURORA = "AURORA",
+  AURORA = "aETH",
   BINANCE = "BNB",
   BNBCHAIN = "BNB",
   CELO = "CELO",
