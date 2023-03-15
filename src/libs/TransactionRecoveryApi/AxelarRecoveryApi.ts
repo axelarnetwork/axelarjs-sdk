@@ -27,6 +27,7 @@ export enum GMPStatus {
   INSUFFICIENT_FEE = "insufficient_fee",
   UNKNOWN_ERROR = "unknown_error",
   CANNOT_FETCH_STATUS = "cannot_fetch_status",
+  SRC_GATEWAY_CONFIRMED = "confirmed",
 }
 
 export enum GasPaidStatus {
@@ -188,7 +189,7 @@ export class AxelarRecoveryApi {
     );
   }
 
-  private parseGMPStatus(response: any): GMPStatus | string {
+  public parseGMPStatus(response: any): GMPStatus | string {
     const { error, status } = response;
 
     if (status === "error" && error) return GMPStatus.DEST_EXECUTE_ERROR;

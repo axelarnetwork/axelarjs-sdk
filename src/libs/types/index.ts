@@ -145,6 +145,7 @@ export interface AddGasOptions {
   amount?: string;
   refundAddress?: string;
   estimatedGasUsed?: number;
+  gasMultipler?: number;
   evmWalletDetails?: EvmWalletDetails;
 }
 
@@ -177,6 +178,8 @@ export interface TxResult {
 export interface QueryGasFeeOptions {
   provider?: ethers.providers.JsonRpcProvider;
   estimatedGas?: number;
+  gasMultipler?: number;
+  shouldSubtractBaseFee?: boolean;
 }
 
 export interface QueryTransferOptions {
