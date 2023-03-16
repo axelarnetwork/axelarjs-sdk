@@ -224,14 +224,14 @@ export class AxelarQueryAPI {
 
     const destTxFee = srcGasPrice.mul(gasLimit);
 
-    const fee =
+    let fee =
       gasMultiplier > 1
         ? destTxFee
             .mul(gasMultiplier * 10000)
             .div(10000)
             .add(baseFee)
         : destTxFee.add(baseFee);
-    if (isGMPExpressTransaction) fee.add(expressFee);
+    if (isGMPExpressTransaction) fee = fee.add(expressFee);
 
     return fee.toString();
   }
