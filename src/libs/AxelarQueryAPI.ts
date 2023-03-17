@@ -74,6 +74,23 @@ export class AxelarQueryAPI {
     });
   }
 
+  public async getEVMEvent(sourceChainId: string, srcTxHash: string, srcEventId: number) {
+    await throwIfInvalidChainIds([sourceChainId], this.environment);
+    await this.initQueryClientIfNeeded();
+    return this.axelarQueryClient.evm
+      .Event({
+        chain: sourceChainId,
+        eventId: `${srcTxHash}-${srcEventId}`,
+      })
+      .catch((e) => undefined);
+  }
+
+  public async getConfirmationHeight(chain: string) {
+    await throwIfInvalidChainIds([chain], this.environment);
+    await this.initQueryClientIfNeeded();
+    return this.axelarQueryClient.evm.ConfirmationHeight({ chain });
+  }
+
   /**
    * Gest the transfer fee for a given transaction
    * example testnet query: "https://axelartest-lcd.quickapi.com/axelar/nexus/v1beta1/transfer_fee?source_chain=ethereum&destination_chain=terra&amount=100000000uusd"
@@ -147,12 +164,21 @@ export class AxelarQueryAPI {
         sourceTokenSymbol,
       })
       .then((response) => {
-        const { base_fee, source_token } = response.result;
+        const { base_fee, source_token, destination_native_token, express_fee } = response.result;
         const { decimals } = source_token;
         const baseFee = parseUnits(base_fee.toString(), decimals).toString();
-        return { baseFee, sourceToken: source_token, success: true };
-      })
-      .catch((error) => ({ success: false, error: error.message }));
+        const expressFee = parseUnits(express_fee.toString(), decimals).toString();
+        return {
+          baseFee,
+          expressFee,
+          sourceToken: source_token,
+          destToken: {
+            gas_price: destination_native_token.gas_price,
+            gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
+          },
+          success: true,
+        };
+      });
   }
 
   /**
@@ -162,7 +188,8 @@ export class AxelarQueryAPI {
    * @param sourceChainTokenSymbol
    * @param gasLimit (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which should be sufficient for most transactions.
    * @param gasMultiplier (Optional) A multiplier used to create a buffer above the calculated gas fee, to account for potential slippage throughout tx execution, e.g. 1.1 = 10% buffer. supports up to 3 decimal places
-   * @param minGasPrice (Optional) A floor set for the gas price in wei, used as override in case estimated gas price is below specified minimum
+   * @param minGasPrice (Optional) A minimum value, in wei, for the gas price on the destination chain that is used to override the estimated gas price if it falls below this specified value.
+   * @param isGMPExpressTransaction (Optional) For GMP express transactions, there is an additional fee (equal to the original base fee) that is added to the estimate
    * @returns
    */
   public async estimateGasFee(
@@ -171,7 +198,8 @@ export class AxelarQueryAPI {
     sourceChainTokenSymbol: GasToken | string,
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1,
-    minGasPrice = "0"
+    minGasPrice = "0",
+    isGMPExpressTransaction: boolean = false
   ): Promise<string> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
 
@@ -183,23 +211,29 @@ export class AxelarQueryAPI {
 
     if (!response) return "0";
 
-    const { baseFee, sourceToken, success } = response;
+    const { baseFee, expressFee, sourceToken, destToken, success } = response;
 
     if (!success || !baseFee || !sourceToken) return "0";
 
-    let _gasPrice = parseEther(sourceToken.gas_price);
-    _gasPrice = _gasPrice.gt(minGasPrice) ? _gasPrice : BigNumber.from(minGasPrice);
+    const destGasPrice = parseEther(destToken.gas_price);
+    let srcGasPrice = parseEther(sourceToken.gas_price);
 
-    const destTxFee = _gasPrice.mul(gasLimit);
+    srcGasPrice = destGasPrice.gt(minGasPrice)
+      ? srcGasPrice
+      : srcGasPrice.mul(minGasPrice).div(destGasPrice);
 
-    return (
+    const destTxFee = srcGasPrice.mul(gasLimit);
+
+    let fee =
       gasMultiplier > 1
         ? destTxFee
-            .add(baseFee)
             .mul(gasMultiplier * 10000)
             .div(10000)
-        : destTxFee.add(baseFee)
-    ).toString();
+            .add(baseFee)
+        : destTxFee.add(baseFee);
+    if (isGMPExpressTransaction) fee = fee.add(expressFee);
+
+    return fee.toString();
   }
 
   /**

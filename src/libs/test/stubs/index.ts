@@ -1,4 +1,5 @@
 import { BigNumber } from "ethers";
+import Long from "long";
 import { EvmChain } from "../../types";
 
 export const uuidStub = () => "83462f97-63cf-4205-a659-6f54bec623f6";
@@ -34,6 +35,7 @@ export const activeChainsStub = () => [
   "stargaze",
   "terra-3",
   "umee",
+  "base",
 ];
 
 export const otcStub = () => ({
@@ -110,6 +112,27 @@ export const contractReceiptStub = () => ({
   transactionIndex: 1,
 });
 
+export const evmEventStubResponse = () => ({
+  success: true,
+  errorMessage: "",
+  commandId: "",
+  infoLog: "",
+  eventResponse: {
+    event: {
+      chain: "Moonbeam",
+      txId: new Uint8Array(),
+      index: Long.fromNumber(1),
+      status: 2,
+      tokenSent: undefined,
+      contractCall: undefined,
+      contractCallWithToken: undefined,
+      transfer: undefined,
+      tokenDeployed: undefined,
+      multisigOwnershipTransferred: undefined,
+      multisigOperatorshipTransferred: undefined,
+    },
+  },
+});
 export const axelarTxResponseStub = (rawLog: any = []) => ({
   height: 1,
   code: 0,
@@ -224,3 +247,40 @@ export const transferResponseExecutedStub = () => {
     },
   ];
 };
+
+export const getFeeStub = () => ({
+  method: "getFees",
+  params: {
+    method: "getFees",
+    sourceChain: "avalanche",
+    destinationChain: "ethereum",
+    sourceTokenAddress: "0x0000000000000000000000000000000000000000",
+  },
+  result: {
+    base_fee: 0.418869692086198,
+    source_token: {
+      contract_address: "0x0000000000000000000000000000000000000000",
+      symbol: "AVAX",
+      name: "Avalanche",
+      decimals: 18,
+      token_price: {
+        usd: 20.56,
+      },
+      gas_price: "0.000001893353954513",
+    },
+    source_base_fee: 0.418869692086198,
+    destination_native_token: {
+      contract_address: "0x0000000000000000000000000000000000000000",
+      name: "Ethereum",
+      symbol: "ETH",
+      decimals: 18,
+      token_price: {
+        usd: 1674.72,
+      },
+      gas_price: "0.000000023244098897",
+      gas_price_gwei: "23.244098897",
+    },
+    destination_base_fee: 0.00514232878886753,
+  },
+  time_spent: 310,
+});

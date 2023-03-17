@@ -1,6 +1,7 @@
 import { EvmChain } from "../../../types";
 import { Network } from "@ethersproject/networks";
 
+// @ts-ignore - base does not exist in mainnet yet
 export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.FANTOM]: "https://rpc.ftm.tools",
   [EvmChain.POLYGON]: "https://polygon-rpc.com",
@@ -9,11 +10,13 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.ETHEREUM]: "https://mainnet.infura.io/v3/510b6d5b3c56497b8070626a54f565a9",
   [EvmChain.AURORA]: "https://mainnet.aurora.dev",
   [EvmChain.BINANCE]: "https://bsc-dataseed.binance.org",
+  [EvmChain.BNBCHAIN]: "https://bsc-dataseed.binance.org",
   [EvmChain.ARBITRUM]: "https://arb1.arbitrum.io/rpc",
   [EvmChain.CELO]: "https://forno.celo.org",
   [EvmChain.KAVA]: "https://evm.kava.io",
 };
 
+// @ts-ignore - base does not exist in mainnet yet
 export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.FANTOM]: {
     chainId: 250,
@@ -42,6 +45,10 @@ export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.BINANCE]: {
     chainId: 56,
     name: EvmChain.BINANCE,
+  },
+  [EvmChain.BNBCHAIN]: {
+    chainId: 56,
+    name: EvmChain.BNBCHAIN,
   },
   [EvmChain.ARBITRUM]: {
     chainId: 42161,

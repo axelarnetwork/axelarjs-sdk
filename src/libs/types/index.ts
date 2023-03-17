@@ -19,9 +19,11 @@ export enum EvmChain {
   MOONBEAM = "moonbeam",
   AURORA = "aurora",
   BINANCE = "binance",
+  BNBCHAIN = "binance",
   ARBITRUM = "arbitrum",
   CELO = "celo",
   KAVA = "kava",
+  BASE = "base",
 }
 
 export enum CosmosChain {
@@ -72,17 +74,23 @@ export interface AxelarQueryAPIConfig {
   axelarRpcUrl?: string;
   axelarLcdUrl?: string;
   environment: Environment;
+  debug?: boolean;
 }
 
 export interface BaseFeeResponse {
   success: boolean;
   error?: string;
-  baseFee?: string;
-  sourceToken?: {
+  baseFee: string;
+  expressFee: string;
+  sourceToken: {
     gas_price: string;
     decimals: number;
     name: string;
     symbol: string;
+  };
+  destToken: {
+    gas_price: string;
+    gas_price_gwei: string;
   };
 }
 
@@ -127,16 +135,19 @@ export enum GasToken {
   MATIC = "MATIC",
   UST = "UST",
   USDC = "USDC",
-  AURORA = "AURORA",
+  AURORA = "aETH",
   BINANCE = "BNB",
+  BNBCHAIN = "BNB",
   CELO = "CELO",
   KAVA = "KAVA",
+  BASE = "ETH",
 }
 
 export interface AddGasOptions {
   amount?: string;
   refundAddress?: string;
   estimatedGasUsed?: number;
+  gasMultipler?: number;
   evmWalletDetails?: EvmWalletDetails;
 }
 
@@ -144,6 +155,7 @@ export interface EventLog {
   signature: string;
   eventLog: LogDescription;
   logIndex: number;
+  eventIndex: number;
 }
 
 export interface ExecuteArgs {
@@ -168,6 +180,8 @@ export interface TxResult {
 export interface QueryGasFeeOptions {
   provider?: ethers.providers.JsonRpcProvider;
   estimatedGas?: number;
+  gasMultipler?: number;
+  shouldSubtractBaseFee?: boolean;
 }
 
 export interface QueryTransferOptions {
@@ -210,8 +224,11 @@ export enum ApproveGatewayError {
   ALREADY_APPROVED = "already approved",
   ALREADY_EXECUTED = "already executed",
   SIGN_COMMAND_FAILED = "cannot sign command",
+  CONFIRM_COMMAND_FAILED = "cannot confirm command",
   FETCHING_STATUS_FAILED = "cannot fetching status",
   ERROR_BATCHED_COMMAND = "cannot find batch command",
+  ERROR_GET_EVM_EVENT = "cannot get evm event",
+  ERROR_BROADCAST_EVENT = "cannot broadcast event to destination chain",
   ERROR_UNKNOWN = "unknown error",
   ERROR_ACCOUNT_SEQUENCE_MISMATCH = "account sequence mismatch",
 }
@@ -219,10 +236,10 @@ export enum ApproveGatewayError {
 export interface ApproveGatewayResponse {
   success: boolean;
   error?: ApproveGatewayError | string;
-  confirmTx?: AxelarTxResponse;
-  createPendingTransferTx?: AxelarTxResponse;
-  signCommandTx?: AxelarTxResponse;
+  confirmTx?: AxelarTxResponse | null;
+  signCommandTx?: AxelarTxResponse | null;
   approveTx?: any;
+  infoLogs?: string[];
 }
 
 export const isNativeToken = (chain: string, selectedToken: GasToken): boolean => {
@@ -234,8 +251,10 @@ export const isNativeToken = (chain: string, selectedToken: GasToken): boolean =
     moonbeam: GasToken.GLMR,
     aurora: GasToken.AURORA,
     binance: GasToken.BINANCE,
+    bnbchain: GasToken.BINANCE,
     celo: GasToken.CELO,
     kava: GasToken.KAVA,
+    base: GasToken.BASE,
   };
   return nativeTokenMap[chain]?.toLowerCase() === selectedToken?.toLowerCase();
 };

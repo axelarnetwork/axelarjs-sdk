@@ -27,16 +27,19 @@ import { loadChains } from "../chains";
 import { AxelarQueryAPI } from "./AxelarQueryAPI";
 const { HashZero } = constants;
 
+interface GetDepositAddressOptions {
+  _traceId?: string;
+  shouldUnwrapIntoNative?: boolean;
+  refundAddress?: string;
+  erc20DepositAddressType?: "network" | "offline";
+}
+
 interface GetDepositAddressParams {
   fromChain: string;
   toChain: string;
   destinationAddress: string;
   asset: string;
-  options?: {
-    _traceId?: string;
-    shouldUnwrapIntoNative: boolean;
-    refundAddress: string;
-  };
+  options?: GetDepositAddressOptions;
 }
 
 export class AxelarAssetTransfer {
@@ -46,8 +49,6 @@ export class AxelarAssetTransfer {
   readonly api: RestService;
   readonly depositServiceApi: RestService;
   readonly axelarQueryApi: AxelarQueryAPI;
-  private gasReceiverContract: Record<string, string> = {};
-  private depositServiceContract: Record<string, string> = {};
   private evmDenomMap: Record<string, string> = {};
   private staticInfo: Record<string, any>;
 
@@ -80,7 +81,7 @@ export class AxelarAssetTransfer {
     await throwIfInvalidChainIds([fromChain, toChain], this.environment);
     await this.axelarQueryApi.throwIfInactiveChains([fromChain, toChain]);
 
-    refundAddress =
+    const _refundAddress =
       refundAddress ||
       (await this.axelarQueryApi.getContractAddressFromConfig(
         fromChain,
@@ -92,7 +93,7 @@ export class AxelarAssetTransfer {
       fromChain,
       toChain,
       destinationAddress,
-      refundAddress,
+      _refundAddress,
       HashZero
     );
 
@@ -101,7 +102,7 @@ export class AxelarAssetTransfer {
       fromChain,
       toChain,
       destinationAddress,
-      refundAddress,
+      _refundAddress,
       HashZero
     );
 
@@ -120,7 +121,7 @@ export class AxelarAssetTransfer {
     await throwIfInvalidChainIds([fromChain, toChain], this.environment);
     await this.axelarQueryApi.throwIfInactiveChains([fromChain, toChain]);
 
-    refundAddress =
+    const _refundAddress =
       refundAddress ||
       (await this.axelarQueryApi.getContractAddressFromConfig(
         fromChainModule === "evm" ? fromChain : toChain,
@@ -132,7 +133,7 @@ export class AxelarAssetTransfer {
       undefined,
       toChain,
       destinationAddress,
-      refundAddress,
+      _refundAddress,
       HashZero
     );
 
@@ -141,7 +142,7 @@ export class AxelarAssetTransfer {
       fromChain,
       toChain,
       destinationAddress,
-      refundAddress,
+      _refundAddress,
       HashZero
     );
 
@@ -158,15 +159,46 @@ export class AxelarAssetTransfer {
     return finalDepositAddress;
   }
 
+  public async getOfflineDepositAddressForERC20Transfer(
+    fromChain: string,
+    toChain: string,
+    destinationAddress: string,
+    fromChainModule: "evm" | "axelarnet" = "evm",
+    tokenSymbol: string,
+    refundAddress?: string
+  ): Promise<string> {
+    await throwIfInvalidChainIds([fromChain, toChain], this.environment);
+    await this.axelarQueryApi.throwIfInactiveChains([fromChain, toChain]);
+
+    const _refundAddress =
+      refundAddress ||
+      (await this.axelarQueryApi.getContractAddressFromConfig(
+        fromChainModule === "evm" ? fromChain : toChain,
+        "default_refund_collector"
+      ));
+    const { address } = await this.getDepositAddressFromRemote(
+      "erc20",
+      fromChain,
+      toChain,
+      destinationAddress,
+      _refundAddress,
+      HashZero,
+      tokenSymbol
+    );
+
+    return address;
+  }
+
   async getDepositAddressFromRemote(
-    wrapOrUnWrap: "wrap" | "unwrap",
+    type: "erc20" | "wrap" | "unwrap",
     fromChain: string | undefined,
     toChain: string | undefined,
     destinationAddress: string,
     refundAddress: string,
-    hexSalt: string
+    hexSalt: string,
+    tokenSymbol: string | undefined = undefined
   ): Promise<{ address: string }> {
-    const endpoint = wrapOrUnWrap === "wrap" ? "/deposit/wrap" : "/deposit/unwrap";
+    const endpoint = `/deposit/${type}`;
 
     if (fromChain) {
       await throwIfInvalidChainIds([fromChain], this.environment);
@@ -185,6 +217,7 @@ export class AxelarAssetTransfer {
         destination_chain: toChain,
         destination_address: destinationAddress,
         refund_address: refundAddress,
+        token_symbol: tokenSymbol,
       })
       .then((res) => ({ address: res.address.toLowerCase() }))
       .catch(() => ({ address: "" }));
@@ -249,7 +282,7 @@ export class AxelarAssetTransfer {
     _toChain?: string,
     _destinationAddress?: string,
     _asset?: string,
-    _options?: any
+    _options?: GetDepositAddressOptions
   ): Promise<string> {
     let fromChain: string, toChain: string, destinationAddress: string, asset: string, options: any;
 
@@ -307,6 +340,17 @@ export class AxelarAssetTransfer {
         destinationAddress,
         srcChainInfo.module,
         options.refundAddress
+      );
+    }
+
+    if (srcChainInfo.module === "evm" && options?.erc20DepositAddressType === "offline") {
+      return await this.getOfflineDepositAddressForERC20Transfer(
+        fromChain,
+        toChain,
+        destinationAddress,
+        "evm",
+        (await this.axelarQueryApi.getSymbolFromDenom(asset, fromChain.toLowerCase())) as string,
+        options?.refundAddress
       );
     }
 

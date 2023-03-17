@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.5] - 2023-MARCH-17
+
+- AxelarQueryAPI
+  - Fixed `estimateGasFee` function in how it handles the `minGasPrice` parameter, which should compare the min to the destination chain gas price, whereas it was comparing to the source chain price originally.
+  - Updated `estimateGasFee` to accept `isGMPExpressTransaction` parameter
+- AxelarRecoveryAPI
+  - introduced wss subscription service (subscribeToTx) to invoke subscribe to specific transactions for updates
+  - fixed `addNativeGas` method so that it does not subtract out the fee the user originally paid (which has led to situations of adding zero gas)
+- AxelarAssetTransfer
+  - adding feature to generate deposit addresses "offline" for erc-20 transfers
+- AxelarGMPRecoveryAPI
+  - fixes to manualRelayToDestinationChain to first check if transaction is already confirmed but not broadcasted, and broadcast the transaction (as identified by command ID) if so
+- update constants to include `BNBCHAIN` (in addition to `BINANCE`)
+
 ## [0.12.4] - 2023-FEBRUARY-1
+
 - AxelarQueryAPI
   - added `minGasPrice` parameter for the `estimateGasFee` function. `minGasPrice` is a floor set for the gas price in wei, used as override in case estimated gas price is below specified minimum.
 - AxelarGMPRecoveryAPI

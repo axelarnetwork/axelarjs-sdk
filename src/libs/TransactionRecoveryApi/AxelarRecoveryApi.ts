@@ -1,14 +1,17 @@
+import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
+import { BatchedCommandsStatus } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
+import { TransactionRequest } from "@ethersproject/providers";
 import fetch from "cross-fetch";
+import { BigNumber } from "ethers";
 import { loadChains } from "../../chains";
 import { EnvironmentConfigs, getConfigs } from "../../constants";
-import { AxelarRecoveryAPIConfig, Environment, EvmChain, EvmWalletDetails } from "../types";
-import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
+import { sleep, throwIfInvalidChainIds } from "../../utils";
 import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
+import { AxelarRecoveryAPIConfig, Environment, EvmChain, EvmWalletDetails } from "../types";
 import EVMClient from "./client/EVMClient";
-import { TransactionRequest } from "@ethersproject/providers";
+import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import rpcInfo from "./constants/chain";
-import { BigNumber } from "ethers";
-import { throwIfInvalidChainIds } from "../../utils";
+import { mapIntoAxelarscanResponseType } from "./helpers/mappers";
 
 export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
@@ -24,6 +27,7 @@ export enum GMPStatus {
   INSUFFICIENT_FEE = "insufficient_fee",
   UNKNOWN_ERROR = "unknown_error",
   CANNOT_FETCH_STATUS = "cannot_fetch_status",
+  SRC_GATEWAY_CONFIRMED = "confirmed",
 }
 
 export enum GasPaidStatus {
@@ -70,12 +74,51 @@ export interface ExecuteParamsResponse {
   data?: ExecuteParams;
 }
 
+export interface CommandObj {
+  id: string;
+  type: string;
+  key_id: string;
+  max_gas_cost: number;
+  executed: boolean;
+  transactionHash: string;
+  transactionIndex: string;
+  logIndex: number;
+  block_timestamp: number;
+}
+export interface BatchedCommandsAxelarscanResponse {
+  data: string;
+  status: string;
+  key_id: string;
+  execute_data: string;
+  prev_batched_commands_id: string;
+  command_ids: string[];
+  batch_id: string;
+  chain: string;
+  id: string;
+}
+export type SubscriptionStrategy =
+  | {
+      kind: "websocket";
+    }
+  | {
+      kind: "polling";
+      interval: number;
+    };
+
+const DEFAULT_SUBSCRIPTION_STRATEGY: SubscriptionStrategy = {
+  kind: "polling",
+  interval: 15000,
+};
+
 export class AxelarRecoveryApi {
   readonly environment: Environment;
   readonly recoveryApiUrl: string;
   readonly axelarGMPApiUrl: string;
+  readonly axelarscanBaseApiUrl: string;
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
+  readonly wssStatusUrl: string;
+  readonly debugMode: boolean;
   readonly config: AxelarRecoveryAPIConfig;
   protected axelarQuerySvc: AxelarQueryClientType | null = null;
   protected evmClient: EVMClient;
@@ -84,7 +127,10 @@ export class AxelarRecoveryApi {
     const { environment } = config;
     const links: EnvironmentConfigs = getConfigs(environment);
     this.axelarGMPApiUrl = links.axelarGMPApiUrl;
+    this.debugMode = !!config.debug;
+    this.axelarscanBaseApiUrl = links.axelarscanBaseApiUrl;
     this.recoveryApiUrl = links.recoveryApiUrl;
+    this.wssStatusUrl = links.wssStatus;
     this.axelarRpcUrl = config.axelarRpcUrl || links.axelarRpcUrl;
     this.axelarLcdUrl = config.axelarLcdUrl || links.axelarLcdUrl;
     this.environment = environment;
@@ -101,7 +147,49 @@ export class AxelarRecoveryApi {
       .catch(() => undefined);
   }
 
-  private parseGMPStatus(response: any): GMPStatus | string {
+  public async fetchBatchData(
+    chainId: string,
+    commandId: string
+  ): Promise<BatchedCommandsAxelarscanResponse | null> {
+    /**first check axelarscan API */
+    let batchData;
+    batchData = await this.execPost(this.axelarscanBaseApiUrl, "/batches", {
+      commandId,
+    })
+      .then((res) => res[0])
+      .catch(() => null);
+
+    /**if not found, check last few batches on core in case it is an issue of delayed indexing of data on the axelarscan API */
+    if (!batchData) batchData = this.searchRecentBatchesFromCore(chainId, commandId);
+
+    return batchData;
+  }
+
+  private async searchRecentBatchesFromCore(
+    chainId: string,
+    commandId: string,
+    iteration: number = 0,
+    maxTries: number = 3,
+    batchId?: string
+  ): Promise<BatchedCommandsAxelarscanResponse | null> {
+    if (iteration > maxTries) return null;
+    let batchData = await this.queryBatchedCommands(chainId, batchId).catch((e) => null);
+    if (!batchData) return null;
+    // console.log("searchRecentBatchesFromCore", iteration, maxTries, batchData);
+    if (batchData.commandIds.includes(commandId)) {
+      return mapIntoAxelarscanResponseType(batchData, chainId);
+    }
+    sleep(2);
+    return this.searchRecentBatchesFromCore(
+      chainId,
+      commandId,
+      iteration + 1,
+      maxTries,
+      batchData.prevBatchedCommandsId
+    );
+  }
+
+  public parseGMPStatus(response: any): GMPStatus | string {
     const { error, status } = response;
 
     if (status === "error" && error) return GMPStatus.DEST_EXECUTE_ERROR;
@@ -167,6 +255,68 @@ export class AxelarRecoveryApi {
     };
   }
 
+  /**
+   * Subscribe to a transaction status using either a websocket or polling strategy
+   */
+  public async subscribeToTx(
+    txHash: string,
+    cb: (data: GMPStatusResponse) => void,
+    strategy = DEFAULT_SUBSCRIPTION_STRATEGY
+  ) {
+    if (strategy.kind === "websocket") {
+      this.subscribeToTxWSS_EXPERIMENTAL(txHash, cb);
+    } else {
+      this.subscribeToTxPOLLING(txHash, cb, strategy.interval);
+    }
+  }
+
+  /**
+   * Subscribe to a transaction status using a polling strategy
+   */
+  private async subscribeToTxPOLLING(
+    txHash: string,
+    cb: (data: GMPStatusResponse) => void,
+    interval = 30000 // 30 seconds
+  ) {
+    const intervalId = setInterval(async () => {
+      const response = await this.queryTransactionStatus(txHash);
+      cb(response);
+
+      if (response.status === GMPStatus.DEST_EXECUTED) {
+        clearInterval(intervalId);
+      }
+    }, interval);
+  }
+
+  /**
+   * Subscribe to a transaction status using a websocket strategy (Experimental)
+   */
+  private async subscribeToTxWSS_EXPERIMENTAL(
+    txHash: string,
+    cb: (data: GMPStatusResponse) => void
+  ) {
+    const conn = new WebSocket(this.wssStatusUrl);
+
+    conn.onopen = () => {
+      const msg = JSON.stringify({
+        action: "sendmessage",
+        topic: "subscribeToSrcChainTx",
+        srcTxHash: txHash,
+      });
+
+      conn.send(msg);
+    };
+
+    conn.onmessage = (event) => {
+      const resData = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+      if (resData?.txStatus) {
+        resData.txStatus = this.parseGMPStatus({ status: resData.txStatus, error: "" });
+      }
+      if (resData?.txStatus === GMPStatus.DEST_EXECUTED) conn.close();
+      cb?.(resData);
+    };
+  }
+
   public async queryExecuteParams(
     txHash: string,
     txLogIndex?: number
@@ -216,7 +366,9 @@ export class AxelarRecoveryApi {
       })
     ).find((chainInfo) => chainInfo.id.toLowerCase() === chainId.toLowerCase());
 
-    if (!chainInfo) throw new Error("cannot find chain" + chainId);
+    if (!chainInfo) {
+      throw new Error(`cannot find chain${chainId}`);
+    }
 
     return chainInfo;
   }
@@ -343,7 +495,7 @@ export class AxelarRecoveryApi {
   }
 
   public async execGet(base: string, params?: any) {
-    return fetch(base + "?" + new URLSearchParams(params).toString(), {
+    return fetch(`${base}?${new URLSearchParams(params).toString()}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",

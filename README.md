@@ -18,4 +18,4 @@ For full SDK docs, please visit: https://docs.axelar.dev/dev/axelarjs-sdk/intro
 
 ## Development
 
-When you develop make sure that you have the [_eslint plugin_](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) installed plugin installed.
+When you develop make sure that you have the [_eslint plugin_](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) installed.
