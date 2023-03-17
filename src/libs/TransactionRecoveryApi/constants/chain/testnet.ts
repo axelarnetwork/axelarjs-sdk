@@ -13,6 +13,7 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.ARBITRUM]: "https://goerli-rollup.arbitrum.io/rpc",
   [EvmChain.CELO]: "https://alfajores-forno.celo-testnet.org",
   [EvmChain.KAVA]: "https://evm.testnet.kava.io",
+  [EvmChain.BASE]: "https://goerli.base.org",
 };
 
 export const networkInfo: Record<EvmChain | string, Network> = {
@@ -59,5 +60,9 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.KAVA]: {
     chainId: 2221,
     name: EvmChain.KAVA,
+  },
+  [EvmChain.BASE]: {
+    chainId: 84_531,
+    name: EvmChain.BASE,
   },
 };

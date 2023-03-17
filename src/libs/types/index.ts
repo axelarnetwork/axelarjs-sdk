@@ -23,6 +23,7 @@ export enum EvmChain {
   ARBITRUM = "arbitrum",
   CELO = "celo",
   KAVA = "kava",
+  BASE = "base",
 }
 
 export enum CosmosChain {
@@ -139,6 +140,7 @@ export enum GasToken {
   BNBCHAIN = "BNB",
   CELO = "CELO",
   KAVA = "KAVA",
+  BASE = "ETH",
 }
 
 export interface AddGasOptions {
@@ -222,6 +224,7 @@ export enum ApproveGatewayError {
   ALREADY_APPROVED = "already approved",
   ALREADY_EXECUTED = "already executed",
   SIGN_COMMAND_FAILED = "cannot sign command",
+  CONFIRM_COMMAND_FAILED = "cannot confirm command",
   FETCHING_STATUS_FAILED = "cannot fetching status",
   ERROR_BATCHED_COMMAND = "cannot find batch command",
   ERROR_GET_EVM_EVENT = "cannot get evm event",
@@ -251,6 +254,7 @@ export const isNativeToken = (chain: string, selectedToken: GasToken): boolean =
     bnbchain: GasToken.BINANCE,
     celo: GasToken.CELO,
     kava: GasToken.KAVA,
+    base: GasToken.BASE,
   };
   return nativeTokenMap[chain]?.toLowerCase() === selectedToken?.toLowerCase();
 };

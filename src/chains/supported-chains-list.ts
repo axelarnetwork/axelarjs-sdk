@@ -20,6 +20,7 @@ export const CHAINS = {
     ARBITRUM: "arbitrum",
     CELO: "celo",
     KAVA: "kava",
+    BASE: "base",
   },
   MAINNET: {
     ASSETMANTLE: "assetmantle",
@@ -51,5 +52,6 @@ export const CHAINS = {
     ARBITRUM: "arbitrum",
     CELO: "celo",
     KAVA: "kava",
+    BASE: "base",
   },
 };

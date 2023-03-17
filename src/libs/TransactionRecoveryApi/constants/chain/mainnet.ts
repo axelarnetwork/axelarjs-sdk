@@ -1,6 +1,7 @@
 import { EvmChain } from "../../../types";
 import { Network } from "@ethersproject/networks";
 
+// @ts-ignore - base does not exist in mainnet yet
 export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.FANTOM]: "https://rpc.ftm.tools",
   [EvmChain.POLYGON]: "https://polygon-rpc.com",
@@ -15,6 +16,7 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.KAVA]: "https://evm.kava.io",
 };
 
+// @ts-ignore - base does not exist in mainnet yet
 export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.FANTOM]: {
     chainId: 250,

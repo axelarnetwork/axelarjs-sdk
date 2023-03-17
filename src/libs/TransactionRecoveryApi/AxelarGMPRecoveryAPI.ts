@@ -238,7 +238,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       /**todo, need to check whether tx is finalized */
       // const confirmationHeight = await this.axelarQueryApi.getConfirmationHeight(srcChain);
 
-      res.confirmTx = await this.confirmGatewayTx(txHash, srcChain);
+      res.confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch((e) => {
+        console.error(e);
+        return null;
+      });
+      if (!res.confirmTx) {
+        res.success = false;
+        res.errorMessage = "findEventAndConfirmIfNeeded(): unable to confirm transaction on Axelar";
+        return res;
+      }
       confirmLog = `confirmation: successfully confirmed ${txHash} on Axelar; waiting ${sleepSeconds} seconds for network confirmation`;
       if (this.debugMode) console.debug(confirmLog);
 
@@ -408,7 +416,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       eventResponse = confirmTxRequest.eventResponse;
       if (confirmTxRequest.infoLogs) infoLogs = [...infoLogs, ...confirmTxRequest.infoLogs];
     } catch (e: any) {
-      return GMPErrorResponse(ApproveGatewayError.ERROR_GET_EVM_EVENT, e.errorMessage);
+      return GMPErrorResponse(ApproveGatewayError.CONFIRM_COMMAND_FAILED, e.errorMessage);
     }
 
     if (!confirmTxRequest?.success)

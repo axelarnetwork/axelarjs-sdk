@@ -35,6 +35,7 @@ export const activeChainsStub = () => [
   "stargaze",
   "terra-3",
   "umee",
+  "base",
 ];
 
 export const otcStub = () => ({

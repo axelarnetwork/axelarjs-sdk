@@ -12,6 +12,7 @@ export const NATIVE_GAS_TOKEN_SYMBOL = {
   [EvmChain.ARBITRUM]: GasToken.ETH,
   [EvmChain.CELO]: GasToken.CELO,
   [EvmChain.KAVA]: GasToken.KAVA,
+  [EvmChain.BASE]: GasToken.BASE,
 };
 
 export const DEFAULT_ESTIMATED_GAS = 700000;

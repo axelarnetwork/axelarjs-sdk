@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - introduced wss subscription service (subscribeToTx) to invoke subscribe to specific transactions for updates
   - fixed `addNativeGas` method so that it does not subtract out the fee the user originally paid (which has led to situations of adding zero gas)
 - AxelarAssetTransfer
-  - adding feature to generate deposit addresses "offline"
+  - adding feature to generate deposit addresses "offline" for erc-20 transfers
 - AxelarGMPRecoveryAPI
   - fixes to manualRelayToDestinationChain to first check if transaction is already confirmed but not broadcasted, and broadcast the transaction (as identified by command ID) if so
 - update constants to include `BNBCHAIN` (in addition to `BINANCE`)
