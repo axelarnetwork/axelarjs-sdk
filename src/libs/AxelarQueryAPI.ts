@@ -22,6 +22,22 @@ interface TranslatedTransferRateLimitResponse {
   outgoing: string;
   limit: string;
 }
+interface GMPExpressTransactionParameters {
+  isGMPExpressTransaction: boolean;
+  transferAmount: BigNumber;
+  destinationContractAddress: `0x${string}`;
+  evmTokenSymbol: string;
+}
+export interface AxelarQueryAPIFeeResponse {
+  fee: string;
+  expressFee: string;
+  baseFee: string;
+  dynamicFee: string;
+  gasMultiplier: number;
+  gasLimit: number;
+  srcGasPrice: string;
+  minGasPrice: string;
+}
 export class AxelarQueryAPI {
   readonly environment: Environment;
   readonly lcdApi: RestService;
@@ -152,7 +168,9 @@ export class AxelarQueryAPI {
   public async getNativeGasBaseFee(
     sourceChainId: EvmChain | string,
     destinationChainId: EvmChain | string,
-    sourceTokenSymbol?: GasToken
+    sourceTokenSymbol?: GasToken,
+    evmTokenSymbol?: string,
+    amount?: BigNumber
   ): Promise<BaseFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
     await this.throwIfInactiveChains([sourceChainId, destinationChainId]);
@@ -162,6 +180,8 @@ export class AxelarQueryAPI {
         destinationChain: destinationChainId,
         sourceChain: sourceChainId,
         sourceTokenSymbol,
+        symbol: evmTokenSymbol,
+        amount,
       })
       .then((response) => {
         const { base_fee, source_token, destination_native_token, express_fee } = response.result;
@@ -189,7 +209,8 @@ export class AxelarQueryAPI {
    * @param gasLimit (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which should be sufficient for most transactions.
    * @param gasMultiplier (Optional) A multiplier used to create a buffer above the calculated gas fee, to account for potential slippage throughout tx execution, e.g. 1.1 = 10% buffer. supports up to 3 decimal places
    * @param minGasPrice (Optional) A minimum value, in wei, for the gas price on the destination chain that is used to override the estimated gas price if it falls below this specified value.
-   * @param isGMPExpressTransaction (Optional) For GMP express transactions, there is an additional fee (equal to the original base fee) that is added to the estimate
+   * @param gmpExpressTransactionDetails (Optional) For GMP express transactions, there is an additional fee (equal to the original base fee) that is added to the estimate
+   * @param getFullFeeBreakdown (Optional) mark true if you want a full breakdown of the total assessed fee
    * @returns
    */
   public async estimateGasFee(
@@ -199,14 +220,17 @@ export class AxelarQueryAPI {
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1,
     minGasPrice = "0",
-    isGMPExpressTransaction: boolean = false
-  ): Promise<string> {
+    gmpExpressTransactionDetails?: GMPExpressTransactionParameters,
+    getFullFeeBreakdown: boolean = false
+  ): Promise<string | AxelarQueryAPIFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
 
     const response = await this.getNativeGasBaseFee(
       sourceChainId,
       destinationChainId,
-      sourceChainTokenSymbol as GasToken
+      sourceChainTokenSymbol as GasToken,
+      gmpExpressTransactionDetails?.evmTokenSymbol,
+      gmpExpressTransactionDetails?.transferAmount
     ).catch(() => undefined);
 
     if (!response) return "0";
@@ -231,9 +255,20 @@ export class AxelarQueryAPI {
             .div(10000)
             .add(baseFee)
         : destTxFee.add(baseFee);
-    if (isGMPExpressTransaction) fee = fee.add(expressFee);
+    if (gmpExpressTransactionDetails?.isGMPExpressTransaction) fee = fee.add(expressFee);
 
-    return fee.toString();
+    return getFullFeeBreakdown
+      ? {
+          baseFee,
+          expressFee,
+          dynamicFee: destTxFee.toString(),
+          fee: fee.toString(),
+          gasLimit,
+          gasMultiplier,
+          srcGasPrice: srcGasPrice.toString(),
+          minGasPrice: minGasPrice === "0" ? "NA" : minGasPrice,
+        }
+      : fee.toString();
   }
 
   /**
