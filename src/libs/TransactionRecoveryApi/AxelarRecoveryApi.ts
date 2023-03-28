@@ -168,12 +168,12 @@ export class AxelarRecoveryApi {
   private async searchRecentBatchesFromCore(
     chainId: string,
     commandId: string,
-    iteration: number = 0,
-    maxTries: number = 3,
+    iteration = 0,
+    maxTries = 3,
     batchId?: string
   ): Promise<BatchedCommandsAxelarscanResponse | null> {
     if (iteration > maxTries) return null;
-    let batchData = await this.queryBatchedCommands(chainId, batchId).catch((e) => null);
+    const batchData = await this.queryBatchedCommands(chainId, batchId).catch((e) => null);
     if (!batchData) return null;
     // console.log("searchRecentBatchesFromCore", iteration, maxTries, batchData);
     if (batchData.commandIds.includes(commandId)) {

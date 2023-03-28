@@ -223,7 +223,7 @@ export class AxelarQueryAPI {
     gasMultiplier = 1.1,
     minGasPrice = "0",
     gmpExpressTransactionDetails?: GMPParams,
-    getFullFeeBreakdown: boolean = false
+    getFullFeeBreakdown = false
   ): Promise<string | AxelarQueryAPIFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
 
