@@ -22,21 +22,22 @@ interface TranslatedTransferRateLimitResponse {
   outgoing: string;
   limit: string;
 }
-interface GMPExpressTransactionParameters {
-  isGMPExpressTransaction: boolean;
-  transferAmount: BigNumber;
-  destinationContractAddress: `0x${string}`;
-  evmTokenSymbol: string;
+interface GMPParams {
+  isGMPExpress: boolean;
+  transferAmount: number; //in terms of symbol, not unit denom, e.g. use 1 for 1 axlUSDC, not 1000000
+  destinationContractAddress: string;
+  tokenSymbol: string;
 }
 export interface AxelarQueryAPIFeeResponse {
   fee: string;
   expressFee: string;
   baseFee: string;
-  dynamicFee: string;
+  executionFee: string;
   gasMultiplier: number;
   gasLimit: number;
   srcGasPrice: string;
   minGasPrice: string;
+  fullAxelarscanResponse: any;
 }
 export class AxelarQueryAPI {
   readonly environment: Environment;
@@ -169,8 +170,8 @@ export class AxelarQueryAPI {
     sourceChainId: EvmChain | string,
     destinationChainId: EvmChain | string,
     sourceTokenSymbol?: GasToken,
-    evmTokenSymbol?: string,
-    amount?: BigNumber
+    symbol?: string,
+    amount?: number
   ): Promise<BaseFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
     await this.throwIfInactiveChains([sourceChainId, destinationChainId]);
@@ -180,7 +181,7 @@ export class AxelarQueryAPI {
         destinationChain: destinationChainId,
         sourceChain: sourceChainId,
         sourceTokenSymbol,
-        symbol: evmTokenSymbol,
+        symbol,
         amount,
       })
       .then((response) => {
@@ -196,6 +197,7 @@ export class AxelarQueryAPI {
             gas_price: destination_native_token.gas_price,
             gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
           },
+          fullAxelarscanResponse: response,
           success: true,
         };
       });
@@ -220,7 +222,7 @@ export class AxelarQueryAPI {
     gasLimit: number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1,
     minGasPrice = "0",
-    gmpExpressTransactionDetails?: GMPExpressTransactionParameters,
+    gmpExpressTransactionDetails?: GMPParams,
     getFullFeeBreakdown: boolean = false
   ): Promise<string | AxelarQueryAPIFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
@@ -229,13 +231,14 @@ export class AxelarQueryAPI {
       sourceChainId,
       destinationChainId,
       sourceChainTokenSymbol as GasToken,
-      gmpExpressTransactionDetails?.evmTokenSymbol,
+      gmpExpressTransactionDetails?.tokenSymbol,
       gmpExpressTransactionDetails?.transferAmount
     ).catch(() => undefined);
 
     if (!response) return "0";
 
-    const { baseFee, expressFee, sourceToken, destToken, success } = response;
+    const { baseFee, expressFee, sourceToken, destToken, fullAxelarscanResponse, success } =
+      response;
 
     if (!success || !baseFee || !sourceToken) return "0";
 
@@ -255,18 +258,19 @@ export class AxelarQueryAPI {
             .div(10000)
             .add(baseFee)
         : destTxFee.add(baseFee);
-    if (gmpExpressTransactionDetails?.isGMPExpressTransaction) fee = fee.add(expressFee);
+    if (gmpExpressTransactionDetails?.isGMPExpress) fee = fee.add(expressFee);
 
     return getFullFeeBreakdown
       ? {
           baseFee,
           expressFee,
-          dynamicFee: destTxFee.toString(),
+          executionFee: destTxFee.toString(),
           fee: fee.toString(),
           gasLimit,
           gasMultiplier,
           srcGasPrice: srcGasPrice.toString(),
           minGasPrice: minGasPrice === "0" ? "NA" : minGasPrice,
+          fullAxelarscanResponse,
         }
       : fee.toString();
   }

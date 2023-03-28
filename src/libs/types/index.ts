@@ -79,6 +79,7 @@ export interface AxelarQueryAPIConfig {
 
 export interface BaseFeeResponse {
   success: boolean;
+  fullAxelarscanResponse?: any;
   error?: string;
   baseFee: string;
   expressFee: string;

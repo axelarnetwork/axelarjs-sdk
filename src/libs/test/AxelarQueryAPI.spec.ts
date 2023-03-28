@@ -2,7 +2,7 @@ import {
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
-import { ethers } from "ethers";
+import { BigNumberish, ethers } from "ethers";
 import { CHAINS } from "../../chains";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
@@ -92,7 +92,7 @@ describe("AxelarQueryAPI", () => {
       );
 
       // gasAmount should be less than 10k usd, otherwise we handle decimal conversion incorrectly.
-      expect(ethers.utils.parseUnits("10000", 6).gt(gasAmount)).toBeTruthy();
+      expect(ethers.utils.parseUnits("10000", 6).gt(gasAmount as BigNumberish)).toBeTruthy();
     });
 
     test("It should return estimated gas amount that makes sense for native token", async () => {
@@ -106,7 +106,7 @@ describe("AxelarQueryAPI", () => {
       );
 
       // gasAmount should be greater than 0.0000001, otherwise we handle decimal conversion incorrectly.
-      expect(ethers.utils.parseEther("0.0000001").lt(gasAmount)).toBeTruthy();
+      expect(ethers.utils.parseEther("0.0000001").lt(gasAmount as BigNumberish)).toBeTruthy();
     });
 
     test("It should use `minGasPrice` if it is greater than the destination chain's gas_price returned from the api", async () => {
