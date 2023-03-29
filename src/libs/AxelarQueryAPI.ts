@@ -33,6 +33,7 @@ export interface AxelarQueryAPIFeeResponse {
   expressFee: string;
   baseFee: string;
   executionFee: string;
+  executionFeeWithMultiplier: string;
   gasMultiplier: number;
   gasLimit: number;
   srcGasPrice: string;
@@ -256,21 +257,15 @@ export class AxelarQueryAPI {
       ? srcGasPrice
       : srcGasPrice.mul(minGasPrice).div(destGasPrice);
 
-    const destTxFee = srcGasPrice.mul(gasLimit);
-
-    let fee =
-      gasMultiplier > 1
-        ? destTxFee
-            .mul(gasMultiplier * 10000)
-            .div(10000)
-            .add(baseFee)
-        : destTxFee.add(baseFee);
-
+    const executionFee = srcGasPrice.mul(gasLimit);
+    const executionFeeWithMultiplier =
+      gasMultiplier > 1 ? executionFee.mul(gasMultiplier * 10000).div(10000) : executionFee;
     return gmpParams?.isGMPExpress
       ? {
           baseFee,
           expressFee,
-          executionFee: destTxFee.toString(),
+          executionFee: executionFee.toString(),
+          executionFeeWithMultiplier: executionFeeWithMultiplier.toString(),
           gasLimit,
           gasMultiplier,
           srcGasPrice: srcGasPrice.toString(),
@@ -278,7 +273,7 @@ export class AxelarQueryAPI {
           apiResponse,
           isExpressSupported: expressSupported,
         }
-      : fee.toString();
+      : executionFeeWithMultiplier.add(baseFee).toString();
   }
 
   /**
