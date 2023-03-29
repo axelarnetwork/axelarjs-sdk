@@ -806,8 +806,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       options.estimatedGas,
       options.gasMultipler,
       undefined,
-      undefined,
-      false
+      undefined
     );
 
     let topupGasAmount = ethers.BigNumber.from(totalGasFee);
