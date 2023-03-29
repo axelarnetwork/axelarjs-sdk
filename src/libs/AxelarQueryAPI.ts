@@ -23,7 +23,7 @@ interface TranslatedTransferRateLimitResponse {
   limit: string;
 }
 interface GMPParams {
-  isGMPExpress: boolean;
+  showDetailedFees: boolean;
   transferAmount: number; //in terms of symbol, not unit denom, e.g. use 1 for 1 axlUSDC, not 1000000
   destinationContractAddress: string;
   sourceContractAddress: string;
