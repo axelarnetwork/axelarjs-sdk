@@ -260,7 +260,7 @@ export class AxelarQueryAPI {
     const executionFee = srcGasPrice.mul(gasLimit);
     const executionFeeWithMultiplier =
       gasMultiplier > 1 ? executionFee.mul(gasMultiplier * 10000).div(10000) : executionFee;
-    return gmpParams?.isGMPExpress
+    return gmpParams?.showDetailedFees
       ? {
           baseFee,
           expressFee,
