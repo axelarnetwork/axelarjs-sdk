@@ -101,7 +101,7 @@ export class AxelarQueryAPI {
         chain: sourceChainId,
         eventId: `${srcTxHash}-${srcEventId}`,
       })
-      .catch((e) => undefined);
+      .catch(() => undefined);
   }
 
   public async getConfirmationHeight(chain: string) {

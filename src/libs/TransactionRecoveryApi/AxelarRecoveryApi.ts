@@ -1,5 +1,3 @@
-import { BatchedCommandsResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
-import { BatchedCommandsStatus } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { TransactionRequest } from "@ethersproject/providers";
 import fetch from "cross-fetch";
 import { BigNumber } from "ethers";
@@ -173,7 +171,7 @@ export class AxelarRecoveryApi {
     batchId?: string
   ): Promise<BatchedCommandsAxelarscanResponse | null> {
     if (iteration > maxTries) return null;
-    const batchData = await this.queryBatchedCommands(chainId, batchId).catch((e) => null);
+    const batchData = await this.queryBatchedCommands(chainId, batchId).catch(() => null);
     if (!batchData) return null;
     // console.log("searchRecentBatchesFromCore", iteration, maxTries, batchData);
     if (batchData.commandIds.includes(commandId)) {

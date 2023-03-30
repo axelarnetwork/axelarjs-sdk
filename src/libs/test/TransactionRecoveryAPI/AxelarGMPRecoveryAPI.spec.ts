@@ -37,14 +37,11 @@ import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contra
 import {
   activeChainsStub,
   axelarTxResponseStub,
-  batchedCommandResponseStub,
   contractReceiptStub,
   evmEventStubResponse,
   executeParamsStub,
 } from "../stubs";
 import * as Sleep from "../../../utils/sleep";
-import Long from "long";
-import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 
 describe("AxelarGMPRecoveryAPI", () => {
@@ -62,14 +59,6 @@ describe("AxelarGMPRecoveryAPI", () => {
 
   describe.skip("findEventAndConfirmIfNeeded", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
-    const evmEvent = {
-      event: {
-        chain: "Moonbeam",
-        txId: new Uint8Array(),
-        index: Long.fromNumber(1),
-        status: Event_Status.STATUS_UNSPECIFIED,
-      },
-    };
 
     test("It should confirm an event if needed", async () => {
       const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");

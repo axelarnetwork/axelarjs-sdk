@@ -1,5 +1,5 @@
 import { AxelarGMPRecoveryAPI } from "../../TransactionRecoveryApi/AxelarGMPRecoveryAPI";
-import { AddGasOptions, Environment, EvmChain, EvmWalletDetails } from "../../types";
+import { Environment, EvmChain, EvmWalletDetails } from "../../types";
 import { utils } from "@axelar-network/axelar-local-dev";
 
 describe("AxelarDepositRecoveryAPI", () => {

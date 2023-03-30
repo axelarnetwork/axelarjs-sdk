@@ -123,7 +123,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return this.axelarQueryApi
       .getConfirmationHeight(chain)
       .then((res) => res.height.greaterThan(currHeight))
-      .catch((e) => undefined);
+      .catch(() => undefined);
   }
 
   public isEVMEventFailed(eventResponse: EventResponse | undefined): boolean | undefined {
@@ -350,7 +350,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           broadcastTxLog = `broadcasting: batch ID ${batchData.batch_id} broadcasted to ${destChainId}`;
           res.infoLogs.push(broadcastTxLog);
           break;
-        case "BATCHED_COMMANDS_STATUS_SIGNING":
+        case "BATCHED_COMMANDS_STATUS_SIGNING": {
           broadcastTxLog = `broadcasting: batch ID ${batchData.batch_id} signing in process, checking again in 15 seconds`;
           if (this.debugMode) console.debug(broadcastTxLog);
           res.infoLogs.push(broadcastTxLog);
@@ -364,6 +364,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           );
           if (retry.infoLogs) res.infoLogs = [...res.infoLogs, ...retry.infoLogs];
           break;
+        }
         default:
           res.errorMessage = `findBatchAndBroadcastIfNeeded(): status unsuccessful for command data: ${commandId}`;
           res.success = false;
@@ -395,8 +396,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const srcChain = callTx.chain;
     const destChain = callTx.returnValues.destinationChain;
 
-    let commandId = "",
-      eventResponse;
+    let commandId = "";
 
     /**find event and confirm if needed */
     let confirmTxRequest;
@@ -409,7 +409,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
       confirmTx = confirmTxRequest.confirmTx;
       commandId = confirmTxRequest.commandId;
-      eventResponse = confirmTxRequest.eventResponse;
+      // eventResponse = confirmTxRequest.eventResponse;
       if (confirmTxRequest.infoLogs) infoLogs = [...infoLogs, ...confirmTxRequest.infoLogs];
     } catch (e: any) {
       return GMPErrorResponse(ApproveGatewayError.CONFIRM_COMMAND_FAILED, e.errorMessage);
