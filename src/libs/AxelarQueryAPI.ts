@@ -267,8 +267,6 @@ export class AxelarQueryAPI {
 
     if (!success || !baseFee || !sourceToken) return "0";
 
-    console.log("line 2", response);
-
     const destGasPrice = parseEther(destToken.gas_price);
     let srcGasPrice = parseEther(sourceToken.gas_price);
 
