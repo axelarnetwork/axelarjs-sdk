@@ -24,7 +24,7 @@ interface TranslatedTransferRateLimitResponse {
 }
 interface GMPParams {
   showDetailedFees: boolean;
-  transferAmount: number; //in terms of symbol, not unit denom, e.g. use 1 for 1 axlUSDC, not 1000000
+  transferAmount: number; // In terms of symbol, not unit denom, e.g. use 1 for 1 axlUSDC, not 1000000
   destinationContractAddress: string;
   sourceContractAddress: string;
   tokenSymbol: string;
