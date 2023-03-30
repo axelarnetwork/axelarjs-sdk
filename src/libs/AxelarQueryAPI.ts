@@ -179,23 +179,36 @@ export class AxelarQueryAPI {
   ): Promise<BaseFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
     await this.throwIfInactiveChains([sourceChainId, destinationChainId]);
+    const params: {
+      method: string;
+      destinationChain: EvmChain | string;
+      sourceChain: EvmChain | string;
+      sourceTokenSymbol?: string;
+      symbol?: string;
+      amount?: number;
+      destinationContractAddress?: string;
+      sourceContractAddress?: string;
+    } = {
+      method: "getFees",
+      destinationChain: destinationChainId,
+      sourceChain: sourceChainId,
+    };
+    if (sourceTokenSymbol) params.sourceTokenSymbol = sourceTokenSymbol;
+    if (symbol) params.symbol = symbol;
+    if (amount) params.amount = amount;
+    if (destinationContractAddress) params.destinationContractAddress = destinationContractAddress;
+    if (sourceContractAddress) params.sourceContractAddress = sourceContractAddress;
+
     return this.axelarGMPServiceApi
-      .post("", {
-        method: "getFees",
-        destinationChain: destinationChainId,
-        sourceChain: sourceChainId,
-        sourceTokenSymbol,
-        symbol,
-        amount,
-        destinationContractAddress,
-        sourceContractAddress,
-      })
+      .post("", params)
       .then((response) => {
         const { base_fee, source_token, destination_native_token, express_fee, express_supported } =
           response.result;
         const { decimals } = source_token;
         const baseFee = parseUnits(base_fee.toString(), decimals).toString();
-        const expressFee = parseUnits(express_fee.toString(), decimals).toString();
+        const expressFee = express_fee
+          ? parseUnits(express_fee.toString(), decimals).toString()
+          : "0";
         return {
           baseFee,
           expressFee,
@@ -208,6 +221,10 @@ export class AxelarQueryAPI {
           success: true,
           expressSupported: express_supported,
         };
+      })
+      .catch((e) => {
+        console.error("some kind of issue", e);
+        return {} as any;
       });
   }
 
@@ -243,12 +260,16 @@ export class AxelarQueryAPI {
       gmpParams?.sourceContractAddress
     ).catch(() => undefined);
 
+    console.log("line 1", response);
+
     if (!response) return "0";
 
     const { baseFee, expressFee, sourceToken, destToken, apiResponse, success, expressSupported } =
       response;
 
     if (!success || !baseFee || !sourceToken) return "0";
+
+    console.log("line 2", response);
 
     const destGasPrice = parseEther(destToken.gas_price);
     let srcGasPrice = parseEther(sourceToken.gas_price);

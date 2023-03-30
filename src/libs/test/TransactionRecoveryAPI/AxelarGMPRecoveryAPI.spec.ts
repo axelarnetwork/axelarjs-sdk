@@ -287,7 +287,9 @@ describe("AxelarGMPRecoveryAPI", () => {
       const res = await api.manualRelayToDestChain("0x");
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
-      expect(res?.error).toEqual(ApproveGatewayError.ERROR_GET_EVM_EVENT);
+      expect(res?.error).toEqual(
+        "findEventAndConfirmIfNeeded(): unable to confirm transaction on Axelar"
+      );
     });
     test("it should fail if it confirms the tx and event still incomplete", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
