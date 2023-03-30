@@ -260,8 +260,6 @@ export class AxelarQueryAPI {
       gmpParams?.sourceContractAddress
     ).catch(() => undefined);
 
-    console.log("line 1", response);
-
     if (!response) return "0";
 
     const { baseFee, expressFee, sourceToken, destToken, apiResponse, success, expressSupported } =
