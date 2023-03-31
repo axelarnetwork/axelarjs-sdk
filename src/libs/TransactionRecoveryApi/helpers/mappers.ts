@@ -15,10 +15,7 @@ import { BatchedCommandsAxelarscanResponse } from "../AxelarRecoveryApi";
 * sample input: 3
 * expected output: BATCHED_COMMANDS_STATUS_SIGNED
 */
-const getStatusKey = (
-  obj: Record<string, BatchedCommandsStatus>,
-  value: BatchedCommandsStatus
-): string => {
+const getStatusKey = (obj: Object, value: BatchedCommandsStatus): string => {
   const keyIndex = Object.values(obj).indexOf(value);
   return Object.keys(obj)[keyIndex];
 };
