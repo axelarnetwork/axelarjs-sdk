@@ -70,8 +70,4 @@ export const networkInfo: Record<EvmChain, Network> = {
     chainId: 2222,
     name: EvmChain.KAVA,
   },
-  [EvmChain.FILECOIN]: {
-    chainId: 314,
-    name: EvmChain.FILECOIN,
-  },
 };
