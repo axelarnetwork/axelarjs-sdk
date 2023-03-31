@@ -79,6 +79,7 @@ export interface AxelarQueryAPIConfig {
 
 export interface BaseFeeResponse {
   success: boolean;
+  apiResponse?: any;
   error?: string;
   baseFee: string;
   expressFee: string;
@@ -92,6 +93,7 @@ export interface BaseFeeResponse {
     gas_price: string;
     gas_price_gwei: string;
   };
+  expressSupported: boolean;
 }
 
 export type CosmosBasedWalletDetails = {

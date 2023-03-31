@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.6] - 2023-MARCH-30
+
+- AxelarQueryAPI
+  - Update `estimateGasFee` function to allow user to see a more detailed response by passing in an additional parameter `gmpParams`, where they can also specify the details of the specific GMP call
+
 ## [0.12.5] - 2023-MARCH-17
 
 - AxelarQueryAPI

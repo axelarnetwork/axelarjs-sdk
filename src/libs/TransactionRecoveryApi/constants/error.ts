@@ -1,5 +1,5 @@
-import { ApproveGatewayError, EvmChain } from "../../../libs";
-import { ExecuteParams, GMPStatus } from "../AxelarRecoveryApi";
+import { EvmChain } from "../../../libs";
+import { ExecuteParams } from "../AxelarRecoveryApi";
 
 const metamaskErrorMsg = (e: any) => e.data?.message;
 
@@ -114,14 +114,3 @@ export const InsufficientFundsError = (params: ExecuteParams) => {
     },
   };
 };
-
-// export const GMPErrorMap: Record<string, ApproveGatewayError> = {
-//   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
-//   [GMPStatus.DEST_EXECUTED]: ApproveGatewayError.ALREADY_EXECUTED,
-//   [GMPStatus.DEST_GATEWAY_APPROVED]: ApproveGatewayError.ALREADY_APPROVED,
-// };
-
-// export const GMPErrorResponse = (error: ApproveGatewayError, errorDetails?: string) => ({
-//   success: false,
-//   error: errorDetails || error,
-// });

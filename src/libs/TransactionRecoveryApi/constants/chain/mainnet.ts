@@ -1,7 +1,6 @@
 import { EvmChain } from "../../../types";
 import { Network } from "@ethersproject/networks";
 
-// @ts-ignore - base does not exist in mainnet yet
 export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.FANTOM]: "https://rpc.ftm.tools",
   [EvmChain.POLYGON]: "https://polygon-rpc.com",
@@ -14,13 +13,17 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.ARBITRUM]: "https://arb1.arbitrum.io/rpc",
   [EvmChain.CELO]: "https://forno.celo.org",
   [EvmChain.KAVA]: "https://evm.kava.io",
+  [EvmChain.BASE]: "",
 };
 
-// @ts-ignore - base does not exist in mainnet yet
 export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.FANTOM]: {
     chainId: 250,
     name: EvmChain.FANTOM,
+  },
+  [EvmChain.BASE]: {
+    chainId: -1,
+    name: EvmChain.BASE,
   },
   [EvmChain.POLYGON]: {
     chainId: 137,
