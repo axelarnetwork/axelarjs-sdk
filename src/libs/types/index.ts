@@ -24,6 +24,7 @@ export enum EvmChain {
   CELO = "celo",
   KAVA = "kava",
   BASE = "base",
+  FILECOIN = "filecoin",
 }
 
 export enum CosmosChain {
@@ -143,6 +144,7 @@ export enum GasToken {
   CELO = "CELO",
   KAVA = "KAVA",
   BASE = "ETH",
+  FILECOIN = "FIL",
 }
 
 export interface AddGasOptions {
@@ -257,6 +259,7 @@ export const isNativeToken = (chain: string, selectedToken: GasToken): boolean =
     celo: GasToken.CELO,
     kava: GasToken.KAVA,
     base: GasToken.BASE,
+    filecoin: GasToken.FILECOIN,
   };
   return nativeTokenMap[chain]?.toLowerCase() === selectedToken?.toLowerCase();
 };

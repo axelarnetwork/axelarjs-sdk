@@ -14,6 +14,7 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.CELO]: "https://forno.celo.org",
   [EvmChain.KAVA]: "https://evm.kava.io",
   [EvmChain.BASE]: "",
+  [EvmChain.FILECOIN]: "https://rpc.ankr.com/filecoin",
 };
 
 export const networkInfo: Record<EvmChain, Network> = {
@@ -22,8 +23,12 @@ export const networkInfo: Record<EvmChain, Network> = {
     name: EvmChain.FANTOM,
   },
   [EvmChain.BASE]: {
-    chainId: -1,
+    chainId: -1, // does not exist yet
     name: EvmChain.BASE,
+  },
+  [EvmChain.FILECOIN]: {
+    chainId: 314,
+    name: EvmChain.FILECOIN,
   },
   [EvmChain.POLYGON]: {
     chainId: 137,
@@ -64,5 +69,9 @@ export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.KAVA]: {
     chainId: 2222,
     name: EvmChain.KAVA,
+  },
+  [EvmChain.FILECOIN]: {
+    chainId: 314,
+    name: EvmChain.FILECOIN,
   },
 };
