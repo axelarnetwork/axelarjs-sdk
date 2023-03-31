@@ -1,6 +1,6 @@
 {
   "name": "@axelar-network/axelarjs-sdk",
-  "version": "0.12.6",
+  "version": "0.12.7-alpha.0",
   "description": "The JavaScript SDK for Axelar Network",
   "repository": {
     "type": "git",
