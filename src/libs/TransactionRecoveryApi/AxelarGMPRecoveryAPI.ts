@@ -208,7 +208,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     destChain: EvmChain,
     txHash: string,
     evmWalletDetails: EvmWalletDetails,
-    sleepSeconds = 30
+    sleepSeconds = 60
   ): Promise<ConfirmTxSDKResponse> {
     const res: ConfirmTxSDKResponse = {
       confirmTx: null,
