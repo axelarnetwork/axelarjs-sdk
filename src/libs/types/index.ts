@@ -93,6 +93,7 @@ export interface BaseFeeResponse {
   destToken: {
     gas_price: string;
     gas_price_gwei: string;
+    decimals: number;
   };
   expressSupported: boolean;
 }
@@ -129,15 +130,16 @@ export type AxelarTransferAPIConfig = {
   environment: Environment;
 };
 
-// Includes all native tokens and stablecoins
+// Includes all supported native tokens and stablecoins (i.e. for fees)
 export enum GasToken {
   ETH = "ETH",
   AVAX = "AVAX",
   GLMR = "GLMR",
   FTM = "FTM",
   MATIC = "MATIC",
-  UST = "UST",
   USDC = "USDC",
+  aUSDC = "aUSDC", //testnet only
+  axlUSDC = "axlUSDC",
   AURORA = "aETH",
   BINANCE = "BNB",
   BNBCHAIN = "BNB",
@@ -145,6 +147,8 @@ export enum GasToken {
   KAVA = "KAVA",
   BASE = "ETH",
   FILECOIN = "FIL",
+  OSMO = "OSMO",
+  AXL = "AXL",
 }
 
 export interface AddGasOptions {

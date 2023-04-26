@@ -10,10 +10,10 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@axelar-network/axelar-cgp-solidity@^4.0.0", "@axelar-network/axelar-cgp-solidity@^4.3.0":
-  "integrity" "sha512-0cCgCFtxnipyzSplPnj/HxDx4DqqHGEr+J7M7NWKM1fXvfS4t/70aCAw/h9GYW8dZ3BmKOqKAYQCNpmP+2Oa+w=="
-  "resolved" "https://registry.npmjs.org/@axelar-network/axelar-cgp-solidity/-/axelar-cgp-solidity-4.3.0.tgz"
-  "version" "4.3.0"
+"@axelar-network/axelar-cgp-solidity@^4.0.0", "@axelar-network/axelar-cgp-solidity@^4.5.0":
+  "integrity" "sha512-4F4rmHei0cmzeUR7/mW4Bap5rc/KlPV2crD9HA7HTRfl15mVcN6/3z8p+pAm9We6bOrQplNW9KBZ3HJFP3C1Gw=="
+  "resolved" "https://registry.npmjs.org/@axelar-network/axelar-cgp-solidity/-/axelar-cgp-solidity-4.5.0.tgz"
+  "version" "4.5.0"
 
 "@axelar-network/axelar-local-dev@1.0.2":
   "integrity" "sha512-sb+8gLNF/xMztN2m05mm8Rh1hpG298DPOqEtOZsQz0LTbhzFe/yKoIgOuO++0G9w5o4u/skTQA1SOSpMWC0M/w=="

@@ -204,10 +204,10 @@ export class AxelarQueryAPI {
       .then((response) => {
         const { base_fee, source_token, destination_native_token, express_fee, express_supported } =
           response.result;
-        const { decimals } = source_token;
-        const baseFee = parseUnits(base_fee.toString(), decimals).toString();
+        const { decimals: sourceTokenDecimals } = source_token;
+        const baseFee = parseUnits(base_fee.toString(), sourceTokenDecimals).toString();
         const expressFee = express_fee
-          ? parseUnits(express_fee.toString(), decimals).toString()
+          ? parseUnits(express_fee.toString(), sourceTokenDecimals).toString()
           : "0";
         return {
           baseFee,
@@ -216,6 +216,7 @@ export class AxelarQueryAPI {
           destToken: {
             gas_price: destination_native_token.gas_price,
             gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
+            decimals: destination_native_token.decimals,
           },
           apiResponse: response,
           success: true,
@@ -230,8 +231,8 @@ export class AxelarQueryAPI {
 
   /**
    * Calculate estimated gas amount to pay for the gas receiver contract.
-   * @param sourceChainId
-   * @param destinationChainId
+   * @param sourceChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
+   * @param destinationChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
    * @param sourceChainTokenSymbol
    * @param gasLimit (Optional) An estimated gas amount required to execute `executeWithToken` function. The default value is 700000 which should be sufficient for most transactions.
    * @param gasMultiplier (Optional) A multiplier used to create a buffer above the calculated gas fee, to account for potential slippage throughout tx execution, e.g. 1.1 = 10% buffer. supports up to 3 decimal places
@@ -267,8 +268,8 @@ export class AxelarQueryAPI {
 
     if (!success || !baseFee || !sourceToken) return "0";
 
-    const destGasPrice = parseEther(destToken.gas_price);
-    let srcGasPrice = parseEther(sourceToken.gas_price);
+    const destGasPrice = parseUnits(destToken.gas_price, destToken.decimals);
+    let srcGasPrice = parseUnits(sourceToken.gas_price, sourceToken.decimals);
 
     srcGasPrice = destGasPrice.gt(minGasPrice)
       ? srcGasPrice
