@@ -24,7 +24,8 @@ interface TranslatedTransferRateLimitResponse {
 }
 interface GMPParams {
   showDetailedFees: boolean;
-  transferAmount: number; // In terms of symbol, not unit denom, e.g. use 1 for 1 axlUSDC, not 1000000
+  transferAmount?: number; // In terms of symbol, not unit denom, e.g. use 1 for 1 axlUSDC, not 1000000
+  transferAmountInUnits?: string; // In terms of unit denom, not symbol, e.g. use 1000000 for 1 axlUSDC, not 1
   destinationContractAddress: string;
   sourceContractAddress: string;
   tokenSymbol: string;
@@ -173,9 +174,10 @@ export class AxelarQueryAPI {
     destinationChainId: EvmChain | string,
     sourceTokenSymbol?: GasToken,
     symbol?: string,
-    amount?: number,
     destinationContractAddress?: string,
-    sourceContractAddress?: string
+    sourceContractAddress?: string,
+    amount?: number,
+    amountInUnits?: BigNumber | string
   ): Promise<BaseFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
     await this.throwIfInactiveChains([sourceChainId, destinationChainId]);
@@ -186,6 +188,7 @@ export class AxelarQueryAPI {
       sourceTokenSymbol?: string;
       symbol?: string;
       amount?: number;
+      amountInUnits?: BigNumber | string;
       destinationContractAddress?: string;
       sourceContractAddress?: string;
     } = {
@@ -195,9 +198,13 @@ export class AxelarQueryAPI {
     };
     if (sourceTokenSymbol) params.sourceTokenSymbol = sourceTokenSymbol;
     if (symbol) params.symbol = symbol;
-    if (amount) params.amount = amount;
     if (destinationContractAddress) params.destinationContractAddress = destinationContractAddress;
     if (sourceContractAddress) params.sourceContractAddress = sourceContractAddress;
+    if (amount) {
+      params.amount = amount;
+    } else if (amountInUnits) {
+      params.amountInUnits = amountInUnits;
+    }
 
     return this.axelarGMPServiceApi
       .post("", params)
@@ -256,9 +263,10 @@ export class AxelarQueryAPI {
       destinationChainId,
       sourceChainTokenSymbol as GasToken,
       gmpParams?.tokenSymbol,
-      gmpParams?.transferAmount,
       gmpParams?.destinationContractAddress,
-      gmpParams?.sourceContractAddress
+      gmpParams?.sourceContractAddress,
+      gmpParams?.transferAmount,
+      gmpParams?.transferAmountInUnits
     ).catch(() => undefined);
 
     if (!response) return "0";
