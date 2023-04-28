@@ -214,7 +214,7 @@ export class AxelarQueryAPI {
         const { decimals: sourceTokenDecimals } = source_token;
         const baseFee = parseUnits(base_fee.toString(), sourceTokenDecimals).toString();
         const expressFee = express_fee
-          ? parseUnits(express_fee.toString(), sourceTokenDecimals).toString()
+          ? parseUnits(Number(express_fee).toFixed(20), sourceTokenDecimals).toString()
           : "0";
         return {
           baseFee,
