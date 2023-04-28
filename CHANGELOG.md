@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - AxelarGMPRecoveryAPI
   - update the delay after transaction confirmation to 60 seconds before it finds the confirmed event on the axelar network (from 30 seconds originally)
 - Add `Filecoin` EVM configs
+- Updated Osmosis testnet to `osmosis-6` that points to `osmo-test-5`
 
 ## [0.12.6] - 2023-MARCH-30
 
