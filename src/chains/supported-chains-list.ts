@@ -54,5 +54,6 @@ export const CHAINS = {
     CELO: "celo",
     KAVA: "kava",
     BASE: "base",
+    FILECOIN: "filecoin",
   },
 };
