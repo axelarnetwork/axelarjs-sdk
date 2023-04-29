@@ -181,6 +181,7 @@ export class AxelarQueryAPI {
   ): Promise<BaseFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
     await this.throwIfInactiveChains([sourceChainId, destinationChainId]);
+
     const params: {
       method: string;
       destinationChain: EvmChain | string;
@@ -209,12 +210,17 @@ export class AxelarQueryAPI {
     return this.axelarGMPServiceApi
       .post("", params)
       .then((response) => {
-        const { base_fee, source_token, destination_native_token, express_fee, express_supported } =
-          response.result;
+        const {
+          base_fee,
+          source_token,
+          destination_native_token,
+          express_fee_string,
+          express_supported,
+        } = response.result;
         const { decimals: sourceTokenDecimals } = source_token;
         const baseFee = parseUnits(base_fee.toString(), sourceTokenDecimals).toString();
-        const expressFee = express_fee
-          ? parseUnits(Number(express_fee).toFixed(20), sourceTokenDecimals).toString()
+        const expressFee = express_fee_string
+          ? parseUnits(express_fee_string, sourceTokenDecimals).toString()
           : "0";
         return {
           baseFee,
