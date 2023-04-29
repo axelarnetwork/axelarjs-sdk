@@ -211,14 +211,14 @@ export class AxelarQueryAPI {
       .post("", params)
       .then((response) => {
         const {
-          base_fee,
+          source_base_fee_string,
           source_token,
           destination_native_token,
           express_fee_string,
           express_supported,
         } = response.result;
         const { decimals: sourceTokenDecimals } = source_token;
-        const baseFee = parseUnits(base_fee.toString(), sourceTokenDecimals).toString();
+        const baseFee = parseUnits(source_base_fee_string, sourceTokenDecimals).toString();
         const expressFee = express_fee_string
           ? parseUnits(express_fee_string, sourceTokenDecimals).toString()
           : "0";
