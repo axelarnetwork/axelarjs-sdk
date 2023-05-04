@@ -16,7 +16,6 @@ import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 import { BigNumber } from "ethers";
-import bn from "bignumber.js";
 
 interface TranslatedTransferRateLimitResponse {
   incoming: string;
