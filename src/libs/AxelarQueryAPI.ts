@@ -16,6 +16,7 @@ import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 import { BigNumber } from "ethers";
+import bn from "bignumber.js";
 
 interface TranslatedTransferRateLimitResponse {
   incoming: string;
@@ -37,7 +38,6 @@ export interface AxelarQueryAPIFeeResponse {
   executionFeeWithMultiplier: string;
   gasMultiplier: number;
   gasLimit: number;
-  srcGasPrice: string;
   minGasPrice: string;
   apiResponse: any;
   isExpressSupported: boolean;
@@ -282,16 +282,25 @@ export class AxelarQueryAPI {
 
     if (!success || !baseFee || !sourceToken) return "0";
 
-    const destGasPrice = parseUnits(destToken.gas_price, destToken.decimals);
-    let srcGasPrice = parseUnits(sourceToken.gas_price, sourceToken.decimals);
+    const destGasFeeWei = parseUnits(
+      (gasLimit * Number(destToken.gas_price)).toString(),
+      destToken.decimals
+    );
+    console.log("MINGASPRICE", minGasPrice);
+    const minDestGasFeeWei = BigNumber.from(gasLimit).mul(minGasPrice); //minGasPrice already provided by the user in wei
+    const srcGasFeeWei = parseUnits(
+      (gasLimit * Number(sourceToken.gas_price)).toString(),
+      sourceToken.decimals
+    );
 
-    srcGasPrice = destGasPrice.gt(minGasPrice)
-      ? srcGasPrice
-      : srcGasPrice.mul(minGasPrice).div(destGasPrice);
+    const executionFee = destGasFeeWei.gt(minDestGasFeeWei)
+      ? srcGasFeeWei
+      : srcGasFeeWei.mul(minDestGasFeeWei).div(destGasFeeWei);
 
-    const executionFee = srcGasPrice.mul(gasLimit);
     const executionFeeWithMultiplier =
       gasMultiplier > 1 ? executionFee.mul(gasMultiplier * 10000).div(10000) : executionFee;
+
+    console.log("EXECUTIONFEEEEE", executionFee);
 
     return gmpParams?.showDetailedFees
       ? {
@@ -301,7 +310,6 @@ export class AxelarQueryAPI {
           executionFeeWithMultiplier: executionFeeWithMultiplier.toString(),
           gasLimit,
           gasMultiplier,
-          srcGasPrice: srcGasPrice.toString(),
           minGasPrice: minGasPrice === "0" ? "NA" : minGasPrice,
           apiResponse,
           isExpressSupported: expressSupported,

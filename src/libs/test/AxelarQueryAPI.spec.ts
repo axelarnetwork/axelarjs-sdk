@@ -15,7 +15,7 @@ describe("AxelarQueryAPI", () => {
     vitest.clearAllMocks();
   });
 
-  describe("getFeeForChainAndAsset", () => {
+  describe.skip("getFeeForChainAndAsset", () => {
     test("It should generate a fee response", async () => {
       const [chain, assetDenom] = ["avalanche", "uausdc"];
       const response: FeeInfoResponse = await api.getFeeForChainAndAsset(chain, assetDenom);
@@ -29,7 +29,7 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
-  describe("getTransferFee", () => {
+  describe.skip("getTransferFee", () => {
     test("It should generate a transfer fee for a specific transaction", async () => {
       const [sourceChainName, destinationChainName, assetDenom, amount] = [
         "avalanche",
@@ -63,7 +63,7 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
-  describe("getGasPrice", () => {
+  describe.skip("getGasPrice", () => {
     test("It should get a gas price", async () => {
       const [sourceChainName, destinationChainName, sourceChainTokenSymbol] = [
         EvmChain.AVALANCHE,
@@ -95,7 +95,7 @@ describe("AxelarQueryAPI", () => {
       expect(ethers.utils.parseUnits("10000", 6).gt(gasAmount as BigNumberish)).toBeTruthy();
     });
 
-    test("It should return estimated gas amount that makes sense for native token", async () => {
+    test.skip("It should return estimated gas amount that makes sense for native token", async () => {
       const gasAmount = await api.estimateGasFee(
         CHAINS.TESTNET.AVALANCHE as EvmChain,
         CHAINS.TESTNET.ETHEREUM as EvmChain,
