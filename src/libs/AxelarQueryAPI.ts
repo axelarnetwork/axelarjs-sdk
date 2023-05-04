@@ -282,13 +282,13 @@ export class AxelarQueryAPI {
     if (!success || !baseFee || !sourceToken) return "0";
 
     const destGasFeeWei = parseUnits(
-      (gasLimit * Number(destToken.gas_price)).toString(),
+      (gasLimit * Number(destToken.gas_price)).toFixed(destToken.decimals),
       destToken.decimals
     );
 
     const minDestGasFeeWei = BigNumber.from(gasLimit).mul(minGasPrice); //minGasPrice already provided by the user in wei
     const srcGasFeeWei = parseUnits(
-      (gasLimit * Number(sourceToken.gas_price)).toString(),
+      (gasLimit * Number(sourceToken.gas_price)).toFixed(sourceToken.decimals),
       sourceToken.decimals
     );
 
