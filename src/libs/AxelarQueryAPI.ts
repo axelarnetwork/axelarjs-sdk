@@ -286,7 +286,7 @@ export class AxelarQueryAPI {
       (gasLimit * Number(destToken.gas_price)).toString(),
       destToken.decimals
     );
-    console.log("MINGASPRICE", minGasPrice);
+
     const minDestGasFeeWei = BigNumber.from(gasLimit).mul(minGasPrice); //minGasPrice already provided by the user in wei
     const srcGasFeeWei = parseUnits(
       (gasLimit * Number(sourceToken.gas_price)).toString(),
@@ -296,11 +296,8 @@ export class AxelarQueryAPI {
     const executionFee = destGasFeeWei.gt(minDestGasFeeWei)
       ? srcGasFeeWei
       : srcGasFeeWei.mul(minDestGasFeeWei).div(destGasFeeWei);
-
     const executionFeeWithMultiplier =
       gasMultiplier > 1 ? executionFee.mul(gasMultiplier * 10000).div(10000) : executionFee;
-
-    console.log("EXECUTIONFEEEEE", executionFee);
 
     return gmpParams?.showDetailedFees
       ? {
