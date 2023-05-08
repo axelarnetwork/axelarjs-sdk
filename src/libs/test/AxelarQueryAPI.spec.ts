@@ -2,7 +2,8 @@ import {
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
-import { BigNumberish, ethers } from "ethers";
+import { BigNumber, BigNumberish, ethers } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { CHAINS } from "../../chains";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment, EvmChain, GasToken } from "../types";
@@ -115,10 +116,6 @@ describe("AxelarQueryAPI", () => {
 
       const minGasPrice = ethers.utils.parseUnits("200", "gwei");
       const gasLimit = ethers.BigNumber.from(700000);
-      const srcGasPrice = ethers.utils.parseEther(feeStub.result.source_token.gas_price);
-      const destGasPrice = ethers.utils.parseEther(
-        feeStub.result.destination_native_token.gas_price
-      );
       const baseFee = ethers.utils.parseEther(feeStub.result.base_fee.toString());
       const gasAmount = await api.estimateGasFee(
         CHAINS.TESTNET.AVALANCHE as EvmChain,
@@ -128,12 +125,22 @@ describe("AxelarQueryAPI", () => {
         1.1,
         minGasPrice.toString()
       );
+      const destGasFeeWei = parseUnits(
+        (
+          gasLimit.toNumber() * Number(feeStub.result.destination_native_token.gas_price)
+        ).toString(),
+        feeStub.result.destination_native_token.decimals
+      );
+      const srcGasFeeWei = parseUnits(
+        (gasLimit.toNumber() * Number(feeStub.result.source_token.gas_price)).toString(),
+        feeStub.result.source_token.decimals
+      );
 
-      const expectedGasAmount = srcGasPrice
+      const expectedGasAmount = BigNumber.from(gasLimit)
         .mul(minGasPrice)
-        .div(destGasPrice)
-        .mul(gasLimit)
-        .mul(ethers.BigNumber.from(1.1 * 10000))
+        .mul(srcGasFeeWei)
+        .div(destGasFeeWei)
+        .mul(1.1 * 10000)
         .div(10000)
         .add(baseFee)
         .toString();

@@ -37,7 +37,6 @@ export interface AxelarQueryAPIFeeResponse {
   executionFeeWithMultiplier: string;
   gasMultiplier: number;
   gasLimit: number;
-  srcGasPrice: string;
   minGasPrice: string;
   apiResponse: any;
   isExpressSupported: boolean;
@@ -282,14 +281,20 @@ export class AxelarQueryAPI {
 
     if (!success || !baseFee || !sourceToken) return "0";
 
-    const destGasPrice = parseUnits(destToken.gas_price, destToken.decimals);
-    let srcGasPrice = parseUnits(sourceToken.gas_price, sourceToken.decimals);
+    const destGasFeeWei = parseUnits(
+      (gasLimit * Number(destToken.gas_price)).toFixed(destToken.decimals),
+      destToken.decimals
+    );
 
-    srcGasPrice = destGasPrice.gt(minGasPrice)
-      ? srcGasPrice
-      : srcGasPrice.mul(minGasPrice).div(destGasPrice);
+    const minDestGasFeeWei = BigNumber.from(gasLimit).mul(minGasPrice); //minGasPrice already provided by the user in wei
+    const srcGasFeeWei = parseUnits(
+      (gasLimit * Number(sourceToken.gas_price)).toFixed(sourceToken.decimals),
+      sourceToken.decimals
+    );
 
-    const executionFee = srcGasPrice.mul(gasLimit);
+    const executionFee = destGasFeeWei.gt(minDestGasFeeWei)
+      ? srcGasFeeWei
+      : srcGasFeeWei.mul(minDestGasFeeWei).div(destGasFeeWei);
     const executionFeeWithMultiplier =
       gasMultiplier > 1 ? executionFee.mul(gasMultiplier * 10000).div(10000) : executionFee;
 
@@ -301,7 +306,6 @@ export class AxelarQueryAPI {
           executionFeeWithMultiplier: executionFeeWithMultiplier.toString(),
           gasLimit,
           gasMultiplier,
-          srcGasPrice: srcGasPrice.toString(),
           minGasPrice: minGasPrice === "0" ? "NA" : minGasPrice,
           apiResponse,
           isExpressSupported: expressSupported,
