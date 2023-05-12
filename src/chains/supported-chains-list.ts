@@ -27,7 +27,7 @@ export const CHAINS = {
     PERSISTENCE: "persistence",
     POLYGON: "Polygon",
     SECRETSNIP: "secret-snip",
-    SECRETSNIP2: "secret-snip-2",
+    SECRETSNIP: "secret-snip-2",
     SEI: "sei",
     TERRA: "terra-3",
     XPLA: "xpla",
