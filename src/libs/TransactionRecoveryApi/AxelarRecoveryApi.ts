@@ -15,6 +15,7 @@ export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
   DEST_GATEWAY_APPROVED = "destination_gateway_approved",
   DEST_EXECUTED = "destination_executed",
+  EXPRESS_EXECUTED = "express_executed",
   DEST_EXECUTE_ERROR = "error",
   DEST_EXECUTING = "executing",
   APPROVING = "approving",
@@ -45,6 +46,7 @@ export interface GMPStatusResponse {
   error?: GMPError;
   callTx?: any;
   executed?: any;
+  expressExecuted?: any;
   approved?: any;
   callback?: any;
 }
@@ -226,7 +228,8 @@ export class AxelarRecoveryApi {
 
     if (!txDetails) return { status: GMPStatus.CANNOT_FETCH_STATUS };
 
-    const { call, gas_status, gas_paid, executed, approved, callback } = txDetails;
+    const { call, gas_status, gas_paid, executed, express_executed, approved, callback } =
+      txDetails;
 
     const gasPaidInfo: GasPaidInfo = {
       status: gas_status,
@@ -253,6 +256,7 @@ export class AxelarRecoveryApi {
       gasPaidInfo,
       callTx: call,
       executed,
+      expressExecuted: express_executed,
       approved,
       callback,
     };

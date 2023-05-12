@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - AxelarRecoveryAPI
   - Fix `queryTransactionStatus` method to accept cosmos-based source chains
+  - Add `expressExecuted` API response into the response object for the `queryTransactionStatus` method
 - AxelarQueryAPI
   - Fix `estimateGasFee` method to allow for cosmos source chains, including adjustments to the way in which the numbers are calculated after swapping between currencies with different decimals
   - Update `GMPParams` in `estimateGasFee` method to accept `amountInUnits`
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - update the delay after transaction confirmation to 60 seconds before it finds the confirmed event on the axelar network (from 30 seconds originally)
 - Add `Filecoin` EVM configs
 - Updated Osmosis testnet to `osmosis-6` that points to `osmo-test-5`
+-
 
 ## [0.12.6] - 2023-MARCH-30
 
