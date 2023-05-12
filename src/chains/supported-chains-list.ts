@@ -26,7 +26,6 @@ export const CHAINS = {
     OSMOSIS: "osmosis-6",
     PERSISTENCE: "persistence",
     POLYGON: "Polygon",
-    SECRETSNIP: "secret-snip",
     SECRETSNIP: "secret-snip-2",
     SEI: "sei",
     TERRA: "terra-3",
