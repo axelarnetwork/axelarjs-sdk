@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.12.7] - 2023-MAY-[]
+## [0.12.7] - 2023-MAY-12
 
 - AxelarRecoveryAPI
   - Fix `queryTransactionStatus` method to accept cosmos-based source chains
@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - update the delay after transaction confirmation to 60 seconds before it finds the confirmed event on the axelar network (from 30 seconds originally)
 - Add `Filecoin` EVM configs
 - Updated Osmosis testnet to `osmosis-6` that points to `osmo-test-5`
--
+- add all current active chains (as of May 12 2023) to the `supported-chains-list` file
 
 ## [0.12.6] - 2023-MARCH-30
 
