@@ -206,39 +206,33 @@ export class AxelarQueryAPI {
       params.amountInUnits = amountInUnits;
     }
 
-    return this.axelarGMPServiceApi
-      .post("", params)
-      .then((response) => {
-        const {
-          source_base_fee_string,
-          source_token,
-          destination_native_token,
-          express_fee_string,
-          express_supported,
-        } = response.result;
-        const { decimals: sourceTokenDecimals } = source_token;
-        const baseFee = parseUnits(source_base_fee_string, sourceTokenDecimals).toString();
-        const expressFee = express_fee_string
-          ? parseUnits(express_fee_string, sourceTokenDecimals).toString()
-          : "0";
-        return {
-          baseFee,
-          expressFee,
-          sourceToken: source_token,
-          destToken: {
-            gas_price: destination_native_token.gas_price,
-            gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
-            decimals: destination_native_token.decimals,
-          },
-          apiResponse: response,
-          success: true,
-          expressSupported: express_supported,
-        };
-      })
-      .catch((e) => {
-        console.error("some kind of issue", e);
-        return {} as any;
-      });
+    return this.axelarGMPServiceApi.post("", params).then((response) => {
+      const {
+        source_base_fee_string,
+        source_token,
+        destination_native_token,
+        express_fee_string,
+        express_supported,
+      } = response.result;
+      const { decimals: sourceTokenDecimals } = source_token;
+      const baseFee = parseUnits(source_base_fee_string, sourceTokenDecimals).toString();
+      const expressFee = express_fee_string
+        ? parseUnits(express_fee_string, sourceTokenDecimals).toString()
+        : "0";
+      return {
+        baseFee,
+        expressFee,
+        sourceToken: source_token,
+        destToken: {
+          gas_price: destination_native_token.gas_price,
+          gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
+          decimals: destination_native_token.decimals,
+        },
+        apiResponse: response,
+        success: true,
+        expressSupported: express_supported,
+      };
+    });
   }
 
   /**
@@ -272,14 +266,14 @@ export class AxelarQueryAPI {
       gmpParams?.sourceContractAddress,
       gmpParams?.transferAmount,
       gmpParams?.transferAmountInUnits
-    ).catch(() => undefined);
-
-    if (!response) return "0";
+    );
 
     const { baseFee, expressFee, sourceToken, destToken, apiResponse, success, expressSupported } =
       response;
 
-    if (!success || !baseFee || !sourceToken) return "0";
+    if (!success || !baseFee || !sourceToken) {
+      throw new Error("Failed to estimate gas fee");
+    }
 
     const destGasFeeWei = parseUnits(
       (gasLimit * Number(destToken.gas_price)).toFixed(destToken.decimals),

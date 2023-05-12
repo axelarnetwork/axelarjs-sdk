@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Add `expressExecuted` API response into the response object for the `queryTransactionStatus` method
 - AxelarQueryAPI
   - Fix `estimateGasFee` method to allow for cosmos source chains, including adjustments to the way in which the numbers are calculated after swapping between currencies with different decimals
+  - Fix: throw error instead of returning 0 in estimateGasFee
   - Update `GMPParams` in `estimateGasFee` method to accept `amountInUnits`
 - AxelarGMPRecoveryAPI
   - update the delay after transaction confirmation to 60 seconds before it finds the confirmed event on the axelar network (from 30 seconds originally)
