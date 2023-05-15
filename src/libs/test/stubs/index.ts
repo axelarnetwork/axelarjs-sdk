@@ -269,6 +269,7 @@ export const getFeeStub = () => ({
       gas_price: "0.000001893353954513",
     },
     source_base_fee: 0.418869692086198,
+    source_base_fee_string: "0.418869692086198",
     destination_native_token: {
       contract_address: "0x0000000000000000000000000000000000000000",
       name: "Ethereum",

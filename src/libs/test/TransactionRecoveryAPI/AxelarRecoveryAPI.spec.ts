@@ -51,6 +51,12 @@ describe("AxelarRecoveryAPI", () => {
       });
     });
 
+    test("it should return a valid result when the source tx is from a cosmos-based chain", async () => {
+      const txHash = "B210DF80331FB40A61229D23DEF849FF04A51839D47F7D696A4B228DB57EED1D";
+      const result = await api.queryTransactionStatus(txHash);
+      expect(result.status).toEqual("destination_executed");
+    });
+
     test("it should return 'GMPStatus.DEST_EXECUTING' when the transaction is still in process", async () => {
       const txHash = "0x123456789";
       const txDetails = {

@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.7] - 2023-MAY-12
+
+- AxelarRecoveryAPI
+  - Fix `queryTransactionStatus` method to accept cosmos-based source chains
+  - Add `expressExecuted` API response into the response object for the `queryTransactionStatus` method
+- AxelarQueryAPI
+  - Fix `estimateGasFee` method to allow for cosmos source chains, including adjustments to the way in which the numbers are calculated after swapping between currencies with different decimals
+  - Fix: throw error instead of returning 0 in estimateGasFee
+  - Update `GMPParams` in `estimateGasFee` method to accept `amountInUnits`
+- AxelarGMPRecoveryAPI
+  - update the delay after transaction confirmation to 60 seconds before it finds the confirmed event on the axelar network (from 30 seconds originally)
+- Add `Filecoin` EVM configs
+- Updated Osmosis testnet to `osmosis-6` that points to `osmo-test-5`
+- add all current active chains (as of May 12 2023) to the `supported-chains-list` file
+- fix issue in generated deposit addresses for `wrap` transactions, addresses https://github.com/axelarnetwork/axelarjs-sdk/issues/267
+
 ## [0.12.6] - 2023-MARCH-30
 
 - AxelarQueryAPI
