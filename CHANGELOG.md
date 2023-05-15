@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add `Filecoin` EVM configs
 - Updated Osmosis testnet to `osmosis-6` that points to `osmo-test-5`
 - add all current active chains (as of May 12 2023) to the `supported-chains-list` file
+- fix issue in generated deposit addresses for `wrap` transactions, addresses https://github.com/axelarnetwork/axelarjs-sdk/issues/267
 
 ## [0.12.6] - 2023-MARCH-30
 

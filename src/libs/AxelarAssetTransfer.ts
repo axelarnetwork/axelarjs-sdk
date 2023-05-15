@@ -239,7 +239,7 @@ export class AxelarAssetTransfer {
       wrapOrUnWrap === "wrap"
         ? receiverInterface.encodeFunctionData("receiveAndSendNative", [
             refundAddress,
-            toChain,
+            toChain.toLowerCase(),
             destinationAddress,
           ])
         : receiverInterface.encodeFunctionData("receiveAndUnwrapNative", [
