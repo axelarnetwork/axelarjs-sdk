@@ -47,7 +47,7 @@
     "clone-deep": "^4.0.1",
     "cross-fetch": "^3.1.5",
     "ethers": "^5.4.7",
-    "socket.io-client": "^4.2.0",
+    "socket.io-client": "^4.6.1",
     "standard-http-error": "^2.0.1",
     "string-similarity-js": "^2.1.4",
     "uuid": "^8.3.2",
