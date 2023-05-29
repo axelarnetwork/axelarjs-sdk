@@ -4,3 +4,7 @@
 *.idea
 *.DS_store
 cache
+
+# lockfiles that shouldn't be tracked since we're using pnpm
+package-lock.json
+yarn.lock
