@@ -27,6 +27,7 @@ import { CHAINS, loadChains } from "../chains";
 import { AxelarQueryAPI } from "./AxelarQueryAPI";
 import { Coin, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { SigningStargateClient, StdFee } from "@cosmjs/stargate";
+import Long from "long";
 const { HashZero } = constants;
 
 interface GetDepositAddressOptions {
@@ -50,9 +51,8 @@ interface CosmosSendTokenOptions {
   cosmosDirectSigner: OfflineDirectSigner;
   rpcUrl: string;
   transferAmount: Coin;
-  sourceChannel: string;
-  timeoutHeight: Height;
-  timeoutTimestamp: number | undefined;
+  timeoutHeight?: Height;
+  timeoutTimestamp?: number | undefined;
   fee: StdFee | "auto" | number;
 }
 interface GetDepositAddressParams {
@@ -63,7 +63,7 @@ interface GetDepositAddressParams {
   options?: GetDepositAddressOptions;
 }
 
-interface SendTokenParams {
+export interface SendTokenParams {
   fromChain: string;
   toChain: string;
   destinationAddress: string;
@@ -315,14 +315,14 @@ export class AxelarAssetTransfer {
 
     return srcChainInfo.module === "evm"
       ? this.sendTokenFromEvmChain(requestParams)
-      : this.sendTokenFromCosmosChain(requestParams);
+      : this.sendTokenFromCosmosChain(requestParams, srcChainInfo);
   }
 
   private async sendTokenFromEvmChain(requestParams: SendTokenParams) {
     //todo
   }
 
-  private async sendTokenFromCosmosChain(requestParams: SendTokenParams) {
+  private async sendTokenFromCosmosChain(requestParams: SendTokenParams, chain: ChainInfo) {
     if (!requestParams.options?.cosmosSendTokenOptions) throw `need a cosmos signer`;
     const {
       fromChain,
@@ -332,7 +332,6 @@ export class AxelarAssetTransfer {
         cosmosSendTokenOptions: {
           cosmosDirectSigner,
           rpcUrl,
-          sourceChannel,
           transferAmount,
           timeoutHeight,
           timeoutTimestamp,
@@ -361,9 +360,12 @@ export class AxelarAssetTransfer {
       AXELAR_GMP_ACCOUNT_ADDRESS,
       transferAmount,
       "transfer",
-      sourceChannel,
-      timeoutHeight,
-      timeoutTimestamp,
+      chain.channelIdToAxelar as string,
+      timeoutHeight ?? {
+        revisionHeight: Long.fromNumber(10),
+        revisionNumber: Long.fromNumber(10),
+      },
+      timeoutTimestamp ?? 0,
       fee,
       memo
     );
