@@ -21,10 +21,12 @@ import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositRe
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 
-import { constants } from "ethers";
+import { constants, ethers, Signer } from "ethers";
 import { ChainInfo } from "../chains/types";
-import { loadChains } from "../chains";
+import { CHAINS, loadChains } from "../chains";
 import { AxelarQueryAPI } from "./AxelarQueryAPI";
+import { Coin, OfflineDirectSigner } from "@cosmjs/proto-signing";
+import { SigningStargateClient, StdFee } from "@cosmjs/stargate";
 const { HashZero } = constants;
 
 interface GetDepositAddressOptions {
@@ -34,12 +36,41 @@ interface GetDepositAddressOptions {
   erc20DepositAddressType?: "network" | "offline";
 }
 
+interface EVMSendTokenOptions {
+  symbol: string;
+  signer: Signer;
+}
+interface Height {
+  /** the revision that the client is currently on */
+  revisionNumber: Long;
+  /** the height within the given revision */
+  revisionHeight: Long;
+}
+interface CosmosSendTokenOptions {
+  cosmosDirectSigner: OfflineDirectSigner;
+  rpcUrl: string;
+  transferAmount: Coin;
+  sourceChannel: string;
+  timeoutHeight: Height;
+  timeoutTimestamp: number | undefined;
+  fee: StdFee | "auto" | number;
+}
 interface GetDepositAddressParams {
   fromChain: string;
   toChain: string;
   destinationAddress: string;
   asset: string;
   options?: GetDepositAddressOptions;
+}
+
+interface SendTokenParams {
+  fromChain: string;
+  toChain: string;
+  destinationAddress: string;
+  options?: {
+    evmSendTokenOptions?: EVMSendTokenOptions;
+    cosmosSendTokenOptions?: CosmosSendTokenOptions;
+  };
 }
 
 export class AxelarAssetTransfer {
@@ -264,6 +295,78 @@ export class AxelarAssetTransfer {
       )
     );
     return address.toLowerCase();
+  }
+
+  /**
+   * @param {Object}  requestParams
+   * @param {string}  requestParams.fromChain - Source chain identifier eg: avalanche, moonbeam ethereum-2, terra-2 ...
+   * @param {string}  requestParams.toChain - Destination chain identifier eg: avalanche, moonbeam ethereum-2, terra-2 ...
+   * @param {string}  requestParams.destinationAddress - Address where the asset should be transferred to on the destination chain
+   * @param {Object}  requestParams.options
+   */
+  public async sendToken(requestParams: SendTokenParams) {
+    const { fromChain, toChain } = requestParams;
+
+    await throwIfInvalidChainIds([fromChain, toChain], this.environment);
+
+    const chainList: ChainInfo[] = await loadChains({ environment: this.environment });
+    const srcChainInfo = chainList.find((ch) => ch.id === fromChain.toLowerCase());
+    if (!srcChainInfo) throw new Error("cannot find chain" + fromChain);
+
+    return srcChainInfo.module === "evm"
+      ? this.sendTokenFromEvmChain(requestParams)
+      : this.sendTokenFromCosmosChain(requestParams);
+  }
+
+  private async sendTokenFromEvmChain(requestParams: SendTokenParams) {
+    //todo
+  }
+
+  private async sendTokenFromCosmosChain(requestParams: SendTokenParams) {
+    if (!requestParams.options?.cosmosSendTokenOptions) throw `need a cosmos signer`;
+    const {
+      fromChain,
+      toChain: destination_chain,
+      destinationAddress: destination_address,
+      options: {
+        cosmosSendTokenOptions: {
+          cosmosDirectSigner,
+          rpcUrl,
+          sourceChannel,
+          transferAmount,
+          timeoutHeight,
+          timeoutTimestamp,
+          fee,
+        },
+      },
+    } = requestParams;
+    if (fromChain === CHAINS[this.environment.toUpperCase() as "TESTNET" | "MAINNET"].AXELAR)
+      throw `sending cross-chain using sendToken directly from Axelar network is currently not supported`;
+
+    const memo = JSON.stringify({
+      destination_chain,
+      destination_address,
+      payload: null,
+      type: 3, // type 3 corresponds to the `sendToken` command on Axelar
+    });
+
+    const signingClient = await SigningStargateClient.connectWithSigner(rpcUrl, cosmosDirectSigner);
+    const { address: senderAddress } = (await cosmosDirectSigner.getAccounts())[0];
+
+    const AXELAR_GMP_ACCOUNT_ADDRESS =
+      "axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5";
+
+    return signingClient.sendIbcTokens(
+      senderAddress,
+      AXELAR_GMP_ACCOUNT_ADDRESS,
+      transferAmount,
+      "transfer",
+      sourceChannel,
+      timeoutHeight,
+      timeoutTimestamp,
+      fee,
+      memo
+    );
   }
 
   /**
