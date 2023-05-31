@@ -4,66 +4,49 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  # bump-version:
-  #   name: "Bump version and publish alpha version"
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     commit-sha: ${{ steps.latest-commit.outputs.SHA }}
-  #   steps:
-  #     - name: "Checkout source code"
-  #       uses: "actions/checkout@v3"
-  #     - uses: "actions/setup-node@v2"
-  #       with:
-  #         node-version: 16
-  #         registry-url: "https://registry.npmjs.org"
-  #     - name: "Current version in package.json"
-  #       run: cat ./package.json | grep version
-  #     - name: "Automated Version Bump"
-  #       id: version-bump
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       uses: "phips28/gh-action-bump-version@master"
-  #       with:
-  #         default: prerelease
-  #         preid: "alpha"
-  #         skip-tag: true
-  #         patch-wording: "patch"
-  #         rc-wording: ""
-  #         bump-policy: "last-commit"
-  #         commit-message: "Publish pre-alpha version to {{version}}"
-  #     - name: "Updated version in package.json"
-  #       run: cat ./package.json | grep version
-  #     - name: "Get latest commit"
-  #       id: latest-commit
-  #       run: |
-  #         sha_new=$(git rev-parse HEAD)
-  #         echo $sha_new
-  #         echo "::set-output name=SHA::$sha_new"
-  #     # - run: echo ${{ steps.latest-commit.outputs.SHA }}
-
   publish-npm:
     name: "Publish npm"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           ref: ${{ needs.bump-version.outputs.commit-sha }}
-      - uses: actions/setup-node@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 16
-          registry-url: "https://registry.npmjs.org"
-      - uses: actions/cache@v3
-        id: npm-cache
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        id: pnpm-install
         with:
-          path: ./node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Install dependencies for .
-        if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm i --ignore-scripts
-      - run: npm run build
-      - run: npm publish --tag alpha
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish to npm
+        run: npm publish --tag alpha
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

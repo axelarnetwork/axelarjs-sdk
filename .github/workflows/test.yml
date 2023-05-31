@@ -10,21 +10,37 @@ jobs:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Git repository
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: Set up Node.js
+
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
-      - uses: actions/cache@v3
-        id: npm-cache
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        id: pnpm-install
         with:
-          path: ./node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Install dependencies for .
-        if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm i --ignore-scripts
-      - name: Running tests
-        run: npm run test
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests
+        run: pnpm test
