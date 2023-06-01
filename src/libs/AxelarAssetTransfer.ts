@@ -26,8 +26,10 @@ import { ChainInfo } from "../chains/types";
 import { CHAINS, loadChains } from "../chains";
 import { AxelarQueryAPI } from "./AxelarQueryAPI";
 import { Coin, OfflineDirectSigner } from "@cosmjs/proto-signing";
-import { SigningStargateClient, StdFee } from "@cosmjs/stargate";
+import { MsgTransferEncodeObject, SigningStargateClient, StdFee } from "@cosmjs/stargate";
 import Long from "long";
+import { MsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx";
+
 const { HashZero } = constants;
 
 interface GetDepositAddressOptions {
@@ -41,17 +43,12 @@ interface EVMSendTokenOptions {
   symbol: string;
   signer: Signer;
 }
-interface Height {
-  /** the revision that the client is currently on */
-  revisionNumber: Long;
-  /** the height within the given revision */
-  revisionHeight: Long;
-}
+
 interface CosmosSendTokenOptions {
   cosmosDirectSigner: OfflineDirectSigner;
   rpcUrl: string;
   transferAmount: Coin;
-  timeoutHeight?: Height;
+  timeoutHeight?: any;
   timeoutTimestamp?: number | undefined;
   fee: StdFee | "auto" | number;
 }
@@ -355,20 +352,44 @@ export class AxelarAssetTransfer {
     const AXELAR_GMP_ACCOUNT_ADDRESS =
       "axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5";
 
-    return signingClient.sendIbcTokens(
-      senderAddress,
-      AXELAR_GMP_ACCOUNT_ADDRESS,
-      transferAmount,
-      "transfer",
-      chain.channelIdToAxelar as string,
-      timeoutHeight ?? {
+    const typeUrl = "/ibc.applications.transfer.v1.MsgTransfer";
+    const value = MsgTransfer.fromPartial({
+      sender: senderAddress,
+      receiver: AXELAR_GMP_ACCOUNT_ADDRESS,
+      token: transferAmount,
+      sourceChannel: chain.channelIdToAxelar,
+      sourcePort: "transfer",
+      timeoutHeight: timeoutHeight ?? {
         revisionHeight: Long.fromNumber(10),
         revisionNumber: Long.fromNumber(10),
       },
-      timeoutTimestamp ?? 0,
-      fee,
-      memo
-    );
+      timeoutTimestamp: timeoutTimestamp ?? 0,
+      memo,
+    });
+
+    const payload: MsgTransferEncodeObject[] = [
+      {
+        typeUrl,
+        value,
+      },
+    ];
+
+    return signingClient.signAndBroadcast(senderAddress, payload, fee, memo);
+
+    // return signingClient.sendIbcTokens(
+    //   senderAddress,
+    //   AXELAR_GMP_ACCOUNT_ADDRESS,
+    //   transferAmount,
+    //   "transfer",
+    //   chain.channelIdToAxelar as string,
+    //   timeoutHeight ?? {
+    //     revisionHeight: Long.fromNumber(10),
+    //     revisionNumber: Long.fromNumber(10),
+    //   },
+    //   timeoutTimestamp ?? 0,
+    //   fee,
+    //   memo
+    // );
   }
 
   /**
