@@ -374,7 +374,7 @@ export class AxelarAssetTransfer {
       },
     ];
 
-    return signingClient.signAndBroadcast(senderAddress, payload, fee, memo);
+    return signingClient.signAndBroadcast(senderAddress, payload, fee);
 
     // return signingClient.sendIbcTokens(
     //   senderAddress,
