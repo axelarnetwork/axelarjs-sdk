@@ -25,7 +25,7 @@ import { constants, ethers, Signer } from "ethers";
 import { ChainInfo } from "../chains/types";
 import { CHAINS, loadChains } from "../chains";
 import { AxelarQueryAPI } from "./AxelarQueryAPI";
-import { Coin, OfflineDirectSigner } from "@cosmjs/proto-signing";
+import { Coin, EncodeObject, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { MsgTransferEncodeObject, SigningStargateClient, StdFee } from "@cosmjs/stargate";
 import Long from "long";
 import { MsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx";
@@ -44,10 +44,11 @@ interface EVMSendTokenOptions {
   signer: Signer;
 }
 
+export type PopulateTransactionParams = SendTokenParams | undefined;
+
 interface CosmosSendTokenOptions {
   cosmosDirectSigner: OfflineDirectSigner;
   rpcUrl: string;
-  transferAmount: Coin;
   timeoutHeight?: any;
   timeoutTimestamp?: number | undefined;
   fee: StdFee | "auto" | number;
@@ -64,6 +65,7 @@ export interface SendTokenParams {
   fromChain: string;
   toChain: string;
   destinationAddress: string;
+  coin: Coin;
   options?: {
     evmSendTokenOptions?: EVMSendTokenOptions;
     cosmosSendTokenOptions?: CosmosSendTokenOptions;
@@ -79,6 +81,7 @@ export class AxelarAssetTransfer {
   readonly axelarQueryApi: AxelarQueryAPI;
   private evmDenomMap: Record<string, string> = {};
   private staticInfo: Record<string, any>;
+  private chains: ChainInfo[];
 
   constructor(config: AxelarAssetTransferConfig) {
     const configs = getConfigs(config.environment);
@@ -306,90 +309,105 @@ export class AxelarAssetTransfer {
 
     await throwIfInvalidChainIds([fromChain, toChain], this.environment);
 
-    const chainList: ChainInfo[] = await loadChains({ environment: this.environment });
+    const chainList: ChainInfo[] = await this.getChains();
     const srcChainInfo = chainList.find((ch) => ch.id === fromChain.toLowerCase());
     if (!srcChainInfo) throw new Error("cannot find chain" + fromChain);
 
     return srcChainInfo.module === "evm"
       ? this.sendTokenFromEvmChain(requestParams)
-      : this.sendTokenFromCosmosChain(requestParams, srcChainInfo);
+      : this.sendTokenFromCosmosChain(requestParams);
   }
 
-  private async sendTokenFromEvmChain(requestParams: SendTokenParams) {
+  public async sendTokenFromEvmChain(requestParams: SendTokenParams) {
     //todo
   }
 
-  private async sendTokenFromCosmosChain(requestParams: SendTokenParams, chain: ChainInfo) {
+  private async getChains() {
+    if (!this.chains) {
+      this.chains = await loadChains({ environment: this.environment });
+    }
+    return this.chains;
+  }
+
+  public async sendTokenFromCosmosChain(requestParams: SendTokenParams) {
+    if (!requestParams.options?.cosmosSendTokenOptions) throw `need a cosmos signer`;
+    const {
+      options: {
+        cosmosSendTokenOptions: { cosmosDirectSigner, rpcUrl, fee },
+      },
+    } = requestParams;
+    const signingClient = await SigningStargateClient.connectWithSigner(rpcUrl, cosmosDirectSigner);
+    const { address: senderAddress } = (await cosmosDirectSigner.getAccounts())[0];
+    const payload = (await this.populateUnsignedTx().sendToken(requestParams)).getTx();
+    return signingClient.signAndBroadcast(senderAddress, payload, fee);
+  }
+
+  public populateUnsignedTx() {
+    let tx: EncodeObject[];
+    const api = this;
+
+    const txBuilder = {
+      async sendToken(params: SendTokenParams) {
+        tx = await api.generateUnsignedSendTokenTx(params);
+        return txBuilder;
+      },
+      getTx(): EncodeObject[] {
+        return tx;
+      },
+    };
+
+    return txBuilder;
+  }
+
+  private async generateUnsignedSendTokenTx(
+    requestParams: SendTokenParams
+  ): Promise<EncodeObject[]> {
     if (!requestParams.options?.cosmosSendTokenOptions) throw `need a cosmos signer`;
     const {
       fromChain,
       toChain: destination_chain,
       destinationAddress: destination_address,
+      coin,
       options: {
-        cosmosSendTokenOptions: {
-          cosmosDirectSigner,
-          rpcUrl,
-          transferAmount,
-          timeoutHeight,
-          timeoutTimestamp,
-          fee,
-        },
+        cosmosSendTokenOptions: { cosmosDirectSigner, timeoutHeight, timeoutTimestamp },
       },
     } = requestParams;
     if (fromChain === CHAINS[this.environment.toUpperCase() as "TESTNET" | "MAINNET"].AXELAR)
       throw `sending cross-chain using sendToken directly from Axelar network is currently not supported`;
+    const chainList: ChainInfo[] = await this.getChains();
+    const chain = chainList.find((ch) => ch.id === fromChain.toLowerCase());
+    if (!chain) throw new Error("cannot find chain" + fromChain);
 
     const memo = JSON.stringify({
       destination_chain,
       destination_address,
       payload: null,
-      type: 3, // type 3 corresponds to the `sendToken` command on Axelar
+      type: 3, // corresponds to the `sendToken` command on Axelar
     });
 
-    const signingClient = await SigningStargateClient.connectWithSigner(rpcUrl, cosmosDirectSigner);
     const { address: senderAddress } = (await cosmosDirectSigner.getAccounts())[0];
 
     const AXELAR_GMP_ACCOUNT_ADDRESS =
       "axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5";
 
-    const typeUrl = "/ibc.applications.transfer.v1.MsgTransfer";
-    const value = MsgTransfer.fromPartial({
-      sender: senderAddress,
-      receiver: AXELAR_GMP_ACCOUNT_ADDRESS,
-      token: transferAmount,
-      sourceChannel: chain.channelIdToAxelar,
-      sourcePort: "transfer",
-      timeoutHeight: timeoutHeight ?? {
-        revisionHeight: Long.fromNumber(10),
-        revisionNumber: Long.fromNumber(10),
-      },
-      timeoutTimestamp: timeoutTimestamp ?? 0,
-      memo,
-    });
-
-    const payload: MsgTransferEncodeObject[] = [
+    return [
       {
-        typeUrl,
-        value,
+        typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+        value: MsgTransfer.fromPartial({
+          sender: senderAddress,
+          receiver: AXELAR_GMP_ACCOUNT_ADDRESS,
+          token: coin,
+          sourceChannel: chain.channelIdToAxelar,
+          sourcePort: "transfer",
+          timeoutHeight: timeoutHeight ?? {
+            revisionHeight: Long.fromNumber(10),
+            revisionNumber: Long.fromNumber(10),
+          },
+          timeoutTimestamp: timeoutTimestamp ?? 0,
+          memo,
+        }),
       },
     ];
-
-    return signingClient.signAndBroadcast(senderAddress, payload, fee);
-
-    // return signingClient.sendIbcTokens(
-    //   senderAddress,
-    //   AXELAR_GMP_ACCOUNT_ADDRESS,
-    //   transferAmount,
-    //   "transfer",
-    //   chain.channelIdToAxelar as string,
-    //   timeoutHeight ?? {
-    //     revisionHeight: Long.fromNumber(10),
-    //     revisionNumber: Long.fromNumber(10),
-    //   },
-    //   timeoutTimestamp ?? 0,
-    //   fee,
-    //   memo
-    // );
   }
 
   /**

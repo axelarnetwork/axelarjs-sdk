@@ -587,20 +587,20 @@ describe("AxelarAssetTransfer", () => {
           gas: "250000",
           amount: [{ denom: "uosmo", amount: "30000" }],
         };
-        const transferAmount: Coin = {
+        const coin: Coin = {
           denom: "ibc/9463E39D230614B313B487836D13A392BD1731928713D4C8427A083627048DB3",
           amount: "150000",
         };
         const requestOptions: SendTokenParams = {
           fromChain: CHAINS.TESTNET.OSMOSIS,
           toChain: CHAINS.TESTNET.AVALANCHE,
+          coin,
           destinationAddress: "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
           options: {
             cosmosSendTokenOptions: {
               cosmosDirectSigner: offlineSigner,
               rpcUrl,
               fee,
-              transferAmount,
             },
           },
         };
