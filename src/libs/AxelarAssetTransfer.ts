@@ -16,7 +16,16 @@ import {
   validateDestinationAddressByChainName,
 } from "../utils";
 import { EnvironmentConfigs, getConfigs } from "../constants";
-import { AxelarAssetTransferConfig, Environment, GasToken, isNativeToken } from "./types";
+import {
+  AxelarAssetTransferConfig,
+  CosmosChain,
+  Environment,
+  EvmChain,
+  GasToken,
+  isNativeToken,
+  SendTokenArgs,
+  TxOption,
+} from "./types";
 import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
@@ -29,6 +38,7 @@ import { Coin, EncodeObject, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { MsgTransferEncodeObject, SigningStargateClient, StdFee } from "@cosmjs/stargate";
 import Long from "long";
 import { MsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx";
+import { AxelarGateway } from "./AxelarGateway";
 
 const { HashZero } = constants;
 
@@ -40,8 +50,9 @@ interface GetDepositAddressOptions {
 }
 
 interface EVMSendTokenOptions {
-  symbol: string;
   signer: Signer;
+  provider: ethers.providers.Provider;
+  txOptions: TxOption;
 }
 
 export type PopulateTransactionParams = SendTokenParams | undefined;
@@ -65,7 +76,11 @@ export interface SendTokenParams {
   fromChain: string;
   toChain: string;
   destinationAddress: string;
-  coin: Coin;
+  coin?: Coin;
+  evmToken?: {
+    symbol: string;
+    amountInAtomicUnits: string;
+  };
   options?: {
     evmSendTokenOptions?: EVMSendTokenOptions;
     cosmosSendTokenOptions?: CosmosSendTokenOptions;
@@ -319,7 +334,25 @@ export class AxelarAssetTransfer {
   }
 
   public async sendTokenFromEvmChain(requestParams: SendTokenParams) {
-    //todo
+    if (!requestParams?.options?.evmSendTokenOptions?.provider) throw `need a provider`;
+    if (!requestParams?.options?.evmSendTokenOptions?.signer) throw `need a signer`;
+    const gateway = await AxelarGateway.create(
+      this.environment,
+      requestParams.fromChain as EvmChain,
+      requestParams.options?.evmSendTokenOptions?.provider
+    );
+    const sendTokenArgs: SendTokenArgs = {
+      destinationChain: requestParams.toChain as EvmChain | CosmosChain,
+      destinationAddress: requestParams.destinationAddress,
+      symbol: requestParams.evmToken?.symbol as string,
+      amount: requestParams.evmToken?.amountInAtomicUnits as string,
+    };
+    const sentTokenTx = await gateway.createSendTokenTx(sendTokenArgs);
+
+    return sentTokenTx.send(
+      requestParams.options.evmSendTokenOptions.signer,
+      requestParams.options.evmSendTokenOptions.txOptions
+    );
   }
 
   private async getChains() {

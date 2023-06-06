@@ -9,6 +9,7 @@ import {
 } from "./types";
 import erc20Abi from "./abi/erc20Abi.json";
 import { GatewayTx } from "./GatewayTx";
+import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 
 export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string>>> = {
   [Environment.MAINNET]: {
@@ -74,12 +75,19 @@ export class AxelarGateway {
    * @param provider evm provider to read value from the contract.
    * @returns AxelarGateway instance
    */
-  static create(
+  static async create(
     env: Environment,
     chain: EvmChain,
     provider: ethers.providers.Provider
-  ): AxelarGateway {
-    return new AxelarGateway(AXELAR_GATEWAY[env][chain] as string, provider);
+  ): Promise<AxelarGateway> {
+    let gatewayAddr = AXELAR_GATEWAY[env][chain];
+    if (!gatewayAddr) {
+      const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient({
+        environment: env,
+      });
+      gatewayAddr = (await api.evm.GatewayAddress({ chain }))?.address;
+    }
+    return new AxelarGateway(gatewayAddr as string, provider);
   }
 
   async createCallContractTx(args: CallContractTxArgs): Promise<GatewayTx> {
