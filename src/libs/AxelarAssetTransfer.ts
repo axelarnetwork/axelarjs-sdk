@@ -354,12 +354,11 @@ export class AxelarAssetTransfer {
           requestParams.options.evmSendTokenOptions.provider
         )
       );
-      (
-        await tokenContract.approve(
-          gateway.getGatewayAddress,
-          requestParams.evmToken.amountInAtomicUnits
-        )
-      ).wait(1);
+      const approveTx = await tokenContract.approve(
+        gateway.getGatewayAddress,
+        requestParams.evmToken.amountInAtomicUnits
+      );
+      await approveTx.wait();
     }
 
     const sendTokenArgs: SendTokenArgs = {
