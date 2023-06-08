@@ -30,7 +30,7 @@ import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositRe
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 
-import { constants, ethers, Signer } from "ethers";
+import { constants, Contract, ethers, Signer } from "ethers";
 import { ChainInfo } from "../chains/types";
 import { CHAINS, loadChains } from "../chains";
 import { AxelarQueryAPI } from "./AxelarQueryAPI";
@@ -39,6 +39,7 @@ import { MsgTransferEncodeObject, SigningStargateClient, StdFee } from "@cosmjs/
 import Long from "long";
 import { MsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx";
 import { AxelarGateway } from "./AxelarGateway";
+import erc20Abi from "./abi/erc20Abi.json";
 
 const { HashZero } = constants;
 
@@ -52,7 +53,8 @@ interface GetDepositAddressOptions {
 interface EVMSendTokenOptions {
   signer: Signer;
   provider: ethers.providers.Provider;
-  txOptions: TxOption;
+  txOptions?: TxOption;
+  approveSendForMe?: boolean;
 }
 
 export type PopulateTransactionParams = SendTokenParams | undefined;
@@ -336,11 +338,30 @@ export class AxelarAssetTransfer {
   public async sendTokenFromEvmChain(requestParams: SendTokenParams) {
     if (!requestParams?.options?.evmSendTokenOptions?.provider) throw `need a provider`;
     if (!requestParams?.options?.evmSendTokenOptions?.signer) throw `need a signer`;
+    if (!requestParams.evmToken) throw `need a token`;
+
     const gateway = await AxelarGateway.create(
       this.environment,
       requestParams.fromChain as EvmChain,
       requestParams.options?.evmSendTokenOptions?.provider
     );
+
+    if (requestParams?.options?.evmSendTokenOptions?.approveSendForMe) {
+      const tokenContract = new Contract(
+        await gateway.getTokenAddress(requestParams.evmToken?.symbol),
+        erc20Abi,
+        requestParams.options.evmSendTokenOptions.signer.connect(
+          requestParams.options.evmSendTokenOptions.provider
+        )
+      );
+      (
+        await tokenContract.approve(
+          gateway.getGatewayAddress,
+          requestParams.evmToken.amountInAtomicUnits
+        )
+      ).wait(1);
+    }
+
     const sendTokenArgs: SendTokenArgs = {
       destinationChain: requestParams.toChain as EvmChain | CosmosChain,
       destinationAddress: requestParams.destinationAddress,

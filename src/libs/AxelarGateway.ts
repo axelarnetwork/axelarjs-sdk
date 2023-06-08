@@ -44,15 +44,17 @@ export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string
 export class AxelarGateway {
   private contract: ethers.Contract;
   private provider: ethers.providers.Provider;
+  private gatewayAddress: string;
 
   /**
    * @param contractAddress axelar gateway's contract address.
    * @param provider evm provider to read value from the contract.
    */
-  constructor(contractAddress: string, provider: ethers.providers.Provider) {
+  constructor(gatewayAddress: string, provider: ethers.providers.Provider) {
     this.provider = provider;
+    this.gatewayAddress = gatewayAddress;
     this.contract = new ethers.Contract(
-      contractAddress,
+      gatewayAddress,
       [
         "event ContractCallWithToken(address indexed _from, string _sourceChain, string _destinationChain, bytes32 _txHash, bytes _data, string _token, uint256 _amount)",
         "event ContractCall(address indexed sender,string destinationChain,string destinationContractAddress,bytes32 indexed payloadHash,bytes payload)",
@@ -98,6 +100,10 @@ export class AxelarGateway {
     );
 
     return new GatewayTx(unsignedTx, this.provider);
+  }
+
+  get getGatewayAddress() {
+    return this.gatewayAddress;
   }
 
   async createCallContractWithTokenTx(args: CallContractWithTokenTxArgs): Promise<GatewayTx> {
