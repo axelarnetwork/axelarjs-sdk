@@ -244,8 +244,8 @@ export enum ApproveGatewayError {
 export interface ApproveGatewayResponse {
   success: boolean;
   error?: ApproveGatewayError | string;
-  confirmTx?: AxelarTxResponse | null;
-  signCommandTx?: AxelarTxResponse | null;
+  confirmTx?: AxelarTxResponse;
+  signCommandTx?: AxelarTxResponse;
   approveTx?: any;
   infoLogs?: string[];
 }

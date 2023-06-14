@@ -306,7 +306,6 @@ describe("AxelarGMPRecoveryAPI", () => {
         errorMessage: `findEventAndConfirmIfNeeded(): could not confirm event successfully`,
         commandId: "",
         eventResponse: {} as EventResponse,
-        confirmTx: null,
         infoLogs: [""],
       });
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");

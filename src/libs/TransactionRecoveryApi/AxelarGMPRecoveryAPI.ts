@@ -10,7 +10,6 @@ import {
   ApproveGatewayError,
   ApproveGatewayResponse,
   AxelarTxResponse,
-  CosmosChain,
 } from "../types";
 import {
   AxelarRecoveryApi,
@@ -40,8 +39,6 @@ import {
   ContractCallError,
   ExecutionRevertedError,
   GasPriceAPIError,
-  // GMPErrorMap,
-  // GMPErrorResponse,
   GMPQueryError,
   InsufficientFundsError,
   InvalidGasTokenError,
@@ -51,19 +48,11 @@ import {
   UnsupportedGasTokenError,
 } from "./constants/error";
 import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
-import { sleep, throwIfInvalidChainIds, validateChainIdentifier } from "../../utils";
+import { sleep, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
-import {
-  ExecuteMessageRequest,
-  protobufPackage as AxelarProtobufPackage,
-} from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/tx";
 import { Interface } from "ethers/lib/utils";
-import { loadChains } from "src/chains";
 import { ChainInfo } from "src/chains/types";
-import { toAccAddress } from "@cosmjs/stargate/build/queryclient/utils";
-import { fromHex } from "@cosmjs/encoding";
-import { broadcastCosmosTx } from "./client/helpers/cosmos";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -72,32 +61,45 @@ export const GMPErrorMap: Record<string, ApproveGatewayError> = {
 };
 
 interface ConfirmTxSDKResponse {
-  confirmTx: AxelarTxResponse | null;
   success: boolean;
   errorMessage: string;
   infoLogs: string[];
   commandId: string;
-  eventResponse: EventResponse | null;
+  confirmTx?: AxelarTxResponse;
+  eventResponse?: EventResponse;
 }
 
 interface SignTxSDKResponse {
   success: boolean;
   errorMessage: string;
-  signCommandTx: AxelarTxResponse | null;
+  signCommandTx?: AxelarTxResponse;
   infoLogs: string[];
 }
 
 interface BroadcastTxSDKResponse {
   success: boolean;
   errorMessage: string;
-  approveTx: AxelarTxResponse | null;
+  approveTx?: AxelarTxResponse;
   infoLogs: string[];
 }
 
-export const GMPErrorResponse = (error: ApproveGatewayError, errorDetails?: string) => ({
-  success: false,
-  error: errorDetails || error,
-});
+// export const GMPErrorResponse = (error: ApproveGatewayError, errorDetails?: string) => ({
+//   success: false,
+//   error: errorDetails || error,
+// });
+
+interface GMPRecoveryError {
+  success: false;
+  error: string;
+}
+
+interface GMPRecoverySuccess {
+  success: true;
+  infoLogs: string[];
+  signCommandTx?: AxelarTxResponse;
+  approveTx?: AxelarTxResponse;
+  confirmTx?: AxelarTxResponse;
+}
 
 enum RouteDir {
   COSMOS_TO_EVM = "cosmos_to_evm",
@@ -235,12 +237,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     sleepSeconds = 60
   ): Promise<ConfirmTxSDKResponse> {
     const res: ConfirmTxSDKResponse = {
-      confirmTx: null,
       success: true,
       errorMessage: "",
       infoLogs: [],
       commandId: "",
-      eventResponse: null,
     };
     let confirmLog = "";
 
@@ -264,7 +264,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
       res.confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch((e) => {
         console.error(e);
-        return null;
+        return undefined;
       });
       if (!res.confirmTx) {
         res.success = false;
@@ -304,7 +304,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const res: SignTxSDKResponse = {
       success: true,
       errorMessage: "",
-      signCommandTx: null,
       infoLogs: [],
     };
 
@@ -341,7 +340,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       return {
         success: false,
         errorMessage: `findBatchAndBroadcast(): this recovery stalled out on waiting for signing. please try again later. `,
-        approveTx: null,
         infoLogs: [],
       };
 
@@ -352,7 +350,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const res: BroadcastTxSDKResponse = {
       success: true,
       errorMessage: "",
-      approveTx: null,
       infoLogs: [],
     };
 
@@ -412,7 +409,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const { callTx, status } = await this.queryTransactionStatus(txHash);
 
     /**first check if transaction is already executed */
-    if (GMPErrorMap[status]) return GMPErrorResponse(GMPErrorMap[status]);
+    if (GMPErrorMap[status])
+      return {
+        success: false,
+        error: GMPErrorMap[status],
+      };
     const srcChain: string = callTx.chain;
     const destChain: string = callTx.returnValues.destinationChain;
     const srcChainInfo = await this.getChainInfo(srcChain);
@@ -460,70 +461,66 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     evmWalletDetails?: EvmWalletDetails,
     escapeAfterConfirm = true
   ) {
-    let confirmTx: AxelarTxResponse | null = null;
-
-    let infoLogs: string[] = [];
-    let commandId = "";
-
     const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
-    /**find event and confirm if needed */
-    let confirmTxRequest;
     try {
-      confirmTxRequest = await this.findEventAndConfirmIfNeeded(
+      const confirmTxRequest = await this.findEventAndConfirmIfNeeded(
         srcChain,
         destChain,
         txHash,
         _evmWalletDetails
       );
-      confirmTx = confirmTxRequest.confirmTx;
-      commandId = confirmTxRequest.commandId;
-      if (confirmTxRequest.infoLogs) infoLogs = [...infoLogs, ...confirmTxRequest.infoLogs];
-    } catch (e: any) {
-      return GMPErrorResponse(ApproveGatewayError.CONFIRM_COMMAND_FAILED, e.errorMessage);
-    }
 
-    if (!confirmTxRequest?.success)
-      return GMPErrorResponse(
-        ApproveGatewayError.ERROR_BATCHED_COMMAND,
-        confirmTxRequest.errorMessage
-      );
-    else if (confirmTx && escapeAfterConfirm) {
+      if (!confirmTxRequest?.success) {
+        return {
+          success: false,
+          error: confirmTxRequest.errorMessage || ApproveGatewayError.ERROR_BATCHED_COMMAND,
+        };
+      }
+
+      const { infoLogs = [], commandId, confirmTx } = confirmTxRequest;
+
+      if (confirmTx && escapeAfterConfirm) {
+        return {
+          success: true,
+          confirmTx,
+          infoLogs,
+        };
+      }
+
+      const response = await this.findBatchAndSign(commandId, destChain, _evmWalletDetails);
+      if (!response.success) return response;
+      const { success, signCommandTx, infoLogs: responseInfoLogs } = response;
+      const combinedInfoLogs: string[] = [...(responseInfoLogs || []), ...infoLogs];
       return {
-        success: true,
+        success,
+        signCommandTx,
+        infoLogs: combinedInfoLogs,
         confirmTx,
-        infoLogs,
+      };
+
+      // If more code is required here, you can add it below.
+    } catch (e: any) {
+      return {
+        success: false,
+        error: e.errorMessage || ApproveGatewayError.CONFIRM_COMMAND_FAILED,
       };
     }
-
-    const response = await this.findBatchAndSign(commandId, destChain, _evmWalletDetails);
-    if (!response || !response.success) return response;
-    const _response = response as {
-      success: boolean;
-      infoLogs: string[];
-      signCommandTx: AxelarTxResponse;
-    };
-
-    return {
-      ..._response,
-      infoLogs: [...infoLogs, _response.infoLogs],
-      confirmTx,
-    };
   }
 
   private async findBatchAndSign(
     commandId: string,
     destChain: string,
     evmWalletDetails: EvmWalletDetails
-  ) {
+  ): Promise<GMPRecoveryError | GMPRecoverySuccess> {
     try {
       const signTxRequest = await this.findBatchAndSignIfNeeded(commandId, destChain);
 
       if (!signTxRequest?.success) {
-        return GMPErrorResponse(
-          ApproveGatewayError.SIGN_COMMAND_FAILED,
-          signTxRequest.errorMessage
-        );
+        return {
+          success: false,
+          error: signTxRequest.errorMessage || ApproveGatewayError.SIGN_COMMAND_FAILED,
+        };
       }
 
       const broadcastTxRequest = await this.findBatchAndBroadcast(
@@ -533,10 +530,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
 
       if (!broadcastTxRequest?.success) {
-        return GMPErrorResponse(
-          ApproveGatewayError.ERROR_BROADCAST_EVENT,
-          broadcastTxRequest.errorMessage
-        );
+        return {
+          success: false,
+          error: broadcastTxRequest.errorMessage || ApproveGatewayError.ERROR_BROADCAST_EVENT,
+        };
       }
 
       return {
