@@ -78,11 +78,11 @@ export interface SendTokenParams {
   fromChain: string;
   toChain: string;
   destinationAddress: string;
-  coin?: Coin;
-  evmToken?: {
-    symbol: string;
-    amountInAtomicUnits: string;
+  asset: {
+    denom?: string;
+    symbol?: string;
   };
+  amountInAtomicUnits: string;
   options?: {
     evmSendTokenOptions?: EVMSendTokenOptions;
     cosmosSendTokenOptions?: CosmosSendTokenOptions;
@@ -322,12 +322,13 @@ export class AxelarAssetTransfer {
    * @param {Object}  requestParams.options
    */
   public async sendToken(requestParams: SendTokenParams) {
-    const { fromChain, toChain } = requestParams;
+    const { fromChain, toChain, asset } = requestParams;
 
     await throwIfInvalidChainIds([fromChain, toChain], this.environment);
 
     const chainList: ChainInfo[] = await this.getChains();
     const srcChainInfo = chainList.find((ch) => ch.id === fromChain.toLowerCase());
+    if (!asset?.denom && !asset?.symbol) throw new Error("need to specify an asset");
     if (!srcChainInfo) throw new Error("cannot find chain" + fromChain);
 
     return srcChainInfo.module === "evm"
@@ -338,7 +339,15 @@ export class AxelarAssetTransfer {
   public async sendTokenFromEvmChain(requestParams: SendTokenParams) {
     if (!requestParams?.options?.evmSendTokenOptions?.provider) throw `need a provider`;
     if (!requestParams?.options?.evmSendTokenOptions?.signer) throw `need a signer`;
-    if (!requestParams.evmToken) throw `need a token`;
+    if (!requestParams.asset?.denom && !requestParams.asset?.symbol)
+      throw new Error("need to specify an asset");
+
+    const symbol =
+      requestParams.asset.symbol ||
+      ((await this.axelarQueryApi.getSymbolFromDenom(
+        requestParams.asset.denom as string,
+        requestParams.fromChain.toLowerCase()
+      )) as string);
 
     const gateway = await AxelarGateway.create(
       this.environment,
@@ -348,7 +357,7 @@ export class AxelarAssetTransfer {
 
     if (requestParams?.options?.evmSendTokenOptions?.approveSendForMe) {
       const tokenContract = new Contract(
-        await gateway.getTokenAddress(requestParams.evmToken?.symbol),
+        await gateway.getTokenAddress(symbol),
         erc20Abi,
         requestParams.options.evmSendTokenOptions.signer.connect(
           requestParams.options.evmSendTokenOptions.provider
@@ -356,7 +365,7 @@ export class AxelarAssetTransfer {
       );
       const approveTx = await tokenContract.approve(
         gateway.getGatewayAddress,
-        requestParams.evmToken.amountInAtomicUnits
+        requestParams.amountInAtomicUnits
       );
       await approveTx.wait();
     }
@@ -364,8 +373,8 @@ export class AxelarAssetTransfer {
     const sendTokenArgs: SendTokenArgs = {
       destinationChain: requestParams.toChain as EvmChain | CosmosChain,
       destinationAddress: requestParams.destinationAddress,
-      symbol: requestParams.evmToken?.symbol as string,
-      amount: requestParams.evmToken?.amountInAtomicUnits as string,
+      symbol,
+      amount: requestParams.amountInAtomicUnits as string,
     };
     const sentTokenTx = await gateway.createSendTokenTx(sendTokenArgs);
 
@@ -420,7 +429,8 @@ export class AxelarAssetTransfer {
       fromChain,
       toChain: destination_chain,
       destinationAddress: destination_address,
-      coin,
+      asset,
+      amountInAtomicUnits,
       options: {
         cosmosSendTokenOptions: { cosmosDirectSigner, timeoutHeight, timeoutTimestamp },
       },
@@ -449,14 +459,14 @@ export class AxelarAssetTransfer {
         value: MsgTransfer.fromPartial({
           sender: senderAddress,
           receiver: AXELAR_GMP_ACCOUNT_ADDRESS,
-          token: coin,
+          token: {
+            denom: asset.denom,
+            amount: amountInAtomicUnits,
+          },
           sourceChannel: chain.channelIdToAxelar,
           sourcePort: "transfer",
-          timeoutHeight: timeoutHeight ?? {
-            revisionHeight: Long.fromNumber(10),
-            revisionNumber: Long.fromNumber(10),
-          },
-          timeoutTimestamp: timeoutTimestamp ?? 0,
+          timeoutHeight,
+          timeoutTimestamp: timeoutTimestamp ?? (Date.now() + 90) * 1e9,
           memo,
         }),
       },
