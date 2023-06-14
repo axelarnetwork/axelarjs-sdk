@@ -516,43 +516,38 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     destChain: string,
     evmWalletDetails: EvmWalletDetails
   ) {
-    /**find batch and sign if needed */
-    let signTxRequest;
-    let signCommandTx: AxelarTxResponse | null = null;
-    let approveTx: any = null;
-    let infoLogs: string[] = [];
-
     try {
-      signTxRequest = await this.findBatchAndSignIfNeeded(commandId, destChain);
-      signCommandTx = signTxRequest.signCommandTx;
-      if (signTxRequest.infoLogs) infoLogs = [...infoLogs, ...signTxRequest.infoLogs];
-    } catch (e) {
-      throw `error finding batch to sign, ${e}`;
-    }
-    if (!signTxRequest?.success)
-      return GMPErrorResponse(ApproveGatewayError.SIGN_COMMAND_FAILED, signTxRequest.errorMessage);
+      const signTxRequest = await this.findBatchAndSignIfNeeded(commandId, destChain);
 
-    /**find batch and manually execute if needed */
-    let broadcastTxRequest;
-    try {
-      broadcastTxRequest = await this.findBatchAndBroadcast(commandId, destChain, evmWalletDetails);
-      approveTx = broadcastTxRequest.approveTx;
-      if (broadcastTxRequest.infoLogs) infoLogs = [...infoLogs, ...broadcastTxRequest.infoLogs];
-    } catch (e) {
-      throw `error finding batch to broadcast, ${e}`;
-    }
-    if (!broadcastTxRequest?.success)
-      return GMPErrorResponse(
-        ApproveGatewayError.ERROR_BROADCAST_EVENT,
-        broadcastTxRequest.errorMessage
+      if (!signTxRequest?.success) {
+        return GMPErrorResponse(
+          ApproveGatewayError.SIGN_COMMAND_FAILED,
+          signTxRequest.errorMessage
+        );
+      }
+
+      const broadcastTxRequest = await this.findBatchAndBroadcast(
+        commandId,
+        destChain,
+        evmWalletDetails
       );
 
-    return {
-      success: true,
-      signCommandTx,
-      approveTx,
-      infoLogs,
-    };
+      if (!broadcastTxRequest?.success) {
+        return GMPErrorResponse(
+          ApproveGatewayError.ERROR_BROADCAST_EVENT,
+          broadcastTxRequest.errorMessage
+        );
+      }
+
+      return {
+        success: true,
+        signCommandTx: signTxRequest.signCommandTx,
+        approveTx: broadcastTxRequest.approveTx,
+        infoLogs: [...(signTxRequest.infoLogs || []), ...(broadcastTxRequest.infoLogs || [])],
+      };
+    } catch (e) {
+      throw new Error(`Error finding batch: ${e}`);
+    }
   }
 
   /**
