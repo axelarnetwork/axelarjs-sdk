@@ -84,8 +84,8 @@ export interface SendTokenParams {
   };
   amountInAtomicUnits: string;
   options?: {
-    evmSendTokenOptions?: EVMSendTokenOptions;
-    cosmosSendTokenOptions?: CosmosSendTokenOptions;
+    evmOptions?: EVMSendTokenOptions;
+    cosmosOptions?: CosmosSendTokenOptions;
   };
 }
 
@@ -337,8 +337,8 @@ export class AxelarAssetTransfer {
   }
 
   public async sendTokenFromEvmChain(requestParams: SendTokenParams) {
-    if (!requestParams?.options?.evmSendTokenOptions?.provider) throw `need a provider`;
-    if (!requestParams?.options?.evmSendTokenOptions?.signer) throw `need a signer`;
+    if (!requestParams?.options?.evmOptions?.provider) throw `need a provider`;
+    if (!requestParams?.options?.evmOptions?.signer) throw `need a signer`;
     if (!requestParams.asset?.denom && !requestParams.asset?.symbol)
       throw new Error("need to specify an asset");
 
@@ -352,16 +352,14 @@ export class AxelarAssetTransfer {
     const gateway = await AxelarGateway.create(
       this.environment,
       requestParams.fromChain as EvmChain,
-      requestParams.options?.evmSendTokenOptions?.provider
+      requestParams.options?.evmOptions?.provider
     );
 
-    if (requestParams?.options?.evmSendTokenOptions?.approveSendForMe) {
+    if (requestParams?.options?.evmOptions?.approveSendForMe) {
       const tokenContract = new Contract(
         await gateway.getTokenAddress(symbol),
         erc20Abi,
-        requestParams.options.evmSendTokenOptions.signer.connect(
-          requestParams.options.evmSendTokenOptions.provider
-        )
+        requestParams.options.evmOptions.signer.connect(requestParams.options.evmOptions.provider)
       );
       const approveTx = await tokenContract.approve(
         gateway.getGatewayAddress,
@@ -379,8 +377,8 @@ export class AxelarAssetTransfer {
     const sentTokenTx = await gateway.createSendTokenTx(sendTokenArgs);
 
     return sentTokenTx.send(
-      requestParams.options.evmSendTokenOptions.signer,
-      requestParams.options.evmSendTokenOptions.txOptions
+      requestParams.options.evmOptions.signer,
+      requestParams.options.evmOptions.txOptions
     );
   }
 
@@ -392,10 +390,10 @@ export class AxelarAssetTransfer {
   }
 
   public async sendTokenFromCosmosChain(requestParams: SendTokenParams) {
-    if (!requestParams.options?.cosmosSendTokenOptions) throw `need a cosmos signer`;
+    if (!requestParams.options?.cosmosOptions) throw `need a cosmos signer`;
     const {
       options: {
-        cosmosSendTokenOptions: { cosmosDirectSigner, rpcUrl, fee },
+        cosmosOptions: { cosmosDirectSigner, rpcUrl, fee },
       },
     } = requestParams;
     const signingClient = await SigningStargateClient.connectWithSigner(rpcUrl, cosmosDirectSigner);
@@ -424,7 +422,7 @@ export class AxelarAssetTransfer {
   private async generateUnsignedSendTokenTx(
     requestParams: SendTokenParams
   ): Promise<EncodeObject[]> {
-    if (!requestParams.options?.cosmosSendTokenOptions) throw `need a cosmos signer`;
+    if (!requestParams.options?.cosmosOptions) throw `need a cosmos signer`;
     const {
       fromChain,
       toChain: destination_chain,
@@ -432,7 +430,7 @@ export class AxelarAssetTransfer {
       asset,
       amountInAtomicUnits,
       options: {
-        cosmosSendTokenOptions: { cosmosDirectSigner, timeoutHeight, timeoutTimestamp },
+        cosmosOptions: { cosmosDirectSigner, timeoutHeight, timeoutTimestamp },
       },
     } = requestParams;
     if (fromChain === CHAINS[this.environment.toUpperCase() as "TESTNET" | "MAINNET"].AXELAR)
