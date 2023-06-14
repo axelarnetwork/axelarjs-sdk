@@ -10,6 +10,7 @@ import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import rpcInfo from "./constants/chain";
 import { mapIntoAxelarscanResponseType } from "./helpers/mappers";
+import { ChainInfo } from "src/chains/types";
 
 export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
@@ -122,6 +123,7 @@ export class AxelarRecoveryApi {
   readonly config: AxelarRecoveryAPIConfig;
   protected axelarQuerySvc: AxelarQueryClientType | null = null;
   protected evmClient: EVMClient;
+  protected chainsList: ChainInfo[] = [];
 
   public constructor(config: AxelarRecoveryAPIConfig) {
     const { environment } = config;
@@ -366,12 +368,15 @@ export class AxelarRecoveryApi {
     };
   }
 
-  private async getChainInfo(chainId: string) {
-    const chainInfo = (
-      await loadChains({
+  protected async getChainInfo(chainId: string) {
+    if (this.chainsList.length === 0) {
+      this.chainsList = await loadChains({
         environment: this.environment,
-      })
-    ).find((chainInfo) => chainInfo.id.toLowerCase() === chainId.toLowerCase());
+      });
+    }
+    const chainInfo = this.chainsList.find(
+      (chainInfo) => chainInfo.id.toLowerCase() === chainId.toLowerCase()
+    );
 
     if (!chainInfo) {
       throw new Error(`cannot find chain${chainId}`);
@@ -408,6 +413,15 @@ export class AxelarRecoveryApi {
     const txBytes = await this.execRecoveryUrlFetch("/execute_pending_transfers", {
       chain: chainIdentifier[this.environment],
       module,
+    });
+
+    return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+  }
+
+  public async routeMessageRequest(txHash: string, payload: string, logIndex?: number) {
+    const txBytes = await this.execRecoveryUrlFetch("/route_messsage", {
+      payload,
+      id: logIndex === -1 ? `${txHash}` : `${txHash}-${logIndex}`,
     });
 
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);

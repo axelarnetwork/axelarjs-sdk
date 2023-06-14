@@ -10,6 +10,7 @@ import {
   ApproveGatewayError,
   ApproveGatewayResponse,
   AxelarTxResponse,
+  CosmosChain,
 } from "../types";
 import {
   AxelarRecoveryApi,
@@ -50,10 +51,19 @@ import {
   UnsupportedGasTokenError,
 } from "./constants/error";
 import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
-import { sleep, throwIfInvalidChainIds } from "../../utils";
+import { sleep, throwIfInvalidChainIds, validateChainIdentifier } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
+import {
+  ExecuteMessageRequest,
+  protobufPackage as AxelarProtobufPackage,
+} from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/tx";
 import { Interface } from "ethers/lib/utils";
+import { loadChains } from "src/chains";
+import { ChainInfo } from "src/chains/types";
+import { toAccAddress } from "@cosmjs/stargate/build/queryclient/utils";
+import { fromHex } from "@cosmjs/encoding";
+import { broadcastCosmosTx } from "./client/helpers/cosmos";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -88,6 +98,12 @@ export const GMPErrorResponse = (error: ApproveGatewayError, errorDetails?: stri
   success: false,
   error: errorDetails || error,
 });
+
+enum RouteDir {
+  COSMOS_TO_EVM = "cosmos_to_evm",
+  EVM_TO_COSMOS = "evm_to_cosmos",
+  EVM_TO_EVM = "evm_to_evm",
+}
 
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   axelarQueryApi: AxelarQueryAPI;
@@ -203,9 +219,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     };
   }
 
-  public async findEventAndConfirmIfNeeded(
+  public async findEventAndRouteMessageIfNeeded(
     srcChain: EvmChain,
     destChain: EvmChain,
+    txHash: string,
+    evmWalletDetails: EvmWalletDetails,
+    sleepSeconds = 60
+  ) {}
+
+  public async findEventAndConfirmIfNeeded(
+    srcChain: string,
+    destChain: string,
     txHash: string,
     evmWalletDetails: EvmWalletDetails,
     sleepSeconds = 60
@@ -269,6 +293,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     res.infoLogs.push(confirmLog);
 
     return res;
+  }
+
+  public async findRouteMessageAndSignIfNeeded(txHash: string, payload: string, logIndex = -1) {
+    return this.routeMessageRequest(txHash, payload, logIndex);
   }
 
   public async findBatchAndSignIfNeeded(commandId: string, destChainId: string, sleepSeconds = 60) {
@@ -380,23 +408,64 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txHash: string,
     evmWalletDetails?: EvmWalletDetails,
     escapeAfterConfirm = true
-  ): Promise<ApproveGatewayResponse | null> {
-    let confirmTx: AxelarTxResponse | null = null;
-    let signCommandTx: AxelarTxResponse | null = null;
-    let approveTx: any = null;
-    const success = true;
-    let infoLogs: string[] = [];
-
-    const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
-
+  ): Promise<ApproveGatewayResponse> {
     const { callTx, status } = await this.queryTransactionStatus(txHash);
 
     /**first check if transaction is already executed */
     if (GMPErrorMap[status]) return GMPErrorResponse(GMPErrorMap[status]);
-    const srcChain = callTx.chain;
-    const destChain = callTx.returnValues.destinationChain;
+    const srcChain: string = callTx.chain;
+    const destChain: string = callTx.returnValues.destinationChain;
+    const srcChainInfo = await this.getChainInfo(srcChain);
+    const destChainInfo = await this.getChainInfo(destChain);
+    const routeDir = this.getRouteDir(srcChainInfo, destChainInfo);
 
+    if (routeDir === RouteDir.COSMOS_TO_EVM) {
+      // TODO: implement cosmos to evm recovery function
+      return { success: false, error: "Cosmos to EVM recovery function not implemented yet." };
+    } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
+      // TODO: implement evm to cosmos recovery function
+      return { success: false, error: "EVM to Cosmos recovery function not implemented yet." };
+    } else {
+      return this.recoverEvmToEvmTx(
+        srcChain,
+        destChain,
+        txHash,
+        evmWalletDetails,
+        escapeAfterConfirm
+      );
+    }
+  }
+
+  public getRouteDir(srcChain: ChainInfo, destChain: ChainInfo) {
+    if (srcChain.module === "axelarnet" && destChain.module === "evm") {
+      return RouteDir.COSMOS_TO_EVM;
+    } else if (srcChain.module === "evm" && destChain.module === "axelarnet") {
+      return RouteDir.EVM_TO_COSMOS;
+    } else {
+      return RouteDir.EVM_TO_EVM;
+    }
+  }
+
+  private async recoverEvmToCosmosTx() {}
+
+  private async recoverCosmosToEvmTx(txHash: string, payload: string) {
+    await this.routeMessageRequest(txHash, payload);
+  }
+
+  // TODO: big method needs refactoring
+  private async recoverEvmToEvmTx(
+    srcChain: string,
+    destChain: string,
+    txHash: string,
+    evmWalletDetails?: EvmWalletDetails,
+    escapeAfterConfirm = true
+  ) {
+    let confirmTx: AxelarTxResponse | null = null;
+
+    let infoLogs: string[] = [];
     let commandId = "";
+
+    const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
     /**find event and confirm if needed */
     let confirmTxRequest;
@@ -409,7 +478,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
       confirmTx = confirmTxRequest.confirmTx;
       commandId = confirmTxRequest.commandId;
-      // eventResponse = confirmTxRequest.eventResponse;
       if (confirmTxRequest.infoLogs) infoLogs = [...infoLogs, ...confirmTxRequest.infoLogs];
     } catch (e: any) {
       return GMPErrorResponse(ApproveGatewayError.CONFIRM_COMMAND_FAILED, e.errorMessage);
@@ -422,14 +490,38 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
     else if (confirmTx && escapeAfterConfirm) {
       return {
-        success,
+        success: true,
         confirmTx,
         infoLogs,
       };
     }
 
+    const response = await this.findBatchAndSign(commandId, destChain, _evmWalletDetails);
+    if (!response || !response.success) return response;
+    const _response = response as {
+      success: boolean;
+      infoLogs: string[];
+      signCommandTx: AxelarTxResponse;
+    };
+
+    return {
+      ..._response,
+      infoLogs: [...infoLogs, _response.infoLogs],
+      confirmTx,
+    };
+  }
+
+  private async findBatchAndSign(
+    commandId: string,
+    destChain: string,
+    evmWalletDetails: EvmWalletDetails
+  ) {
     /**find batch and sign if needed */
     let signTxRequest;
+    let signCommandTx: AxelarTxResponse | null = null;
+    let approveTx: any = null;
+    let infoLogs: string[] = [];
+
     try {
       signTxRequest = await this.findBatchAndSignIfNeeded(commandId, destChain);
       signCommandTx = signTxRequest.signCommandTx;
@@ -443,11 +535,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     /**find batch and manually execute if needed */
     let broadcastTxRequest;
     try {
-      broadcastTxRequest = await this.findBatchAndBroadcast(
-        commandId,
-        destChain,
-        _evmWalletDetails
-      );
+      broadcastTxRequest = await this.findBatchAndBroadcast(commandId, destChain, evmWalletDetails);
       approveTx = broadcastTxRequest.approveTx;
       if (broadcastTxRequest.infoLogs) infoLogs = [...infoLogs, ...broadcastTxRequest.infoLogs];
     } catch (e) {
@@ -460,8 +548,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
 
     return {
-      success,
-      confirmTx,
+      success: true,
       signCommandTx,
       approveTx,
       infoLogs,
