@@ -31,6 +31,7 @@ export interface ChainInfo {
   };
   nativeAsset: string[];
   addressPrefix: string;
+  channelIdToAxelar?: string;
 }
 
 export interface AssetTransferObject {

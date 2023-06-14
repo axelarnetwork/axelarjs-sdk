@@ -659,7 +659,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     // Check if given `gasTokenAddress` exists
     if (!gasTokenSymbol) return InvalidGasTokenError();
 
-    const axelarGateway = AxelarGateway.create(this.environment, chain, signer.provider);
+    const axelarGateway = await AxelarGateway.create(this.environment, chain, signer.provider);
     const gatewayGasTokenAddress = await axelarGateway.getTokenAddress(gasTokenSymbol);
 
     // Check if given `gasTokenAddress` is supported by Axelar.

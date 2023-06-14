@@ -62,7 +62,7 @@ describe("AxelarGMPRecoveryAPI", () => {
 
     test("It should confirm an event if needed", async () => {
       const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");
-      const stub = axelarTxResponseStub();
+      const stub: AxelarTxResponse = axelarTxResponseStub();
       mockConfirmGatewayTx.mockImplementation(() => Promise.resolve(stub));
       const confirmation = await api.findEventAndConfirmIfNeeded(
         // { event: { ...evmEvent.event, status: Event_Status.STATUS_UNSPECIFIED } },

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.9] - 2023-JUNE-X
+
+- AxelarAssetTransfer
+  - add `sendToken` method that allows token transfers directly from a source chain (instead of using the deposit address method). This includes both Cosmos-based and EVM-based source chains.
+
+## [0.12.8] - 2023-MAY-28
+
+- technical change, upgraded dependencies
+
 ## [0.12.7] - 2023-MAY-12
 
 - AxelarRecoveryAPI
