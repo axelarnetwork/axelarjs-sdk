@@ -34,9 +34,8 @@ import { constants, Contract, ethers, Signer } from "ethers";
 import { ChainInfo } from "../chains/types";
 import { CHAINS, loadChains } from "../chains";
 import { AxelarQueryAPI } from "./AxelarQueryAPI";
-import { Coin, EncodeObject, OfflineDirectSigner } from "@cosmjs/proto-signing";
-import { MsgTransferEncodeObject, SigningStargateClient, StdFee } from "@cosmjs/stargate";
-import Long from "long";
+import { EncodeObject, OfflineDirectSigner } from "@cosmjs/proto-signing";
+import { SigningStargateClient, StdFee } from "@cosmjs/stargate";
 import { MsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx";
 import { AxelarGateway } from "./AxelarGateway";
 import erc20Abi from "./abi/erc20Abi.json";
@@ -398,17 +397,18 @@ export class AxelarAssetTransfer {
     } = requestParams;
     const signingClient = await SigningStargateClient.connectWithSigner(rpcUrl, cosmosDirectSigner);
     const { address: senderAddress } = (await cosmosDirectSigner.getAccounts())[0];
-    const payload = (await this.populateUnsignedTx().sendToken(requestParams)).getTx();
+    const payload = await this.populateUnsignedTx()
+      .sendToken(requestParams)
+      .then((x) => x.getTx());
     return signingClient.signAndBroadcast(senderAddress, payload, fee);
   }
 
   public populateUnsignedTx() {
     let tx: EncodeObject[];
-    const api = this;
 
     const txBuilder = {
-      async sendToken(params: SendTokenParams) {
-        tx = await api.generateUnsignedSendTokenTx(params);
+      sendToken: async (params: SendTokenParams) => {
+        tx = await this.generateUnsignedSendTokenTx(params);
         return txBuilder;
       },
       getTx(): EncodeObject[] {
