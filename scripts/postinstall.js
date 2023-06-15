@@ -58,8 +58,6 @@ ${v} ${chalk.cyan(releaseUrl)}${pad(6)}${v}
 ${v} ${line}
 ${bl}${border}${br}
 \n`);
-  } else {
-    console.log(`\n\n📦 ${name} is up to date!`);
   }
 }
 
