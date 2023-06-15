@@ -241,11 +241,12 @@ export enum ApproveGatewayError {
   ERROR_ACCOUNT_SEQUENCE_MISMATCH = "account sequence mismatch",
 }
 
-export interface ApproveGatewayResponse {
+export interface GMPRecoveryResponse {
   success: boolean;
   error?: ApproveGatewayError | string;
   confirmTx?: AxelarTxResponse;
   signCommandTx?: AxelarTxResponse;
+  routeMessageTx?: AxelarTxResponse;
   approveTx?: any;
   infoLogs?: string[];
 }

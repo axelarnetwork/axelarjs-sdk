@@ -8,7 +8,7 @@ import {
   TxResult,
   QueryGasFeeOptions,
   ApproveGatewayError,
-  ApproveGatewayResponse,
+  GMPRecoveryResponse,
   AxelarTxResponse,
 } from "../types";
 import {
@@ -82,11 +82,6 @@ interface BroadcastTxSDKResponse {
   approveTx?: AxelarTxResponse;
   infoLogs: string[];
 }
-
-// export const GMPErrorResponse = (error: ApproveGatewayError, errorDetails?: string) => ({
-//   success: false,
-//   error: errorDetails || error,
-// });
 
 interface GMPRecoveryError {
   success: false;
@@ -177,11 +172,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       infoLog = "";
 
     try {
-      eventIndex = (await this.getEventIndex(
-        srcChainId as EvmChain,
-        srcTxHash,
-        evmWalletDetails
-      )) as number;
+      eventIndex = (await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)) as number;
     } catch (e) {
       return {
         success,
@@ -220,14 +211,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       infoLog,
     };
   }
-
-  public async findEventAndRouteMessageIfNeeded(
-    srcChain: EvmChain,
-    destChain: EvmChain,
-    txHash: string,
-    evmWalletDetails: EvmWalletDetails,
-    sleepSeconds = 60
-  ) {}
 
   public async findEventAndConfirmIfNeeded(
     srcChain: string,
@@ -405,7 +388,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txHash: string,
     evmWalletDetails?: EvmWalletDetails,
     escapeAfterConfirm = true
-  ): Promise<ApproveGatewayResponse> {
+  ): Promise<GMPRecoveryResponse> {
     const { callTx, status } = await this.queryTransactionStatus(txHash);
 
     /**first check if transaction is already executed */
@@ -425,7 +408,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       return { success: false, error: "Cosmos to EVM recovery function not implemented yet." };
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
       // TODO: implement evm to cosmos recovery function
-      return { success: false, error: "EVM to Cosmos recovery function not implemented yet." };
+      return this.recoverEvmToCosmosTx(srcChain, destChain, txHash, evmWalletDetails);
     } else {
       return this.recoverEvmToEvmTx(
         srcChain,
@@ -447,13 +430,64 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
-  private async recoverEvmToCosmosTx() {}
+  private async recoverEvmToCosmosTx(
+    srcChain: string,
+    destChain: string,
+    txHash: string,
+    evmWalletDetails?: EvmWalletDetails
+  ) {
+    const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
+    // Step 1: ConfirmGatewayTx and check if it is successfully executed
+    const confirmTxResponse = await this.findEventAndConfirmIfNeeded(
+      srcChain,
+      destChain,
+      txHash,
+      _evmWalletDetails
+    );
+
+    // If the `success` flag is false, return the error response
+    if (!confirmTxResponse?.success) {
+      return {
+        success: false,
+        error: confirmTxResponse.errorMessage || ApproveGatewayError.ERROR_BATCHED_COMMAND,
+      };
+    }
+
+    // Step 2: Fetch all necessary data to send the route message tx
+    const payload = await this.fetchGMPTransaction(txHash).then(
+      (data) => data.call.returnValues.payload
+    );
+    const logIndex = await this.getEventIndex(srcChain as EvmChain, txHash);
+
+    // Step 3: Send the route message tx
+    const routeMessageTx = await this.routeMessageRequest(txHash, payload, logIndex).catch(
+      () => undefined
+    );
+
+    // If the `success` flag is false, return the error response
+    if (!routeMessageTx) {
+      return {
+        success: false,
+        error: "Failed to send route message tx",
+      };
+    }
+
+    // Return the success response
+    return {
+      success: true,
+      confirmTx: confirmTxResponse.confirmTx,
+      routeMessageTx,
+      infoLogs: [
+        ...confirmTxResponse.infoLogs,
+        `Successfully sent RouteMessage tx for given ${txHash}`,
+      ],
+    };
+  }
 
   private async recoverCosmosToEvmTx(txHash: string, payload: string) {
     await this.routeMessageRequest(txHash, payload);
   }
 
-  // TODO: big method needs refactoring
   private async recoverEvmToEvmTx(
     srcChain: string,
     destChain: string,
@@ -464,6 +498,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
     try {
+      // Step 1: ConfirmGatewayTx and check if it is successfully executed
       const confirmTxRequest = await this.findEventAndConfirmIfNeeded(
         srcChain,
         destChain,
@@ -471,6 +506,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         _evmWalletDetails
       );
 
+      // If the `success` flag is false, we will return the error response
       if (!confirmTxRequest?.success) {
         return {
           success: false,
@@ -478,25 +514,35 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      const { infoLogs = [], commandId, confirmTx } = confirmTxRequest;
+      const { infoLogs: confirmTxLogs, commandId, confirmTx } = confirmTxRequest;
 
+      // If the `escapeAfterConfirm` flag is set to true, we will return the `confirmTx` and `infoLogs` immediately without signing the batch.
       if (confirmTx && escapeAfterConfirm) {
         return {
           success: true,
           confirmTx,
-          infoLogs,
+          infoLogs: confirmTxLogs,
         };
       }
 
+      // Step 2: Find the batch and sign it
       const response = await this.findBatchAndSign(commandId, destChain, _evmWalletDetails);
-      if (!response.success) return response;
-      const { success, signCommandTx, infoLogs: responseInfoLogs } = response;
-      const combinedInfoLogs: string[] = [...(responseInfoLogs || []), ...infoLogs];
+
+      // If the response.success is false, we will return the error response
+      if (!response.success) {
+        return {
+          success: false,
+          error: response.error,
+        };
+      }
+
+      // Otherwise, we will return the success response
+      const { signCommandTx, infoLogs: signTxLogs } = response;
       return {
-        success,
-        signCommandTx,
-        infoLogs: combinedInfoLogs,
+        success: true,
         confirmTx,
+        signCommandTx,
+        infoLogs: [...confirmTxLogs, ...signTxLogs],
       };
 
       // If more code is required here, you can add it below.
@@ -624,7 +670,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return this.subtractGasFee(sourceChain, destinationChain, gasTokenSymbol, paidGasFee, options);
   }
 
-  public async getEventIndex(chain: EvmChain, txHash: string, evmWalletDetails?: EvmWalletDetails) {
+  public async getEventIndex(chain: string, txHash: string, evmWalletDetails?: EvmWalletDetails) {
     const signer = this.getSigner(chain, evmWalletDetails || { useWindowEthereum: true });
     const receipt = await signer.provider.getTransactionReceipt(txHash);
     if (!receipt) return -1;
