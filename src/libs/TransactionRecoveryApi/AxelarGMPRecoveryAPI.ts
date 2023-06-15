@@ -402,19 +402,18 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const srcChainInfo = await this.getChainInfo(srcChain);
     const destChainInfo = await this.getChainInfo(destChain);
     const routeDir = this.getRouteDir(srcChainInfo, destChainInfo);
+    const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
     if (routeDir === RouteDir.COSMOS_TO_EVM) {
-      // TODO: implement cosmos to evm recovery function
-      return { success: false, error: "Cosmos to EVM recovery function not implemented yet." };
+      return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails);
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
-      // TODO: implement evm to cosmos recovery function
-      return this.recoverEvmToCosmosTx(srcChain, destChain, txHash, evmWalletDetails);
+      return this.recoverEvmToCosmosTx(srcChain, destChain, txHash, _evmWalletDetails);
     } else {
       return this.recoverEvmToEvmTx(
         srcChain,
         destChain,
         txHash,
-        evmWalletDetails,
+        _evmWalletDetails,
         escapeAfterConfirm
       );
     }
@@ -434,15 +433,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChain: string,
     destChain: string,
     txHash: string,
-    evmWalletDetails?: EvmWalletDetails
+    evmWalletDetails: EvmWalletDetails
   ) {
-    const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
     // Step 1: ConfirmGatewayTx and check if it is successfully executed
     const confirmTxResponse = await this.findEventAndConfirmIfNeeded(
       srcChain,
       destChain,
       txHash,
-      _evmWalletDetails
+      evmWalletDetails
     );
 
     // If the `success` flag is false, return the error response
@@ -484,26 +482,59 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     };
   }
 
-  private async recoverCosmosToEvmTx(txHash: string, payload: string) {
-    await this.routeMessageRequest(txHash, payload);
+  private async recoverCosmosToEvmTx(txHash: string, evmWalletDetails: EvmWalletDetails) {
+    const txDetails = await this.fetchGMPTransaction(txHash);
+    const { messageId, payload, destinationChain } = txDetails.call.returnValues;
+    const { command_id: commandId } = txDetails;
+
+    // Step1: Route Message
+    const routeMessageTx = await this.routeMessageRequest(messageId, payload, -1).catch(
+      () => undefined
+    );
+
+    if (!routeMessageTx) {
+      return {
+        success: false,
+        error: "Failed to send route message tx",
+      };
+    }
+
+    // Step 2: Find the batch and sign it
+    const response = await this.findBatchAndSign(commandId, destinationChain, evmWalletDetails);
+
+    // If the response.success is false, we will return the error response
+    if (!response.success) {
+      return {
+        success: false,
+        error: response.error,
+      };
+    }
+
+    // Otherwise, we will return the success response
+    const { signCommandTx, infoLogs: signTxLogs } = response;
+
+    return {
+      success: true,
+      routeMessageTx,
+      signCommandTx,
+      infoLogs: [`Successfully sent RouteMessage tx for given ${txHash}`, ...signTxLogs],
+    };
   }
 
   private async recoverEvmToEvmTx(
     srcChain: string,
     destChain: string,
     txHash: string,
-    evmWalletDetails?: EvmWalletDetails,
+    evmWalletDetails: EvmWalletDetails,
     escapeAfterConfirm = true
   ) {
-    const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
-
     try {
       // Step 1: ConfirmGatewayTx and check if it is successfully executed
       const confirmTxRequest = await this.findEventAndConfirmIfNeeded(
         srcChain,
         destChain,
         txHash,
-        _evmWalletDetails
+        evmWalletDetails
       );
 
       // If the `success` flag is false, we will return the error response
@@ -526,7 +557,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       }
 
       // Step 2: Find the batch and sign it
-      const response = await this.findBatchAndSign(commandId, destChain, _evmWalletDetails);
+      const response = await this.findBatchAndSign(commandId, destChain, evmWalletDetails);
 
       // If the response.success is false, we will return the error response
       if (!response.success) {
