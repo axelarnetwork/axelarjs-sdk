@@ -48,11 +48,12 @@ import {
   UnsupportedGasTokenError,
 } from "./constants/error";
 import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
-import { sleep, throwIfInvalidChainIds } from "../../utils";
+import { retry, sleep, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { Interface } from "ethers/lib/utils";
 import { ChainInfo } from "src/chains/types";
+import { retryRpc } from "./client/helpers/retryRpc";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -171,9 +172,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       errorMessage = "",
       infoLog = "";
 
-    try {
-      eventIndex = (await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)) as number;
-    } catch (e) {
+    eventIndex = await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)
+      .then((index) => index as number)
+      .catch(() => -1);
+
+    if (eventIndex === -1) {
       return {
         success,
         errorMessage: `getEvmEvent(): could not find event index for ${srcTxHash}`,
@@ -186,7 +189,12 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const commandId = this.getCidFromSrcTxHash(destChainId, srcTxHash, eventIndex);
     infoLog = `srcTxHash: ${srcTxHash}, generated commandId: ${commandId}`;
 
-    const eventResponse = await this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex);
+    const eventResponse = await retry(
+      () => this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex),
+      12,
+      10000
+    );
+
     if (!eventResponse || this.isEVMEventFailed(eventResponse)) {
       errorMessage = this.isEVMEventFailed(eventResponse)
         ? `getEvmEvent(): event on source chain is not successful for: ${srcTxHash}`
@@ -257,8 +265,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       confirmLog = `confirmation: successfully confirmed ${txHash} on Axelar; waiting ${sleepSeconds} seconds for network confirmation`;
       if (this.debugMode) console.debug(confirmLog);
 
-      await sleep(sleepSeconds);
-
       const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
 
       if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
@@ -266,7 +272,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         confirmLog += `; confirmed event was finalized`;
       } else {
         res.success = false;
-        res.errorMessage = `findEventAndConfirmIfNeeded(): could not confirm and finalize event successfully: ${txHash}`;
+        res.errorMessage = `findEventAndConfirmIfNeeded(): could not confirm and finalize event successfully: ${txHash};. Your transaction may not have enough confirmations yet.`;
         confirmLog += `; confirmed event was unable to be finalized`;
       }
     }
@@ -407,7 +413,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (routeDir === RouteDir.COSMOS_TO_EVM) {
       return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails);
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
-      return this.recoverEvmToCosmosTx(srcChain, destChain, txHash, _evmWalletDetails);
+      return this.recoverEvmToCosmosTx(srcChain, txHash);
     } else {
       return this.recoverEvmToEvmTx(
         srcChain,
@@ -429,25 +435,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
-  private async recoverEvmToCosmosTx(
-    srcChain: string,
-    destChain: string,
-    txHash: string,
-    evmWalletDetails: EvmWalletDetails
-  ) {
+  private async recoverEvmToCosmosTx(srcChain: string, txHash: string) {
     // Step 1: ConfirmGatewayTx and check if it is successfully executed
-    const confirmTxResponse = await this.findEventAndConfirmIfNeeded(
-      srcChain,
-      destChain,
-      txHash,
-      evmWalletDetails
-    );
+    const confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch(() => undefined);
 
-    // If the `success` flag is false, return the error response
-    if (!confirmTxResponse?.success) {
+    if (!confirmTx) {
       return {
         success: false,
-        error: confirmTxResponse.errorMessage || ApproveGatewayError.ERROR_BATCHED_COMMAND,
+        error: "Failed to send ConfirmGatewayTx to Axelar",
       };
     }
 
@@ -466,17 +461,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (!routeMessageTx) {
       return {
         success: false,
-        error: "Failed to send route message tx",
+        error: "Failed to send RouteMessage to Axelar",
       };
     }
 
     // Return the success response
     return {
       success: true,
-      confirmTx: confirmTxResponse.confirmTx,
+      confirmTx,
       routeMessageTx,
       infoLogs: [
-        ...confirmTxResponse.infoLogs,
+        `Successfully sent ConfirmGatewayTx tx for given ${txHash}`,
         `Successfully sent RouteMessage tx for given ${txHash}`,
       ],
     };
