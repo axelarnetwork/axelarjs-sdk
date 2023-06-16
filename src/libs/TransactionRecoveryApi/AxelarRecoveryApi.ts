@@ -182,7 +182,6 @@ export class AxelarRecoveryApi {
     if (iteration > maxTries) return null;
     const batchData = await this.queryBatchedCommands(chainId, batchId).catch(() => null);
     if (!batchData) return null;
-    // console.log("searchRecentBatchesFromCore", iteration, maxTries, batchData);
     if (batchData.commandIds.includes(commandId)) {
       return mapIntoAxelarscanResponseType(batchData, chainId);
     }
@@ -419,7 +418,7 @@ export class AxelarRecoveryApi {
   }
 
   public async routeMessageRequest(txHash: string, payload: string, logIndex?: number) {
-    const txBytes = await this.execRecoveryUrlFetch("/route_messsage", {
+    const txBytes = await this.execRecoveryUrlFetch("/route_message", {
       payload,
       id: logIndex === -1 ? `${txHash}` : `${txHash}-${logIndex}`,
     });
