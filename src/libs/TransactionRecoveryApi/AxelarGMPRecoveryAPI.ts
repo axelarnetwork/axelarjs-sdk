@@ -490,7 +490,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (!routeMessageTx) {
       return {
         success: false,
-        error: "Failed to send route message tx",
+        error: "Failed to send RouteMessage to Axelar",
       };
     }
 
