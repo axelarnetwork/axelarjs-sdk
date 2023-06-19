@@ -255,6 +255,28 @@ describe("AxelarGMPRecoveryAPI", () => {
     }, 60000);
   });
 
+  describe("doesTxMeetConfirmHt", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+
+    beforeEach(() => {
+      vitest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "getSigner").mockReturnValue({
+        provider: {
+          getTransactionReceipt: () => Promise.resolve({ confirmations: 10 }),
+        },
+      });
+    });
+
+    test("it should return true if the given transaction hash has enough confirmation", async () => {
+      const isConfirmed = await api.doesTxMeetConfirmHt("ethereum-2", "0xinsufficient");
+      expect(isConfirmed).toBeFalsy();
+    });
+
+    test("it should return false if the given transaction hash does not have enough confirmation", async () => {
+      const isConfimed = await api.doesTxMeetConfirmHt("avalanche", "0xsufficient");
+      expect(isConfimed).toBeTruthy();
+    });
+  });
+
   describe("manualRelayToDestChain", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 

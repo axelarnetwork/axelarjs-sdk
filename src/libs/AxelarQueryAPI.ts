@@ -105,7 +105,9 @@ export class AxelarQueryAPI {
   public async getConfirmationHeight(chain: string) {
     await throwIfInvalidChainIds([chain], this.environment);
     await this.initQueryClientIfNeeded();
-    return this.axelarQueryClient.evm.ConfirmationHeight({ chain });
+    const chains = await loadChains({ environment: this.environment });
+    const chainConfig = chains.find((c) => c.id.toLowerCase() === chain.toLowerCase());
+    return chainConfig?.confirmLevel || 0;
   }
 
   /**

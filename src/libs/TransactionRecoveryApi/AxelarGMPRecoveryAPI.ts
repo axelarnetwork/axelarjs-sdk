@@ -132,10 +132,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return getCommandId(destChainId, txHash, eventIndex, this.environment, rpcInfo);
   }
 
-  public async doesTxMeetConfirmHt(chain: string, currHeight: number) {
+  public async doesTxMeetConfirmHt(chain: string, txHash: string) {
+    const confirmations = await this.getSigner(chain)
+      .provider.getTransactionReceipt(txHash)
+      .then((receipt) => receipt.confirmations);
+
     return this.axelarQueryApi
       .getConfirmationHeight(chain)
-      .then((res) => res.height.greaterThan(currHeight))
+      .then((minConfirmHeight) => minConfirmHeight <= confirmations)
       .catch(() => undefined);
   }
 
@@ -154,6 +158,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (!eventResponse) return undefined;
     return eventResponse.event?.status === Event_Status.STATUS_COMPLETED;
   }
+
   public async getEvmEvent(
     srcChainId: string,
     destChainId: string,
