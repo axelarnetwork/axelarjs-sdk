@@ -264,8 +264,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      res.confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch((e) => {
-        console.error(e);
+      res.confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch(() => {
         return undefined;
       });
       if (!res.confirmTx) {
