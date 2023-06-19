@@ -1,4 +1,4 @@
-import { AxelarGMPRecoveryAPI } from "../../TransactionRecoveryApi/AxelarGMPRecoveryAPI";
+import { AxelarGMPRecoveryAPI, RouteDir } from "../../TransactionRecoveryApi/AxelarGMPRecoveryAPI";
 import {
   AddGasOptions,
   ApproveGatewayError,
@@ -43,6 +43,7 @@ import {
 } from "../stubs";
 import * as Sleep from "../../../utils/sleep";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
+import { CosmosChain } from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/types";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -255,6 +256,74 @@ describe("AxelarGMPRecoveryAPI", () => {
     }, 60000);
   });
 
+  describe("recoverEvmToCosmosTx", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+
+    beforeEach(() => {
+      vitest.spyOn(api, "queryTransactionStatus").mockResolvedValueOnce({
+        status: "called",
+        callTx: {
+          chain: "avalanche",
+          returnValues: {
+            destinationChain: "osmosis-6",
+          },
+        },
+      });
+    });
+
+    test("it returns error if the confirmation is not met", async () => {
+      vitest
+        .spyOn(AxelarGMPRecoveryAPI.prototype as any, "doesTxMeetConfirmHt")
+        .mockReturnValue(Promise.resolve(false));
+
+      const result = await api.manualRelayToDestChain("0xtest");
+      expect(result.success).toBeFalsy();
+      expect(result.error).toContain("not confirmed");
+    });
+
+    test("it returns error if the api fails to send ConfirmGatewayTx tx", async () => {
+      vitest
+        .spyOn(AxelarGMPRecoveryAPI.prototype as any, "doesTxMeetConfirmHt")
+        .mockReturnValue(Promise.resolve(true));
+      vitest.spyOn(api, "confirmGatewayTx").mockRejectedValue({ message: "any" });
+      const result = await api.manualRelayToDestChain("0xtest");
+      expect(result.success).toBeFalsy();
+      expect(result.error).toContain("ConfirmGatewayTx");
+    });
+
+    test("it returns error if the api fails to send RouteMessage tx", async () => {
+      vitest
+        .spyOn(AxelarGMPRecoveryAPI.prototype as any, "doesTxMeetConfirmHt")
+        .mockReturnValue(Promise.resolve(true));
+      vitest.spyOn(api, "confirmGatewayTx").mockResolvedValue(axelarTxResponseStub());
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValue({
+        call: { returnValues: { payload: "payload" } },
+      });
+      vitest.spyOn(api, "getEventIndex").mockResolvedValue(0);
+      vitest.spyOn(api, "routeMessageRequest").mockRejectedValue({ message: "any" });
+      const result = await api.manualRelayToDestChain("0xtest");
+      expect(result.success).toBeFalsy();
+      expect(result.error).toContain("RouteMessage");
+    });
+
+    test("it should return success if the api succeeds to send RouteMessage tx", async () => {
+      vitest
+        .spyOn(AxelarGMPRecoveryAPI.prototype as any, "doesTxMeetConfirmHt")
+        .mockReturnValue(Promise.resolve(true));
+      vitest.spyOn(api, "confirmGatewayTx").mockResolvedValue(axelarTxResponseStub());
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValue({
+        call: { returnValues: { payload: "payload" } },
+      });
+      vitest.spyOn(api, "getEventIndex").mockResolvedValue(0);
+      vitest.spyOn(api, "routeMessageRequest").mockResolvedValue(axelarTxResponseStub());
+      const result = await api.manualRelayToDestChain("0xtest");
+      expect(result.success).toBeTruthy();
+      expect(result.confirmTx).toBeDefined();
+      expect(result.routeMessageTx).toBeDefined();
+      expect(result.infoLogs?.length).toBeGreaterThan(0);
+    });
+  });
+
   describe("doesTxMeetConfirmHt", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
@@ -286,6 +355,14 @@ describe("AxelarGMPRecoveryAPI", () => {
       mockSleep.mockImplementation(() => Promise.resolve(undefined));
     });
 
+    test("it should be able to recover evm to cosmos tx", async () => {
+      const txhash = "0x6fe786de6a9ae4d2456253d36c263467df2d8ee7a83d8eabc2e66d0423fd63ad";
+      const response = await api.manualRelayToDestChain(txhash);
+      expect(response.success).toBeTruthy();
+      expect(response.confirmTx).toBeDefined();
+      expect(response.routeMessageTx).toBeDefined();
+    });
+
     test("it shouldn't call approve given the gmp status cannot be fetched", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({ status: GMPStatus.CANNOT_FETCH_STATUS });
@@ -297,6 +374,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         error: ApproveGatewayError.FETCHING_STATUS_FAILED,
       });
     });
+
     test("it should fail if the evm event cannot be retrieved", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
