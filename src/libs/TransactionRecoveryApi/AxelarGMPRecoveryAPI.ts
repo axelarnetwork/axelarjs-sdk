@@ -255,16 +255,26 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       confirmLog = `confirmation: event for ${txHash} was already detected on the network and did not need to be confirmed`;
     } else {
       /**todo, need to check whether tx is finalized */
-      // const confirmationHeight = await this.axelarQueryApi.getConfirmationHeight(srcChain);
+      const isConfirmed = await this.doesTxMeetConfirmHt(srcChain, txHash);
+      if (!isConfirmed) {
+        const minConfirmLevel = await this.axelarQueryApi.getConfirmationHeight(srcChain);
+        return {
+          ...res,
+          success: false,
+          errorMessage: `findEventAndConfirmIfNeeded(): ${txHash} is not confirmed on ${srcChain}. The minimum confirmation height is ${minConfirmLevel}`,
+        };
+      }
 
       res.confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch((e) => {
         console.error(e);
         return undefined;
       });
       if (!res.confirmTx) {
-        res.success = false;
-        res.errorMessage = "findEventAndConfirmIfNeeded(): unable to confirm transaction on Axelar";
-        return res;
+        return {
+          ...res,
+          success: false,
+          errorMessage: `findEventAndConfirmIfNeeded(): could not confirm transaction on Axelar`,
+        };
       }
       confirmLog = `confirmation: successfully confirmed ${txHash} on Axelar; waiting ${sleepSeconds} seconds for network confirmation`;
       if (this.debugMode) console.debug(confirmLog);
