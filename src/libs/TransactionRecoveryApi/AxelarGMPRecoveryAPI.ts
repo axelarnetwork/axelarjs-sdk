@@ -53,7 +53,6 @@ import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { Interface } from "ethers/lib/utils";
 import { ChainInfo } from "src/chains/types";
-import { retryRpc } from "./client/helpers/retryRpc";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -568,6 +567,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         success: true,
         confirmTx,
         signCommandTx,
+        approveTx: response.approveTx,
         infoLogs: [...confirmTxLogs, ...signTxLogs],
       };
 
