@@ -37,7 +37,6 @@ import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contra
 import {
   activeChainsStub,
   axelarTxResponseStub,
-  batchDataStub,
   batchedCommandResponseStub,
   chainInfoStub,
   contractReceiptStub,
@@ -290,6 +289,7 @@ describe("AxelarGMPRecoveryAPI", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     beforeEach(() => {
+      vitest.clearAllMocks();
       vitest.spyOn(api, "queryTransactionStatus").mockResolvedValueOnce({
         status: "called",
         callTx: {
@@ -302,9 +302,7 @@ describe("AxelarGMPRecoveryAPI", () => {
     });
 
     test("it returns error if the confirmation is not met", async () => {
-      vitest
-        .spyOn(AxelarGMPRecoveryAPI.prototype as any, "doesTxMeetConfirmHt")
-        .mockReturnValue(Promise.resolve(false));
+      vitest.spyOn(api as any, "doesTxMeetConfirmHt").mockReturnValue(Promise.resolve(false));
 
       const result = await api.manualRelayToDestChain("0xtest");
       expect(result.success).toBeFalsy();
@@ -312,9 +310,8 @@ describe("AxelarGMPRecoveryAPI", () => {
     });
 
     test("it returns error if the api fails to send ConfirmGatewayTx tx", async () => {
-      vitest
-        .spyOn(AxelarGMPRecoveryAPI.prototype as any, "doesTxMeetConfirmHt")
-        .mockReturnValue(Promise.resolve(true));
+      vitest.spyOn(api as any, "doesTxMeetConfirmHt").mockReturnValue(Promise.resolve(true));
+
       vitest.spyOn(api, "confirmGatewayTx").mockRejectedValue({ message: "any" });
       const result = await api.manualRelayToDestChain("0xtest");
       expect(result.success).toBeFalsy();
@@ -322,9 +319,7 @@ describe("AxelarGMPRecoveryAPI", () => {
     });
 
     test("it returns error if the api fails to send RouteMessage tx", async () => {
-      vitest
-        .spyOn(AxelarGMPRecoveryAPI.prototype as any, "doesTxMeetConfirmHt")
-        .mockReturnValue(Promise.resolve(true));
+      vitest.spyOn(api as any, "doesTxMeetConfirmHt").mockReturnValue(Promise.resolve(true));
       vitest.spyOn(api, "confirmGatewayTx").mockResolvedValue(axelarTxResponseStub());
       vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValue({
         call: { returnValues: { payload: "payload" } },
@@ -337,9 +332,7 @@ describe("AxelarGMPRecoveryAPI", () => {
     });
 
     test("it should return success if the api succeeds to send RouteMessage tx", async () => {
-      vitest
-        .spyOn(AxelarGMPRecoveryAPI.prototype as any, "doesTxMeetConfirmHt")
-        .mockReturnValue(Promise.resolve(true));
+      vitest.spyOn(api as any, "doesTxMeetConfirmHt").mockReturnValue(Promise.resolve(true));
       vitest.spyOn(api, "confirmGatewayTx").mockResolvedValue(axelarTxResponseStub());
       vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValue({
         call: { returnValues: { payload: "payload" } },
@@ -358,7 +351,8 @@ describe("AxelarGMPRecoveryAPI", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     beforeEach(() => {
-      vitest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "getSigner").mockReturnValue({
+      vitest.clearAllMocks();
+      vitest.spyOn(api as any, "getSigner").mockReturnValue({
         provider: {
           getTransactionReceipt: () => Promise.resolve({ confirmations: 10 }),
         },
@@ -381,6 +375,7 @@ describe("AxelarGMPRecoveryAPI", () => {
 
     beforeEach(() => {
       // Prevent sleep while testing
+      vitest.clearAllMocks();
       const mockSleep = vitest.spyOn(Sleep, "sleep");
       mockSleep.mockImplementation(() => Promise.resolve(undefined));
     });
@@ -406,11 +401,12 @@ describe("AxelarGMPRecoveryAPI", () => {
           returnValues: { destinationChain: EvmChain.MOONBEAM },
         },
       });
+      vitest.spyOn(api as any, "doesTxMeetConfirmHt").mockReturnValue(Promise.resolve(true));
       const res = await api.manualRelayToDestChain("0x");
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(
-        "findEventAndConfirmIfNeeded(): unable to confirm transaction on Axelar"
+        "findEventAndConfirmIfNeeded(): could not confirm transaction on Axelar"
       );
     });
 
