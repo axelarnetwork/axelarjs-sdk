@@ -599,7 +599,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     } catch (e: any) {
       return {
         success: false,
-        error: e.errorMessage || ApproveGatewayError.CONFIRM_COMMAND_FAILED,
+        error: e.message || ApproveGatewayError.CONFIRM_COMMAND_FAILED,
       };
     }
   }
