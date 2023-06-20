@@ -44,6 +44,18 @@ export const otcStub = () => ({
     "Verify I'm a real user with this one-time-code: hr64_XnjNE (This will not cost any fees)",
 });
 
+export const batchCommandStub = () => ({
+  data: "mockedData",
+  status: "mockedStatus",
+  key_id: "mockedKeyId",
+  execute_data: "mockedExecuteData",
+  prev_batched_commands_id: "mockedPrevBatchedCommandsId",
+  command_ids: ["mockedCommandId1", "mockedCommandId2"],
+  batch_id: "mockedBatchId",
+  chain: "mockedChain",
+  id: "mockedId",
+});
+
 export const apiErrorStub = () => ({
   message: "AxelarJS-SDK uncaught post error",
   uncaught: true,

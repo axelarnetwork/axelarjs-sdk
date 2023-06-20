@@ -62,7 +62,7 @@ export const GMPErrorMap: Record<string, ApproveGatewayError> = {
 
 interface ConfirmTxSDKResponse {
   success: boolean;
-  errorMessage: string;
+  errorMessage?: string;
   infoLogs: string[];
   commandId: string;
   confirmTx?: AxelarTxResponse;
@@ -71,14 +71,14 @@ interface ConfirmTxSDKResponse {
 
 interface SignTxSDKResponse {
   success: boolean;
-  errorMessage: string;
+  errorMessage?: string;
   signCommandTx?: AxelarTxResponse;
   infoLogs: string[];
 }
 
 interface BroadcastTxSDKResponse {
   success: boolean;
-  errorMessage: string;
+  errorMessage?: string;
   approveTx?: AxelarTxResponse;
   infoLogs: string[];
 }
@@ -329,73 +329,59 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async findBatchAndBroadcast(
     commandId: string,
     destChainId: string,
-    wallet: EvmWalletDetails,
-    iter = 0,
-    maxTries = 2
+    wallet: EvmWalletDetails
   ): Promise<BroadcastTxSDKResponse> {
-    if (iter > maxTries)
-      return {
-        success: false,
-        errorMessage: `findBatchAndBroadcast(): this recovery stalled out on waiting for signing. please try again later. `,
-        infoLogs: [],
-      };
-
     if (this.debugMode)
       console.debug(`broadcasting: checking for command ID: ${commandId} to broadcast`);
 
-    let broadcastTxLog = "";
-    const res: BroadcastTxSDKResponse = {
-      success: true,
-      errorMessage: "",
-      infoLogs: [],
-    };
-
-    try {
-      const batchData = await this.fetchBatchData(destChainId, commandId);
-
-      if (!batchData) {
-        res.success = false;
-        res.errorMessage = `findBatchAndBroadcast(): unable to retrieve batch data for ${commandId}`;
-        return res;
-      }
-
-      const commandData = batchData.command_ids.find((t) => t === commandId);
-      if (!commandData) {
-        res.success = false;
-        res.errorMessage = `findBatchAndBroadcast(): unable to retrieve command ID (${commandId}) in batch data`;
-        return res;
-      }
-
-      switch (batchData.status) {
-        case "BATCHED_COMMANDS_STATUS_SIGNED":
-          res.approveTx = await this.sendApproveTx(destChainId, batchData.execute_data, wallet);
-          broadcastTxLog = `broadcasting: batch ID ${batchData.batch_id} broadcasted to ${destChainId}`;
-          res.infoLogs.push(broadcastTxLog);
-          break;
-        case "BATCHED_COMMANDS_STATUS_SIGNING": {
-          broadcastTxLog = `broadcasting: batch ID ${batchData.batch_id} signing in process, checking again in 15 seconds`;
-          if (this.debugMode) console.debug(broadcastTxLog);
-          res.infoLogs.push(broadcastTxLog);
-          sleep(15);
-          const retry = await this.findBatchAndBroadcast(
-            commandId,
-            destChainId,
-            wallet,
-            iter + 1,
-            maxTries
+    return retry(
+      async () => {
+        const batchData = await this.fetchBatchData(destChainId, commandId);
+        if (!batchData) {
+          return Promise.reject(
+            `findBatchAndBroadcast(): unable to retrieve batch data for ${commandId}`
           );
-          if (retry.infoLogs) res.infoLogs = [...res.infoLogs, ...retry.infoLogs];
-          break;
         }
-        default:
-          res.errorMessage = `findBatchAndBroadcastIfNeeded(): status unsuccessful for command data: ${commandId}`;
-          res.success = false;
-      }
-    } catch (e) {
-      res.errorMessage = `findBatchAndBroadcastIfNeeded(): issue retrieving and broadcasting command data: ${commandId}`;
-      res.success = false;
-    }
-    return res;
+
+        const commandData = batchData.command_ids.find((t) => t === commandId);
+
+        if (!commandData) {
+          return Promise.reject(
+            `findBatchAndBroadcast(): unable to retrieve command ID (${commandId}) in batch data`
+          );
+        }
+
+        if (batchData.status === "BATCHED_COMMANDS_STATUS_SIGNING") {
+          return Promise.reject(
+            `findBatchAndBroadcast(): batch ID ${batchData.batch_id} signing in process`
+          );
+        } else if (batchData.status === "BATCHED_COMMANDS_STATUS_SIGNED") {
+          const approveTx = await this.sendApproveTx(destChainId, batchData.execute_data, wallet);
+          return {
+            success: true,
+            approveTx,
+            infoLogs: [
+              `broadcasting: batch ID ${batchData.batch_id} broadcasted to ${destChainId}`,
+            ],
+          };
+        } else {
+          return Promise.reject(
+            `findBatchAndBroadcast(): batch ID ${batchData.batch_id} is in an unknown state for command data: ${commandId}`
+          );
+        }
+      },
+      3,
+      10
+    ).catch((error: any) => {
+      return {
+        success: false,
+        errorMessage:
+          error.message || // error can be both a string or an object with a message property
+          error ||
+          `findBatchAndBroadcastIfNeeded(): issue retrieving and broadcasting command data: ${commandId}`,
+        infoLogs: [],
+      };
+    });
   }
 
   public async manualRelayToDestChain(
@@ -542,7 +528,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     escapeAfterConfirm = true
   ) {
     try {
-      // Step 1: ConfirmGatewayTx and check if it is successfully executed
+      // ConfirmGatewayTx and check if it is successfully executed
       const confirmTxRequest = await this.findEventAndConfirmIfNeeded(
         srcChain,
         destChain,
@@ -569,7 +555,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      // Step 2: Find the batch and sign it
+      // Find the batch and sign it
       const response = await this.findBatchAndSign(commandId, destChain, evmWalletDetails);
 
       // If the response.success is false, we will return the error response

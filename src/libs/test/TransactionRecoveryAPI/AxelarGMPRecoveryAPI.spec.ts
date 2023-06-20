@@ -37,6 +37,7 @@ import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contra
 import {
   activeChainsStub,
   axelarTxResponseStub,
+  batchCommandStub,
   batchedCommandResponseStub,
   chainInfoStub,
   contractReceiptStub,
@@ -184,66 +185,71 @@ describe("AxelarGMPRecoveryAPI", () => {
     }, 60000);
   });
 
-  describe.skip("findBatchAndBroadcastIfNeeded", () => {
+  describe("findBatchAndBroadcastIfNeeded", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
-    test("It should broadcast an event if needed", async () => {
-      const commandId = "TEST_COMMAND_ID",
-        destChainId = EvmChain.MOONBEAM;
-      const mockSendApproveTx = vitest.spyOn(api, "sendApproveTx");
-      const stub = axelarTxResponseStub();
-      mockSendApproveTx.mockImplementation(() => Promise.resolve(stub));
-      const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
-      mockFetchBatchData.mockImplementation(() =>
-        Promise.resolve({} as BatchedCommandsAxelarscanResponse)
-      );
+    beforeEach(() => {
+      vitest.clearAllMocks();
+    });
 
-      const approveTx = await api.findBatchAndBroadcast(commandId, destChainId, evmWalletDetails);
+    test("It should broadcast an event if needed", async () => {
+      const mockSendApproveTx = vitest
+        .spyOn(api, "sendApproveTx")
+        .mockResolvedValue(axelarTxResponseStub());
+      vitest.spyOn(api, "fetchBatchData").mockResolvedValue({
+        ...batchCommandStub(),
+        status: "BATCHED_COMMANDS_STATUS_SIGNED",
+      });
+
+      const response = await api.findBatchAndBroadcast(
+        batchCommandStub().command_ids[0],
+        EvmChain.MOONBEAM,
+        evmWalletDetails
+      );
       expect(mockSendApproveTx).toHaveBeenCalled();
-      expect(approveTx).toBeTruthy();
-      expect(approveTx.errorMessage).toBeFalsy();
-      expect(approveTx.approveTx).toEqual(stub);
-      expect(approveTx.success).toBeTruthy();
-    }, 60000);
+      expect(response).toBeDefined();
+      expect(response.errorMessage).toBeFalsy();
+      expect(response.approveTx).toEqual(axelarTxResponseStub());
+      expect(response.success).toBeTruthy();
+    });
 
     test("It should return unsuccess message if batch data is not found", async () => {
-      const commandId = "TEST_COMMAND_ID",
-        destChainId = EvmChain.MOONBEAM;
-      const mockSendApproveTx = vitest.spyOn(api, "sendApproveTx");
-      const stub = axelarTxResponseStub();
-      mockSendApproveTx.mockImplementation(() => Promise.resolve(stub));
-      const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
-      mockFetchBatchData.mockImplementation(() => Promise.resolve(null));
+      const mockSendApproveTx = vitest
+        .spyOn(api, "sendApproveTx")
+        .mockResolvedValue(axelarTxResponseStub());
+      vitest.spyOn(api, "fetchBatchData").mockResolvedValue(undefined);
 
-      const approveTx = await api.findBatchAndBroadcast(commandId, destChainId, evmWalletDetails);
-      expect(mockSendApproveTx).not.toHaveBeenCalled();
-      expect(approveTx).toBeTruthy();
-      expect(approveTx.errorMessage).toContain(
-        `findBatchAndBroadcastIfNeeded(): unable to retrieve batch data for`
+      const response = await api.findBatchAndBroadcast(
+        batchCommandStub().command_ids[0],
+        EvmChain.MOONBEAM,
+        evmWalletDetails
       );
-      expect(approveTx.approveTx).toEqual(null);
-      expect(approveTx.success).toBeFalsy();
-    }, 60000);
+      expect(mockSendApproveTx).not.toHaveBeenCalled();
+      expect(response).toBeTruthy();
+      expect(response.errorMessage).toContain(
+        `findBatchAndBroadcast(): unable to retrieve batch data for`
+      );
+      expect(response.approveTx).toBeUndefined();
+      expect(response.success).toBeFalsy();
+    });
+
     test("It should return unsuccess message if batch data does not contain command ID", async () => {
-      const commandId = "TEST_COMMAND_ID",
-        destChainId = EvmChain.MOONBEAM;
-      const mockSendApproveTx = vitest.spyOn(api, "sendApproveTx");
-      const stub = axelarTxResponseStub();
-      mockSendApproveTx.mockImplementation(() => Promise.resolve(stub));
-      const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
-      mockFetchBatchData.mockImplementation(() =>
-        Promise.resolve({} as BatchedCommandsAxelarscanResponse)
-      );
+      vitest.spyOn(api, "sendApproveTx").mockResolvedValue(axelarTxResponseStub());
+      vitest.spyOn(api, "fetchBatchData").mockResolvedValue({
+        ...batchCommandStub(),
+        status: "BATCHED_COMMANDS_STATUS_SIGNED",
+      });
 
-      const approveTx = await api.findBatchAndBroadcast(commandId, destChainId, evmWalletDetails);
-      expect(mockSendApproveTx).not.toHaveBeenCalled();
-      expect(approveTx).toBeTruthy();
-      expect(approveTx.errorMessage).toContain(
-        `findBatchAndBroadcastIfNeeded(): unable to retrieve command ID`
+      const response = await api.findBatchAndBroadcast(
+        "non-existent-command-id",
+        EvmChain.MOONBEAM,
+        evmWalletDetails
       );
-      expect(approveTx.approveTx).toEqual(null);
-      expect(approveTx.success).toBeFalsy();
-    }, 60000);
+      expect(response).toBeDefined();
+      expect(response.errorMessage).toContain("unable to retrieve command ID");
+      expect(response.approveTx).toBeUndefined();
+      expect(response.success).toBeFalsy();
+    });
   });
 
   describe.skip("confirmGatewayTx", () => {
