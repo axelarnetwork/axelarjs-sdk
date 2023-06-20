@@ -185,7 +185,7 @@ describe("AxelarGMPRecoveryAPI", () => {
     }, 60000);
   });
 
-  describe("findBatchAndBroadcastIfNeeded", () => {
+  describe("findBatchAndBroadcast", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     beforeEach(() => {
