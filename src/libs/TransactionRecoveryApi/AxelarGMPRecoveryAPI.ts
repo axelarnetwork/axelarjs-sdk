@@ -296,10 +296,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return res;
   }
 
-  public async findRouteMessageAndSignIfNeeded(txHash: string, payload: string, logIndex = -1) {
-    return this.routeMessageRequest(txHash, payload, logIndex);
-  }
-
   public async findBatchAndSignIfNeeded(commandId: string, destChainId: string, sleepSeconds = 60) {
     let signTxLog = "";
     const res: SignTxSDKResponse = {
