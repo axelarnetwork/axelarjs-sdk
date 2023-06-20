@@ -159,15 +159,16 @@ export class AxelarRecoveryApi {
     commandId: string
   ): Promise<BatchedCommandsAxelarscanResponse | undefined> {
     /**first check axelarscan API */
-    let batchData;
-    batchData = await this.execPost(this.axelarscanBaseApiUrl, "/batches", {
+    const batchData = await this.execPost(this.axelarscanBaseApiUrl, "/batches", {
       commandId,
     })
       .then((res) => res[0])
       .catch(() => undefined);
 
     /**if not found, check last few batches on core in case it is an issue of delayed indexing of data on the axelarscan API */
-    if (!batchData) batchData = this.searchRecentBatchesFromCore(chainId, commandId);
+    if (!batchData) {
+      return this.searchRecentBatchesFromCore(chainId, commandId);
+    }
 
     return batchData;
   }
