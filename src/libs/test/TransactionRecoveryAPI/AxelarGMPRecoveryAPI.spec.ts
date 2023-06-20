@@ -185,7 +185,7 @@ describe("AxelarGMPRecoveryAPI", () => {
     }, 60000);
   });
 
-  describe("findBatchAndBroadcast", () => {
+  describe("findBatchAndApproveGateway", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     beforeEach(() => {
@@ -227,7 +227,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       expect(mockSendApproveTx).not.toHaveBeenCalled();
       expect(response).toBeTruthy();
       expect(response.errorMessage).toContain(
-        `findBatchAndBroadcast(): unable to retrieve batch data for`
+        `findBatchAndApproveGateway(): unable to retrieve batch data for`
       );
       expect(response.approveTx).toBeUndefined();
       expect(response.success).toBeFalsy();
@@ -350,6 +350,64 @@ describe("AxelarGMPRecoveryAPI", () => {
       expect(result.confirmTx).toBeDefined();
       expect(result.routeMessageTx).toBeDefined();
       expect(result.infoLogs?.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("recoverCosmosToEvmTx", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+
+    beforeEach(() => {
+      vitest.clearAllMocks();
+      vitest.spyOn(api, "queryTransactionStatus").mockResolvedValueOnce({
+        status: "called",
+        callTx: {
+          chain: "osmosis-6",
+          returnValues: {
+            destinationChain: "avalanche",
+          },
+        },
+      });
+    });
+
+    test("it should return error if the routeMessage tx is undefined", async () => {
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValue({
+        call: { returnValues: { payload: "payload", messageId: "messageID" } },
+      });
+      vitest.spyOn(api, "routeMessageRequest").mockRejectedValue("any");
+      const result = await api.manualRelayToDestChain("0xtest");
+      expect(result.success).toBeFalsy();
+      expect(result.error).toContain("RouteMessage");
+    });
+
+    test("it should return error if the signAndApproveGateway is not success", async () => {
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValue({
+        call: { returnValues: { payload: "payload", messageId: "messageID" } },
+      });
+      vitest.spyOn(api, "routeMessageRequest").mockResolvedValue(axelarTxResponseStub());
+      vitest.spyOn(api as any, "signAndApproveGateway").mockResolvedValue({
+        success: false,
+        error: "any",
+      });
+      const result = await api.manualRelayToDestChain("0xtest");
+      expect(result.success).toBeFalsy();
+      expect(result.error).toBe("any");
+    });
+
+    test("it should return success response if the signAndApproveGateway is success", async () => {
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValue({
+        call: { returnValues: { payload: "payload", messageId: "messageID" } },
+      });
+      vitest.spyOn(api, "routeMessageRequest").mockResolvedValue(axelarTxResponseStub());
+      vitest.spyOn(api as any, "signAndApproveGateway").mockResolvedValue({
+        success: true,
+        signCommandTx: axelarTxResponseStub(),
+        infoLogs: ["log"],
+      });
+      const result = await api.manualRelayToDestChain("0xtest");
+      expect(result.success).toBeTruthy();
+      expect(result.signCommandTx).toBeDefined();
+      expect(result.infoLogs?.length).toEqual(2);
+      expect(result.routeMessageTx).toEqual(axelarTxResponseStub());
     });
   });
 
@@ -505,10 +563,10 @@ describe("AxelarGMPRecoveryAPI", () => {
         signCommandTx: {} as AxelarTxResponse,
         infoLogs: [],
       });
-      const mockfindBatchAndBroadcast = vitest.spyOn(api, "findBatchAndBroadcast");
-      mockfindBatchAndBroadcast.mockResolvedValueOnce({
+      const mockfindBatchAndApproveGateway = vitest.spyOn(api, "findBatchAndApproveGateway");
+      mockfindBatchAndApproveGateway.mockResolvedValueOnce({
         success: false,
-        errorMessage: "findBatchAndBroadcast(): unable to retrieve command ID",
+        errorMessage: "findBatchAndApproveGateway(): unable to retrieve command ID",
         approveTx: {} as AxelarTxResponse,
         infoLogs: [],
       });
@@ -518,7 +576,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const res = await api.manualRelayToDestChain("0x", undefined, false);
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
-      expect(res?.error).toEqual(`findBatchAndBroadcast(): unable to retrieve command ID`);
+      expect(res?.error).toEqual(`findBatchAndApproveGateway(): unable to retrieve command ID`);
     });
 
     test("it shouldn't call approve given the 'batchedCommandId' cannot be fetched", async () => {

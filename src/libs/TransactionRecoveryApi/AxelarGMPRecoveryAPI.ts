@@ -339,7 +339,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         const batchData = await this.fetchBatchData(destChainId, commandId);
         if (!batchData) {
           return Promise.reject(
-            `findBatchAndBroadcast(): unable to retrieve batch data for ${commandId}`
+            `findBatchAndApproveGateway(): unable to retrieve batch data for ${commandId}`
           );
         }
 
@@ -347,13 +347,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
         if (!commandData) {
           return Promise.reject(
-            `findBatchAndBroadcast(): unable to retrieve command ID (${commandId}) in batch data`
+            `findBatchAndApproveGateway(): unable to retrieve command ID (${commandId}) in batch data`
           );
         }
 
         if (batchData.status === "BATCHED_COMMANDS_STATUS_SIGNING") {
           return Promise.reject(
-            `findBatchAndBroadcast(): batch ID ${batchData.batch_id} signing in process`
+            `findBatchAndApproveGateway(): batch ID ${batchData.batch_id} signing in process`
           );
         } else if (batchData.status === "BATCHED_COMMANDS_STATUS_SIGNED") {
           const approveTx = await this.sendApproveTx(destChainId, batchData.execute_data, wallet);
@@ -366,7 +366,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           };
         } else {
           return Promise.reject(
-            `findBatchAndBroadcast(): batch ID ${batchData.batch_id} is in an unknown state for command data: ${commandId}`
+            `findBatchAndApproveGateway(): batch ID ${batchData.batch_id} is in an unknown state for command data: ${commandId}`
           );
         }
       },
@@ -378,7 +378,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         errorMessage:
           error.message || // error can be both a string or an object with a message property
           error ||
-          `findBatchAndBroadcastIfNeeded(): issue retrieving and broadcasting command data: ${commandId}`,
+          `findBatchAndApproveGatewayIfNeeded(): issue retrieving and broadcasting command data: ${commandId}`,
         infoLogs: [],
       };
     });
@@ -623,8 +623,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         approveTx: broadcastTxRequest.approveTx,
         infoLogs: [...(signTxRequest.infoLogs || []), ...(broadcastTxRequest.infoLogs || [])],
       };
-    } catch (e) {
-      throw new Error(`Error finding batch: ${e}`);
+    } catch (e: any) {
+      return {
+        success: false,
+        error: e.message || `Error signing and approving gateway for commandId: ${commandId}`,
+      };
     }
   }
 
