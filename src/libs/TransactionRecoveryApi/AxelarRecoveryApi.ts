@@ -3,7 +3,7 @@ import fetch from "cross-fetch";
 import { BigNumber } from "ethers";
 import { loadChains } from "../../chains";
 import { EnvironmentConfigs, getConfigs } from "../../constants";
-import { sleep, throwIfInvalidChainIds } from "../../utils";
+import { retry, throwIfInvalidChainIds } from "../../utils";
 import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
 import { AxelarRecoveryAPIConfig, Environment, EvmChain, EvmWalletDetails } from "../types";
 import EVMClient from "./client/EVMClient";
@@ -164,7 +164,7 @@ export class AxelarRecoveryApi {
       commandId,
     })
       .then((res) => res[0])
-      .catch(() => null);
+      .catch(() => undefined);
 
     /**if not found, check last few batches on core in case it is an issue of delayed indexing of data on the axelarscan API */
     if (!batchData) batchData = this.searchRecentBatchesFromCore(chainId, commandId);
@@ -175,24 +175,15 @@ export class AxelarRecoveryApi {
   private async searchRecentBatchesFromCore(
     chainId: string,
     commandId: string,
-    iteration = 0,
-    maxTries = 3,
     batchId?: string
-  ): Promise<BatchedCommandsAxelarscanResponse | null> {
-    if (iteration > maxTries) return null;
-    const batchData = await this.queryBatchedCommands(chainId, batchId).catch(() => null);
-    if (!batchData) return null;
-    if (batchData.commandIds.includes(commandId)) {
+  ): Promise<BatchedCommandsAxelarscanResponse | undefined> {
+    return retry(async () => {
+      const batchData = await this.queryBatchedCommands(chainId, batchId).catch(() => undefined);
+      if (!batchData) return;
+      if (!batchData.commandIds.includes(commandId))
+        return Promise.reject("command id not found in batch");
       return mapIntoAxelarscanResponseType(batchData, chainId);
-    }
-    sleep(2);
-    return this.searchRecentBatchesFromCore(
-      chainId,
-      commandId,
-      iteration + 1,
-      maxTries,
-      batchData.prevBatchedCommandsId
-    );
+    });
   }
 
   public parseGMPStatus(response: any): GMPStatus | string {
