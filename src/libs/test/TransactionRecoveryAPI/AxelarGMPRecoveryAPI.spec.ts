@@ -201,7 +201,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         status: "BATCHED_COMMANDS_STATUS_SIGNED",
       });
 
-      const response = await api.findBatchAndBroadcast(
+      const response = await api.findBatchAndApproveGateway(
         batchCommandStub().command_ids[0],
         EvmChain.MOONBEAM,
         evmWalletDetails
@@ -219,7 +219,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         .mockResolvedValue(axelarTxResponseStub());
       vitest.spyOn(api, "fetchBatchData").mockResolvedValue(undefined);
 
-      const response = await api.findBatchAndBroadcast(
+      const response = await api.findBatchAndApproveGateway(
         batchCommandStub().command_ids[0],
         EvmChain.MOONBEAM,
         evmWalletDetails
@@ -240,7 +240,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         status: "BATCHED_COMMANDS_STATUS_SIGNED",
       });
 
-      const response = await api.findBatchAndBroadcast(
+      const response = await api.findBatchAndApproveGateway(
         "non-existent-command-id",
         EvmChain.MOONBEAM,
         evmWalletDetails

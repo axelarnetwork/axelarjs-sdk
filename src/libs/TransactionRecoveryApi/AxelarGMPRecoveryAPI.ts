@@ -296,37 +296,37 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return res;
   }
 
-  public async findBatchAndSignIfNeeded(commandId: string, destChainId: string, sleepSeconds = 60) {
+  public async findBatchAndSignIfNeeded(commandId: string, destChainId: string) {
     let signTxLog = "";
-    const res: SignTxSDKResponse = {
-      success: true,
-      errorMessage: "",
-      infoLogs: [],
-    };
-
-    if (this.debugMode)
-      console.debug(`signing: checking whether command ID: ${commandId} needs to be signed`);
-
     try {
       const batchData = await this.fetchBatchData(destChainId, commandId);
       if (batchData) {
-        signTxLog = `signing: batch data exists so do not need to sign. commandId: ${commandId}, batchId: ${batchData.batch_id}; waiting ${sleepSeconds} seconds to attempt broadcast`;
+        signTxLog = `signing: batch data exists so do not need to sign. commandId: ${commandId}, batchId: ${batchData.batch_id}`;
+        if (this.debugMode) console.debug(signTxLog);
+        return {
+          success: true,
+          infoLogs: [signTxLog],
+        };
       } else {
-        res.signCommandTx = await this.signCommands(destChainId);
-        signTxLog = `signing: signed batch for commandId (${commandId}) in tx: ${res.signCommandTx.transactionHash}; waiting ${sleepSeconds} seconds to attempt broadcast`;
+        const signCommandTx = await this.signCommands(destChainId);
+        signTxLog = `signing: signed batch for commandId (${commandId}) in tx: ${signCommandTx.transactionHash}`;
+        if (this.debugMode) console.debug(signTxLog);
+        return {
+          success: true,
+          signCommandTx,
+          infoLogs: [signTxLog],
+        };
       }
-      if (this.debugMode) console.debug(signTxLog);
-      await sleep(sleepSeconds);
     } catch (e) {
-      console.error(e);
-      res.errorMessage = `findBatchAndSignIfNeeded(): issue retrieving and signing command data: ${commandId}`;
-      res.success = false;
+      return {
+        success: false,
+        errorMessage: `findBatchAndSignIfNeeded(): issue retrieving and signing command data: ${commandId}`,
+        infoLogs: [signTxLog],
+      };
     }
-    res.infoLogs.push(signTxLog);
-    return res;
   }
 
-  public async findBatchAndBroadcast(
+  public async findBatchAndApproveGateway(
     commandId: string,
     destChainId: string,
     wallet: EvmWalletDetails
@@ -486,7 +486,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const { messageId, payload, destinationChain } = txDetails.call.returnValues;
     const { command_id: commandId } = txDetails;
 
-    // Step1: Route Message
+    // Send RouteMessageTx
     const routeMessageTx = await this.routeMessageRequest(messageId, payload, -1).catch(
       () => undefined
     );
@@ -498,8 +498,12 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
-    // Step 2: Find the batch and sign it
-    const response = await this.findBatchAndSign(commandId, destinationChain, evmWalletDetails);
+    // Dispatch a SignCommand transaction and an Approve transaction to the Gateway contract.
+    const response = await this.signAndApproveGateway(
+      commandId,
+      destinationChain,
+      evmWalletDetails
+    );
 
     // If the response.success is false, we will return the error response
     if (!response.success) {
@@ -556,7 +560,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       }
 
       // Find the batch and sign it
-      const response = await this.findBatchAndSign(commandId, destChain, evmWalletDetails);
+      const response = await this.signAndApproveGateway(commandId, destChain, evmWalletDetails);
 
       // If the response.success is false, we will return the error response
       if (!response.success) {
@@ -585,7 +589,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
-  private async findBatchAndSign(
+  private async signAndApproveGateway(
     commandId: string,
     destChain: string,
     evmWalletDetails: EvmWalletDetails
@@ -600,7 +604,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      const broadcastTxRequest = await this.findBatchAndBroadcast(
+      const broadcastTxRequest = await this.findBatchAndApproveGateway(
         commandId,
         destChain,
         evmWalletDetails
