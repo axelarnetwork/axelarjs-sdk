@@ -218,72 +218,78 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChain: string,
     destChain: string,
     txHash: string,
-    evmWalletDetails: EvmWalletDetails,
-    sleepSeconds = 60
+    evmWalletDetails: EvmWalletDetails
   ): Promise<ConfirmTxSDKResponse> {
-    const res: ConfirmTxSDKResponse = {
-      success: true,
-      errorMessage: "",
-      infoLogs: [],
-      commandId: "",
-    };
-    let confirmLog = "";
-
     if (this.debugMode)
       console.debug(`confirmation: checking whether ${txHash} needs to be confirmed on Axelar`);
 
-    const evmEventResponse = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
-    res.commandId = evmEventResponse.commandId;
-    res.eventResponse = evmEventResponse.eventResponse;
-    const { infoLog: getEvmEventInfoLog } = evmEventResponse;
+    const evmEvent = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
+    const { infoLog: getEvmEventInfoLog } = evmEvent;
     if (this.debugMode) console.debug(`confirmation: ${getEvmEventInfoLog}`);
 
     if (
-      this.isEVMEventCompleted(res.eventResponse) ||
-      this.isEVMEventConfirmed(res.eventResponse)
+      this.isEVMEventCompleted(evmEvent.eventResponse) ||
+      this.isEVMEventConfirmed(evmEvent.eventResponse)
     ) {
-      confirmLog = `confirmation: event for ${txHash} was already detected on the network and did not need to be confirmed`;
+      return {
+        success: true,
+        commandId: evmEvent.commandId,
+        eventResponse: evmEvent.eventResponse,
+        infoLogs: [
+          `confirmation: event for ${txHash} was already detected on the network and did not need to be confirmed`,
+        ],
+      };
     } else {
       const isConfirmed = await this.doesTxMeetConfirmHt(srcChain, txHash);
       if (!isConfirmed) {
         const minConfirmLevel = await this.axelarQueryApi.getConfirmationHeight(srcChain);
         return {
-          ...res,
           success: false,
+          commandId: evmEvent.commandId,
+          eventResponse: evmEvent.eventResponse,
+          infoLogs: [],
           errorMessage: `findEventAndConfirmIfNeeded(): ${txHash} is not confirmed on ${srcChain}. The minimum confirmation height is ${minConfirmLevel}`,
         };
       }
 
-      res.confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch(() => {
-        return undefined;
-      });
-      if (!res.confirmTx) {
+      const confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch(() => undefined);
+      if (!confirmTx) {
         return {
-          ...res,
           success: false,
+          commandId: evmEvent.commandId,
+          eventResponse: evmEvent.eventResponse,
+          infoLogs: [],
           errorMessage: `findEventAndConfirmIfNeeded(): could not confirm transaction on Axelar`,
         };
       }
-      confirmLog = `confirmation: successfully confirmed ${txHash} on Axelar; waiting ${sleepSeconds} seconds for network confirmation`;
-      if (this.debugMode) console.debug(confirmLog);
 
-      const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
+      const updatedEvent = await retry(() =>
+        this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails)
+      );
 
       if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
-        res.eventResponse = updatedEvent.eventResponse;
-        confirmLog += `; confirmed event was finalized`;
+        return {
+          success: true,
+          commandId: updatedEvent.commandId,
+          eventResponse: updatedEvent.eventResponse,
+          infoLogs: [
+            `confirmation: successfully confirmed ${txHash} on Axelar; confirmed event was finalized`,
+            getEvmEventInfoLog,
+          ],
+        };
       } else {
-        res.success = false;
-        res.errorMessage = `findEventAndConfirmIfNeeded(): could not confirm and finalize event successfully: ${txHash};. Your transaction may not have enough confirmations yet.`;
-        confirmLog += `; confirmed event was unable to be finalized`;
+        return {
+          success: false,
+          eventResponse: evmEvent.eventResponse,
+          commandId: updatedEvent.commandId,
+          errorMessage: `findEventAndConfirmIfNeeded(): could not confirm and finalize event successfully: ${txHash};. Your transaction may not have enough confirmations yet.`,
+          infoLogs: [
+            `confirmation: successfully confirmed ${txHash} on Axelar; confirmed event was unable to be finalized`,
+            getEvmEventInfoLog,
+          ],
+        };
       }
     }
-    if (this.debugMode) console.debug(confirmLog);
-
-    getEvmEventInfoLog && res.infoLogs.push(getEvmEventInfoLog);
-    res.infoLogs.push(confirmLog);
-
-    return res;
   }
 
   public async findBatchAndSignIfNeeded(
