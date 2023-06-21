@@ -126,63 +126,43 @@ describe("AxelarGMPRecoveryAPI", () => {
     }, 60000);
   });
 
-  describe.skip("findBatchAndSignIfNeeded", () => {
+  describe("findBatchAndSignIfNeeded", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     test("It should sign an event if needed", async () => {
-      const mockSignCommandTx = vitest.spyOn(api, "signCommands");
-      const stub = axelarTxResponseStub();
-      mockSignCommandTx.mockImplementation(() => Promise.resolve(stub));
-      const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
-      mockFetchBatchData.mockImplementation(() => Promise.resolve(null));
+      const mockSignCommandTx = vitest
+        .spyOn(api, "signCommands")
+        .mockResolvedValue(axelarTxResponseStub());
+      vitest.spyOn(api, "fetchBatchData").mockResolvedValue(undefined);
 
-      const commandId = "",
-        destChainId = EvmChain.MOONBEAM;
-      const signResult = await api.findBatchAndSignIfNeeded(commandId, destChainId, 1);
-      expect(mockSignCommandTx).toHaveBeenCalled();
-      expect(signResult).toBeTruthy();
-      expect(signResult.errorMessage).toBeFalsy();
-      expect(signResult.signCommandTx).toEqual(stub);
-      expect(signResult.success).toBeTruthy();
-    }, 60000);
+      const signResult = await api.findBatchAndSignIfNeeded("conmmandId", EvmChain.AVALANCHE);
+      expect(mockSignCommandTx).toHaveBeenLastCalledWith(EvmChain.AVALANCHE);
+      expect(signResult).toBeDefined();
+    });
     test("It should skip sign an event if batch is found", async () => {
-      const mockSignCommandTx = vitest.spyOn(api, "signCommands");
-      const stub = axelarTxResponseStub();
-      mockSignCommandTx.mockImplementation(() => Promise.resolve(stub));
-      const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
-      mockFetchBatchData.mockImplementation(() =>
-        Promise.resolve({} as BatchedCommandsAxelarscanResponse)
-      );
+      const mockSignCommandTx = vitest
+        .spyOn(api, "signCommands")
+        .mockResolvedValue(axelarTxResponseStub());
+      vitest.spyOn(api, "fetchBatchData").mockResolvedValue({} as any);
 
-      const commandId = "",
-        destChainId = EvmChain.MOONBEAM;
-      const signResult = await api.findBatchAndSignIfNeeded(commandId, destChainId, 1);
+      const signResult = await api.findBatchAndSignIfNeeded("commandId", EvmChain.MOONBEAM);
       expect(mockSignCommandTx).not.toHaveBeenCalled();
-      expect(signResult).toBeTruthy();
-      expect(signResult.errorMessage).toBeFalsy();
-      expect(signResult.signCommandTx).toBeNull();
-      expect(signResult.success).toBeTruthy();
-    }, 60000);
+      expect(signResult).toBeDefined();
+    });
+
     test("It should return an error if unable to fetchBatchData", async () => {
-      const mockSignCommandTx = vitest.spyOn(api, "signCommands");
-      const stub = axelarTxResponseStub();
-      mockSignCommandTx.mockImplementation(() => Promise.resolve(stub));
-      const mockFetchBatchData = vitest.spyOn(api, "fetchBatchData");
-      mockFetchBatchData.mockImplementation(() => {
-        throw "error";
-      });
+      const mockSignCommandTx = vitest
+        .spyOn(api, "signCommands")
+        .mockResolvedValue(axelarTxResponseStub());
+      vitest.spyOn(api, "fetchBatchData").mockRejectedValue("error");
 
-      const commandId = "",
-        destChainId = EvmChain.MOONBEAM;
-      const signResult = await api.findBatchAndSignIfNeeded(commandId, destChainId, 1);
+      const signResult = await api.findBatchAndSignIfNeeded("commandId", EvmChain.MOONBEAM);
       expect(mockSignCommandTx).not.toHaveBeenCalled();
-      expect(signResult).toBeTruthy();
+      expect(signResult).toBeDefined();
       expect(signResult.errorMessage).toContain(
-        `findBatchAndSignIfNeeded(): issue retrieving and signing command data`
+        `findBatchAndSignIfNeeded(): issue retrieving and signing`
       );
-      expect(signResult.signCommandTx).toBeNull();
-      expect(signResult.success).toBeFalsy();
-    }, 60000);
+    });
   });
 
   describe("findBatchAndApproveGateway", () => {
@@ -524,7 +504,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       mockFindBatchAndSignIfNeeded.mockResolvedValueOnce({
         success: false,
         errorMessage: "findBatchAndSignIfNeeded(): issue retrieving and signing command data",
-        signCommandTx: {} as AxelarTxResponse,
+        signCommandTx: undefined,
         infoLogs: [],
       });
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");

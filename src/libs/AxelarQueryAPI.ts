@@ -51,8 +51,8 @@ export class AxelarQueryAPI {
   readonly axelarLcdUrl: string;
   readonly axelarGMPServiceUrl: string;
   private allAssets: AssetConfig[];
-  private chainsList: ChainInfo[];
   private axelarQueryClient: AxelarQueryClientType;
+  private chainsList: ChainInfo[] = [];
 
   public constructor(config: AxelarQueryAPIConfig) {
     const { axelarLcdUrl, axelarRpcUrl, environment } = config;
