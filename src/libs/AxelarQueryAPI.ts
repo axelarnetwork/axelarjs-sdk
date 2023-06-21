@@ -16,6 +16,7 @@ import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 import { BigNumber } from "ethers";
+import { ChainInfo } from "src/chains/types";
 
 interface TranslatedTransferRateLimitResponse {
   incoming: string;
@@ -50,6 +51,7 @@ export class AxelarQueryAPI {
   readonly axelarLcdUrl: string;
   readonly axelarGMPServiceUrl: string;
   private allAssets: AssetConfig[];
+  private chainsList: ChainInfo[];
   private axelarQueryClient: AxelarQueryClientType;
 
   public constructor(config: AxelarQueryAPIConfig) {
@@ -105,9 +107,8 @@ export class AxelarQueryAPI {
   public async getConfirmationHeight(chain: string) {
     await throwIfInvalidChainIds([chain], this.environment);
     await this.initQueryClientIfNeeded();
-    const chains = await loadChains({ environment: this.environment });
-    const chainConfig = chains.find((c) => c.id.toLowerCase() === chain.toLowerCase());
-    return chainConfig?.confirmLevel || 0;
+    const chainInfo = await this.getChainInfo(chain);
+    return chainInfo?.confirmLevel || 0;
   }
 
   /**
@@ -366,8 +367,7 @@ export class AxelarQueryAPI {
    * @returns the contract address
    */
   public async getContractAddressFromConfig(chainId: string, contractKey: string): Promise<string> {
-    const chains = await loadChains({ environment: this.environment });
-    const selectedChain = chains.find((chain) => chain.id.toLowerCase() === chainId.toLowerCase());
+    const selectedChain = await this.getChainInfo(chainId);
     if (!selectedChain) throw `getContractAddressFromConfig() ${chainId} not found`;
     return await fetch(s3[this.environment])
       .then((res) => res.json())
@@ -486,8 +486,7 @@ export class AxelarQueryAPI {
   }): Promise<TranslatedTransferRateLimitResponse> {
     // verify chain params
     await throwIfInvalidChainIds([chainId], this.environment);
-    const chains = await loadChains({ environment: this.environment });
-    const chain = chains.find((c) => c.id === chainId);
+    const chain = this.getChainInfo(chainId);
     if (!chain) throw `Chain ${chainId} not found`;
 
     const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient({
@@ -516,6 +515,19 @@ export class AxelarQueryAPI {
     } catch (e: any) {
       return { limit: "", outgoing: "", incoming: "" };
     }
+  }
+
+  private async getChainInfo(chainId: string) {
+    if (this.chainsList.length === 0) {
+      this.chainsList = await loadChains({
+        environment: this.environment,
+      });
+    }
+    const chainInfo = this.chainsList.find(
+      (chainInfo) => chainInfo.id.toLowerCase() === chainId.toLowerCase()
+    );
+
+    return chainInfo;
   }
 
   private async _convertAssetDenom(denom: string): Promise<string> {
