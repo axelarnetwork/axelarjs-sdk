@@ -375,15 +375,31 @@ describe("AxelarGMPRecoveryAPI", () => {
 
     test("it should return success response if the signAndApproveGateway is success", async () => {
       vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValue({
-        call: { returnValues: { payload: "payload", messageId: "messageID" } },
+        call: {
+          returnValues: {
+            payload: "payload",
+            messageId: "messageID",
+            destinationChain: "avalanche",
+          },
+        },
+        command_id: "commandID",
       });
-      vitest.spyOn(api, "routeMessageRequest").mockResolvedValue(axelarTxResponseStub());
-      vitest.spyOn(api as any, "signAndApproveGateway").mockResolvedValue({
-        success: true,
-        signCommandTx: axelarTxResponseStub(),
-        infoLogs: ["log"],
-      });
+      const mockRouteMesssageRequest = vitest
+        .spyOn(api, "routeMessageRequest")
+        .mockResolvedValue(axelarTxResponseStub());
+      const mockSignAndApproveGateway = vitest
+        .spyOn(api as any, "signAndApproveGateway")
+        .mockResolvedValue({
+          success: true,
+          signCommandTx: axelarTxResponseStub(),
+          infoLogs: ["log"],
+        });
+
       const result = await api.manualRelayToDestChain("0xtest");
+      expect(mockRouteMesssageRequest).toHaveBeenLastCalledWith("messageID", "payload", -1);
+      expect(mockSignAndApproveGateway).toHaveBeenLastCalledWith("commandID", "avalanche", {
+        useWindowEthereum: true,
+      });
       expect(result.success).toBeTruthy();
       expect(result.signCommandTx).toBeDefined();
       expect(result.infoLogs?.length).toEqual(2);
@@ -540,7 +556,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       mockFindBatchAndSignIfNeeded.mockResolvedValueOnce({
         success: true,
         errorMessage: "",
-        signCommandTx: {} as AxelarTxResponse,
+        signCommandTx: undefined,
         infoLogs: [],
       });
       const mockfindBatchAndApproveGateway = vitest.spyOn(api, "findBatchAndApproveGateway");

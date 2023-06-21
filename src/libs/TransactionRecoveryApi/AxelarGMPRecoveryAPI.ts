@@ -296,7 +296,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return res;
   }
 
-  public async findBatchAndSignIfNeeded(commandId: string, destChainId: string) {
+  public async findBatchAndSignIfNeeded(
+    commandId: string,
+    destChainId: string
+  ): Promise<SignTxSDKResponse> {
     let signTxLog = "";
     try {
       const batchData = await this.fetchBatchData(destChainId, commandId);
