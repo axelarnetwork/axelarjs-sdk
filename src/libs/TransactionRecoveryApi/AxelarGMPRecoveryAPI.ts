@@ -171,28 +171,21 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     errorMessage: string;
     infoLog: string;
   }> {
-    let eventIndex = -1,
-      success = false,
-      errorMessage = "",
-      infoLog = "";
-
-    eventIndex = await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)
+    const eventIndex = await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)
       .then((index) => index as number)
       .catch(() => -1);
 
     if (eventIndex === -1) {
       return {
-        success,
+        success: false,
         errorMessage: `getEvmEvent(): could not find event index for ${srcTxHash}`,
         commandId: "",
         eventResponse: {},
-        infoLog,
+        infoLog: "",
       };
     }
 
     const commandId = this.getCidFromSrcTxHash(destChainId, srcTxHash, eventIndex);
-    infoLog = `srcTxHash: ${srcTxHash}, generated commandId: ${commandId}`;
-
     const eventResponse = await retry(
       () => this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex),
       12,
@@ -200,27 +193,24 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     );
 
     if (!eventResponse || this.isEVMEventFailed(eventResponse)) {
-      errorMessage = this.isEVMEventFailed(eventResponse)
+      const errorMessage = this.isEVMEventFailed(eventResponse)
         ? `getEvmEvent(): event on source chain is not successful for: ${srcTxHash}`
         : `getEvmEvent(): could not determine status of event: ${srcTxHash}`;
       return {
-        success,
+        success: false,
         errorMessage,
         commandId,
         eventResponse: {},
-        infoLog,
+        infoLog: `srcTxHash: ${srcTxHash}, generated commandId: ${commandId}`,
       };
     }
 
-    success = true;
-    infoLog = `${srcTxHash} correspondes to command ID: ${commandId}`;
-
     return {
+      success: true,
       commandId,
       eventResponse,
-      success,
-      errorMessage,
-      infoLog,
+      errorMessage: "",
+      infoLog: `${srcTxHash} correspondes to command ID: ${commandId}`,
     };
   }
 
