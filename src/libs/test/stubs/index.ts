@@ -133,7 +133,27 @@ export const evmEventStubResponse = () => ({
     },
   },
 });
-export const axelarTxResponseStub = (rawLog: any = []): AxelarTxResponse => ({
+
+export const chainInfoStub = () => ({
+  id: "mockedId",
+  assets: [],
+  chainSymbol: "mockedSymbol",
+  chainName: "mockedName",
+  fullySupported: true,
+  estimatedWaitTime: 10,
+  txFeeInPercent: 0.1,
+  module: "axelarnet",
+  chainIdentifier: {
+    devnet: "mockedDevnet",
+    testnet: "mockedTestnet",
+    mainnet: "mockedMainnet",
+  },
+  nativeAsset: ["mockedNativeAsset"],
+  addressPrefix: "mockedPrefix",
+  confirmLevel: 1,
+});
+
+export const axelarTxResponseStub = (rawLog: any = []) => ({
   height: 1,
   code: 0,
   transactionHash: "0x",

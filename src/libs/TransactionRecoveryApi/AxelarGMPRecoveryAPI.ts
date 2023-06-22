@@ -96,7 +96,7 @@ interface GMPRecoverySuccess {
   confirmTx?: AxelarTxResponse;
 }
 
-enum RouteDir {
+export enum RouteDir {
   COSMOS_TO_EVM = "cosmos_to_evm",
   EVM_TO_COSMOS = "evm_to_cosmos",
   EVM_TO_EVM = "evm_to_evm",
@@ -254,7 +254,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     ) {
       confirmLog = `confirmation: event for ${txHash} was already detected on the network and did not need to be confirmed`;
     } else {
-      /**todo, need to check whether tx is finalized */
       const isConfirmed = await this.doesTxMeetConfirmHt(srcChain, txHash);
       if (!isConfirmed) {
         const minConfirmLevel = await this.axelarQueryApi.getConfirmationHeight(srcChain);
@@ -450,7 +449,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   private async recoverEvmToCosmosTx(srcChain: string, txHash: string) {
-    // Step 1: ConfirmGatewayTx and check if it is successfully executed
+    // Check if the tx is confirmed on the source chain
+    const isConfirmed = await this.doesTxMeetConfirmHt(srcChain, txHash);
+    if (!isConfirmed) {
+      const minConfirmLevel = await this.axelarQueryApi.getConfirmationHeight(srcChain);
+      return {
+        success: false,
+        error: `${txHash} is not confirmed on ${srcChain}. The minimum confirmation height is ${minConfirmLevel}`,
+      };
+    }
+
+    // ConfirmGatewayTx and check if it is successfully executed
     const confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch(() => undefined);
 
     if (!confirmTx) {
@@ -460,13 +469,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
-    // Step 2: Fetch all necessary data to send the route message tx
+    // Fetch all necessary data to send the route message tx
     const payload = await this.fetchGMPTransaction(txHash).then(
       (data) => data.call.returnValues.payload
     );
     const logIndex = await this.getEventIndex(srcChain as EvmChain, txHash);
 
-    // Step 3: Send the route message tx
+    // Send the route message tx
     const routeMessageTx = await this.routeMessageRequest(txHash, payload, logIndex).catch(
       () => undefined
     );
@@ -485,8 +494,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       confirmTx,
       routeMessageTx,
       infoLogs: [
-        `Successfully sent ConfirmGatewayTx tx for given ${txHash}`,
-        `Successfully sent RouteMessage tx for given ${txHash}`,
+        `Successfully sent ConfirmGatewayTx tx for given tx hash ${txHash}`,
+        `Successfully sent RouteMessage tx for given tx hash ${txHash}`,
       ],
     };
   }

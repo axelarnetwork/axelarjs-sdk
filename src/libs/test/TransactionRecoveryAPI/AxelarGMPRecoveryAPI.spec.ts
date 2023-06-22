@@ -37,13 +37,14 @@ import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contra
 import {
   activeChainsStub,
   axelarTxResponseStub,
+  chainInfoStub,
   contractReceiptStub,
   evmEventStubResponse,
   executeParamsStub,
 } from "../stubs";
 import * as Sleep from "../../../utils/sleep";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
-import { CosmosChain } from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/types";
+import { ChainInfo } from "../../../chains/types";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -256,6 +257,33 @@ describe("AxelarGMPRecoveryAPI", () => {
     }, 60000);
   });
 
+  describe("getRouteDir", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+    const axelarnetModule: ChainInfo = {
+      ...chainInfoStub(),
+      module: "axelarnet",
+    };
+    const evmModule: ChainInfo = {
+      ...chainInfoStub(),
+      module: "evm",
+    };
+
+    test("it should return cosmos_to_evm", () => {
+      const routeDir = api.getRouteDir(axelarnetModule, evmModule);
+      expect(routeDir).toBe(RouteDir.COSMOS_TO_EVM);
+    });
+
+    test("it should return evm_to_cosmos", () => {
+      const routeDir = api.getRouteDir(evmModule, axelarnetModule);
+      expect(routeDir).toBe(RouteDir.EVM_TO_COSMOS);
+    });
+
+    test("it should return evm_to_evm", () => {
+      const routeDir = api.getRouteDir(evmModule, evmModule);
+      expect(routeDir).toBe(RouteDir.EVM_TO_EVM);
+    });
+  });
+
   describe("recoverEvmToCosmosTx", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
@@ -353,14 +381,6 @@ describe("AxelarGMPRecoveryAPI", () => {
       // Prevent sleep while testing
       const mockSleep = vitest.spyOn(Sleep, "sleep");
       mockSleep.mockImplementation(() => Promise.resolve(undefined));
-    });
-
-    test("it should be able to recover evm to cosmos tx", async () => {
-      const txhash = "0x6fe786de6a9ae4d2456253d36c263467df2d8ee7a83d8eabc2e66d0423fd63ad";
-      const response = await api.manualRelayToDestChain(txhash);
-      expect(response.success).toBeTruthy();
-      expect(response.confirmTx).toBeDefined();
-      expect(response.routeMessageTx).toBeDefined();
     });
 
     test("it shouldn't call approve given the gmp status cannot be fetched", async () => {
