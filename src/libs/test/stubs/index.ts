@@ -56,6 +56,15 @@ export const batchCommandStub = () => ({
   id: "mockedId",
 });
 
+export const findEventAndConfirmStub = () => ({
+  success: true,
+  errorMessage: undefined,
+  infoLogs: ["Log 1", "Log 2", "Log 3"],
+  commandId: "commandId",
+  confirmTx: axelarTxResponseStub(),
+  eventResponse: evmEventStubResponse().eventResponse,
+});
+
 export const apiErrorStub = () => ({
   message: "AxelarJS-SDK uncaught post error",
   uncaught: true,
@@ -127,7 +136,7 @@ export const contractReceiptStub = () => ({
 export const evmEventStubResponse = () => ({
   success: true,
   errorMessage: "",
-  commandId: "",
+  commandId: "commandId",
   infoLog: "",
   eventResponse: {
     event: {

@@ -240,8 +240,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         ],
       };
     } else {
-      const isConfirmed = await this.doesTxMeetConfirmHt(srcChain, txHash);
-      if (!isConfirmed) {
+      const isConfirmFinalized = await this.doesTxMeetConfirmHt(srcChain, txHash);
+      if (!isConfirmFinalized) {
         const minConfirmLevel = await this.axelarQueryApi.getConfirmationHeight(srcChain);
         return {
           success: false,
@@ -263,9 +263,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      const updatedEvent = await retry(() =>
-        this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails)
-      );
+      const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
 
       if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
         return {
@@ -570,12 +568,12 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       }
 
       // Otherwise, we will return the success response
-      const { signCommandTx, infoLogs: signTxLogs } = response;
+      const { signCommandTx, approveTx, infoLogs: signTxLogs } = response;
       return {
         success: true,
         confirmTx,
         signCommandTx,
-        approveTx: response.approveTx,
+        approveTx,
         infoLogs: [...confirmTxLogs, ...signTxLogs],
       };
 

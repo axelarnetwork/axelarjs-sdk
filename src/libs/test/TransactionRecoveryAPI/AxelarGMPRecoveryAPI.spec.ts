@@ -38,15 +38,16 @@ import {
   activeChainsStub,
   axelarTxResponseStub,
   batchCommandStub,
-  batchedCommandResponseStub,
   chainInfoStub,
   contractReceiptStub,
   evmEventStubResponse,
   executeParamsStub,
+  findEventAndConfirmStub,
 } from "../stubs";
 import * as Sleep from "../../../utils/sleep";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { ChainInfo } from "../../../chains/types";
+import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -61,69 +62,143 @@ describe("AxelarGMPRecoveryAPI", () => {
     };
   });
 
-  describe.skip("findEventAndConfirmIfNeeded", () => {
+  describe("findEventAndConfirmIfNeeded", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     test("It should confirm an event if needed", async () => {
-      const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");
-      const stub: AxelarTxResponse = axelarTxResponseStub();
-      mockConfirmGatewayTx.mockImplementation(() => Promise.resolve(stub));
-      const confirmation = await api.findEventAndConfirmIfNeeded(
-        // { event: { ...evmEvent.event, status: Event_Status.STATUS_UNSPECIFIED } },
+      const mockConfirmGatewayTx = vitest
+        .spyOn(api, "confirmGatewayTx")
+        .mockResolvedValue(axelarTxResponseStub());
+
+      const mockEvmEvent = vitest
+        .spyOn(api, "getEvmEvent")
+        .mockResolvedValue(evmEventStubResponse());
+
+      vitest.spyOn(api, "isEVMEventCompleted").mockReturnValueOnce(false).mockReturnValueOnce(true);
+      vitest.spyOn(api, "isEVMEventConfirmed").mockReturnValueOnce(false);
+
+      const mockDoesTxMeetConfirmHt = vitest
+        .spyOn(api, "doesTxMeetConfirmHt")
+        .mockResolvedValue(true);
+
+      const txHash = "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503";
+      const response = await api.findEventAndConfirmIfNeeded(
+        EvmChain.AVALANCHE,
+        EvmChain.POLYGON,
+        txHash,
+        evmWalletDetails
+      );
+      expect(mockEvmEvent).toHaveBeenCalledWith(
+        EvmChain.AVALANCHE,
+        EvmChain.POLYGON,
+        txHash,
+        evmWalletDetails
+      );
+      expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
+      expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash);
+      expect(response).toBeDefined();
+      expect(response.infoLogs.length).toBeGreaterThan(0);
+      expect(response.eventResponse).toBeDefined();
+      expect(response.success).toBeTruthy();
+      expect(response.commandId).toBe("commandId");
+    });
+
+    test("It should not confirm an event if the evm event is completed", async () => {
+      const mockConfirmGatewayTx = vitest
+        .spyOn(api, "confirmGatewayTx")
+        .mockResolvedValue(axelarTxResponseStub());
+
+      vitest.spyOn(api, "getEvmEvent").mockResolvedValue({
+        ...evmEventStubResponse(),
+        eventResponse: {
+          event: {
+            ...evmEventStubResponse().eventResponse.event,
+            status: Event_Status.STATUS_COMPLETED,
+          },
+        },
+      });
+
+      const response = await api.findEventAndConfirmIfNeeded(
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
         "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
-        evmWalletDetails,
-        1
+        evmWalletDetails
       );
-      expect(mockConfirmGatewayTx).toHaveBeenCalled();
-      expect(confirmation).toBeTruthy();
-      expect(confirmation.errorMessage).toBeFalsy();
-      expect(confirmation.confirmTx).toEqual(stub);
-      expect(confirmation.success).toBeTruthy();
-    }, 60000);
-    test("It should not confirm an event if not needed", async () => {
-      const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");
-      const stub = axelarTxResponseStub();
-      mockConfirmGatewayTx.mockImplementation(() => Promise.resolve(stub));
-      const confirmation = await api.findEventAndConfirmIfNeeded(
-        // { event: { ...evmEvent.event, status: Event_Status.STATUS_COMPLETED } },
-        EvmChain.AVALANCHE,
-        EvmChain.POLYGON,
-        "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
-        evmWalletDetails,
-        1
-      );
+
       expect(mockConfirmGatewayTx).not.toHaveBeenCalled();
-      expect(confirmation).toBeTruthy();
-      expect(confirmation.errorMessage).toBeFalsy();
-      expect(confirmation.confirmTx).toEqual(null);
-      expect(confirmation.success).toBeTruthy();
-    }, 60000);
-    test("It should confirm the event and fail if event is not completed after sleep delay", async () => {
-      const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");
-      const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
-      const mockisEVMEventCompleted = vitest.spyOn(api, "isEVMEventCompleted");
+      expect(response).toBeTruthy();
+      expect(response.success).toBeTruthy();
+      expect(response.eventResponse).toBeDefined();
+      expect(response.commandId).toBe("commandId");
+    });
 
-      const stub = axelarTxResponseStub();
-      mockConfirmGatewayTx.mockImplementation(() => Promise.resolve(stub));
-      mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
-      mockisEVMEventCompleted.mockReturnValue(false);
+    test("It should not confirm an event if the finalized block is not met", async () => {
+      const mockConfirmGatewayTx = vitest
+        .spyOn(api, "confirmGatewayTx")
+        .mockResolvedValue(axelarTxResponseStub());
 
-      const confirmation = await api.findEventAndConfirmIfNeeded(
-        // evmEvent,
+      vitest.spyOn(api, "getEvmEvent").mockResolvedValue({
+        ...evmEventStubResponse(),
+        eventResponse: {
+          event: {
+            ...evmEventStubResponse().eventResponse.event,
+            status: Event_Status.STATUS_UNSPECIFIED,
+          },
+        },
+      });
+
+      const mockDoesTxMeetConfirmHt = vitest
+        .spyOn(api, "doesTxMeetConfirmHt")
+        .mockResolvedValue(false);
+      const txHash = "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503";
+
+      const response = await api.findEventAndConfirmIfNeeded(
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
-        "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
-        evmWalletDetails,
-        1
+        txHash,
+        evmWalletDetails
       );
-      expect(mockConfirmGatewayTx).toHaveBeenCalled();
-      expect(confirmation).toBeTruthy();
-      expect(confirmation.errorMessage).toContain(`could not confirm event successfully:`);
-      expect(confirmation.confirmTx).toEqual(stub);
-      expect(confirmation.success).toBeFalsy();
-    }, 60000);
+
+      expect(mockConfirmGatewayTx).toBeCalledTimes(0);
+      expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash);
+      expect(response.success).toBeFalsy();
+      expect(response.eventResponse).toBeDefined();
+      expect(response.commandId).toBe("commandId");
+      expect(response.errorMessage).toContain(`minimum confirmation`);
+      expect(response.confirmTx).toBeUndefined();
+    });
+
+    test("It should return success: false if the confirmGatewayTx is failed", async () => {
+      vitest.spyOn(api, "getEvmEvent").mockResolvedValue({
+        ...evmEventStubResponse(),
+        eventResponse: {
+          event: {
+            ...evmEventStubResponse().eventResponse.event,
+            status: Event_Status.STATUS_UNSPECIFIED,
+          },
+        },
+      });
+      const mockDoesTxMeetConfirmHt = vitest
+        .spyOn(api, "doesTxMeetConfirmHt")
+        .mockResolvedValue(true);
+      const txHash = "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503";
+      const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx").mockRejectedValue("error");
+
+      const response = await api.findEventAndConfirmIfNeeded(
+        EvmChain.AVALANCHE,
+        EvmChain.POLYGON,
+        txHash,
+        evmWalletDetails
+      );
+
+      expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
+      expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash);
+      expect(response.success).toBeFalsy();
+      expect(response.eventResponse).toBeDefined();
+      expect(response.commandId).toBe("commandId");
+      expect(response.errorMessage).toContain(`could not confirm`);
+      expect(response.confirmTx).toBeUndefined();
+    });
   });
 
   describe("findBatchAndSignIfNeeded", () => {
@@ -507,15 +582,9 @@ describe("AxelarGMPRecoveryAPI", () => {
           returnValues: { destinationChain: EvmChain.MOONBEAM },
         },
       });
-      const mockFindEventAndConfirmIfNeeded = vitest.spyOn(api, "findEventAndConfirmIfNeeded");
-      mockFindEventAndConfirmIfNeeded.mockResolvedValueOnce({
-        success: true,
-        errorMessage: "findBatchAndSignIfNeeded(): issue retrieving and signing command data",
-        commandId: "",
-        eventResponse: {} as EventResponse,
-        confirmTx: {} as AxelarTxResponse,
-        infoLogs: [""],
-      });
+      const mockFindEventAndConfirmIfNeeded = vitest
+        .spyOn(api, "findEventAndConfirmIfNeeded")
+        .mockResolvedValueOnce(findEventAndConfirmStub());
       const mockFindBatchAndSignIfNeeded = vitest.spyOn(api, "findBatchAndSignIfNeeded");
       mockFindBatchAndSignIfNeeded.mockResolvedValueOnce({
         success: false,
@@ -575,7 +644,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       expect(res?.error).toEqual(`findBatchAndApproveGateway(): unable to retrieve command ID`);
     });
 
-    test("it shouldn't call approve given the 'batchedCommandId' cannot be fetched", async () => {
+    test("it should call approve successfully", async () => {
       const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
       mockQueryTransactionStatus.mockResolvedValueOnce({
         status: GMPStatus.SRC_GATEWAY_CALLED,
@@ -584,86 +653,28 @@ describe("AxelarGMPRecoveryAPI", () => {
           returnValues: { destinationChain: EvmChain.MOONBEAM },
         },
       });
-      const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
-      mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
-      const mockConfirmGatewayTx = vitest.spyOn(api, "confirmGatewayTx");
-      mockConfirmGatewayTx.mockResolvedValueOnce(axelarTxResponseStub());
-      const mockcreatePendingTransfer = vitest.spyOn(api, "createPendingTransfers");
-      mockcreatePendingTransfer.mockResolvedValueOnce(axelarTxResponseStub());
-      const mockSignCommandTx = vitest.spyOn(api, "signCommands");
-      const signCommandStub = axelarTxResponseStub([
-        {
-          events: [
-            {
-              type: "sign",
-              attributes: [
-                {
-                  key: "batchedCommandId",
-                  value: "0x123",
-                },
-              ],
-            },
-          ],
-        },
-      ]);
-      mockSignCommandTx.mockResolvedValueOnce(signCommandStub);
+      vitest.spyOn(api, "getEvmEvent").mockResolvedValueOnce(evmEventStubResponse());
+      const mockFindEventAndConfirmIfNeeded = vitest
+        .spyOn(api, "findEventAndConfirmIfNeeded")
+        .mockResolvedValueOnce(findEventAndConfirmStub());
+      const mockSignAndApproveGateway = vitest
+        .spyOn(api as any, "signAndApproveGateway")
+        .mockResolvedValue({
+          success: true,
+          signCommandTx: axelarTxResponseStub(),
+          approveTx: axelarTxResponseStub(),
+          infoLogs: ["log"],
+        });
 
-      const mockQueryBatchedCommand = vitest.spyOn(api, "queryBatchedCommands");
-      mockQueryBatchedCommand.mockResolvedValue(batchedCommandResponseStub());
-
-      const response = await api.manualRelayToDestChain("0x");
-
-      expect(response.success).toBeFalsy();
-      expect(response.error).toContain("command ID");
+      const response = await api.manualRelayToDestChain("0x", undefined, false);
+      expect(mockFindEventAndConfirmIfNeeded).toHaveBeenCalled();
+      expect(mockSignAndApproveGateway).toHaveBeenCalled();
+      expect(response.success).toBeTruthy();
+      expect(response.confirmTx).toBeDefined();
+      expect(response.signCommandTx).toBeDefined();
+      expect(response.approveTx).toBeDefined();
+      expect(response.infoLogs?.length).greaterThan(2);
     });
-
-    // test.only("it should call approve successfully", async () => {
-    //   const mockQueryTransactionStatus = vitest.spyOn(api, "queryTransactionStatus");
-    //   mockQueryTransactionStatus.mockResolvedValueOnce({
-    //     status: GMPStatus.SRC_GATEWAY_CALLED,
-    //     callTx: {
-    //       chain: EvmChain.AVALANCHE,
-    //       returnValues: { destinationChain: EvmChain.MOONBEAM },
-    //     },
-    //   });
-    //   vitest.spyOn(api, "getEvmEvent").mockResolvedValueOnce(evmEventStubResponse());
-    //   vitest.spyOn(api, "confirmGatewayTx").mockResolvedValueOnce(axelarTxResponseStub());
-    //   vitest.spyOn(api, "createPendingTransfers").mockResolvedValueOnce(axelarTxResponseStub());
-    //   const mockSignCommandTx = vitest.spyOn(api, "signCommands");
-    //   const signCommandStub = axelarTxResponseStub([
-    //     {
-    //       events: [
-    //         {
-    //           type: "sign",
-    //           attributes: [
-    //             {
-    //               key: "batchedCommandId",
-    //               value: "0x123",
-    //             },
-    //           ],
-    //         },
-    //       ],
-    //     },
-    //   ]);
-    //   mockSignCommandTx.mockResolvedValueOnce(signCommandStub);
-
-    //   const mockQueryBatchedCommand = vitest.spyOn(api, "queryBatchedCommands");
-    //   mockQueryBatchedCommand.mockResolvedValueOnce(batchedCommandResponseStub("0x456"));
-    //   vitest.spyOn(api, "fetchBatchData").mockResolvedValueOnce(batchDataStub());
-    //   const mockApproveTx = vitest.spyOn(api, "sendApproveTx");
-    //   const mockTransaction = { transactionHash: "0x123456" };
-    //   mockApproveTx.mockResolvedValueOnce(mockTransaction);
-
-    //   const response = await api.manualRelayToDestChain("0x");
-
-    //   expect(response).toEqual({
-    //     success: true,
-    //     confirmTx: axelarTxResponseStub(),
-    //     createPendingTransferTx: axelarTxResponseStub(),
-    //     signCommandTx: signCommandStub,
-    //     approveTx: mockTransaction,
-    //   });
-    // });
   });
 
   describe.skip("calculateNativeGasFee", () => {
