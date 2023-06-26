@@ -577,11 +577,7 @@ describe("AxelarAssetTransfer", () => {
         vitest.clearAllMocks();
       });
       it("should broadcast an ibc transfer message with a memo", async () => {
-        const getSigner = async () => {
-          const mnemonic = "YOUR OWN";
-          return DirectSecp256k1HdWallet.fromMnemonic(mnemonic, { prefix: "osmo" });
-        };
-        const offlineSigner = await getSigner();
+        const offlineSigner = await DirectSecp256k1HdWallet.generate();
         const rpcUrl = "https://rpc.osmotest5.osmosis.zone";
         const fee: StdFee = {
           gas: "250000",
