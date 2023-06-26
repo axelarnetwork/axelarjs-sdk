@@ -140,6 +140,9 @@ export const axelarTxResponseStub = (rawLog: any = []): AxelarTxResponse => ({
   rawLog,
   gasUsed: 1,
   gasWanted: 1,
+  events: [],
+  msgResponses: [],
+  txIndex: 1,
 });
 
 export const batchedCommandResponseStub = (executeData = "") => ({

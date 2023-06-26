@@ -185,6 +185,9 @@ export function convertRpcTxToBroadcastTxSuccess(tx: any): DeliverTxResponse {
     data: tx.tx_result.data,
     rawLog: tx.tx_result.log,
     code: 0,
+    events: [],
+    msgResponses: [],
+    txIndex: 0,
   };
 }
 
