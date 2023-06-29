@@ -235,7 +235,7 @@ export enum ApproveGatewayError {
   ALREADY_EXECUTED = "already executed",
   SIGN_COMMAND_FAILED = "cannot sign command",
   CONFIRM_COMMAND_FAILED = "cannot confirm command",
-  FETCHING_STATUS_FAILED = "cannot fetching status",
+  FETCHING_STATUS_FAILED = "cannot fetching status from axelarscan api",
   ERROR_BATCHED_COMMAND = "cannot find batch command",
   ERROR_GET_EVM_EVENT = "cannot get evm event",
   ERROR_BROADCAST_EVENT = "cannot broadcast event to destination chain",
@@ -243,11 +243,12 @@ export enum ApproveGatewayError {
   ERROR_ACCOUNT_SEQUENCE_MISMATCH = "account sequence mismatch",
 }
 
-export interface ApproveGatewayResponse {
+export interface GMPRecoveryResponse {
   success: boolean;
   error?: ApproveGatewayError | string;
-  confirmTx?: AxelarTxResponse | null;
-  signCommandTx?: AxelarTxResponse | null;
+  confirmTx?: AxelarTxResponse;
+  signCommandTx?: AxelarTxResponse;
+  routeMessageTx?: AxelarTxResponse;
   approveTx?: any;
   infoLogs?: string[];
 }

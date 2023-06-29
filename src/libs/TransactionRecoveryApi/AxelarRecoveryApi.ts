@@ -3,13 +3,14 @@ import fetch from "cross-fetch";
 import { BigNumber } from "ethers";
 import { loadChains } from "../../chains";
 import { EnvironmentConfigs, getConfigs } from "../../constants";
-import { sleep, throwIfInvalidChainIds } from "../../utils";
+import { retry, throwIfInvalidChainIds } from "../../utils";
 import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
 import { AxelarRecoveryAPIConfig, Environment, EvmChain, EvmWalletDetails } from "../types";
 import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import rpcInfo from "./constants/chain";
 import { mapIntoAxelarscanResponseType } from "./helpers/mappers";
+import { ChainInfo } from "src/chains/types";
 
 export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
@@ -122,6 +123,7 @@ export class AxelarRecoveryApi {
   readonly config: AxelarRecoveryAPIConfig;
   protected axelarQuerySvc: AxelarQueryClientType | null = null;
   protected evmClient: EVMClient;
+  protected chainsList: ChainInfo[] = [];
 
   public constructor(config: AxelarRecoveryAPIConfig) {
     const { environment } = config;
@@ -155,17 +157,18 @@ export class AxelarRecoveryApi {
   public async fetchBatchData(
     chainId: string,
     commandId: string
-  ): Promise<BatchedCommandsAxelarscanResponse | null> {
+  ): Promise<BatchedCommandsAxelarscanResponse | undefined> {
     /**first check axelarscan API */
-    let batchData;
-    batchData = await this.execPost(this.axelarscanBaseApiUrl, "/batches", {
+    const batchData = await this.execPost(this.axelarscanBaseApiUrl, "/batches", {
       commandId,
     })
       .then((res) => res[0])
-      .catch(() => null);
+      .catch(() => undefined);
 
     /**if not found, check last few batches on core in case it is an issue of delayed indexing of data on the axelarscan API */
-    if (!batchData) batchData = this.searchRecentBatchesFromCore(chainId, commandId);
+    if (!batchData) {
+      return this.searchRecentBatchesFromCore(chainId, commandId);
+    }
 
     return batchData;
   }
@@ -173,25 +176,15 @@ export class AxelarRecoveryApi {
   private async searchRecentBatchesFromCore(
     chainId: string,
     commandId: string,
-    iteration = 0,
-    maxTries = 3,
     batchId?: string
-  ): Promise<BatchedCommandsAxelarscanResponse | null> {
-    if (iteration > maxTries) return null;
-    const batchData = await this.queryBatchedCommands(chainId, batchId).catch(() => null);
-    if (!batchData) return null;
-    // console.log("searchRecentBatchesFromCore", iteration, maxTries, batchData);
-    if (batchData.commandIds.includes(commandId)) {
+  ): Promise<BatchedCommandsAxelarscanResponse | undefined> {
+    return retry(async () => {
+      const batchData = await this.queryBatchedCommands(chainId, batchId).catch(() => undefined);
+      if (!batchData) return;
+      if (!batchData.commandIds.includes(commandId))
+        return Promise.reject("command id not found in batch");
       return mapIntoAxelarscanResponseType(batchData, chainId);
-    }
-    sleep(2);
-    return this.searchRecentBatchesFromCore(
-      chainId,
-      commandId,
-      iteration + 1,
-      maxTries,
-      batchData.prevBatchedCommandsId
-    );
+    });
   }
 
   public parseGMPStatus(response: any): GMPStatus | string {
@@ -366,12 +359,15 @@ export class AxelarRecoveryApi {
     };
   }
 
-  private async getChainInfo(chainId: string) {
-    const chainInfo = (
-      await loadChains({
+  protected async getChainInfo(chainId: string) {
+    if (this.chainsList.length === 0) {
+      this.chainsList = await loadChains({
         environment: this.environment,
-      })
-    ).find((chainInfo) => chainInfo.id.toLowerCase() === chainId.toLowerCase());
+      });
+    }
+    const chainInfo = this.chainsList.find(
+      (chainInfo) => chainInfo.id.toLowerCase() === chainId.toLowerCase()
+    );
 
     if (!chainInfo) {
       throw new Error(`cannot find chain${chainId}`);
@@ -408,6 +404,15 @@ export class AxelarRecoveryApi {
     const txBytes = await this.execRecoveryUrlFetch("/execute_pending_transfers", {
       chain: chainIdentifier[this.environment],
       module,
+    });
+
+    return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
+  }
+
+  public async routeMessageRequest(txHash: string, payload: string, logIndex?: number) {
+    const txBytes = await this.execRecoveryUrlFetch("/route_message", {
+      payload,
+      id: logIndex === -1 ? `${txHash}` : `${txHash}-${logIndex}`,
     });
 
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);

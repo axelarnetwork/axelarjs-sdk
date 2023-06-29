@@ -9,8 +9,8 @@ dependencies:
     specifier: ^4.5.0
     version: 4.5.0
   '@axelar-network/axelarjs-types':
-    specifier: ^0.27.0
-    version: 0.27.0
+    specifier: ^0.33.0
+    version: 0.33.0
   '@cosmjs/json-rpc':
     specifier: ^0.30.1
     version: 0.30.1
@@ -184,11 +184,11 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@axelar-network/axelarjs-types@0.27.0:
-    resolution: {integrity: sha512-+ZsNgZc815FEBQnP8wxrtYjEqPMeibGFzKypkj1h0nwsvC051ABB/4xePX41E7G58e5RANhDTOxlvCSAx4MpyA==}
+  /@axelar-network/axelarjs-types@0.33.0:
+    resolution: {integrity: sha512-aCbX/5G+tgWPjr9tl3dQfJftWwRMkILz61ytach7dKqxtO9G9jlxpNvELJQ6gKVOodUtSY8qBCO/fWU19v4hdQ==}
     dependencies:
-      long: 4.0.0
-      protobufjs: 6.11.3
+      long: 5.2.3
+      protobufjs: 7.2.3
     dev: false
 
   /@babel/code-frame@7.21.4:
@@ -4360,7 +4360,6 @@ packages:
 
   /long@5.2.3:
     resolution: {integrity: sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==}
-    dev: true
 
   /loupe@2.3.6:
     resolution: {integrity: sha512-RaPMZKiMy8/JruncMU5Bt6na1eftNoo++R4Y+N2FrxkDVTrGvcyzFTsaGif4QTeKESheMGegbhw6iUAq+5A8zA==}
@@ -4827,6 +4826,25 @@ packages:
       '@types/long': 4.0.2
       '@types/node': 20.2.5
       long: 4.0.0
+
+  /protobufjs@7.2.3:
+    resolution: {integrity: sha512-TtpvOqwB5Gdz/PQmOjgsrGH1nHjAQVCN7JG4A6r1sXRWESL5rNMAiRcBQlCAdKxZcAbstExQePYG8xof/JVRgg==}
+    engines: {node: '>=12.0.0'}
+    requiresBuild: true
+    dependencies:
+      '@protobufjs/aspromise': 1.1.2
+      '@protobufjs/base64': 1.1.2
+      '@protobufjs/codegen': 2.0.4
+      '@protobufjs/eventemitter': 1.1.0
+      '@protobufjs/fetch': 1.1.0
+      '@protobufjs/float': 1.0.2
+      '@protobufjs/inquire': 1.1.0
+      '@protobufjs/path': 1.1.2
+      '@protobufjs/pool': 1.1.0
+      '@protobufjs/utf8': 1.1.0
+      '@types/node': 20.2.5
+      long: 5.2.3
+    dev: false
 
   /pstree.remy@1.1.8:
     resolution: {integrity: sha512-77DZwxQmxKnu3aR542U+X8FypNzbfJ+C5XQDk3uWjWxn6151aIMGthWYRXTqT1E5oJvg+ljaa2OJi+VfvCOQ8w==}

@@ -44,6 +44,27 @@ export const otcStub = () => ({
     "Verify I'm a real user with this one-time-code: hr64_XnjNE (This will not cost any fees)",
 });
 
+export const batchCommandStub = () => ({
+  data: "mockedData",
+  status: "mockedStatus",
+  key_id: "mockedKeyId",
+  execute_data: "mockedExecuteData",
+  prev_batched_commands_id: "mockedPrevBatchedCommandsId",
+  command_ids: ["mockedCommandId1", "mockedCommandId2"],
+  batch_id: "mockedBatchId",
+  chain: "mockedChain",
+  id: "mockedId",
+});
+
+export const findEventAndConfirmStub = () => ({
+  success: true,
+  errorMessage: undefined,
+  infoLogs: ["Log 1", "Log 2", "Log 3"],
+  commandId: "commandId",
+  confirmTx: axelarTxResponseStub(),
+  eventResponse: evmEventStubResponse().eventResponse,
+});
+
 export const apiErrorStub = () => ({
   message: "AxelarJS-SDK uncaught post error",
   uncaught: true,
@@ -115,7 +136,7 @@ export const contractReceiptStub = () => ({
 export const evmEventStubResponse = () => ({
   success: true,
   errorMessage: "",
-  commandId: "",
+  commandId: "commandId",
   infoLog: "",
   eventResponse: {
     event: {
@@ -133,7 +154,27 @@ export const evmEventStubResponse = () => ({
     },
   },
 });
-export const axelarTxResponseStub = (rawLog: any = []): AxelarTxResponse => ({
+
+export const chainInfoStub = () => ({
+  id: "mockedId",
+  assets: [],
+  chainSymbol: "mockedSymbol",
+  chainName: "mockedName",
+  fullySupported: true,
+  estimatedWaitTime: 10,
+  txFeeInPercent: 0.1,
+  module: "axelarnet",
+  chainIdentifier: {
+    devnet: "mockedDevnet",
+    testnet: "mockedTestnet",
+    mainnet: "mockedMainnet",
+  },
+  nativeAsset: ["mockedNativeAsset"],
+  addressPrefix: "mockedPrefix",
+  confirmLevel: 1,
+});
+
+export const axelarTxResponseStub = (rawLog: any = []) => ({
   height: 1,
   code: 0,
   transactionHash: "0x",
