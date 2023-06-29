@@ -25,6 +25,8 @@ export enum EvmChain {
   KAVA = "kava",
   BASE = "base",
   FILECOIN = "filecoin",
+  OPTIMISM = "optimism",
+  LINEA = "linea",
 }
 
 export enum CosmosChain {
