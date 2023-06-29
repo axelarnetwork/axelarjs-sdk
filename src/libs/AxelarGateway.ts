@@ -22,6 +22,7 @@ export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string
     [EvmChain.AURORA]: "0x304acf330bbE08d1e512eefaa92F6a57871fD895",
     [EvmChain.CELO]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.KAVA]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
+    [EvmChain.OPTIMISM]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
   },
   [Environment.TESTNET]: {
     [EvmChain.ETHEREUM]: "0xBC6fcce7c5487d43830a219CA6E7B83238B41e71",
@@ -33,6 +34,8 @@ export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string
     [EvmChain.AURORA]: "0x304acf330bbE08d1e512eefaa92F6a57871fD895",
     [EvmChain.CELO]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.KAVA]: "0xC8D18F85cB0Cee5C95eC29c69DeaF6cea972349c",
+    [EvmChain.OPTIMISM]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
+    [EvmChain.LINEA]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
   },
   [Environment.DEVNET]: {
     [EvmChain.ETHEREUM]: "0x7358799e0c8250f0B7D1164824F6Dd5bA31C9Cd6",

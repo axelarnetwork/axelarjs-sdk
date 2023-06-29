@@ -14,6 +14,8 @@ export const NATIVE_GAS_TOKEN_SYMBOL = {
   [EvmChain.KAVA]: GasToken.KAVA,
   [EvmChain.BASE]: GasToken.BASE,
   [EvmChain.FILECOIN]: GasToken.FILECOIN,
+  [EvmChain.OPTIMISM]: GasToken.ETH,
+  [EvmChain.LINEA]: GasToken.ETH,
 };
 
 export const DEFAULT_ESTIMATED_GAS = 700000;

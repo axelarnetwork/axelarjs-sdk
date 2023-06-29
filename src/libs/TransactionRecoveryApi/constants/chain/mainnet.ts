@@ -13,8 +13,10 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.ARBITRUM]: "https://arb1.arbitrum.io/rpc",
   [EvmChain.CELO]: "https://forno.celo.org",
   [EvmChain.KAVA]: "https://evm.kava.io",
-  [EvmChain.BASE]: "",
   [EvmChain.FILECOIN]: "https://rpc.ankr.com/filecoin",
+  [EvmChain.OPTIMISM]: "https://optimism-mainnet.public.blastapi.io",
+  [EvmChain.BASE]: "",
+  [EvmChain.LINEA]: "",
 };
 
 export const networkInfo: Record<EvmChain, Network> = {
@@ -69,5 +71,13 @@ export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.KAVA]: {
     chainId: 2222,
     name: EvmChain.KAVA,
+  },
+  [EvmChain.OPTIMISM]: {
+    chainId: 10,
+    name: EvmChain.OPTIMISM,
+  },
+  [EvmChain.LINEA]: {
+    chainId: -1, // does not exist yet
+    name: EvmChain.LINEA,
   },
 };
