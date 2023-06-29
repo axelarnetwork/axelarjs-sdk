@@ -5,10 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.12.9] - 2023-JUNE-X
+## [0.13.0] - 2023-JUNE-30
 
 - AxelarAssetTransfer
   - add `sendToken` method that allows token transfers directly from a source chain (instead of using the deposit address method). This includes both Cosmos-based and EVM-based source chains.
+- AxelarGMPRecoveryAPI
+  - update `manualRelayToDestChain` method to include cosmos <> evm directions
+- Updated chain list constants to include recently-added chains (Linea testnet, Optimism testnet/mainnet), various Cosmos chains
+- Technical upgrades
+  - added a post-install script to alert sdk consumers on new versions (if any) post 0.13.0
+  - upgraded downstream dependencies
 
 ## [0.12.8] - 2023-MAY-28
 
