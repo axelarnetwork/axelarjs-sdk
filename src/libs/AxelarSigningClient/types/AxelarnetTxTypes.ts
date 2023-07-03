@@ -7,6 +7,7 @@ import {
   RegisterAssetRequest,
   RouteIBCTransfersRequest,
   RegisterFeeCollectorRequest,
+  RouteMessageRequest,
   protobufPackage,
 } from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/tx";
 import { Registry } from "@cosmjs/proto-signing";
@@ -20,6 +21,7 @@ const TxTypeUrlMap = {
   AxelarnetRegisterAssetRequest: `/${protobufPackage}.RegisterAssetRequest`,
   AxelarnetRouteIBCTransfersRequest: `/${protobufPackage}.RouteIBCTransfersRequest`,
   AxelarnetRegisterFeeCollectorRequest: `/${protobufPackage}.RegisterFeeCollectorRequest`,
+  AxelarnetRouteMessageRequest: `/${protobufPackage}.RouteMessageRequest`,
 };
 
 export const registerAxelarnetTxTypes = (registry: Registry) => {
@@ -34,4 +36,5 @@ export const registerAxelarnetTxTypes = (registry: Registry) => {
   registry.register(TxTypeUrlMap.AxelarnetRegisterAssetRequest, RegisterAssetRequest);
   registry.register(TxTypeUrlMap.AxelarnetRouteIBCTransfersRequest, RouteIBCTransfersRequest);
   registry.register(TxTypeUrlMap.AxelarnetRegisterFeeCollectorRequest, RegisterFeeCollectorRequest);
+  registry.register(TxTypeUrlMap.AxelarnetRouteMessageRequest, RouteMessageRequest);
 };

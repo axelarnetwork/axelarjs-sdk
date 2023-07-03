@@ -1,7 +1,10 @@
 import { hexlify, hexZeroPad } from "ethers/lib/utils";
 import { CHAINS, CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET } from "../..";
-import { AxelarAssetTransfer } from "../AxelarAssetTransfer";
+import { AxelarAssetTransfer, SendTokenParams } from "../AxelarAssetTransfer";
 import { Environment, EvmChain } from "../types";
+import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
+import { Coin } from "@cosmjs/proto-signing";
+import { StdFee } from "@cosmjs/stargate";
 import {
   activeChainsStub,
   apiErrorStub,
@@ -556,6 +559,51 @@ describe("AxelarAssetTransfer", () => {
         ).resolves.toBe("0xc1DCb196BA862B337Aa23eDA1Cb9503C0801b955");
         expect(bridge.getDepositAddressForNativeWrap).not.toHaveBeenCalled();
         expect(bridge.getDepositAddressForNativeUnwrap).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe("sendToken", () => {
+    let bridge: AxelarAssetTransfer;
+
+    beforeEach(() => {
+      bridge = new AxelarAssetTransfer({
+        environment: Environment.TESTNET,
+      });
+    });
+
+    describe("sendToken from Cosmos-based chain", () => {
+      beforeEach(async () => {
+        vitest.clearAllMocks();
+      });
+      it("should broadcast an ibc transfer message with a memo", async () => {
+        const offlineSigner = await DirectSecp256k1HdWallet.generate();
+        const rpcUrl = "https://rpc.osmotest5.osmosis.zone";
+        const fee: StdFee = {
+          gas: "250000",
+          amount: [{ denom: "uosmo", amount: "30000" }],
+        };
+        const coin: Coin = {
+          denom: "ibc/9463E39D230614B313B487836D13A392BD1731928713D4C8427A083627048DB3",
+          amount: "150000",
+        };
+        const requestOptions: SendTokenParams = {
+          fromChain: CHAINS.TESTNET.OSMOSIS,
+          toChain: CHAINS.TESTNET.AVALANCHE,
+          asset: {
+            denom: coin.denom,
+          },
+          amountInAtomicUnits: coin.amount,
+          destinationAddress: "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
+          options: {
+            cosmosOptions: {
+              cosmosDirectSigner: offlineSigner,
+              rpcUrl,
+              fee,
+            },
+          },
+        };
+        await expect(bridge.sendToken(requestOptions)).toBeTruthy();
       });
     });
   });

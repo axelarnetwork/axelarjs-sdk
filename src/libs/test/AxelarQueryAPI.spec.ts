@@ -227,6 +227,13 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
+  describe("getConfirmationHeight", () => {
+    test("confirmation height should be defined", async () => {
+      const height = await api.getConfirmationHeight("polygon");
+      expect(height).toBeDefined();
+    });
+  });
+
   describe("throwIfInactiveChain", () => {
     test("It should throw if the chain does not get included in a active-chains list", async () => {
       vitest.spyOn(api, "getActiveChains").mockResolvedValue(["avalanche", "polygon"]);
