@@ -64,60 +64,64 @@ async function inferPackageManager() {
 }
 
 async function main() {
-  const { version, name } = await fs.readFile("./package.json", "utf-8").then(JSON.parse);
+  try {
+    const { version, name } = await fs.readFile("./package.json", "utf-8").then(JSON.parse);
 
-  // check for latest version on npm
-  const { version: latest } = await packageJson(name, {
-    version: "latest",
-  });
+    // check for latest version on npm
+    const { version: latest } = await packageJson(name, {
+      version: "latest",
+    });
 
-  if (version == latest) {
-    // nothing to see here
-    return;
+    if (version == latest) {
+      // nothing to see here
+      return;
+    }
+
+    const releaseUrl = `https://github.com/axelarnetwork/axelarjs-sdk/releases/tag/v${latest}`;
+    const changelogUrl = `https://github.com/axelarnetwork/axelarjs-sdk/blob/v${latest}/CHANGELOG.md`;
+
+    const updateLine = chalk.bold(
+      `📦 Update available! ${chalk.red(version)} → ${chalk.green(latest)}`
+    );
+
+    const AXELARJS_TAG = [
+      "                     .__                 __",
+      "_____  ___  ___ ____ |  | _____ _______ |__| ______",
+      "\\__  \\ \\  \\/  // __ \\|  | \\__  \\\\_  __ \\|  |/  ___/",
+      " / __ \\_>    <\\  ___/|  |__/ __ \\|  | \\/|  |\\___ \\",
+      "(____  /__/\\_ \\\\___  >____(____  /__/\\__|  /____  >",
+      "     \\/      \\/    \\/          \\/   \\______|    \\/",
+    ];
+
+    const packageManager = await inferPackageManager();
+
+    const installCommands = {
+      npm: `npm i ${name}@latest`,
+      yarn: `yarn add ${name}@latest`,
+      pnpm: `pnpm add ${name}@latest`,
+    };
+
+    renderBox(
+      [
+        ...AXELARJS_TAG.map((x) => chalk.bold.green(pad(9).concat(x))),
+        "",
+        `${pad(20)}${chalk.bold.yellow(name)}`,
+        "",
+        `${pad(16)}${updateLine}`,
+        "",
+        `${pad(6)}Run ${chalk.bgGray(installCommands[packageManager])} to update!`,
+        "",
+        "Find out more about this release:",
+        "",
+        `${chalk.cyan(changelogUrl)}`,
+        `${chalk.cyan(releaseUrl)}`,
+        "",
+      ],
+      chalk.bold.yellow
+    );
+  } catch (error) {
+    console.log("Failed to check for updates.", error?.message);
   }
-
-  const releaseUrl = `https://github.com/axelarnetwork/axelarjs-sdk/releases/tag/v${latest}`;
-  const changelogUrl = `https://github.com/axelarnetwork/axelarjs-sdk/blob/v${latest}/CHANGELOG.md`;
-
-  const updateLine = chalk.bold(
-    `📦 Update available! ${chalk.red(version)} → ${chalk.green(latest)}`
-  );
-
-  const AXELARJS_TAG = [
-    "                     .__                 __",
-    "_____  ___  ___ ____ |  | _____ _______ |__| ______",
-    "\\__  \\ \\  \\/  // __ \\|  | \\__  \\\\_  __ \\|  |/  ___/",
-    " / __ \\_>    <\\  ___/|  |__/ __ \\|  | \\/|  |\\___ \\",
-    "(____  /__/\\_ \\\\___  >____(____  /__/\\__|  /____  >",
-    "     \\/      \\/    \\/          \\/   \\______|    \\/",
-  ];
-
-  const packageManager = await inferPackageManager();
-
-  const installCommands = {
-    npm: `npm i ${name}@latest`,
-    yarn: `yarn add ${name}@latest`,
-    pnpm: `pnpm add ${name}@latest`,
-  };
-
-  renderBox(
-    [
-      ...AXELARJS_TAG.map((x) => chalk.bold.green(pad(9).concat(x))),
-      "",
-      `${pad(20)}${chalk.bold.yellow(name)}`,
-      "",
-      `${pad(16)}${updateLine}`,
-      "",
-      `${pad(6)}Run ${chalk.bgGray(installCommands[packageManager])} to update!`,
-      "",
-      "Find out more about this release:",
-      "",
-      `${chalk.cyan(changelogUrl)}`,
-      `${chalk.cyan(releaseUrl)}`,
-      "",
-    ],
-    chalk.bold.yellow
-  );
 }
 
 main().catch(console.error);
