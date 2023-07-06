@@ -27,7 +27,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"./**/*.{ts,json}\"",
-    "postinstall": "node ./scripts/postinstall.js"
+    "postinstall": "node scripts/postinstall.js"
   },
   "keywords": [
     "axelar",
