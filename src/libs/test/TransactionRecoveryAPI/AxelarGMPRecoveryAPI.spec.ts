@@ -29,10 +29,7 @@ import {
   UnsupportedGasTokenError,
 } from "../../TransactionRecoveryApi/constants/error";
 import { AXELAR_GATEWAY } from "../../AxelarGateway";
-import {
-  BatchedCommandsAxelarscanResponse,
-  GMPStatus,
-} from "../../TransactionRecoveryApi/AxelarRecoveryApi";
+import { GMPStatus } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
 import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contractCallHelper";
 import {
   activeChainsStub,
@@ -582,9 +579,7 @@ describe("AxelarGMPRecoveryAPI", () => {
           returnValues: { destinationChain: EvmChain.MOONBEAM },
         },
       });
-      const mockFindEventAndConfirmIfNeeded = vitest
-        .spyOn(api, "findEventAndConfirmIfNeeded")
-        .mockResolvedValueOnce(findEventAndConfirmStub());
+
       const mockFindBatchAndSignIfNeeded = vitest.spyOn(api, "findBatchAndSignIfNeeded");
       mockFindBatchAndSignIfNeeded.mockResolvedValueOnce({
         success: false,
