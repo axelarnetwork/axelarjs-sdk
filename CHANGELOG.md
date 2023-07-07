@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.13.2] - 2023-JULY-7
+
+- Fix build issue in `0.13.1` with post-install script
+
+## [0.13.1] - 2023-JULY-7
+
+- Fix build issue in `0.13.0` with post-install script
+
 ## [0.13.0] - 2023-JUNE-30
 
 - AxelarAssetTransfer

@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import Long from "long";
-import { AxelarTxResponse, EvmChain } from "../../types";
+import { EvmChain } from "../../types";
 
 export const uuidStub = () => "83462f97-63cf-4205-a659-6f54bec623f6";
 
