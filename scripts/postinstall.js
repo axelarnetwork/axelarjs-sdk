@@ -1,5 +1,4 @@
 const fs = require("fs/promises");
-const packageJson = require("package-json");
 const chalk = require("chalk");
 const stripAnsi = require("strip-ansi");
 
@@ -67,12 +66,16 @@ async function main() {
   try {
     const { version, name } = await fs.readFile("./package.json", "utf-8").then(JSON.parse);
 
+    // use async import to avoid esm / cjs interop issues
+    const { default: packageJson } = await import("package-json");
+
     // check for latest version on npm
     const { version: latest } = await packageJson(name, {
       version: "latest",
     });
 
     if (version == latest) {
+      console.log(`[${name}@${version}] Awesome! you're on the latest version 🎉`);
       // nothing to see here
       return;
     }
