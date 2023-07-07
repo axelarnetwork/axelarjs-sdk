@@ -1,6 +1,4 @@
 const fs = require("fs/promises");
-const chalk = require("chalk");
-const stripAnsi = require("strip-ansi");
 
 const pad = (n = 0) => " ".repeat(n);
 
@@ -8,7 +6,8 @@ const pad = (n = 0) => " ".repeat(n);
  *
  * @param {string[]} lines
  */
-function renderBox(lines = [], color = chalk.green) {
+async function renderBox(lines = [], color = (str) => str) {
+  const { default: stripAnsi } = await import("strip-ansi");
   const maxLineLength = lines.reduce((max, line) => Math.max(max, stripAnsi(line).length), 0);
 
   const maxLength = maxLineLength + 2;
@@ -68,6 +67,7 @@ async function main() {
 
     // use async import to avoid esm / cjs interop issues
     const { default: packageJson } = await import("package-json");
+    const { default: chalk } = await import("chalk");
 
     // check for latest version on npm
     const { version: latest } = await packageJson(name, {
@@ -104,7 +104,7 @@ async function main() {
       pnpm: `pnpm add ${name}@latest`,
     };
 
-    renderBox(
+    await renderBox(
       [
         ...AXELARJS_TAG.map((x) => chalk.bold.green(pad(9).concat(x))),
         "",
