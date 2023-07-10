@@ -74,7 +74,7 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   },
   [EvmChain.OPTIMISM]: {
     chainId: 420,
-    name: EvmChain.OPTIMISM,
+    name: `${EvmChain.OPTIMISM}-goerli`,
   },
   [EvmChain.LINEA]: {
     chainId: 59140,
