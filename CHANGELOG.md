@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.13.5] - 2023-JULY-10
+
+- Fix constant declaration for Optimism testnet
+
 ## [0.13.3] - 2023-JULY-7
 
 - Fix build issue in `0.13.2` with post-install script
