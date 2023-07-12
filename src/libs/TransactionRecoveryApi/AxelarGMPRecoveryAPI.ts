@@ -133,7 +133,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async doesTxMeetConfirmHt(chain: string, txHash: string) {
-    const confirmations = await this.getSigner(chain)
+    const confirmations = await this.getSigner(chain, { useWindowEthereum: false })
       .provider.getTransactionReceipt(txHash)
       .then((receipt) => receipt.confirmations);
 
@@ -162,8 +162,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async getEvmEvent(
     srcChainId: string,
     destChainId: string,
-    srcTxHash: string,
-    evmWalletDetails?: EvmWalletDetails
+    srcTxHash: string
   ): Promise<{
     commandId: string;
     eventResponse: EventResponse;
@@ -171,7 +170,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     errorMessage: string;
     infoLog: string;
   }> {
-    const eventIndex = await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)
+    const eventIndex = await this.getEventIndex(srcChainId, srcTxHash)
       .then((index) => index as number)
       .catch(() => -1);
 
@@ -186,11 +185,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     const commandId = this.getCidFromSrcTxHash(destChainId, srcTxHash, eventIndex);
-    const eventResponse = await retry(
-      () => this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex),
-      12,
-      10000
-    );
+    const eventResponse = await this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex);
 
     if (!eventResponse || this.isEVMEventFailed(eventResponse)) {
       const errorMessage = this.isEVMEventFailed(eventResponse)
@@ -217,13 +212,12 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async findEventAndConfirmIfNeeded(
     srcChain: string,
     destChain: string,
-    txHash: string,
-    evmWalletDetails: EvmWalletDetails
+    txHash: string
   ): Promise<ConfirmTxSDKResponse> {
     if (this.debugMode)
       console.debug(`confirmation: checking whether ${txHash} needs to be confirmed on Axelar`);
 
-    const evmEvent = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
+    const evmEvent = await this.getEvmEvent(srcChain, destChain, txHash);
     const { infoLog: getEvmEventInfoLog } = evmEvent;
     if (this.debugMode) console.debug(`confirmation: ${getEvmEventInfoLog}`);
 
@@ -263,7 +257,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
+      const updatedEvent = await retry(
+        async () => {
+          const response = await this.getEvmEvent(srcChain, destChain, txHash);
+          if (!response.success) throw new Error(response.errorMessage);
+          return response;
+        },
+        10,
+        3000
+      );
 
       if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
         return {
@@ -530,12 +532,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   ) {
     try {
       // ConfirmGatewayTx and check if it is successfully executed
-      const confirmTxRequest = await this.findEventAndConfirmIfNeeded(
-        srcChain,
-        destChain,
-        txHash,
-        evmWalletDetails
-      );
+      const confirmTxRequest = await this.findEventAndConfirmIfNeeded(srcChain, destChain, txHash);
 
       // If the `success` flag is false, we will return the error response
       if (!confirmTxRequest?.success) {
@@ -705,9 +702,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return this.subtractGasFee(sourceChain, destinationChain, gasTokenSymbol, paidGasFee, options);
   }
 
-  public async getEventIndex(chain: string, txHash: string, evmWalletDetails?: EvmWalletDetails) {
-    const signer = this.getSigner(chain, evmWalletDetails || { useWindowEthereum: true });
-    const receipt = await signer.provider.getTransactionReceipt(txHash);
+  public async getEventIndex(chain: string, txHash: string) {
+    const signer = this.getSigner(chain, { useWindowEthereum: false });
+    const receipt = await signer.provider.getTransactionReceipt(txHash).catch(() => undefined);
     if (!receipt) return -1;
     const eventIndex = getEventIndexFromTxReceipt(receipt);
     return eventIndex;
