@@ -895,7 +895,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const gasLimitBuffer = evmWalletDetails?.gasLimitBuffer || 0;
     const { destinationChain, destinationContractAddress } = executeParams;
 
-    const signer = this.getSigner(destinationChain, evmWalletDetails);
+    const signer = this.getSigner(
+      destinationChain,
+      evmWalletDetails || { useWindowEthereum: true }
+    );
     const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
 
     const txResult: TxResult = await callExecute(executeParams, contract, gasLimitBuffer)
