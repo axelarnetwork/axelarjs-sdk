@@ -69,7 +69,7 @@ export const networkInfo: Record<EvmChain | string, Network> = {
     name: EvmChain.BASE,
   },
   [EvmChain.FILECOIN]: {
-    chainId: 3141,
+    chainId: 314159,
     name: EvmChain.FILECOIN,
   },
   [EvmChain.OPTIMISM]: {
