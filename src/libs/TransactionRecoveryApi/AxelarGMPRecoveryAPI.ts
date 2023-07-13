@@ -298,7 +298,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   ): Promise<SignTxSDKResponse> {
     let signTxLog = "";
     try {
-      const batchData = await this.fetchBatchData(destChainId, commandId);
+      const batchData = await retry(() => this.fetchBatchData(destChainId, commandId), 10, 3000);
       if (batchData) {
         signTxLog = `signing: batch data exists so do not need to sign. commandId: ${commandId}, batchId: ${batchData.batch_id}`;
         if (this.debugMode) console.debug(signTxLog);
