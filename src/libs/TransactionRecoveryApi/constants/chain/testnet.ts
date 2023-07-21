@@ -14,7 +14,7 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.CELO]: "https://alfajores-forno.celo-testnet.org",
   [EvmChain.KAVA]: "https://evm.testnet.kava.io",
   [EvmChain.BASE]: "https://goerli.base.org",
-  [EvmChain.FILECOIN]: "https://rpc.ankr.com/filecoin_testnet",
+  [EvmChain.FILECOIN]: "https://filecoin-calibration.chainup.net/rpc/v1",
   [EvmChain.OPTIMISM]: "https://goerli.optimism.io",
   [EvmChain.LINEA]: "https://rpc.goerli.linea.build",
 };
@@ -69,7 +69,7 @@ export const networkInfo: Record<EvmChain | string, Network> = {
     name: EvmChain.BASE,
   },
   [EvmChain.FILECOIN]: {
-    chainId: 3141,
+    chainId: 314159,
     name: EvmChain.FILECOIN,
   },
   [EvmChain.OPTIMISM]: {
