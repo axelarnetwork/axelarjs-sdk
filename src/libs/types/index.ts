@@ -267,6 +267,7 @@ export const isNativeToken = (chain: string, selectedToken: GasToken): boolean =
     kava: GasToken.KAVA,
     base: GasToken.BASE,
     filecoin: GasToken.FILECOIN,
+    linea: GasToken.ETH,
   };
   return nativeTokenMap[chain]?.toLowerCase() === selectedToken?.toLowerCase();
 };

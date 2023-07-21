@@ -15,8 +15,8 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.KAVA]: "https://evm.kava.io",
   [EvmChain.FILECOIN]: "https://rpc.ankr.com/filecoin",
   [EvmChain.OPTIMISM]: "https://optimism-mainnet.public.blastapi.io",
-  [EvmChain.BASE]: "",
-  [EvmChain.LINEA]: "",
+  [EvmChain.BASE]: "https://developer-access-mainnet.base.org",
+  [EvmChain.LINEA]: "https://rpc.linea.build",
 };
 
 export const networkInfo: Record<EvmChain, Network> = {
@@ -25,7 +25,7 @@ export const networkInfo: Record<EvmChain, Network> = {
     name: EvmChain.FANTOM,
   },
   [EvmChain.BASE]: {
-    chainId: -1, // does not exist yet
+    chainId: 8453,
     name: EvmChain.BASE,
   },
   [EvmChain.FILECOIN]: {
@@ -77,7 +77,7 @@ export const networkInfo: Record<EvmChain, Network> = {
     name: EvmChain.OPTIMISM,
   },
   [EvmChain.LINEA]: {
-    chainId: -1, // does not exist yet
+    chainId: 59144,
     name: EvmChain.LINEA,
   },
 };
