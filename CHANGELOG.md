@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.13.6] - 2023-JULY-21
+
+- Fix the issue with `manualRelayToDestChain` where the web client incorrectly utilizes the provider from the injected browser wallet instead of the rpcUrl embedded in the SDK. This error arises when the injected wallet's network differs from the source chain.
+- Add `Linea` and `Base` evm mainnet configs; `Archway`, `Aura`, `Neutron`, `Sei` to cosmos mainnet configs
+
 ## [0.13.5] - 2023-JULY-10
 
 - Fix constant declaration for Optimism testnet
