@@ -17,6 +17,7 @@ import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 import { BigNumber } from "ethers";
 import { ChainInfo } from "src/chains/types";
+import { BigNumberUtils } from "./BigNumberUtils";
 
 interface TranslatedTransferRateLimitResponse {
   incoming: string;
@@ -37,7 +38,7 @@ export interface AxelarQueryAPIFeeResponse {
   executionFee: string;
   executionFeeWithMultiplier: string;
   gasMultiplier: number;
-  gasLimit: number;
+  gasLimit: BigNumber | number;
   minGasPrice: string;
   apiResponse: any;
   isExpressSupported: boolean;
@@ -253,7 +254,7 @@ export class AxelarQueryAPI {
     sourceChainId: EvmChain | string,
     destinationChainId: EvmChain | string,
     sourceChainTokenSymbol: GasToken | string,
-    gasLimit: number = DEFAULT_ESTIMATED_GAS,
+    gasLimit: BigNumber | number = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1,
     minGasPrice = "0",
     gmpParams?: GMPParams
@@ -278,14 +279,16 @@ export class AxelarQueryAPI {
       throw new Error("Failed to estimate gas fee");
     }
 
-    const destGasFeeWei = parseUnits(
-      (gasLimit * Number(destToken.gas_price)).toFixed(destToken.decimals),
+    const destGasFeeWei = BigNumberUtils.multiplyToGetWei(
+      BigNumber.from(gasLimit),
+      destToken.gas_price,
       destToken.decimals
     );
-
     const minDestGasFeeWei = BigNumber.from(gasLimit).mul(minGasPrice); //minGasPrice already provided by the user in wei
-    const srcGasFeeWei = parseUnits(
-      (gasLimit * Number(sourceToken.gas_price)).toFixed(sourceToken.decimals),
+
+    const srcGasFeeWei = BigNumberUtils.multiplyToGetWei(
+      BigNumber.from(gasLimit),
+      sourceToken.gas_price,
       sourceToken.decimals
     );
 
