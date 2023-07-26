@@ -15,7 +15,7 @@ import {
 import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { ChainInfo } from "src/chains/types";
 import { BigNumberUtils } from "./BigNumberUtils";
 
@@ -38,7 +38,7 @@ export interface AxelarQueryAPIFeeResponse {
   executionFee: string;
   executionFeeWithMultiplier: string;
   gasMultiplier: number;
-  gasLimit: BigNumber | number;
+  gasLimit: BigNumberish;
   minGasPrice: string;
   apiResponse: any;
   isExpressSupported: boolean;
@@ -254,7 +254,7 @@ export class AxelarQueryAPI {
     sourceChainId: EvmChain | string,
     destinationChainId: EvmChain | string,
     sourceChainTokenSymbol: GasToken | string,
-    gasLimit: BigNumber | number = DEFAULT_ESTIMATED_GAS,
+    gasLimit: BigNumberish = DEFAULT_ESTIMATED_GAS,
     gasMultiplier = 1.1,
     minGasPrice = "0",
     gmpParams?: GMPParams
