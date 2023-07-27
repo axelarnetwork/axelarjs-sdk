@@ -53,6 +53,7 @@ import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { Interface } from "ethers/lib/utils";
 import { ChainInfo } from "src/chains/types";
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -135,7 +136,18 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async doesTxMeetConfirmHt(chain: string, txHash: string) {
     const confirmations = await this.getSigner(chain, { useWindowEthereum: false })
       .provider.getTransactionReceipt(txHash)
-      .then((receipt) => receipt.confirmations);
+      .then(async (receipt?: TransactionReceipt) => {
+        if (!receipt) {
+          const gmpTx = await this.fetchGMPTransaction(txHash);
+          const currentBlock = await this.getSigner(chain, {
+            useWindowEthereum: false,
+          }).provider.getBlockNumber();
+          return currentBlock - gmpTx.call.blockNumber;
+        }
+
+        console.log(receipt);
+        return receipt.confirmations;
+      });
 
     return this.axelarQueryApi
       .getConfirmationHeight(chain)
@@ -705,9 +717,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async getEventIndex(chain: string, txHash: string) {
     const signer = this.getSigner(chain, { useWindowEthereum: false });
     const receipt = await signer.provider.getTransactionReceipt(txHash).catch(() => undefined);
-    if (!receipt) return -1;
-    const eventIndex = getEventIndexFromTxReceipt(receipt);
-    return eventIndex;
+
+    if (!receipt) {
+      const gmpTx = await this.fetchGMPTransaction(txHash).catch(() => undefined);
+      if (!gmpTx) return -1;
+
+      return parseInt(gmpTx.call.id.split("_").pop());
+    } else {
+      const eventIndex = getEventIndexFromTxReceipt(receipt);
+      return eventIndex;
+    }
   }
 
   /**
