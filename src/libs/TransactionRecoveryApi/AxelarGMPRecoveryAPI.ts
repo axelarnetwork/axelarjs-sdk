@@ -738,8 +738,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     if (!receipt) return InvalidTransactionError(chain);
 
-    const destinationChain = getDestinationChainFromTxReceipt(receipt);
-    const logIndex = getLogIndexFromTxReceipt(receipt);
+    const destinationChain = options?.destChain || getDestinationChainFromTxReceipt(receipt);
+    const logIndex = options?.eventIndex || getLogIndexFromTxReceipt(receipt);
 
     // Check if given txHash is valid
     if (!destinationChain) return NotGMPTransactionError();

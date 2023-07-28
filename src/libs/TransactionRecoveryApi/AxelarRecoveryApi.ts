@@ -370,7 +370,7 @@ export class AxelarRecoveryApi {
     );
 
     if (!chainInfo) {
-      throw new Error(`cannot find chain${chainId}`);
+      throw new Error(`cannot find chain ${chainId}`);
     }
 
     return chainInfo;

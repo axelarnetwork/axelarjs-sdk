@@ -158,6 +158,8 @@ export interface AddGasOptions {
   refundAddress?: string;
   estimatedGasUsed?: number;
   gasMultipler?: number;
+  eventIndex?: number;
+  destChain?: string;
   evmWalletDetails?: EvmWalletDetails;
 }
 
