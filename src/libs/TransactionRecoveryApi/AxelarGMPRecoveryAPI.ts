@@ -831,8 +831,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     // Check if transaction exists
     if (!receipt) return InvalidTransactionError(chain);
 
-    const destinationChain = getDestinationChainFromTxReceipt(receipt);
-    const logIndex = getLogIndexFromTxReceipt(receipt);
+    const destinationChain = options?.destChain || getDestinationChainFromTxReceipt(receipt);
+    const logIndex = options?.eventIndex || getLogIndexFromTxReceipt(receipt);
 
     // Check if given txHash is valid
     if (!destinationChain) return NotGMPTransactionError();
@@ -844,10 +844,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     let gasFeeToAdd = options?.amount;
 
     if (!gasFeeToAdd) {
-      gasFeeToAdd = await this.calculateGasFee(txHash, chain, destinationChain, gasTokenSymbol, {
-        estimatedGas: options?.estimatedGasUsed,
-        provider: evmWalletDetails.provider,
-      }).catch(() => undefined);
+      gasFeeToAdd = await this.calculateGasFee(
+        txHash,
+        chain,
+        destinationChain as EvmChain,
+        gasTokenSymbol,
+        {
+          estimatedGas: options?.estimatedGasUsed,
+          provider: evmWalletDetails.provider,
+        }
+      ).catch(() => undefined);
     }
 
     // Check if gas price is queried successfully.
