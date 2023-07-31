@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.13.6] - 2023-AUGUST-X
 
 - Fix the issue with `manualRelayToDestChain` where the web client incorrectly utilizes the provider from the injected browser wallet instead of the rpcUrl embedded in the SDK. This error arises when the injected wallet's network differs from the source chain.
-- Add `Linea` and `Base` evm mainnet configs; `Archway`, `Aura`, `Neutron`, `Sei` to cosmos mainnet configs
+- Add `Linea` and `Base` evm mainnet configs; `Archway`, `Aura`, `Neutron`, `Sei` to cosmos mainnet configs; Polygon-zkEvm to evm configs
 - Update the `estimateGasFee` method on `AxelarQueryAPI` to accept `BigNumberish` type for `gasLimit` parameter
 
 ## [0.13.5] - 2023-JULY-10

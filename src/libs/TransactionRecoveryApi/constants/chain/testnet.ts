@@ -17,6 +17,7 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.FILECOIN]: "https://filecoin-calibration.chainup.net/rpc/v1",
   [EvmChain.OPTIMISM]: "https://goerli.optimism.io",
   [EvmChain.LINEA]: "https://rpc.goerli.linea.build",
+  [EvmChain.POLYGON_ZKEVM]: "https://testnet-zkevm.polygonscan.com",
 };
 
 export const networkInfo: Record<EvmChain | string, Network> = {
@@ -27,6 +28,10 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.POLYGON]: {
     chainId: 80001,
     name: EvmChain.POLYGON,
+  },
+  [EvmChain.POLYGON_ZKEVM]: {
+    chainId: 1442,
+    name: EvmChain.POLYGON_ZKEVM,
   },
   [EvmChain.MOONBEAM]: {
     chainId: 1287,

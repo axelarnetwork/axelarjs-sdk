@@ -17,6 +17,7 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.OPTIMISM]: "https://optimism-mainnet.public.blastapi.io",
   [EvmChain.BASE]: "https://developer-access-mainnet.base.org",
   [EvmChain.LINEA]: "https://rpc.linea.build",
+  [EvmChain.POLYGON_ZKEVM]: "https://zkevm.polygonscan.com",
 };
 
 export const networkInfo: Record<EvmChain, Network> = {
@@ -79,5 +80,9 @@ export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.LINEA]: {
     chainId: 59144,
     name: EvmChain.LINEA,
+  },
+  [EvmChain.POLYGON_ZKEVM]: {
+    chainId: 1101,
+    name: EvmChain.POLYGON_ZKEVM,
   },
 };

@@ -16,6 +16,7 @@ export const NATIVE_GAS_TOKEN_SYMBOL = {
   [EvmChain.FILECOIN]: GasToken.FILECOIN,
   [EvmChain.OPTIMISM]: GasToken.ETH,
   [EvmChain.LINEA]: GasToken.ETH,
+  [EvmChain.POLYGON_ZKEVM]: GasToken.POLYGON_ZKEVM,
 };
 
 export const DEFAULT_ESTIMATED_GAS = 700000;
