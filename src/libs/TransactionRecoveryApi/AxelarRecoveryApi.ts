@@ -139,7 +139,7 @@ export class AxelarRecoveryApi {
     this.config = config;
   }
 
-  public async fetchGMPTransaction(txHash: string, txLogIndex?: number) {
+  public async fetchGMPTransaction(txHash: string, txLogIndex?: number | null) {
     return this.execGet(this.axelarGMPApiUrl, {
       method: "searchGMP",
       txHash,
@@ -216,8 +216,11 @@ export class AxelarRecoveryApi {
     }
   }
 
-  public async queryTransactionStatus(txHash: string): Promise<GMPStatusResponse> {
-    const txDetails = await this.fetchGMPTransaction(txHash);
+  public async queryTransactionStatus(
+    txHash: string,
+    txLogIndex?: number | null
+  ): Promise<GMPStatusResponse> {
+    const txDetails = await this.fetchGMPTransaction(txHash, txLogIndex);
 
     if (!txDetails) return { status: GMPStatus.CANNOT_FETCH_STATUS };
 
