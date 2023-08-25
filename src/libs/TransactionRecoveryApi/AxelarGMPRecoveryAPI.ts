@@ -163,6 +163,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChainId: string,
     destChainId: string,
     srcTxHash: string,
+    srcTxLogIndex: number | undefined,
     evmWalletDetails?: EvmWalletDetails
   ): Promise<{
     commandId: string;
@@ -171,9 +172,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     errorMessage: string;
     infoLog: string;
   }> {
-    const eventIndex = await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)
-      .then((index) => index as number)
-      .catch(() => -1);
+    const eventIndex =
+      srcTxLogIndex ||
+      (await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)
+        .then((index) => index as number)
+        .catch(() => -1));
 
     if (eventIndex === -1) {
       return {
@@ -218,12 +221,19 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChain: string,
     destChain: string,
     txHash: string,
+    txLogIndex: number | undefined,
     evmWalletDetails: EvmWalletDetails
   ): Promise<ConfirmTxSDKResponse> {
     if (this.debugMode)
       console.debug(`confirmation: checking whether ${txHash} needs to be confirmed on Axelar`);
 
-    const evmEvent = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
+    const evmEvent = await this.getEvmEvent(
+      srcChain,
+      destChain,
+      txHash,
+      txLogIndex,
+      evmWalletDetails
+    );
     const { infoLog: getEvmEventInfoLog } = evmEvent;
     if (this.debugMode) console.debug(`confirmation: ${getEvmEventInfoLog}`);
 
@@ -263,7 +273,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, evmWalletDetails);
+      const updatedEvent = await this.getEvmEvent(
+        srcChain,
+        destChain,
+        txHash,
+        txLogIndex,
+        evmWalletDetails
+      );
 
       if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
         return {
@@ -383,10 +399,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   public async manualRelayToDestChain(
     txHash: string,
+    txLogIndex?: number | undefined,
     evmWalletDetails?: EvmWalletDetails,
     escapeAfterConfirm = true
   ): Promise<GMPRecoveryResponse> {
-    const { callTx, status } = await this.queryTransactionStatus(txHash);
+    const { callTx, status } = await this.queryTransactionStatus(txHash, txLogIndex);
 
     /**first check if transaction is already executed */
     if (GMPErrorMap[status])
@@ -404,12 +421,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (routeDir === RouteDir.COSMOS_TO_EVM) {
       return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails);
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
-      return this.recoverEvmToCosmosTx(srcChain, txHash);
+      return this.recoverEvmToCosmosTx(srcChain, txHash, txLogIndex);
     } else {
       return this.recoverEvmToEvmTx(
         srcChain,
         destChain,
         txHash,
+        txLogIndex,
         _evmWalletDetails,
         escapeAfterConfirm
       );
@@ -426,7 +444,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
-  private async recoverEvmToCosmosTx(srcChain: string, txHash: string) {
+  private async recoverEvmToCosmosTx(srcChain: string, txHash: string, txLogIndex?: number | null) {
     // Check if the tx is confirmed on the source chain
     const isConfirmed = await this.doesTxMeetConfirmHt(srcChain, txHash);
     if (!isConfirmed) {
@@ -451,7 +469,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const payload = await this.fetchGMPTransaction(txHash).then(
       (data) => data.call.returnValues.payload
     );
-    const logIndex = await this.getEventIndex(srcChain as EvmChain, txHash);
+    const logIndex = txLogIndex || (await this.getEventIndex(srcChain as EvmChain, txHash));
 
     // Send the route message tx
     const routeMessageTx = await this.routeMessageRequest(txHash, payload, logIndex).catch(
@@ -525,6 +543,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChain: string,
     destChain: string,
     txHash: string,
+    txLogIndex: number | undefined,
     evmWalletDetails: EvmWalletDetails,
     escapeAfterConfirm = true
   ) {
@@ -534,6 +553,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         srcChain,
         destChain,
         txHash,
+        txLogIndex,
         evmWalletDetails
       );
 

@@ -83,6 +83,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
         txHash,
+        undefined,
         evmWalletDetails
       );
       expect(mockEvmEvent).toHaveBeenCalledWith(
@@ -119,6 +120,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
         "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
+        undefined,
         evmWalletDetails
       );
 
@@ -153,6 +155,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
         txHash,
+        undefined,
         evmWalletDetails
       );
 
@@ -185,6 +188,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
         txHash,
+        undefined,
         evmWalletDetails
       );
 
@@ -590,7 +594,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x", undefined, false);
+      const res = await api.manualRelayToDestChain("0x", undefined, undefined, false);
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(
@@ -633,7 +637,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x", undefined, false);
+      const res = await api.manualRelayToDestChain("0x", undefined, undefined, false);
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(`findBatchAndApproveGateway(): unable to retrieve command ID`);
@@ -661,7 +665,7 @@ describe("AxelarGMPRecoveryAPI", () => {
           infoLogs: ["log"],
         });
 
-      const response = await api.manualRelayToDestChain("0x", undefined, false);
+      const response = await api.manualRelayToDestChain("0x", undefined, undefined, false);
       expect(mockFindEventAndConfirmIfNeeded).toHaveBeenCalled();
       expect(mockSignAndApproveGateway).toHaveBeenCalled();
       expect(response.success).toBeTruthy();

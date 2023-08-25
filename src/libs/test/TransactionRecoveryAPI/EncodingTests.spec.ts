@@ -19,7 +19,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
     test("It should create a command ID from a tx hash and event index", async () => {
       const txHash = "0x0a83f6bff1697bb1f72ee60713427e802f32571f042abfa7c6278024f440e861";
-      const res = await api.manualRelayToDestChain(txHash, evmWalletDetails);
+      const res = await api.manualRelayToDestChain(txHash, undefined, evmWalletDetails);
       expect(res).toBeTruthy();
     }, 120000);
   });
@@ -43,7 +43,7 @@ describe("AxelarDepositRecoveryAPI", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
     test("fetching event status", async () => {
       const txHash = "0xa290f800f2089535a0abb013cea9cb26e1cdb3f2a2f2a8dcef2f149eb7a4d3be";
-      const event = await api.getEvmEvent(EvmChain.MOONBEAM, EvmChain.POLYGON, txHash);
+      const event = await api.getEvmEvent(EvmChain.MOONBEAM, EvmChain.POLYGON, txHash, undefined);
       console.log("event", event);
       const res = await api.isEVMEventCompleted(event.eventResponse);
       expect(res).toBeTruthy();
