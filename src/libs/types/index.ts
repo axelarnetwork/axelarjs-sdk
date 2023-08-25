@@ -16,6 +16,7 @@ export enum EvmChain {
   AVALANCHE = "avalanche",
   FANTOM = "fantom",
   POLYGON = "polygon",
+  POLYGON_ZKEVM = "polygon-zkevm",
   MOONBEAM = "moonbeam",
   AURORA = "aurora",
   BINANCE = "binance",
@@ -151,6 +152,7 @@ export enum GasToken {
   FILECOIN = "FIL",
   OSMO = "OSMO",
   AXL = "AXL",
+  POLYGON_ZKEVM = "ETH",
 }
 
 export interface AddGasOptions {
@@ -267,6 +269,7 @@ export const isNativeToken = (chain: string, selectedToken: GasToken): boolean =
     kava: GasToken.KAVA,
     base: GasToken.BASE,
     filecoin: GasToken.FILECOIN,
+    linea: GasToken.ETH,
   };
   return nativeTokenMap[chain]?.toLowerCase() === selectedToken?.toLowerCase();
 };
