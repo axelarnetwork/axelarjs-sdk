@@ -53,6 +53,7 @@ import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { Interface } from "ethers/lib/utils";
 import { ChainInfo } from "src/chains/types";
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -133,9 +134,20 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async doesTxMeetConfirmHt(chain: string, txHash: string) {
-    const confirmations = await this.getSigner(chain)
+    const confirmations = await this.getSigner(chain, { useWindowEthereum: false })
       .provider.getTransactionReceipt(txHash)
-      .then((receipt) => receipt.confirmations);
+      .then(async (receipt?: TransactionReceipt) => {
+        if (!receipt) {
+          const gmpTx = await this.fetchGMPTransaction(txHash);
+          const currentBlock = await this.getSigner(chain, {
+            useWindowEthereum: false,
+          }).provider.getBlockNumber();
+          return currentBlock - gmpTx.call.blockNumber;
+        }
+
+        console.log(receipt);
+        return receipt.confirmations;
+      });
 
     return this.axelarQueryApi
       .getConfirmationHeight(chain)
@@ -189,11 +201,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     const commandId = this.getCidFromSrcTxHash(destChainId, srcTxHash, eventIndex);
-    const eventResponse = await retry(
-      () => this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex),
-      12,
-      10000
-    );
+    const eventResponse = await this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex);
 
     if (!eventResponse || this.isEVMEventFailed(eventResponse)) {
       const errorMessage = this.isEVMEventFailed(eventResponse)
@@ -312,7 +320,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   ): Promise<SignTxSDKResponse> {
     let signTxLog = "";
     try {
-      const batchData = await this.fetchBatchData(destChainId, commandId);
+      const batchData = await retry(() => this.fetchBatchData(destChainId, commandId), 10, 3000);
       if (batchData) {
         signTxLog = `signing: batch data exists so do not need to sign. commandId: ${commandId}, batchId: ${batchData.batch_id}`;
         if (this.debugMode) console.debug(signTxLog);
@@ -725,12 +733,19 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return this.subtractGasFee(sourceChain, destinationChain, gasTokenSymbol, paidGasFee, options);
   }
 
-  public async getEventIndex(chain: string, txHash: string, evmWalletDetails?: EvmWalletDetails) {
-    const signer = this.getSigner(chain, evmWalletDetails || { useWindowEthereum: true });
-    const receipt = await signer.provider.getTransactionReceipt(txHash);
-    if (!receipt) return -1;
-    const eventIndex = getEventIndexFromTxReceipt(receipt);
-    return eventIndex;
+  public async getEventIndex(chain: string, txHash: string) {
+    const signer = this.getSigner(chain, { useWindowEthereum: false });
+    const receipt = await signer.provider.getTransactionReceipt(txHash).catch(() => undefined);
+
+    if (!receipt) {
+      const gmpTx = await this.fetchGMPTransaction(txHash).catch(() => undefined);
+      if (!gmpTx) return -1;
+
+      return parseInt(gmpTx.call.id.split("_").pop());
+    } else {
+      const eventIndex = getEventIndexFromTxReceipt(receipt);
+      return eventIndex;
+    }
   }
 
   /**
@@ -924,7 +939,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const gasLimitBuffer = evmWalletDetails?.gasLimitBuffer || 0;
     const { destinationChain, destinationContractAddress } = executeParams;
 
-    const signer = this.getSigner(destinationChain, evmWalletDetails);
+    const signer = this.getSigner(
+      destinationChain,
+      evmWalletDetails || { useWindowEthereum: true }
+    );
     const contract = new ethers.Contract(destinationContractAddress, IAxelarExecutable.abi, signer);
 
     const txResult: TxResult = await callExecute(executeParams, contract, gasLimitBuffer)
