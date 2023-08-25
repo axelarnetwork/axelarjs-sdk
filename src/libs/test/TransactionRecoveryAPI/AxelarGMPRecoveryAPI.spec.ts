@@ -82,7 +82,6 @@ describe("AxelarGMPRecoveryAPI", () => {
       const response = await api.findEventAndConfirmIfNeeded(
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
-<<<<<<< HEAD
         txHash,
         undefined,
         evmWalletDetails
@@ -91,12 +90,16 @@ describe("AxelarGMPRecoveryAPI", () => {
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
         txHash,
+        undefined,
         evmWalletDetails
-=======
-        txHash
->>>>>>> v0.13.6
       );
-      expect(mockEvmEvent).toHaveBeenCalledWith(EvmChain.AVALANCHE, EvmChain.POLYGON, txHash);
+      expect(mockEvmEvent).toHaveBeenCalledWith(
+        EvmChain.AVALANCHE,
+        EvmChain.POLYGON,
+        txHash,
+        undefined,
+        evmWalletDetails
+      );
       expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
       expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash);
       expect(response).toBeDefined();
@@ -124,13 +127,9 @@ describe("AxelarGMPRecoveryAPI", () => {
       const response = await api.findEventAndConfirmIfNeeded(
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
-<<<<<<< HEAD
         "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503",
         undefined,
         evmWalletDetails
-=======
-        "0xf452bc47fff8962190e114d0e1f7f3775327f6a5d643ca4fd5d39e9415e54503"
->>>>>>> v0.13.6
       );
 
       expect(mockConfirmGatewayTx).not.toHaveBeenCalled();
@@ -163,13 +162,9 @@ describe("AxelarGMPRecoveryAPI", () => {
       const response = await api.findEventAndConfirmIfNeeded(
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
-<<<<<<< HEAD
         txHash,
         undefined,
         evmWalletDetails
-=======
-        txHash
->>>>>>> v0.13.6
       );
 
       expect(mockConfirmGatewayTx).toBeCalledTimes(0);
@@ -200,13 +195,9 @@ describe("AxelarGMPRecoveryAPI", () => {
       const response = await api.findEventAndConfirmIfNeeded(
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
-<<<<<<< HEAD
         txHash,
         undefined,
         evmWalletDetails
-=======
-        txHash
->>>>>>> v0.13.6
       );
 
       expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
