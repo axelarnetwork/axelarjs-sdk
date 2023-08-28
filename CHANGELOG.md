@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add `Linea` and `Base` evm mainnet configs; `Archway`, `Aura`, `IXO`, `Neutron`, `Provenance`, `Sei` to cosmos mainnet configs; Polygon-zkEvm to evm configs
 - Update the `estimateGasFee` method on `AxelarQueryAPI` to accept `BigNumberish` type for `gasLimit` parameter
 - fix `doesTxMeetConfirmHt` and `getEventIndex` methods to search for EVM transaction receipt from Axelarscan API if not found from the source blockchain
+- fix `BigNumberUtils` to address `fractional component exceeds decimals` error, a valid edge case where floating point numbers can exceed specified atomic units
 
 ## [0.13.5] - 2023-JULY-10
 
