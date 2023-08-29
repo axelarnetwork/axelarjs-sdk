@@ -175,8 +175,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChainId: string,
     destChainId: string,
     srcTxHash: string,
-    srcTxLogIndex: number | undefined,
-    evmWalletDetails?: EvmWalletDetails
+    srcTxLogIndex: number | undefined
   ): Promise<{
     commandId: string;
     eventResponse: EventResponse;
@@ -186,7 +185,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }> {
     const eventIndex =
       srcTxLogIndex ||
-      (await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)
+      (await this.getEventIndex(srcChainId, srcTxHash)
         .then((index) => index as number)
         .catch(() => -1));
 
@@ -235,13 +234,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (this.debugMode)
       console.debug(`confirmation: checking whether ${txHash} needs to be confirmed on Axelar`);
 
-    const evmEvent = await this.getEvmEvent(
-      srcChain,
-      destChain,
-      txHash,
-      txLogIndex,
-      evmWalletDetails
-    );
+    const evmEvent = await this.getEvmEvent(srcChain, destChain, txHash, txLogIndex);
     const { infoLog: getEvmEventInfoLog } = evmEvent;
     if (this.debugMode) console.debug(`confirmation: ${getEvmEventInfoLog}`);
 
@@ -281,13 +274,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      const updatedEvent = await this.getEvmEvent(
-        srcChain,
-        destChain,
-        txHash,
-        txLogIndex,
-        evmWalletDetails
-      );
+      const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, txLogIndex);
 
       if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
         return {
