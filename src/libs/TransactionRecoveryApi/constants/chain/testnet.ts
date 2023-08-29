@@ -18,6 +18,7 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.OPTIMISM]: "https://goerli.optimism.io",
   [EvmChain.LINEA]: "https://rpc.goerli.linea.build",
   [EvmChain.POLYGON_ZKEVM]: "https://testnet-zkevm.polygonscan.com",
+  [EvmChain.MANTLE]: "https://rpc.testnet.mantle.xyz",
 };
 
 export const networkInfo: Record<EvmChain | string, Network> = {
@@ -84,5 +85,9 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.LINEA]: {
     chainId: 59140,
     name: EvmChain.LINEA,
+  },
+  [EvmChain.MANTLE]: {
+    chainId: 5001,
+    name: EvmChain.MANTLE,
   },
 };

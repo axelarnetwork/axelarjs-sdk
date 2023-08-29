@@ -68,6 +68,7 @@ export const CHAINS = {
     KI: "ki",
     KUJIRA: "kujira",
     LINEA: "linea",
+    MANTLE: "mantle",
     MOONBEAM: "Moonbeam",
     NEUTRON: "neutron",
     OPTIMISM: "optimism",

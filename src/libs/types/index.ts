@@ -28,6 +28,7 @@ export enum EvmChain {
   FILECOIN = "filecoin",
   OPTIMISM = "optimism",
   LINEA = "linea",
+  MANTLE = "mantle",
 }
 
 export enum CosmosChain {
@@ -153,6 +154,7 @@ export enum GasToken {
   OSMO = "OSMO",
   AXL = "AXL",
   POLYGON_ZKEVM = "ETH",
+  MANTLE = "MNT",
 }
 
 export interface AddGasOptions {

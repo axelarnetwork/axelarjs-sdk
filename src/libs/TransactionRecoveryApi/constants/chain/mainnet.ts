@@ -18,6 +18,7 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.BASE]: "https://developer-access-mainnet.base.org",
   [EvmChain.LINEA]: "https://rpc.linea.build",
   [EvmChain.POLYGON_ZKEVM]: "https://zkevm.polygonscan.com",
+  [EvmChain.MANTLE]: "https://rpc.mantle.xyz",
 };
 
 export const networkInfo: Record<EvmChain, Network> = {
@@ -84,5 +85,9 @@ export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.POLYGON_ZKEVM]: {
     chainId: 1101,
     name: EvmChain.POLYGON_ZKEVM,
+  },
+  [EvmChain.MANTLE]: {
+    chainId: 5000,
+    name: EvmChain.MANTLE,
   },
 };

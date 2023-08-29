@@ -26,6 +26,7 @@ export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string
     [EvmChain.KAVA]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.OPTIMISM]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.FILECOIN]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
+    [EvmChain.MANTLE]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
   },
   [Environment.TESTNET]: {
     [EvmChain.ETHEREUM]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
@@ -43,6 +44,7 @@ export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string
     [EvmChain.OPTIMISM]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.LINEA]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.FILECOIN]: "0x999117D44220F33e0441fbAb2A5aDB8FF485c54D",
+    [EvmChain.MANTLE]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
   },
   [Environment.DEVNET]: {
     [EvmChain.ETHEREUM]: "0x7358799e0c8250f0B7D1164824F6Dd5bA31C9Cd6",
