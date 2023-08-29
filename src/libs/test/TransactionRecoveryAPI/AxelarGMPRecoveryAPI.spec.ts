@@ -90,15 +90,13 @@ describe("AxelarGMPRecoveryAPI", () => {
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
         txHash,
-        undefined,
-        evmWalletDetails
+        undefined
       );
       expect(mockEvmEvent).toHaveBeenCalledWith(
         EvmChain.AVALANCHE,
         EvmChain.POLYGON,
         txHash,
-        undefined,
-        evmWalletDetails
+        undefined
       );
       expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
       expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash);
