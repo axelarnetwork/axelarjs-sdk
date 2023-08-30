@@ -117,6 +117,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private async saveGMP(
     sourceTransactionHash: string,
     relayerAddress: string,
+    sourceTransactionIndex?: number,
+    sourceTransactionLogIndex?: number,
     transactionHash?: string,
     error?: any
   ) {
@@ -124,6 +126,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       method: "saveGMP",
       sourceTransactionHash,
       transactionHash,
+      sourceTransactionIndex,
+      sourceTransactionLogIndex,
       relayerAddress,
       error,
     });
@@ -924,7 +928,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const executeParams = response.data as ExecuteParams;
     const gasLimitBuffer = evmWalletDetails?.gasLimitBuffer || 0;
-    const { destinationChain, destinationContractAddress } = executeParams;
+    const { destinationChain, destinationContractAddress, srcTxInfo } = executeParams;
 
     const signer = this.getSigner(
       destinationChain,
@@ -975,9 +979,22 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const signerAddress = await signer.getAddress();
     const executeTxHash = txResult.transaction?.transactionHash;
     if (executeTxHash) {
-      await this.saveGMP(srcTxHash, signerAddress, executeTxHash).catch(() => undefined);
+      await this.saveGMP(
+        srcTxHash,
+        signerAddress,
+        srcTxInfo.transactionIndex,
+        srcTxInfo.logIndex,
+        executeTxHash
+      ).catch(() => undefined);
     } else {
-      await this.saveGMP(srcTxHash, signerAddress, "", txResult.error).catch(() => undefined);
+      await this.saveGMP(
+        srcTxHash,
+        signerAddress,
+        srcTxInfo.transactionIndex,
+        srcTxInfo.logIndex,
+        "",
+        txResult.error
+      ).catch(() => undefined);
     }
 
     return txResult;

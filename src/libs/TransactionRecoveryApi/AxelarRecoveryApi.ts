@@ -65,6 +65,11 @@ export interface ExecuteParams {
   payload: string;
   symbol?: string;
   amount?: string;
+  srcTxInfo: {
+    transactionHash: string;
+    transactionIndex: number;
+    logIndex: number;
+  };
   destinationContractAddress: string;
   destinationChain: EvmChain;
   isContractCallWithToken: boolean;
@@ -352,6 +357,11 @@ export class AxelarRecoveryApi {
         destinationContractAddress: callTx.returnValues.destinationContractAddress,
         isContractCallWithToken: callTx.event === "ContractCallWithToken",
         payload: callTx.returnValues.payload,
+        srcTxInfo: {
+          transactionHash: callTx.transactionHash,
+          transactionIndex: callTx.transactionIndex,
+          logIndex: callTx.logIndex,
+        },
         sourceAddress: approvalTx.returnValues.sourceAddress,
         sourceChain: approvalTx.returnValues.sourceChain,
         symbol: approvalTx.returnValues.symbol,
