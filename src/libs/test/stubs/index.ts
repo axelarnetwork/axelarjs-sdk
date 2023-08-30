@@ -111,6 +111,11 @@ export const executeParamsStub = () => ({
   payload: "0x",
   sourceAddress: "0xF16DfB26e1FEc993E085092563ECFAEaDa7eD7fD",
   sourceChain: EvmChain.FANTOM,
+  srcTxInfo: {
+    transactionHash: "0x",
+    transactionIndex: 0,
+    logIndex: 0,
+  },
   amount: "1",
   symbol: "WAVAX",
 });
