@@ -65,6 +65,11 @@ export interface ExecuteParams {
   payload: string;
   symbol?: string;
   amount?: string;
+  srcTxInfo: {
+    transactionHash: string;
+    transactionIndex: number;
+    logIndex: number;
+  };
   destinationContractAddress: string;
   destinationChain: EvmChain;
   isContractCallWithToken: boolean;
@@ -139,7 +144,7 @@ export class AxelarRecoveryApi {
     this.config = config;
   }
 
-  public async fetchGMPTransaction(txHash: string, txLogIndex?: number) {
+  public async fetchGMPTransaction(txHash: string, txLogIndex?: number | undefined) {
     return this.execGet(this.axelarGMPApiUrl, {
       method: "searchGMP",
       txHash,
@@ -216,8 +221,11 @@ export class AxelarRecoveryApi {
     }
   }
 
-  public async queryTransactionStatus(txHash: string): Promise<GMPStatusResponse> {
-    const txDetails = await this.fetchGMPTransaction(txHash);
+  public async queryTransactionStatus(
+    txHash: string,
+    txLogIndex?: number | undefined
+  ): Promise<GMPStatusResponse> {
+    const txDetails = await this.fetchGMPTransaction(txHash, txLogIndex);
 
     if (!txDetails) return { status: GMPStatus.CANNOT_FETCH_STATUS };
 
@@ -349,6 +357,11 @@ export class AxelarRecoveryApi {
         destinationContractAddress: callTx.returnValues.destinationContractAddress,
         isContractCallWithToken: callTx.event === "ContractCallWithToken",
         payload: callTx.returnValues.payload,
+        srcTxInfo: {
+          transactionHash: callTx.transactionHash,
+          transactionIndex: callTx.transactionIndex,
+          logIndex: callTx.logIndex,
+        },
         sourceAddress: approvalTx.returnValues.sourceAddress,
         sourceChain: approvalTx.returnValues.sourceChain,
         symbol: approvalTx.returnValues.symbol,
@@ -370,7 +383,7 @@ export class AxelarRecoveryApi {
     );
 
     if (!chainInfo) {
-      throw new Error(`cannot find chain${chainId}`);
+      throw new Error(`cannot find chain ${chainId}`);
     }
 
     return chainInfo;

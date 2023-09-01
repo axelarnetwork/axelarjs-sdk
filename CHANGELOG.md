@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.13.6] - 2023-SEPTEMBER-1
+
+- Fix the issue with `manualRelayToDestChain` where the web client incorrectly utilizes the provider from the injected browser wallet instead of the rpcUrl embedded in the SDK. This error arises when the injected wallet's network differs from the source chain.
+- update `manualRelayToDestChain` method to accept `txLogIndex` optional parameter
+- update `addGas`, `addNativeGas`
+- Add `Linea`, `Base`, `Mantle` evm mainnet configs; `Archway`, `Aura`, `IXO`, `Neutron`, `Provenance`, `Sei` to cosmos mainnet configs; Polygon-zkEvm to evm configs
+- Update the `estimateGasFee` method on `AxelarQueryAPI` to accept `BigNumberish` type for `gasLimit` parameter
+- fix `doesTxMeetConfirmHt` and `getEventIndex` methods to search for EVM transaction receipt from Axelarscan API if not found from the source blockchain
+- fix `BigNumberUtils` to address `fractional component exceeds decimals` error, a valid edge case where floating point numbers can exceed specified atomic units
+
 ## [0.13.5] - 2023-JULY-10
 
 - Fix constant declaration for Optimism testnet
