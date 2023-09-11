@@ -8,7 +8,7 @@ export class BigNumberUtils {
     } else {
       const multiplier = Math.pow(10, units);
       return BigNumber.from(bn)
-        .mul(parseUnits((Number(number) * multiplier).toString(), units))
+        .mul(parseUnits((Number(number) * multiplier).toFixed(units), units))
         .div(multiplier);
     }
   }

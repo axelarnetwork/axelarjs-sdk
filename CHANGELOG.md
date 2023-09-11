@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.13.7] - 2023-SEPTEMBER-X
+
+- Fix BigNumberUnits utility to adjust for another `fractional component exceeds decimals` edge case
+
 ## [0.13.6] - 2023-SEPTEMBER-1
 
 - Fix the issue with `manualRelayToDestChain` where the web client incorrectly utilizes the provider from the injected browser wallet instead of the rpcUrl embedded in the SDK. This error arises when the injected wallet's network differs from the source chain.
