@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.13.7] - 2023-SEPTEMBER-X
 
 - Fix BigNumberUnits utility to adjust for another `fractional component exceeds decimals` edge case
+- Add AddGasToCosmosChain method to AxelarGMPRecoveryAPI
 
 ## [0.13.6] - 2023-SEPTEMBER-1
 

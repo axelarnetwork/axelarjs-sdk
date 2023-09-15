@@ -10,6 +10,7 @@ import {
   ApproveGatewayError,
   GMPRecoveryResponse,
   AxelarTxResponse,
+  Environment,
 } from "../types";
 import {
   AxelarRecoveryApi,
@@ -54,7 +55,10 @@ import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/
 import { Interface } from "ethers/lib/utils";
 import { ChainInfo } from "src/chains/types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-
+import s3 from "./constants/s3";
+import { Coin, OfflineSigner } from "@cosmjs/proto-signing";
+import { DeliverTxResponse, SigningStargateClient, StdFee } from "@cosmjs/stargate";
+import { COSMOS_GAS_RECEIVER_OPTIONS } from "./constants/cosmosGasReceiverOptions";
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
   [GMPStatus.DEST_EXECUTED]: ApproveGatewayError.ALREADY_EXECUTED,
@@ -103,8 +107,62 @@ export enum RouteDir {
   EVM_TO_EVM = "evm_to_evm",
 }
 
+export type SendOptions = {
+  txFee: StdFee;
+  environment: Environment;
+  offlineSigner: OfflineSigner;
+  rpcUrl?: string;
+  timeoutTimestamp?: number;
+};
+
+export type AutocalculateGasOptions = {
+  gasLimit?: bigint;
+  gasMultipler?: number;
+};
+export type AddGasParams = {
+  txHash: string;
+  chain: string;
+  token: Coin | "autocalculate";
+  sendOptions: SendOptions;
+  autocalculateGasOptions?: AutocalculateGasOptions;
+};
+
+export type AddGasResponse = {
+  success: boolean;
+  info: string;
+  broadcastResult?: DeliverTxResponse;
+};
+
+export type GetFullFeeOptions = {
+  environment: Environment;
+  autocalculateGasOptions?: AutocalculateGasOptions | undefined;
+  tx: any;
+  chainConfig: any;
+};
+
+export const getCosmosSigner = async (rpcUrl: string, offlineDirectSigner: OfflineSigner) => {
+  return SigningStargateClient.connectWithSigner(rpcUrl, offlineDirectSigner);
+};
+
+function matchesOriginalTokenPayment(token: Coin | "autocalculate", denomOnSrcChain: string) {
+  return token === "autocalculate" || token?.denom === denomOnSrcChain;
+}
+
+function getIBCDenomOnSrcChain(denomOnAxelar: string, selectedChain: any, chainConfigs: any) {
+  const asset = chainConfigs["assets"][denomOnAxelar];
+  const assetOnSrcChain = asset["chain_aliases"][selectedChain.chainName.toLowerCase()];
+  const ibcDenom = assetOnSrcChain?.ibcDenom;
+
+  if (!ibcDenom) {
+    throw new Error("cannot find token that matches original gas payment");
+  }
+
+  return ibcDenom;
+}
+
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   axelarQueryApi: AxelarQueryAPI;
+  private staticInfo: Record<string, any>;
   public constructor(config: AxelarRecoveryAPIConfig) {
     super(config);
     this.axelarQueryApi = new AxelarQueryAPI({
@@ -739,6 +797,109 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
+  public async addGasToCosmosChain({
+    autocalculateGasOptions,
+    sendOptions,
+    ...params
+  }: AddGasParams): Promise<AddGasResponse> {
+    const chainConfigs = await this.getStaticInfo();
+    let chainConfig;
+    Object.keys(chainConfigs.chains).forEach((key: string) => {
+      const potentialConfig = chainConfigs.chains[key];
+      if (potentialConfig.id === params.chain) {
+        chainConfig = potentialConfig;
+      }
+    });
+
+    if (!chainConfig) {
+      throw new Error(`chain ID ${params.chain} not found`);
+    }
+
+    const { rpc, channelIdToAxelar } = chainConfig;
+
+    const tx = await this.fetchGMPTransaction(params.txHash);
+
+    if (!tx) {
+      return {
+        success: false,
+        info: `${params.txHash} could not be found`,
+      };
+    }
+
+    const denomOnSrcChain = getIBCDenomOnSrcChain(
+      tx.gas_paid.returnValues.denom,
+      chainConfig,
+      chainConfigs
+    );
+
+    if (!matchesOriginalTokenPayment(params.token, denomOnSrcChain)) {
+      return {
+        success: false,
+        info: `The token you are trying to send does not match the token originally \
+          used for gas payment. Please send ${tx.gas_paid.returnValues.denom} instead`,
+      };
+    }
+
+    const coin =
+      params.token !== "autocalculate"
+        ? params.token
+        : {
+            denom: denomOnSrcChain,
+            amount: await this.axelarQueryApi.estimateGasFee(
+              tx.call.chain,
+              tx.call.returnValues.destinationChain,
+              tx.gas_paid.returnValues.denom,
+              autocalculateGasOptions?.gasLimit,
+              autocalculateGasOptions?.gasMultipler
+            ),
+          };
+
+    const sender = await sendOptions.offlineSigner.getAccounts().then(([acc]: any) => acc?.address);
+
+    if (!sender) {
+      return {
+        success: false,
+        info: `Could not find sender from designated offlineSigner`,
+      };
+    }
+
+    const rpcUrl = sendOptions.rpcUrl ?? rpc[0];
+
+    if (!rpcUrl) {
+      return {
+        success: false,
+        info: "Missing RPC URL. Please pass in an rpcUrl parameter in the sendOptions parameter",
+      };
+    }
+
+    const signer = await getCosmosSigner(rpcUrl, sendOptions.offlineSigner);
+
+    const broadcastResult = await signer.signAndBroadcast(
+      sender,
+      [
+        {
+          typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+          value: {
+            sourcePort: "transfer",
+            sourceChannel: channelIdToAxelar,
+            token: coin,
+            sender,
+            receiver: COSMOS_GAS_RECEIVER_OPTIONS[this.environment],
+            timeoutTimestamp: sendOptions.timeoutTimestamp ?? (Date.now() + 90) * 1e9,
+            memo: tx.call.id,
+          },
+        },
+      ],
+      sendOptions.txFee
+    );
+
+    return {
+      success: true,
+      info: "",
+      broadcastResult,
+    };
+  }
+
   /**
    * Pay native token as gas fee for the given transaction hash.
    * If the transaction details is not valid, it will return an error with reason.
@@ -1041,5 +1202,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     };
     const evmClient = new EVMClient(evmClientConfig);
     return evmClient.getSigner();
+  }
+
+  async getStaticInfo(): Promise<Record<string, any>> {
+    if (!this.staticInfo) {
+      this.staticInfo = await fetch(s3[this.environment])
+        .then((res) => res.json())
+        .catch(() => undefined);
+    }
+    return this.staticInfo;
   }
 }
