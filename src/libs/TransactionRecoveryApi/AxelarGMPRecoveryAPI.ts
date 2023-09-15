@@ -149,7 +149,7 @@ function matchesOriginalTokenPayment(token: Coin | "autocalculate", denomOnSrcCh
 }
 
 function getIBCDenomOnSrcChain(denomOnAxelar: string, selectedChain: any, chainConfigs: any) {
-  const asset = chainConfigs["assets"][denomOnAxelar];
+  const asset = chainConfigs["assets"][denomOnAxelar ?? "uaxl"];
   const assetOnSrcChain = asset["chain_aliases"][selectedChain.chainName.toLowerCase()];
   const ibcDenom = assetOnSrcChain?.ibcDenom;
 
@@ -827,7 +827,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     const denomOnSrcChain = getIBCDenomOnSrcChain(
-      tx.gas_paid.returnValues.denom,
+      tx.gas_paid?.returnValues?.denom,
       chainConfig,
       chainConfigs
     );
@@ -836,7 +836,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       return {
         success: false,
         info: `The token you are trying to send does not match the token originally \
-          used for gas payment. Please send ${tx.gas_paid.returnValues.denom} instead`,
+          used for gas payment. Please send ${tx.gas_paid?.returnValues?.denom} instead`,
       };
     }
 
@@ -848,7 +848,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             amount: await this.axelarQueryApi.estimateGasFee(
               tx.call.chain,
               tx.call.returnValues.destinationChain,
-              tx.gas_paid.returnValues.denom,
+              tx.gas_paid?.returnValues?.denom ?? "uaxl",
               autocalculateGasOptions?.gasLimit,
               autocalculateGasOptions?.gasMultipler
             ),
