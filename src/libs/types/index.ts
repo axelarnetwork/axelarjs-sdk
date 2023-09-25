@@ -12,7 +12,7 @@ export enum Environment {
 }
 
 export enum EvmChain {
-  ETHEREUM = "ethereum",
+  ETHEREUM = "ethereum-2",
   AVALANCHE = "avalanche",
   FANTOM = "fantom",
   POLYGON = "polygon",
@@ -25,7 +25,7 @@ export enum EvmChain {
   CELO = "celo",
   KAVA = "kava",
   BASE = "base",
-  FILECOIN = "filecoin",
+  FILECOIN = "filecoin-2",
   OPTIMISM = "optimism",
   LINEA = "linea",
   MANTLE = "mantle",
