@@ -4,8 +4,6 @@ import { retryRpc } from "./helpers/retryRpc";
 import { createRPCClient } from "./helpers/cosmos";
 import { Environment } from "../../types";
 import { getConfigs } from "../../../constants";
-
-let instance: AxelarRpcClient;
 export default class AxelarRpcClient {
   private client: HttpClient;
   subscribed: boolean;
@@ -16,10 +14,7 @@ export default class AxelarRpcClient {
   }
 
   static getOrCreate(environment: Environment) {
-    if (!instance) {
-      instance = new AxelarRpcClient(environment);
-    }
-    return instance;
+    return new AxelarRpcClient(environment);
   }
 
   query(request: JsonRpcRequest, msToRetries = 3000, maxRetries = 3) {

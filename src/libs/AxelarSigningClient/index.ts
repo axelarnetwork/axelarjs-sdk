@@ -19,8 +19,6 @@ import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { registerEvmTxTypes } from "./types/EvmTxTypes";
 
-let instance: AxelarSigningClient;
-
 interface IAxelarSigningClient extends SigningStargateClient {
   signThenBroadcast(
     messages: readonly EncodeObject[],
@@ -52,34 +50,26 @@ export class AxelarSigningClient extends SigningStargateClient implements IAxela
   }
 
   static async initOrGetAxelarSigningClient(config: AxelarSigningClientConfig) {
-    if (!instance) {
-      const {
-        axelarRpcUrl,
-        environment,
-        options,
-        cosmosBasedWalletDetails: walletDetails,
-      } = config;
-      const links: EnvironmentConfigs = getConfigs(environment);
-      const rpc: string = axelarRpcUrl || links.axelarRpcUrl;
-      const tmClient = await Tendermint34Client.connect(rpc);
-      const prefix = "axelar";
+    const { axelarRpcUrl, environment, options, cosmosBasedWalletDetails: walletDetails } = config;
+    const links: EnvironmentConfigs = getConfigs(environment);
+    const rpc: string = axelarRpcUrl || links.axelarRpcUrl;
+    const tmClient = await Tendermint34Client.connect(rpc);
+    const prefix = "axelar";
 
-      let wallet;
-      if (walletDetails.mnemonic)
-        wallet = await Wallet.fromMnemonic(walletDetails.mnemonic, { prefix });
-      else if (walletDetails.offlineSigner) wallet = walletDetails.offlineSigner;
-      else throw "you need to pass in either a wallet mnemonic string or offline signer";
+    let wallet;
+    if (walletDetails.mnemonic)
+      wallet = await Wallet.fromMnemonic(walletDetails.mnemonic, { prefix });
+    else if (walletDetails.offlineSigner) wallet = walletDetails.offlineSigner;
+    else throw "you need to pass in either a wallet mnemonic string or offline signer";
 
-      const [account] = await wallet.getAccounts();
+    const [account] = await wallet.getAccounts();
 
-      const registry = options.registry || new Registry();
-      registerAxelarnetTxTypes(registry);
-      registerEvmTxTypes(registry);
-      const newOpts = { ...options, registry };
+    const registry = options.registry || new Registry();
+    registerAxelarnetTxTypes(registry);
+    registerEvmTxTypes(registry);
+    const newOpts = { ...options, registry };
 
-      instance = new AxelarSigningClient(tmClient, wallet, account.address, newOpts);
-    }
-    return instance;
+    return new AxelarSigningClient(tmClient, wallet, account.address, newOpts);
   }
 
   public signThenBroadcast(
