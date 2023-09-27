@@ -1,4 +1,4 @@
-import { EvmChain } from "../../../types";
+import { EvmChain } from "../../../../constants/EvmChain";
 import { Network } from "@ethersproject/networks";
 
 export const rpcMap: Record<EvmChain | string, string> = {
@@ -14,7 +14,7 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.CELO]: "https://alfajores-forno.celo-testnet.org",
   [EvmChain.KAVA]: "https://evm.testnet.kava.io",
   [EvmChain.BASE]: "https://goerli.base.org",
-  [EvmChain.FILECOIN]: "https://filecoin-calibration.chainup.net/rpc/v1",
+  "filecoin-2": "https://filecoin-calibration.chainup.net/rpc/v1",
   [EvmChain.OPTIMISM]: "https://goerli.optimism.io",
   [EvmChain.LINEA]: "https://rpc.goerli.linea.build",
   [EvmChain.POLYGON_ZKEVM]: "https://testnet-zkevm.polygonscan.com",
@@ -74,7 +74,7 @@ export const networkInfo: Record<EvmChain | string, Network> = {
     chainId: 84_531,
     name: EvmChain.BASE,
   },
-  [EvmChain.FILECOIN]: {
+  "filecoin-2": {
     chainId: 314159,
     name: EvmChain.FILECOIN,
   },

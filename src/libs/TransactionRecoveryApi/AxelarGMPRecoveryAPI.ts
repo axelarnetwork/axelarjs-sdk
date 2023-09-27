@@ -1,10 +1,8 @@
 import {
   AxelarRecoveryAPIConfig,
-  EvmChain,
   EVMClientConfig,
   EvmWalletDetails,
   AddGasOptions,
-  GasToken,
   TxResult,
   QueryGasFeeOptions,
   ApproveGatewayError,
@@ -12,6 +10,8 @@ import {
   AxelarTxResponse,
   Environment,
 } from "../types";
+import { EvmChain } from "../../constants/EvmChain";
+import { GasToken } from "../../constants/GasToken";
 import {
   AxelarRecoveryApi,
   ExecuteParams,
@@ -21,7 +21,7 @@ import {
 import EVMClient from "./client/EVMClient";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { ContractReceipt, ContractTransaction, ethers } from "ethers";
-import { NATIVE_GAS_TOKEN_SYMBOL } from "./constants/contract";
+import { nativeGasTokenSymbol } from "../../constants/contract";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import rpcInfo from "./constants/chain";
 import {
@@ -920,7 +920,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       chain,
       "gas_service"
     );
-    const nativeGasTokenSymbol = NATIVE_GAS_TOKEN_SYMBOL[chain];
+    const gasToken = nativeGasTokenSymbol[this.environment][chain];
     const receipt = await signer.provider.getTransactionReceipt(txHash);
 
     if (!receipt) return InvalidTransactionError(chain);
@@ -938,17 +938,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     let gasFeeToAdd = options?.amount;
 
     if (!gasFeeToAdd) {
-      gasFeeToAdd = await this.calculateNativeGasFee(
-        txHash,
-        chain,
-        destinationChain,
-        nativeGasTokenSymbol,
-        {
-          estimatedGas: options?.estimatedGasUsed,
-          gasMultipler: options?.gasMultipler,
-          provider: evmWalletDetails.provider,
-        }
-      ).catch(() => undefined);
+      gasFeeToAdd = await this.calculateNativeGasFee(txHash, chain, destinationChain, gasToken, {
+        estimatedGas: options?.estimatedGasUsed,
+        gasMultipler: options?.gasMultipler,
+        provider: evmWalletDetails.provider,
+      }).catch(() => undefined);
     }
 
     // Check if gas price is queried successfully.

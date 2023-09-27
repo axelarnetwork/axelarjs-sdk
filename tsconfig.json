@@ -36,5 +36,10 @@
   },
   "include": ["src", "test"],
   "exclude": ["node_modules", "dist"],
-  "files": ["src/global.d.ts", "vitest.config.ts"]
+  "files": [
+    "src/global.d.ts",
+    "vitest.config.ts",
+    "src/constants/GasToken.ts",
+    "src/constants/EvmChain.ts"
+  ]
 }

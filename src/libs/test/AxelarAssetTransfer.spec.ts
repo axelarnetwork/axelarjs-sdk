@@ -1,7 +1,8 @@
 import { hexlify, hexZeroPad } from "ethers/lib/utils";
 import { CHAINS, CLIENT_API_GET_OTC, CLIENT_API_POST_TRANSFER_ASSET } from "../..";
 import { AxelarAssetTransfer, SendTokenParams } from "../AxelarAssetTransfer";
-import { Environment, EvmChain } from "../types";
+import { Environment } from "../types";
+import { EvmChain } from "../../constants/EvmChain";
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { Coin } from "@cosmjs/proto-signing";
 import { StdFee } from "@cosmjs/stargate";

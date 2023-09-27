@@ -1,4 +1,4 @@
-import { EvmChain } from "../../../types";
+import { EvmChain } from "../../../../constants/EvmChain";
 import { Network } from "@ethersproject/networks";
 
 export const rpcMap: Record<EvmChain, string> = {

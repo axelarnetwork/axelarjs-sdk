@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import ganache from "ganache";
 import rpcInfo from "../../TransactionRecoveryApi/constants/chain";
-import { EvmChain } from "../../types";
+import { EvmChain } from "../../../constants/EvmChain";
 
 export interface ForkOptions {
   impersonateAccounts: string[];

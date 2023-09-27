@@ -1,6 +1,7 @@
 import { Interface } from "@ethersproject/abi";
 import { ethers } from "ethers";
-import { EvmChain, EventLog } from "../../types";
+import { EventLog } from "../../types";
+import { EvmChain } from "../../../constants/EvmChain";
 
 export function getDestinationChainFromTxReceipt(
   receipt: ethers.providers.TransactionReceipt
