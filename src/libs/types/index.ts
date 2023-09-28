@@ -122,7 +122,7 @@ export interface AddGasOptions {
   refundAddress?: string;
   estimatedGasUsed?: number;
   gasMultipler?: number;
-  eventIndex?: number;
+  logIndex?: number;
   destChain?: string;
   evmWalletDetails?: EvmWalletDetails;
 }
