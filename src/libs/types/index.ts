@@ -4,31 +4,14 @@ import { DeliverTxResponse, SigningStargateClientOptions } from "@cosmjs/stargat
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { LogDescription } from "ethers/lib/utils";
 import { ContractReceipt, ethers } from "ethers";
+import { nativeGasTokenSymbol } from "../../constants";
+import { GasToken } from "../../constants/GasToken";
+import { EvmChain } from "../../constants/EvmChain";
 
 export enum Environment {
   DEVNET = "devnet",
   TESTNET = "testnet",
   MAINNET = "mainnet",
-}
-
-export enum EvmChain {
-  ETHEREUM = "ethereum-2",
-  AVALANCHE = "avalanche",
-  FANTOM = "fantom",
-  POLYGON = "polygon",
-  POLYGON_ZKEVM = "polygon-zkevm",
-  MOONBEAM = "moonbeam",
-  AURORA = "aurora",
-  BINANCE = "binance",
-  BNBCHAIN = "binance",
-  ARBITRUM = "arbitrum",
-  CELO = "celo",
-  KAVA = "kava",
-  BASE = "base",
-  FILECOIN = "filecoin-2",
-  OPTIMISM = "optimism",
-  LINEA = "linea",
-  MANTLE = "mantle",
 }
 
 export enum CosmosChain {
@@ -134,29 +117,6 @@ export type AxelarTransferAPIConfig = {
   environment: Environment;
 };
 
-// Includes all supported native tokens and stablecoins (i.e. for fees)
-export enum GasToken {
-  ETH = "ETH",
-  AVAX = "AVAX",
-  GLMR = "GLMR",
-  FTM = "FTM",
-  MATIC = "MATIC",
-  USDC = "USDC",
-  aUSDC = "aUSDC", //testnet only
-  axlUSDC = "axlUSDC",
-  AURORA = "aETH",
-  BINANCE = "BNB",
-  BNBCHAIN = "BNB",
-  CELO = "CELO",
-  KAVA = "KAVA",
-  BASE = "ETH",
-  FILECOIN = "FIL",
-  OSMO = "OSMO",
-  AXL = "AXL",
-  POLYGON_ZKEVM = "ETH",
-  MANTLE = "MNT",
-}
-
 export interface AddGasOptions {
   amount?: string;
   refundAddress?: string;
@@ -259,21 +219,10 @@ export interface GMPRecoveryResponse {
   infoLogs?: string[];
 }
 
-export const isNativeToken = (chain: string, selectedToken: GasToken): boolean => {
-  const nativeTokenMap: Record<string, GasToken> = {
-    ethereum: GasToken.ETH,
-    avalanche: GasToken.AVAX,
-    fantom: GasToken.FTM,
-    polygon: GasToken.MATIC,
-    moonbeam: GasToken.GLMR,
-    aurora: GasToken.AURORA,
-    binance: GasToken.BINANCE,
-    bnbchain: GasToken.BINANCE,
-    celo: GasToken.CELO,
-    kava: GasToken.KAVA,
-    base: GasToken.BASE,
-    filecoin: GasToken.FILECOIN,
-    linea: GasToken.ETH,
-  };
-  return nativeTokenMap[chain]?.toLowerCase() === selectedToken?.toLowerCase();
+export const isNativeToken = (
+  chain: string,
+  selectedToken: GasToken,
+  environment: Environment
+): boolean => {
+  return nativeGasTokenSymbol[environment][chain]?.toLowerCase() === selectedToken?.toLowerCase();
 };

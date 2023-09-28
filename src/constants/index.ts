@@ -73,3 +73,6 @@ export const getConfigs = (environment: string): EnvironmentConfigs => {
     throw new Error(`config environment does not exist for environment: ${environment}`);
   return configToUse;
 };
+
+export * from "./EvmChain";
+export * from "./GasToken";

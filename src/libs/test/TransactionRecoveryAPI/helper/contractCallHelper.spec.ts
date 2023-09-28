@@ -1,6 +1,6 @@
 import { callExecute, CALL_EXECUTE_ERROR } from "../../../TransactionRecoveryApi/helpers";
 import { contractReceiptStub, executeParamsStub } from "../../stubs";
-import { EvmChain } from "../../../types";
+import { EvmChain } from "../../../../constants/EvmChain";
 import IAxelarExecutable from "../../../abi/IAxelarExecutable";
 import { ethers, Wallet } from "ethers";
 import { fork } from "../../testUtils/localChain";

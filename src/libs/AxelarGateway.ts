@@ -4,12 +4,13 @@ import {
   CallContractTxArgs,
   CallContractWithTokenTxArgs,
   Environment,
-  EvmChain,
   SendTokenArgs,
 } from "./types";
+
 import erc20Abi from "./abi/erc20Abi.json";
 import { GatewayTx } from "./GatewayTx";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
+import { EvmChain } from "../constants/EvmChain";
 
 export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string>>> = {
   [Environment.MAINNET]: {

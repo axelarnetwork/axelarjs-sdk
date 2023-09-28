@@ -4,7 +4,8 @@ import {
   GasPaidStatus,
   GMPStatus,
 } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
-import { Environment, EvmChain } from "../../types";
+import { Environment } from "../../types";
+import { EvmChain } from "../../../constants/EvmChain";
 
 describe("AxelarRecoveryAPI", () => {
   const api = new AxelarRecoveryApi({ environment: Environment.TESTNET });

@@ -20,12 +20,12 @@ import {
   AxelarAssetTransferConfig,
   CosmosChain,
   Environment,
-  EvmChain,
-  GasToken,
   isNativeToken,
   SendTokenArgs,
   TxOption,
 } from "./types";
+import { EvmChain } from "../constants/EvmChain";
+import { GasToken } from "../constants/GasToken";
 import DepositReceiver from "../../artifacts/contracts/deposit-service/DepositReceiver.sol/DepositReceiver.json";
 import ReceiverImplementation from "../../artifacts/contracts/deposit-service/ReceiverImplementation.sol/ReceiverImplementation.json";
 import s3 from "./TransactionRecoveryApi/constants/s3";
@@ -529,7 +529,7 @@ export class AxelarAssetTransfer {
     if (!destChainInfo) throw new Error("cannot find chain" + toChain);
 
     /**if user has selected native cxy, e.g. ETH, AVAX, etc, assume it is to be wrapped into ERC20 on dest chain */
-    if (isNativeToken(srcChainInfo.chainName.toLowerCase(), asset as GasToken)) {
+    if (isNativeToken(srcChainInfo.id, asset as GasToken, this.environment)) {
       return this.getDepositAddressForNativeWrap(
         fromChain,
         toChain,
