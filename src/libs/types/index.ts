@@ -4,7 +4,7 @@ import { DeliverTxResponse, SigningStargateClientOptions } from "@cosmjs/stargat
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { LogDescription } from "ethers/lib/utils";
 import { ContractReceipt, ethers } from "ethers";
-import { nativeGasTokenSymbol } from "../../constants/contract";
+import { nativeGasTokenSymbol } from "../../constants";
 import { GasToken } from "../../constants/GasToken";
 import { EvmChain } from "../../constants/EvmChain";
 

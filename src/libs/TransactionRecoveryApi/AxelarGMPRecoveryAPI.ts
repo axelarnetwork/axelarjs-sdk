@@ -21,7 +21,7 @@ import {
 import EVMClient from "./client/EVMClient";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { ContractReceipt, ContractTransaction, ethers } from "ethers";
-import { nativeGasTokenSymbol } from "../../constants/contract";
+import { nativeGasTokenSymbol } from "../../constants";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import rpcInfo from "./constants/chain";
 import {
