@@ -246,7 +246,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     infoLog: string;
   }> {
     const eventIndex =
-      srcTxEventIndex ||
+      srcTxEventIndex ??
       (await this.getEventIndex(srcChainId, srcTxHash)
         .then((index) => index as number)
         .catch(() => -1));
@@ -471,7 +471,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     const srcChain: string = callTx.chain;
     const destChain: string = callTx.returnValues.destinationChain;
-    const eventIndex = txEventIndex ?? callTx._id;
+    const eventIndex = txEventIndex ?? callTx._logIndex;
     const srcChainInfo = await this.getChainInfo(srcChain);
     const destChainInfo = await this.getChainInfo(destChain);
     const routeDir = this.getRouteDir(srcChainInfo, destChainInfo);
@@ -532,7 +532,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const payload = await this.fetchGMPTransaction(txHash).then(
       (data) => data.call.returnValues.payload
     );
-    const eventIndex = txEventIndex || (await this.getEventIndex(srcChain as EvmChain, txHash));
+    const eventIndex = txEventIndex ?? (await this.getEventIndex(srcChain as EvmChain, txHash));
 
     // Send the route message tx
     const routeMessageTx = await this.routeMessageRequest(txHash, payload, eventIndex).catch(
@@ -932,7 +932,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (!receipt) return InvalidTransactionError(chain);
 
     const destinationChain = options?.destChain || getDestinationChainFromTxReceipt(receipt);
-    const logIndex = options?.logIndex || getLogIndexFromTxReceipt(receipt);
+    const logIndex = options?.logIndex ?? getLogIndexFromTxReceipt(receipt);
 
     // Check if given txHash is valid
     if (!destinationChain) return NotGMPTransactionError();
@@ -1019,7 +1019,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (!receipt) return InvalidTransactionError(chain);
 
     const destinationChain = options?.destChain || getDestinationChainFromTxReceipt(receipt);
-    const logIndex = options?.logIndex || getLogIndexFromTxReceipt(receipt);
+    const logIndex = options?.logIndex ?? getLogIndexFromTxReceipt(receipt);
 
     // Check if given txHash is valid
     if (!destinationChain) return NotGMPTransactionError();
