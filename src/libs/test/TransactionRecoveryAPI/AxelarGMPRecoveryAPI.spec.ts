@@ -600,7 +600,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x", undefined, undefined, false);
+      const res = await api.manualRelayToDestChain("0x", undefined, undefined, undefined, false);
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(
@@ -643,7 +643,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x", undefined, undefined, false);
+      const res = await api.manualRelayToDestChain("0x", undefined, undefined, undefined, false);
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(`findBatchAndApproveGateway(): unable to retrieve command ID`);
@@ -671,7 +671,13 @@ describe("AxelarGMPRecoveryAPI", () => {
           infoLogs: ["log"],
         });
 
-      const response = await api.manualRelayToDestChain("0x", undefined, undefined, false);
+      const response = await api.manualRelayToDestChain(
+        "0x",
+        undefined,
+        undefined,
+        undefined,
+        false
+      );
       expect(mockFindEventAndConfirmIfNeeded).toHaveBeenCalled();
       expect(mockSignAndApproveGateway).toHaveBeenCalled();
       expect(response.success).toBeTruthy();
