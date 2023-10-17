@@ -5,12 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.13.7] - 2023-SEPTEMBER-X
+## [0.13.7] - 2023-OCTOBER-X
 
 - Fix BigNumberUnits utility to adjust for another `fractional component exceeds decimals` edge case
 - Add AddGasToCosmosChain method to AxelarGMPRecoveryAPI
 - Remove singleton pattern that was used in the `getConfigs` function that caused an issue in toggling environments in the AxelarQueryAPI
 - Refactor "EvmChain" enum
+- Update `manualRelayToDestChain` method, adding an additional parameter for `txEventIndex` that is used to confirm events on the network
 
 ## [0.13.6] - 2023-SEPTEMBER-1
 
