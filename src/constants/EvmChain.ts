@@ -16,4 +16,5 @@ export enum EvmChain {
   OPTIMISM = "optimism",
   LINEA = "linea",
   MANTLE = "mantle",
+  SCROLL = "scroll",
 }

@@ -22,6 +22,7 @@ export enum GasToken {
   AXL = "AXL",
   POLYGON_ZKEVM = "ETH",
   MANTLE = "MNT",
+  SCROLL = "ETH",
 }
 
 export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasToken>> = {
@@ -43,6 +44,7 @@ export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasT
     [EvmChain.LINEA]: GasToken.ETH,
     [EvmChain.POLYGON_ZKEVM]: GasToken.POLYGON_ZKEVM,
     [EvmChain.MANTLE]: GasToken.MANTLE,
+    [EvmChain.SCROLL]: GasToken.SCROLL,
   },
   mainnet: {
     [EvmChain.AVALANCHE]: GasToken.AVAX,
@@ -62,6 +64,7 @@ export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasT
     [EvmChain.LINEA]: GasToken.ETH,
     [EvmChain.POLYGON_ZKEVM]: GasToken.POLYGON_ZKEVM,
     [EvmChain.MANTLE]: GasToken.MANTLE,
+    [EvmChain.SCROLL]: GasToken.SCROLL,
   },
 };
 

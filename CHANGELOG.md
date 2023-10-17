@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Remove singleton pattern that was used in the `getConfigs` function that caused an issue in toggling environments in the AxelarQueryAPI
 - Refactor "EvmChain" enum
 - Update `manualRelayToDestChain` method, adding an additional parameter for `txEventIndex` that is used to confirm events on the network
+- Add `Scroll` to testnet/mainnet configs
 
 ## [0.13.6] - 2023-SEPTEMBER-1
 
