@@ -459,7 +459,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txLogIndex?: number | undefined,
     txEventIndex?: number | undefined,
     evmWalletDetails?: EvmWalletDetails,
-    escapeAfterConfirm = true
+    escapeAfterConfirm = true,
+    messageId?: string
   ): Promise<GMPRecoveryResponse> {
     const { callTx, status } = await this.queryTransactionStatus(txHash, txLogIndex);
 
@@ -478,7 +479,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
     if (routeDir === RouteDir.COSMOS_TO_EVM) {
-      return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails);
+      return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails, messageId);
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
       return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex);
     } else {
@@ -559,10 +560,20 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     };
   }
 
-  private async recoverCosmosToEvmTx(txHash: string, evmWalletDetails: EvmWalletDetails) {
+  private async recoverCosmosToEvmTx(
+    txHash: string,
+    evmWalletDetails: EvmWalletDetails,
+    msgIdParam?: string
+  ) {
     const txDetails = await this.fetchGMPTransaction(txHash);
-    const { messageId, payload, destinationChain } = txDetails.call.returnValues;
+    const {
+      messageId: msgIdFromAxelarscan,
+      payload,
+      destinationChain,
+    } = txDetails.call.returnValues;
     const { command_id: commandId } = txDetails;
+
+    const messageId: string = msgIdParam ?? msgIdFromAxelarscan;
 
     // Send RouteMessageTx
     const routeMessageTx = await this.routeMessageRequest(messageId, payload, -1).catch(
