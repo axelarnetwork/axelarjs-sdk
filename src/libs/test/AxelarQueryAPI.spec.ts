@@ -62,7 +62,7 @@ describe("AxelarQueryAPI", () => {
       ];
       expect(
         api.getTransferFee(sourceChainName, destinationChainName, assetDenom, amount)
-      ).rejects.toThrow("Invalid chain identifier for osmosis. Did you mean osmosis-6");
+      ).rejects.toThrow("Invalid chain identifier for osmosis. Did you mean osmosis-7");
     });
   });
 

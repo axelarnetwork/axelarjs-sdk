@@ -363,7 +363,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         callTx: {
           chain: "avalanche",
           returnValues: {
-            destinationChain: "osmosis-6",
+            destinationChain: "osmosis-7",
           },
         },
       });
@@ -423,7 +423,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       vitest.spyOn(api, "queryTransactionStatus").mockResolvedValueOnce({
         status: "called",
         callTx: {
-          chain: "osmosis-6",
+          chain: "osmosis-7",
           returnValues: {
             destinationChain: "avalanche",
           },

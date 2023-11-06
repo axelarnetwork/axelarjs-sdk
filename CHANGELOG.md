@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Refactor "EvmChain" enum
 - Update `manualRelayToDestChain` method, adding an additional parameter for `txEventIndex` that is used to confirm events on the network
 - Update `manualRelayToDestChain` method, adding an additional (optional) parameter for `messageId` that is used to recover transactions for GMP transactions from Cosmos source chains
-- Add `Scroll` to testnet/mainnet configs
+- Add `Scroll` to testnet/mainnet configs, `Celestia` to testnet/mainnet, `Haqq` to mainnet, `Provenance` to testnet, `Teritori` to mainnet
+- Updated Osmosis testnet to `osmosis-7` that points to `osmo-test-5`
 
 ## [0.13.6] - 2023-SEPTEMBER-1
 
