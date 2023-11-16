@@ -1,7 +1,7 @@
 import { EvmChain } from "../../../../constants/EvmChain";
 import { Network } from "@ethersproject/networks";
 
-export const rpcMap: Record<EvmChain, string> = {
+export const rpcMap: Partial<Record<EvmChain, string>> = {
   [EvmChain.FANTOM]: "https://rpc.ftm.tools",
   [EvmChain.POLYGON]: "https://polygon-rpc.com",
   [EvmChain.MOONBEAM]: "https://rpc.api.moonbeam.network",
@@ -22,7 +22,7 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.SCROLL]: "https://rpc.scroll.io",
 };
 
-export const networkInfo: Record<EvmChain, Network> = {
+export const networkInfo: Partial<Record<EvmChain, Network>> = {
   [EvmChain.FANTOM]: {
     chainId: 250,
     name: EvmChain.FANTOM,
