@@ -9,6 +9,7 @@ export enum EvmChain {
   BINANCE = "binance",
   BNBCHAIN = "binance",
   ARBITRUM = "arbitrum",
+  ARBITRUM_SEPOLIA = "arbitrum-sepolia",
   CELO = "celo",
   KAVA = "kava",
   BASE = "base",
@@ -17,4 +18,7 @@ export enum EvmChain {
   LINEA = "linea",
   MANTLE = "mantle",
   SCROLL = "scroll",
+  SEPOLIA = "ethereum-sepolia",
+  IMMUTABLE = "immutable",
+  CENTRIFUGE_TESTNET = "centrifuge-2",
 }

@@ -23,6 +23,10 @@ export enum GasToken {
   POLYGON_ZKEVM = "ETH",
   MANTLE = "MNT",
   SCROLL = "ETH",
+  IMMUTABLE = "IMX",
+  SEPOLIA = "ETH",
+  ARBITRUM_SEPOLIA = "ETH",
+  CENTRIFUGE = "CFG",
 }
 
 export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasToken>> = {
@@ -45,6 +49,10 @@ export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasT
     [EvmChain.POLYGON_ZKEVM]: GasToken.POLYGON_ZKEVM,
     [EvmChain.MANTLE]: GasToken.MANTLE,
     [EvmChain.SCROLL]: GasToken.SCROLL,
+    [EvmChain.SEPOLIA]: GasToken.SEPOLIA,
+    [EvmChain.IMMUTABLE]: GasToken.IMMUTABLE,
+    [EvmChain.ARBITRUM_SEPOLIA]: GasToken.ARBITRUM_SEPOLIA,
+    [EvmChain.CENTRIFUGE_TESTNET]: GasToken.CENTRIFUGE,
   },
   mainnet: {
     [EvmChain.AVALANCHE]: GasToken.AVAX,

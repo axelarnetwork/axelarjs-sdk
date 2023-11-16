@@ -20,6 +20,11 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.POLYGON_ZKEVM]: "https://testnet-zkevm.polygonscan.com",
   [EvmChain.MANTLE]: "https://rpc.testnet.mantle.xyz",
   [EvmChain.SCROLL]: "https://sepolia-rpc.scroll.io",
+  [EvmChain.IMMUTABLE]: "https://rpc-geth.testnet.immutable.com",
+  [EvmChain.SEPOLIA]: "https://1rpc.io/sepolia",
+  [EvmChain.ARBITRUM_SEPOLIA]: "https://sepolia-rollup.arbitrum.io/rpc",
+  [EvmChain.CENTRIFUGE_TESTNET]:
+    "https://node-7118620155331796992.gx.onfinality.io/rpc?apikey=00538f2d-6297-44e3-8812-4b9d579524b2",
 };
 
 export const networkInfo: Record<EvmChain | string, Network> = {
@@ -94,5 +99,21 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.SCROLL]: {
     chainId: 534351,
     name: EvmChain.SCROLL,
+  },
+  [EvmChain.SEPOLIA]: {
+    chainId: 11155111,
+    name: EvmChain.SEPOLIA,
+  },
+  [EvmChain.ARBITRUM_SEPOLIA]: {
+    chainId: 421614,
+    name: EvmChain.ARBITRUM_SEPOLIA,
+  },
+  [EvmChain.CENTRIFUGE_TESTNET]: {
+    chainId: 2090,
+    name: "centrifuge",
+  },
+  [EvmChain.IMMUTABLE]: {
+    chainId: 13473,
+    name: EvmChain.IMMUTABLE,
   },
 };
