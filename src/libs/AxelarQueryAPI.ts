@@ -3,8 +3,10 @@ import { parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
-import { AxelarQueryAPIConfig, BaseFeeResponse, Environment, EvmChain, GasToken } from "./types";
-import { DEFAULT_ESTIMATED_GAS } from "./TransactionRecoveryApi/constants/contract";
+import { AxelarQueryAPIConfig, BaseFeeResponse, Environment } from "./types";
+import { EvmChain } from "../constants/EvmChain";
+import { GasToken } from "../constants/GasToken";
+import { DEFAULT_ESTIMATED_GAS } from "../constants";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import fetch from "cross-fetch";
 import {

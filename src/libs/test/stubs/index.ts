@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import Long from "long";
-import { EvmChain } from "../../types";
+import { EvmChain } from "../../../constants/EvmChain";
 
 export const uuidStub = () => "83462f97-63cf-4205-a659-6f54bec623f6";
 

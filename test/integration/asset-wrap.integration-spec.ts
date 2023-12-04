@@ -1,4 +1,5 @@
-import { AxelarAssetTransfer, Environment, EvmChain } from "../../src";
+import { EvmChain } from "../../src/constants/EvmChain";
+import { AxelarAssetTransfer, Environment } from "../../src";
 
 describe(
   "Asset Wrap",

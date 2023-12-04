@@ -1,4 +1,4 @@
-import { EvmChain } from "../../../libs";
+import { EvmChain } from "../../../constants/EvmChain";
 import { ExecuteParams } from "../AxelarRecoveryApi";
 
 const metamaskErrorMsg = (e: any) => e.data?.message;

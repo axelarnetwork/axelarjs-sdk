@@ -1,16 +1,17 @@
 import {
   AxelarRecoveryAPIConfig,
-  EvmChain,
   EVMClientConfig,
   EvmWalletDetails,
   AddGasOptions,
-  GasToken,
   TxResult,
   QueryGasFeeOptions,
   ApproveGatewayError,
   GMPRecoveryResponse,
   AxelarTxResponse,
+  Environment,
 } from "../types";
+import { EvmChain } from "../../constants/EvmChain";
+import { GasToken } from "../../constants/GasToken";
 import {
   AxelarRecoveryApi,
   ExecuteParams,
@@ -20,7 +21,7 @@ import {
 import EVMClient from "./client/EVMClient";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { ContractReceipt, ContractTransaction, ethers } from "ethers";
-import { NATIVE_GAS_TOKEN_SYMBOL } from "./constants/contract";
+import { nativeGasTokenSymbol } from "../../constants";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import rpcInfo from "./constants/chain";
 import {
@@ -54,7 +55,10 @@ import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/
 import { Interface } from "ethers/lib/utils";
 import { ChainInfo } from "src/chains/types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-
+import s3 from "./constants/s3";
+import { Coin, OfflineSigner } from "@cosmjs/proto-signing";
+import { DeliverTxResponse, SigningStargateClient, StdFee } from "@cosmjs/stargate";
+import { COSMOS_GAS_RECEIVER_OPTIONS } from "./constants/cosmosGasReceiverOptions";
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
   [GMPStatus.DEST_EXECUTED]: ApproveGatewayError.ALREADY_EXECUTED,
@@ -103,8 +107,62 @@ export enum RouteDir {
   EVM_TO_EVM = "evm_to_evm",
 }
 
+export type SendOptions = {
+  txFee: StdFee;
+  environment: Environment;
+  offlineSigner: OfflineSigner;
+  rpcUrl?: string;
+  timeoutTimestamp?: number;
+};
+
+export type AutocalculateGasOptions = {
+  gasLimit?: bigint;
+  gasMultipler?: number;
+};
+export type AddGasParams = {
+  txHash: string;
+  chain: string;
+  token: Coin | "autocalculate";
+  sendOptions: SendOptions;
+  autocalculateGasOptions?: AutocalculateGasOptions;
+};
+
+export type AddGasResponse = {
+  success: boolean;
+  info: string;
+  broadcastResult?: DeliverTxResponse;
+};
+
+export type GetFullFeeOptions = {
+  environment: Environment;
+  autocalculateGasOptions?: AutocalculateGasOptions | undefined;
+  tx: any;
+  chainConfig: any;
+};
+
+export const getCosmosSigner = async (rpcUrl: string, offlineDirectSigner: OfflineSigner) => {
+  return SigningStargateClient.connectWithSigner(rpcUrl, offlineDirectSigner);
+};
+
+function matchesOriginalTokenPayment(token: Coin | "autocalculate", denomOnSrcChain: string) {
+  return token === "autocalculate" || token?.denom === denomOnSrcChain;
+}
+
+function getIBCDenomOnSrcChain(denomOnAxelar: string, selectedChain: any, chainConfigs: any) {
+  const asset = chainConfigs["assets"][denomOnAxelar ?? "uaxl"];
+  const assetOnSrcChain = asset["chain_aliases"][selectedChain.chainName.toLowerCase()];
+  const ibcDenom = assetOnSrcChain?.ibcDenom;
+
+  if (!ibcDenom) {
+    throw new Error("cannot find token that matches original gas payment");
+  }
+
+  return ibcDenom;
+}
+
 export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   axelarQueryApi: AxelarQueryAPI;
+  private staticInfo: Record<string, any>;
   public constructor(config: AxelarRecoveryAPIConfig) {
     super(config);
     this.axelarQueryApi = new AxelarQueryAPI({
@@ -179,7 +237,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChainId: string,
     destChainId: string,
     srcTxHash: string,
-    srcTxLogIndex: number | undefined
+    srcTxEventIndex: number | undefined
   ): Promise<{
     commandId: string;
     eventResponse: EventResponse;
@@ -188,7 +246,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     infoLog: string;
   }> {
     const eventIndex =
-      srcTxLogIndex ||
+      srcTxEventIndex ??
       (await this.getEventIndex(srcChainId, srcTxHash)
         .then((index) => index as number)
         .catch(() => -1));
@@ -232,13 +290,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChain: string,
     destChain: string,
     txHash: string,
-    txLogIndex: number | undefined,
+    txEventIndex: number | undefined,
     evmWalletDetails: EvmWalletDetails
   ): Promise<ConfirmTxSDKResponse> {
     if (this.debugMode)
       console.debug(`confirmation: checking whether ${txHash} needs to be confirmed on Axelar`);
 
-    const evmEvent = await this.getEvmEvent(srcChain, destChain, txHash, txLogIndex);
+    const evmEvent = await this.getEvmEvent(srcChain, destChain, txHash, txEventIndex);
     const { infoLog: getEvmEventInfoLog } = evmEvent;
     if (this.debugMode) console.debug(`confirmation: ${getEvmEventInfoLog}`);
 
@@ -278,7 +336,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, txLogIndex);
+      const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, txEventIndex);
 
       if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
         return {
@@ -399,8 +457,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async manualRelayToDestChain(
     txHash: string,
     txLogIndex?: number | undefined,
+    txEventIndex?: number | undefined,
     evmWalletDetails?: EvmWalletDetails,
-    escapeAfterConfirm = true
+    escapeAfterConfirm = true,
+    messageId?: string
   ): Promise<GMPRecoveryResponse> {
     const { callTx, status } = await this.queryTransactionStatus(txHash, txLogIndex);
 
@@ -412,21 +472,22 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     const srcChain: string = callTx.chain;
     const destChain: string = callTx.returnValues.destinationChain;
+    const eventIndex = txEventIndex ?? callTx._logIndex;
     const srcChainInfo = await this.getChainInfo(srcChain);
     const destChainInfo = await this.getChainInfo(destChain);
     const routeDir = this.getRouteDir(srcChainInfo, destChainInfo);
     const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
     if (routeDir === RouteDir.COSMOS_TO_EVM) {
-      return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails);
+      return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails, messageId);
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
-      return this.recoverEvmToCosmosTx(srcChain, txHash, txLogIndex);
+      return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex);
     } else {
       return this.recoverEvmToEvmTx(
         srcChain,
         destChain,
         txHash,
-        txLogIndex,
+        eventIndex,
         _evmWalletDetails,
         escapeAfterConfirm
       );
@@ -443,7 +504,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
-  private async recoverEvmToCosmosTx(srcChain: string, txHash: string, txLogIndex?: number | null) {
+  private async recoverEvmToCosmosTx(
+    srcChain: string,
+    txHash: string,
+    txEventIndex?: number | null
+  ) {
     // Check if the tx is confirmed on the source chain
     const isConfirmed = await this.doesTxMeetConfirmHt(srcChain, txHash);
     if (!isConfirmed) {
@@ -468,10 +533,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const payload = await this.fetchGMPTransaction(txHash).then(
       (data) => data.call.returnValues.payload
     );
-    const logIndex = txLogIndex || (await this.getEventIndex(srcChain as EvmChain, txHash));
+    const eventIndex = txEventIndex ?? (await this.getEventIndex(srcChain as EvmChain, txHash));
 
     // Send the route message tx
-    const routeMessageTx = await this.routeMessageRequest(txHash, payload, logIndex).catch(
+    const routeMessageTx = await this.routeMessageRequest(txHash, payload, eventIndex).catch(
       () => undefined
     );
 
@@ -495,10 +560,20 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     };
   }
 
-  private async recoverCosmosToEvmTx(txHash: string, evmWalletDetails: EvmWalletDetails) {
+  private async recoverCosmosToEvmTx(
+    txHash: string,
+    evmWalletDetails: EvmWalletDetails,
+    msgIdParam?: string
+  ) {
     const txDetails = await this.fetchGMPTransaction(txHash);
-    const { messageId, payload, destinationChain } = txDetails.call.returnValues;
+    const {
+      messageId: msgIdFromAxelarscan,
+      payload,
+      destinationChain,
+    } = txDetails.call.returnValues;
     const { command_id: commandId } = txDetails;
+
+    const messageId: string = msgIdParam ?? msgIdFromAxelarscan;
 
     // Send RouteMessageTx
     const routeMessageTx = await this.routeMessageRequest(messageId, payload, -1).catch(
@@ -542,7 +617,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChain: string,
     destChain: string,
     txHash: string,
-    txLogIndex: number | undefined,
+    txEventIndex: number | undefined,
     evmWalletDetails: EvmWalletDetails,
     escapeAfterConfirm = true
   ) {
@@ -552,7 +627,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         srcChain,
         destChain,
         txHash,
-        txLogIndex,
+        txEventIndex,
         evmWalletDetails
       );
 
@@ -732,11 +807,114 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       const gmpTx = await this.fetchGMPTransaction(txHash).catch(() => undefined);
       if (!gmpTx) return -1;
 
-      return parseInt(gmpTx.call.id.split("_").pop());
+      return parseInt(gmpTx.call._logIndex);
     } else {
       const eventIndex = getEventIndexFromTxReceipt(receipt);
       return eventIndex;
     }
+  }
+
+  public async addGasToCosmosChain({
+    autocalculateGasOptions,
+    sendOptions,
+    ...params
+  }: AddGasParams): Promise<AddGasResponse> {
+    const chainConfigs = await this.getStaticInfo();
+    let chainConfig;
+    Object.keys(chainConfigs.chains).forEach((key: string) => {
+      const potentialConfig = chainConfigs.chains[key];
+      if (potentialConfig.id === params.chain) {
+        chainConfig = potentialConfig;
+      }
+    });
+
+    if (!chainConfig) {
+      throw new Error(`chain ID ${params.chain} not found`);
+    }
+
+    const { rpc, channelIdToAxelar } = chainConfig;
+
+    const tx = await this.fetchGMPTransaction(params.txHash);
+
+    if (!tx) {
+      return {
+        success: false,
+        info: `${params.txHash} could not be found`,
+      };
+    }
+
+    const denomOnSrcChain = getIBCDenomOnSrcChain(
+      tx.gas_paid?.returnValues?.denom,
+      chainConfig,
+      chainConfigs
+    );
+
+    if (!matchesOriginalTokenPayment(params.token, denomOnSrcChain)) {
+      return {
+        success: false,
+        info: `The token you are trying to send does not match the token originally \
+          used for gas payment. Please send ${tx.gas_paid?.returnValues?.denom} instead`,
+      };
+    }
+
+    const coin =
+      params.token !== "autocalculate"
+        ? params.token
+        : {
+            denom: denomOnSrcChain,
+            amount: await this.axelarQueryApi.estimateGasFee(
+              tx.call.chain,
+              tx.call.returnValues.destinationChain,
+              tx.gas_paid?.returnValues?.denom ?? "uaxl",
+              autocalculateGasOptions?.gasLimit,
+              autocalculateGasOptions?.gasMultipler
+            ),
+          };
+
+    const sender = await sendOptions.offlineSigner.getAccounts().then(([acc]: any) => acc?.address);
+
+    if (!sender) {
+      return {
+        success: false,
+        info: `Could not find sender from designated offlineSigner`,
+      };
+    }
+
+    const rpcUrl = sendOptions.rpcUrl ?? rpc[0];
+
+    if (!rpcUrl) {
+      return {
+        success: false,
+        info: "Missing RPC URL. Please pass in an rpcUrl parameter in the sendOptions parameter",
+      };
+    }
+
+    const signer = await getCosmosSigner(rpcUrl, sendOptions.offlineSigner);
+
+    const broadcastResult = await signer.signAndBroadcast(
+      sender,
+      [
+        {
+          typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+          value: {
+            sourcePort: "transfer",
+            sourceChannel: channelIdToAxelar,
+            token: coin,
+            sender,
+            receiver: COSMOS_GAS_RECEIVER_OPTIONS[this.environment],
+            timeoutTimestamp: sendOptions.timeoutTimestamp ?? (Date.now() + 90) * 1e9,
+            memo: tx.call.id,
+          },
+        },
+      ],
+      sendOptions.txFee
+    );
+
+    return {
+      success: true,
+      info: "",
+      broadcastResult,
+    };
   }
 
   /**
@@ -759,13 +937,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       chain,
       "gas_service"
     );
-    const nativeGasTokenSymbol = NATIVE_GAS_TOKEN_SYMBOL[chain];
+    const gasToken = nativeGasTokenSymbol[this.environment][chain];
     const receipt = await signer.provider.getTransactionReceipt(txHash);
 
     if (!receipt) return InvalidTransactionError(chain);
 
     const destinationChain = options?.destChain || getDestinationChainFromTxReceipt(receipt);
-    const logIndex = options?.eventIndex || getLogIndexFromTxReceipt(receipt);
+    const logIndex = options?.logIndex ?? getLogIndexFromTxReceipt(receipt);
 
     // Check if given txHash is valid
     if (!destinationChain) return NotGMPTransactionError();
@@ -777,17 +955,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     let gasFeeToAdd = options?.amount;
 
     if (!gasFeeToAdd) {
-      gasFeeToAdd = await this.calculateNativeGasFee(
-        txHash,
-        chain,
-        destinationChain,
-        nativeGasTokenSymbol,
-        {
-          estimatedGas: options?.estimatedGasUsed,
-          gasMultipler: options?.gasMultipler,
-          provider: evmWalletDetails.provider,
-        }
-      ).catch(() => undefined);
+      gasFeeToAdd = await this.calculateNativeGasFee(txHash, chain, destinationChain, gasToken, {
+        estimatedGas: options?.estimatedGasUsed,
+        gasMultipler: options?.gasMultipler,
+        provider: evmWalletDetails.provider,
+      }).catch(() => undefined);
     }
 
     // Check if gas price is queried successfully.
@@ -858,7 +1030,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (!receipt) return InvalidTransactionError(chain);
 
     const destinationChain = options?.destChain || getDestinationChainFromTxReceipt(receipt);
-    const logIndex = options?.eventIndex || getLogIndexFromTxReceipt(receipt);
+    const logIndex = options?.logIndex ?? getLogIndexFromTxReceipt(receipt);
 
     // Check if given txHash is valid
     if (!destinationChain) return NotGMPTransactionError();
@@ -1041,5 +1213,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     };
     const evmClient = new EVMClient(evmClientConfig);
     return evmClient.getSigner();
+  }
+
+  async getStaticInfo(): Promise<Record<string, any>> {
+    if (!this.staticInfo) {
+      this.staticInfo = await fetch(s3[this.environment])
+        .then((res) => res.json())
+        .catch(() => undefined);
+    }
+    return this.staticInfo;
   }
 }

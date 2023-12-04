@@ -1,7 +1,7 @@
-import { EvmChain } from "../../../types";
+import { EvmChain } from "../../../../constants/EvmChain";
 import { Network } from "@ethersproject/networks";
 
-export const rpcMap: Record<EvmChain, string> = {
+export const rpcMap: Partial<Record<EvmChain, string>> = {
   [EvmChain.FANTOM]: "https://rpc.ftm.tools",
   [EvmChain.POLYGON]: "https://polygon-rpc.com",
   [EvmChain.MOONBEAM]: "https://rpc.api.moonbeam.network",
@@ -19,9 +19,11 @@ export const rpcMap: Record<EvmChain, string> = {
   [EvmChain.LINEA]: "https://rpc.linea.build",
   [EvmChain.POLYGON_ZKEVM]: "https://zkevm.polygonscan.com",
   [EvmChain.MANTLE]: "https://rpc.mantle.xyz",
+  [EvmChain.SCROLL]: "https://rpc.scroll.io",
+  [EvmChain.CENTRIFUGE]: "https://fullnode.parachain.centrifuge.io",
 };
 
-export const networkInfo: Record<EvmChain, Network> = {
+export const networkInfo: Partial<Record<EvmChain, Network>> = {
   [EvmChain.FANTOM]: {
     chainId: 250,
     name: EvmChain.FANTOM,
@@ -89,5 +91,13 @@ export const networkInfo: Record<EvmChain, Network> = {
   [EvmChain.MANTLE]: {
     chainId: 5000,
     name: EvmChain.MANTLE,
+  },
+  [EvmChain.SCROLL]: {
+    chainId: 534352,
+    name: EvmChain.SCROLL,
+  },
+  [EvmChain.CENTRIFUGE]: {
+    chainId: 2031,
+    name: EvmChain.CENTRIFUGE,
   },
 };

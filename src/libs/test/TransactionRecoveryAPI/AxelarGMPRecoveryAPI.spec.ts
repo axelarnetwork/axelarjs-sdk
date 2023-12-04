@@ -4,10 +4,10 @@ import {
   ApproveGatewayError,
   AxelarTxResponse,
   Environment,
-  EvmChain,
   EvmWalletDetails,
-  GasToken,
 } from "../../types";
+import { EvmChain } from "../../../constants/EvmChain";
+import { GasToken } from "../../../constants/GasToken";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
 import { Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
 import DistributionExecutable from "../abi/DistributionExecutable.json";
@@ -363,7 +363,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         callTx: {
           chain: "avalanche",
           returnValues: {
-            destinationChain: "osmosis-6",
+            destinationChain: "osmosis-7",
           },
         },
       });
@@ -423,7 +423,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       vitest.spyOn(api, "queryTransactionStatus").mockResolvedValueOnce({
         status: "called",
         callTx: {
-          chain: "osmosis-6",
+          chain: "osmosis-7",
           returnValues: {
             destinationChain: "avalanche",
           },
@@ -600,7 +600,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x", undefined, undefined, false);
+      const res = await api.manualRelayToDestChain("0x", undefined, undefined, undefined, false);
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(
@@ -643,7 +643,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x", undefined, undefined, false);
+      const res = await api.manualRelayToDestChain("0x", undefined, undefined, undefined, false);
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(`findBatchAndApproveGateway(): unable to retrieve command ID`);
@@ -671,7 +671,13 @@ describe("AxelarGMPRecoveryAPI", () => {
           infoLogs: ["log"],
         });
 
-      const response = await api.manualRelayToDestChain("0x", undefined, undefined, false);
+      const response = await api.manualRelayToDestChain(
+        "0x",
+        undefined,
+        undefined,
+        undefined,
+        false
+      );
       expect(mockFindEventAndConfirmIfNeeded).toHaveBeenCalled();
       expect(mockSignAndApproveGateway).toHaveBeenCalled();
       expect(response.success).toBeTruthy();

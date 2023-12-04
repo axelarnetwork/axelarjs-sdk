@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { Contract, Signer } from "ethers";
 import { AxelarGateway } from "../AxelarGateway";
-import { EvmChain } from "../types";
+import { EvmChain } from "../../constants/EvmChain";
 import { GatewayTx } from "../GatewayTx";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
 

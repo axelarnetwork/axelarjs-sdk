@@ -6,7 +6,9 @@ import { BigNumber, BigNumberish, ethers } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { CHAINS } from "../../chains";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
-import { Environment, EvmChain, GasToken } from "../types";
+import { Environment } from "../types";
+import { EvmChain } from "../../constants/EvmChain";
+import { GasToken } from "../../constants/GasToken";
 import { activeChainsStub, getFeeStub } from "./stubs";
 
 describe("AxelarQueryAPI", () => {
@@ -60,7 +62,7 @@ describe("AxelarQueryAPI", () => {
       ];
       expect(
         api.getTransferFee(sourceChainName, destinationChainName, assetDenom, amount)
-      ).rejects.toThrow("Invalid chain identifier for osmosis. Did you mean osmosis-6");
+      ).rejects.toThrow("Invalid chain identifier for osmosis. Did you mean osmosis-7");
     });
   });
 

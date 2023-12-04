@@ -6,19 +6,11 @@ import { AxelarQueryService, setupQueryExtension } from "./types/index";
 
 export type AxelarQueryClientType = QueryClient & AxelarQueryService;
 
-let instance: AxelarQueryClientType;
-
 export class AxelarQueryClient extends QueryClient {
   static async initOrGetAxelarQueryClient(config: AxelarQueryClientConfig) {
-    if (!instance) {
-      const { axelarRpcUrl, environment } = config;
-      const links: EnvironmentConfigs = getConfigs(environment);
-      const rpc: string = axelarRpcUrl || links.axelarRpcUrl;
-      instance = QueryClient.withExtensions(
-        await Tendermint34Client.connect(rpc),
-        setupQueryExtension
-      );
-    }
-    return instance;
+    const { axelarRpcUrl, environment } = config;
+    const links: EnvironmentConfigs = getConfigs(environment);
+    const rpc: string = axelarRpcUrl || links.axelarRpcUrl;
+    return QueryClient.withExtensions(await Tendermint34Client.connect(rpc), setupQueryExtension);
   }
 }

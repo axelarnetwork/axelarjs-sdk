@@ -1,4 +1,4 @@
-import { EvmChain } from "../../../types";
+import { EvmChain } from "../../../../constants/EvmChain";
 import { Network } from "@ethersproject/networks";
 
 export const rpcMap: Record<EvmChain | string, string> = {
@@ -14,11 +14,17 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.CELO]: "https://alfajores-forno.celo-testnet.org",
   [EvmChain.KAVA]: "https://evm.testnet.kava.io",
   [EvmChain.BASE]: "https://goerli.base.org",
-  [EvmChain.FILECOIN]: "https://filecoin-calibration.chainup.net/rpc/v1",
+  "filecoin-2": "https://rpc.ankr.com/filecoin_testnet",
   [EvmChain.OPTIMISM]: "https://goerli.optimism.io",
   [EvmChain.LINEA]: "https://rpc.goerli.linea.build",
   [EvmChain.POLYGON_ZKEVM]: "https://testnet-zkevm.polygonscan.com",
   [EvmChain.MANTLE]: "https://rpc.testnet.mantle.xyz",
+  [EvmChain.SCROLL]: "https://sepolia-rpc.scroll.io",
+  [EvmChain.IMMUTABLE]: "https://rpc-geth.testnet.immutable.com",
+  [EvmChain.SEPOLIA]: "https://1rpc.io/sepolia",
+  [EvmChain.ARBITRUM_SEPOLIA]: "https://sepolia-rollup.arbitrum.io/rpc",
+  [EvmChain.CENTRIFUGE_TESTNET]:
+    "https://node-7118620155331796992.gx.onfinality.io/jsonrpc?apikey=00538f2d-6297-44e3-8812-4b9d579524b2",
 };
 
 export const networkInfo: Record<EvmChain | string, Network> = {
@@ -74,7 +80,7 @@ export const networkInfo: Record<EvmChain | string, Network> = {
     chainId: 84_531,
     name: EvmChain.BASE,
   },
-  [EvmChain.FILECOIN]: {
+  "filecoin-2": {
     chainId: 314159,
     name: EvmChain.FILECOIN,
   },
@@ -89,5 +95,25 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.MANTLE]: {
     chainId: 5001,
     name: EvmChain.MANTLE,
+  },
+  [EvmChain.SCROLL]: {
+    chainId: 534351,
+    name: EvmChain.SCROLL,
+  },
+  [EvmChain.SEPOLIA]: {
+    chainId: 11155111,
+    name: EvmChain.SEPOLIA,
+  },
+  [EvmChain.ARBITRUM_SEPOLIA]: {
+    chainId: 421614,
+    name: EvmChain.ARBITRUM_SEPOLIA,
+  },
+  [EvmChain.CENTRIFUGE_TESTNET]: {
+    chainId: 2090,
+    name: "centrifuge",
+  },
+  [EvmChain.IMMUTABLE]: {
+    chainId: 13473,
+    name: EvmChain.IMMUTABLE,
   },
 };

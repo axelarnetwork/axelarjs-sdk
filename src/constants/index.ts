@@ -67,12 +67,12 @@ configsMap["devnet"] = devnetConfigs;
 configsMap["testnet"] = testnetConfigs;
 configsMap["mainnet"] = mainnetConfigs;
 
-let configToUse: EnvironmentConfigs;
-
 export const getConfigs = (environment: string): EnvironmentConfigs => {
-  if (!configToUse) {
-    if (!configsMap[environment]) throw new Error("config environment does not exist");
-    configToUse = configsMap[environment];
-  }
+  const configToUse = configsMap[environment];
+  if (!configToUse)
+    throw new Error(`config environment does not exist for environment: ${environment}`);
   return configToUse;
 };
+
+export * from "./EvmChain";
+export * from "./GasToken";
