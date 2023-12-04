@@ -21,4 +21,5 @@ export enum EvmChain {
   SEPOLIA = "ethereum-sepolia",
   IMMUTABLE = "immutable",
   CENTRIFUGE_TESTNET = "centrifuge-2",
+  CENTRIFUGE = "centrifuge",
 }

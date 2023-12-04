@@ -20,6 +20,7 @@ export const rpcMap: Partial<Record<EvmChain, string>> = {
   [EvmChain.POLYGON_ZKEVM]: "https://zkevm.polygonscan.com",
   [EvmChain.MANTLE]: "https://rpc.mantle.xyz",
   [EvmChain.SCROLL]: "https://rpc.scroll.io",
+  [EvmChain.CENTRIFUGE]: "https://fullnode.parachain.centrifuge.io",
 };
 
 export const networkInfo: Partial<Record<EvmChain, Network>> = {
@@ -94,5 +95,9 @@ export const networkInfo: Partial<Record<EvmChain, Network>> = {
   [EvmChain.SCROLL]: {
     chainId: 534352,
     name: EvmChain.SCROLL,
+  },
+  [EvmChain.CENTRIFUGE]: {
+    chainId: 2031,
+    name: EvmChain.CENTRIFUGE,
   },
 };

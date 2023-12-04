@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.13.7] - 2023-NOVEMBER-X
+## [0.13.7] - 2023-DECEMBER-4
 
 - Fix BigNumberUnits utility to adjust for another `fractional component exceeds decimals` edge case
 - Add AddGasToCosmosChain method to AxelarGMPRecoveryAPI
@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Refactor "EvmChain" enum
 - Update `manualRelayToDestChain` method, adding an additional parameter for `txEventIndex` that is used to confirm events on the network
 - Update `manualRelayToDestChain` method, adding an additional (optional) parameter for `messageId` that is used to recover transactions for GMP transactions from Cosmos source chains
-- Add `Scroll` to testnet/mainnet configs, `Celestia` to testnet/mainnet, `Haqq` to mainnet, `Provenance`, `Centrifuge`, `Sepolia`, `Arbitrum-Sepolia`, `Immutable` to testnet, `Teritori` to mainnet
+- Add `Scroll` to testnet/mainnet configs, `Celestia`, `Centrifuge` to testnet/mainnet, `Haqq` to mainnet, `Provenance`, `Sepolia`, `Arbitrum-Sepolia`, `Immutable` to testnet, `Teritori` to mainnet
 - Updated Osmosis testnet to `osmosis-7` that points to `osmo-test-5`
 
 ## [0.13.6] - 2023-SEPTEMBER-1

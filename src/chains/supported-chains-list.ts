@@ -62,6 +62,7 @@ export const CHAINS = {
     CARBON: "carbon",
     CELESTIA: "celestia",
     CELO: "celo",
+    CENTRIFUGE: "centrifuge",
     COMDEX: "comdex",
     COSMOSHUB: "cosmoshub",
     CRESCENT: "crescent",
