@@ -29,7 +29,7 @@ export enum GasToken {
   CENTRIFUGE = "CFG",
 }
 
-export const nativeGasTokenSymbol: Partial<Record<string, Record<EvmChain | string, GasToken>>> = {
+export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasToken>> = {
   testnet: {
     [EvmChain.AVALANCHE]: GasToken.AVAX,
     [EvmChain.MOONBEAM]: GasToken.GLMR,
