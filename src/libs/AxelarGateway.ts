@@ -30,6 +30,7 @@ export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string
     [EvmChain.MANTLE]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.SCROLL]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.CENTRIFUGE]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
+    [EvmChain.IMMUTABLE]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
   },
   [Environment.TESTNET]: {
     [EvmChain.ETHEREUM]: "0xe432150cce91c13a887f7D836923d5597adD8E31",

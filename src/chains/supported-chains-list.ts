@@ -73,6 +73,7 @@ export const CHAINS = {
     FETCH: "fetch",
     FILECOIN: "filecoin",
     HAQQ: "haqq",
+    IMMUTABLE: "immutable",
     INJECTIVE: "injective",
     IXO: "ixo",
     JUNO: "juno",
