@@ -20,7 +20,7 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.POLYGON_ZKEVM]: "https://testnet-zkevm.polygonscan.com",
   [EvmChain.MANTLE]: "https://rpc.testnet.mantle.xyz",
   [EvmChain.SCROLL]: "https://sepolia-rpc.scroll.io",
-  [EvmChain.IMMUTABLE]: "https://rpc-geth.testnet.immutable.com",
+  [EvmChain.IMMUTABLE]: "https://rpc.testnet.immutable.com",
   [EvmChain.SEPOLIA]: "https://1rpc.io/sepolia",
   [EvmChain.ARBITRUM_SEPOLIA]: "https://sepolia-rollup.arbitrum.io/rpc",
   [EvmChain.CENTRIFUGE_TESTNET]:
