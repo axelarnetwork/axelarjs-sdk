@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.13.8] - 2023-DECEMBER-18
+
+- Add `Immutable` to mainnet configs; update `Immutable` testnet RPC
+
 ## [0.13.7] - 2023-DECEMBER-4
 
 - Fix BigNumberUnits utility to adjust for another `fractional component exceeds decimals` edge case
