@@ -3,10 +3,10 @@ import { Network } from "@ethersproject/networks";
 
 export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.FANTOM]: "https://rpc.testnet.fantom.network",
-  [EvmChain.POLYGON]: "https://nd-244-242-844.p2pify.com/a336ed852bfcb6dd53869c8626be64fd",
+  [EvmChain.POLYGON]: "https://rpc-mumbai.maticvigil.com",
   [EvmChain.MOONBEAM]: "https://rpc.api.moonbase.moonbeam.network",
   [EvmChain.AVALANCHE]: "https://api.avax-test.network/ext/bc/C/rpc",
-  "ethereum-2": "https://goerli.infura.io/v3/510b6d5b3c56497b8070626a54f565a9",
+  "ethereum-2": "https://eth-goerli.api.onfinality.io/public",
   [EvmChain.AURORA]: "https://testnet.aurora.dev",
   [EvmChain.BINANCE]: "https://data-seed-prebsc-1-s1.binance.org:8545",
   [EvmChain.BNBCHAIN]: "https://data-seed-prebsc-1-s1.binance.org:8545",
