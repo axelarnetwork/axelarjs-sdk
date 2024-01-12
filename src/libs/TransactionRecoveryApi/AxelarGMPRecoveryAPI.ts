@@ -172,25 +172,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
   }
 
-  private async saveGMP(
-    sourceTransactionHash: string,
-    relayerAddress: string,
-    sourceTransactionIndex?: number,
-    sourceTransactionLogIndex?: number,
-    transactionHash?: string,
-    error?: any
-  ) {
-    return await this.execPost(super.getAxelarGMPApiUrl, "", {
-      method: "saveGMP",
-      sourceTransactionHash,
-      transactionHash,
-      sourceTransactionIndex,
-      sourceTransactionLogIndex,
-      relayerAddress,
-      error,
-    });
-  }
-
   public getCidFromSrcTxHash(destChainId: string, txHash: string, eventIndex: number) {
     return getCommandId(destChainId, txHash, eventIndex, this.environment, rpcInfo);
   }
@@ -1146,28 +1127,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           return ContractCallError(e);
         }
       });
-
-    // Submit execute data to axelarscan if the contract execution is success.
-    const signerAddress = await signer.getAddress();
-    const executeTxHash = txResult.transaction?.transactionHash;
-    if (executeTxHash) {
-      await this.saveGMP(
-        srcTxHash,
-        signerAddress,
-        srcTxInfo.transactionIndex,
-        srcTxInfo.logIndex,
-        executeTxHash
-      ).catch(() => undefined);
-    } else {
-      await this.saveGMP(
-        srcTxHash,
-        signerAddress,
-        srcTxInfo.transactionIndex,
-        srcTxInfo.logIndex,
-        "",
-        txResult.error
-      ).catch(() => undefined);
-    }
 
     return txResult;
   }
