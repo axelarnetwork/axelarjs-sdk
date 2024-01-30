@@ -256,8 +256,8 @@ export class AxelarQueryAPI {
     sourceChainId: EvmChain | string,
     destinationChainId: EvmChain | string,
     sourceChainTokenSymbol: GasToken | string,
-    gasLimit: BigNumberish = DEFAULT_ESTIMATED_GAS,
-    gasMultiplier = 1.1,
+    gasLimit: BigNumberish,
+    gasMultiplier = 1.0,
     minGasPrice = "0",
     gmpParams?: GMPParams
   ): Promise<string | AxelarQueryAPIFeeResponse> {
@@ -279,6 +279,10 @@ export class AxelarQueryAPI {
 
     if (!success || !baseFee || !sourceToken) {
       throw new Error("Failed to estimate gas fee");
+    }
+
+    if(gasLimit < 21000) {
+      throw new Error("Gas limit is too low.");
     }
 
     const destGasFeeWei = BigNumberUtils.multiplyToGetWei(
