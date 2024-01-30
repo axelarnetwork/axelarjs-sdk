@@ -6,7 +6,6 @@ import { RestService } from "../services";
 import { AxelarQueryAPIConfig, BaseFeeResponse, Environment } from "./types";
 import { EvmChain } from "../constants/EvmChain";
 import { GasToken } from "../constants/GasToken";
-import { DEFAULT_ESTIMATED_GAS } from "../constants";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import fetch from "cross-fetch";
 import {
@@ -281,8 +280,8 @@ export class AxelarQueryAPI {
       throw new Error("Failed to estimate gas fee");
     }
 
-    if(gasLimit < 21000) {
-      throw new Error("Gas limit is too low.");
+    if (BigNumber.from(gasLimit).lt(21000)) {
+      throw new Error("Gas limit is too low");
     }
 
     const destGasFeeWei = BigNumberUtils.multiplyToGetWei(
