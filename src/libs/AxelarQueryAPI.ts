@@ -280,8 +280,8 @@ export class AxelarQueryAPI {
       throw new Error("Failed to estimate gas fee");
     }
 
-    if (BigNumber.from(gasLimit).lt(21000)) {
-      throw new Error("Gas limit is too low");
+    if (!BigNumber.from(gasLimit).gt(0)) {
+      throw new Error("Gas limit must be provided");
     }
 
     const destGasFeeWei = BigNumberUtils.multiplyToGetWei(
