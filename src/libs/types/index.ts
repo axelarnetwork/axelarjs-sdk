@@ -71,6 +71,7 @@ export interface BaseFeeResponse {
   error?: string;
   baseFee: string;
   expressFee: string;
+  executeGasMultiplier: number;
   sourceToken: {
     gas_price: string;
     decimals: number;

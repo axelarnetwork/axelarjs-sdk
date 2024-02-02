@@ -218,16 +218,19 @@ export class AxelarQueryAPI {
         destination_native_token,
         express_fee_string,
         express_supported,
+        execute_gas_multiplier,
       } = response.result;
       const { decimals: sourceTokenDecimals } = source_token;
       const baseFee = parseUnits(source_base_fee_string, sourceTokenDecimals).toString();
       const expressFee = express_fee_string
         ? parseUnits(express_fee_string, sourceTokenDecimals).toString()
         : "0";
+
       return {
         baseFee,
         expressFee,
         sourceToken: source_token,
+        executeGasMultiplier: execute_gas_multiplier,
         destToken: {
           gas_price: destination_native_token.gas_price,
           gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
@@ -256,7 +259,7 @@ export class AxelarQueryAPI {
     destinationChainId: EvmChain | string,
     sourceChainTokenSymbol: GasToken | string,
     gasLimit: BigNumberish,
-    gasMultiplier = 1.0,
+    gasMultiplier: number | "auto" = "auto",
     minGasPrice = "0",
     gmpParams?: GMPParams
   ): Promise<string | AxelarQueryAPIFeeResponse> {
@@ -273,8 +276,16 @@ export class AxelarQueryAPI {
       gmpParams?.transferAmountInUnits
     );
 
-    const { baseFee, expressFee, sourceToken, destToken, apiResponse, success, expressSupported } =
-      response;
+    const {
+      baseFee,
+      expressFee,
+      sourceToken,
+      executeGasMultiplier,
+      destToken,
+      apiResponse,
+      success,
+      expressSupported,
+    } = response;
 
     if (!success || !baseFee || !sourceToken) {
       throw new Error("Failed to estimate gas fee");
@@ -300,8 +311,11 @@ export class AxelarQueryAPI {
     const executionFee = destGasFeeWei.gt(minDestGasFeeWei)
       ? srcGasFeeWei
       : srcGasFeeWei.mul(minDestGasFeeWei).div(destGasFeeWei);
+
+    const _gasMultiplier = gasMultiplier === "auto" ? executeGasMultiplier : gasMultiplier;
+
     const executionFeeWithMultiplier =
-      gasMultiplier > 1 ? executionFee.mul(gasMultiplier * 10000).div(10000) : executionFee;
+      _gasMultiplier > 1 ? executionFee.mul(_gasMultiplier * 10000).div(10000) : executionFee;
 
     return gmpParams?.showDetailedFees
       ? {
@@ -310,7 +324,7 @@ export class AxelarQueryAPI {
           executionFee: executionFee.toString(),
           executionFeeWithMultiplier: executionFeeWithMultiplier.toString(),
           gasLimit,
-          gasMultiplier,
+          gasMultiplier: _gasMultiplier,
           minGasPrice: minGasPrice === "0" ? "NA" : minGasPrice,
           apiResponse,
           isExpressSupported: expressSupported,
