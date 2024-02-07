@@ -6,7 +6,6 @@ import { RestService } from "../services";
 import { AxelarQueryAPIConfig, BaseFeeResponse, Environment } from "./types";
 import { EvmChain } from "../constants/EvmChain";
 import { GasToken } from "../constants/GasToken";
-import { DEFAULT_ESTIMATED_GAS } from "../constants";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import fetch from "cross-fetch";
 import {
@@ -219,16 +218,19 @@ export class AxelarQueryAPI {
         destination_native_token,
         express_fee_string,
         express_supported,
+        execute_gas_multiplier,
       } = response.result;
       const { decimals: sourceTokenDecimals } = source_token;
       const baseFee = parseUnits(source_base_fee_string, sourceTokenDecimals).toString();
       const expressFee = express_fee_string
         ? parseUnits(express_fee_string, sourceTokenDecimals).toString()
         : "0";
+
       return {
         baseFee,
         expressFee,
         sourceToken: source_token,
+        executeGasMultiplier: execute_gas_multiplier,
         destToken: {
           gas_price: destination_native_token.gas_price,
           gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
@@ -256,8 +258,8 @@ export class AxelarQueryAPI {
     sourceChainId: EvmChain | string,
     destinationChainId: EvmChain | string,
     sourceChainTokenSymbol: GasToken | string,
-    gasLimit: BigNumberish = DEFAULT_ESTIMATED_GAS,
-    gasMultiplier = 1.1,
+    gasLimit: BigNumberish,
+    gasMultiplier: number | "auto" = "auto",
     minGasPrice = "0",
     gmpParams?: GMPParams
   ): Promise<string | AxelarQueryAPIFeeResponse> {
@@ -274,11 +276,23 @@ export class AxelarQueryAPI {
       gmpParams?.transferAmountInUnits
     );
 
-    const { baseFee, expressFee, sourceToken, destToken, apiResponse, success, expressSupported } =
-      response;
+    const {
+      baseFee,
+      expressFee,
+      sourceToken,
+      executeGasMultiplier,
+      destToken,
+      apiResponse,
+      success,
+      expressSupported,
+    } = response;
 
     if (!success || !baseFee || !sourceToken) {
       throw new Error("Failed to estimate gas fee");
+    }
+
+    if (!BigNumber.from(gasLimit).gt(0)) {
+      throw new Error("Gas limit must be provided");
     }
 
     const destGasFeeWei = BigNumberUtils.multiplyToGetWei(
@@ -297,8 +311,13 @@ export class AxelarQueryAPI {
     const executionFee = destGasFeeWei.gt(minDestGasFeeWei)
       ? srcGasFeeWei
       : srcGasFeeWei.mul(minDestGasFeeWei).div(destGasFeeWei);
+
+    const actualGasMultiplier = gasMultiplier === "auto" ? executeGasMultiplier : gasMultiplier;
+
     const executionFeeWithMultiplier =
-      gasMultiplier > 1 ? executionFee.mul(gasMultiplier * 10000).div(10000) : executionFee;
+      actualGasMultiplier > 1
+        ? executionFee.mul(actualGasMultiplier * 10000).div(10000)
+        : executionFee;
 
     return gmpParams?.showDetailedFees
       ? {
@@ -307,7 +326,7 @@ export class AxelarQueryAPI {
           executionFee: executionFee.toString(),
           executionFeeWithMultiplier: executionFeeWithMultiplier.toString(),
           gasLimit,
-          gasMultiplier,
+          gasMultiplier: actualGasMultiplier,
           minGasPrice: minGasPrice === "0" ? "NA" : minGasPrice,
           apiResponse,
           isExpressSupported: expressSupported,
