@@ -312,10 +312,12 @@ export class AxelarQueryAPI {
       ? srcGasFeeWei
       : srcGasFeeWei.mul(minDestGasFeeWei).div(destGasFeeWei);
 
-    const _gasMultiplier = gasMultiplier === "auto" ? executeGasMultiplier : gasMultiplier;
+    const actualGasMultiplier = gasMultiplier === "auto" ? executeGasMultiplier : gasMultiplier;
 
     const executionFeeWithMultiplier =
-      _gasMultiplier > 1 ? executionFee.mul(_gasMultiplier * 10000).div(10000) : executionFee;
+      actualGasMultiplier > 1
+        ? executionFee.mul(actualGasMultiplier * 10000).div(10000)
+        : executionFee;
 
     return gmpParams?.showDetailedFees
       ? {
@@ -324,7 +326,7 @@ export class AxelarQueryAPI {
           executionFee: executionFee.toString(),
           executionFeeWithMultiplier: executionFeeWithMultiplier.toString(),
           gasLimit,
-          gasMultiplier: _gasMultiplier,
+          gasMultiplier: actualGasMultiplier,
           minGasPrice: minGasPrice === "0" ? "NA" : minGasPrice,
           apiResponse,
           isExpressSupported: expressSupported,
