@@ -27,6 +27,7 @@ export enum GasToken {
   SEPOLIA = "ETH",
   ARBITRUM_SEPOLIA = "ETH",
   CENTRIFUGE = "CFG",
+  FRAXTAL = "frxETH",
 }
 
 export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasToken>> = {
@@ -53,6 +54,7 @@ export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasT
     [EvmChain.IMMUTABLE]: GasToken.IMMUTABLE,
     [EvmChain.ARBITRUM_SEPOLIA]: GasToken.ARBITRUM_SEPOLIA,
     [EvmChain.CENTRIFUGE_TESTNET]: GasToken.CENTRIFUGE,
+    [EvmChain.FRAXTAL]: GasToken.FRAXTAL,
   },
   mainnet: {
     [EvmChain.AVALANCHE]: GasToken.AVAX,

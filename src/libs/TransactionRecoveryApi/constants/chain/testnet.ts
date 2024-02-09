@@ -25,6 +25,7 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.ARBITRUM_SEPOLIA]: "https://sepolia-rollup.arbitrum.io/rpc",
   [EvmChain.CENTRIFUGE_TESTNET]:
     "https://node-7118620155331796992.gx.onfinality.io/jsonrpc?apikey=00538f2d-6297-44e3-8812-4b9d579524b2",
+  [EvmChain.FRAXTAL]: "https://rpc.testnet.frax.com",
 };
 
 export const networkInfo: Record<EvmChain | string, Network> = {
@@ -115,5 +116,9 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.IMMUTABLE]: {
     chainId: 13473,
     name: EvmChain.IMMUTABLE,
+  },
+  [EvmChain.FRAXTAL]: {
+    chainId: 2522,
+    name: EvmChain.FRAXTAL,
   },
 };

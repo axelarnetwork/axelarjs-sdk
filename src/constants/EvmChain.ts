@@ -22,4 +22,5 @@ export enum EvmChain {
   IMMUTABLE = "immutable",
   CENTRIFUGE_TESTNET = "centrifuge-2",
   CENTRIFUGE = "centrifuge",
+  FRAXTAL = "fraxtal",
 }

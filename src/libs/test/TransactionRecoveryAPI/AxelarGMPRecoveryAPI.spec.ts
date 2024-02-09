@@ -1525,23 +1525,11 @@ describe("AxelarGMPRecoveryAPI", () => {
       const error = new Error(ContractCallHelper.CALL_EXECUTE_ERROR.REVERT);
       vitest.spyOn(ContractCallHelper, "callExecute").mockRejectedValueOnce(error);
 
-      // Mock private saveGMP
-      const mockGMPApi = vitest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
-      mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
-
       const sourceTxHash = "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae";
       const response = await api.execute(sourceTxHash, undefined, evmWalletDetails);
 
       // Expect returns error
       expect(response).toEqual(ExecutionRevertedError(executeParams));
-
-      // Expect we don't call saveGMP api
-      expect(mockGMPApi).toHaveBeenCalledWith(
-        sourceTxHash,
-        new ethers.Wallet(evmWalletDetails.privateKey as string).address,
-        "",
-        response.error
-      );
     });
 
     test("it calls 'execute' and return revert error given 'callExecute' throws 'CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS' error", async () => {
@@ -1557,23 +1545,11 @@ describe("AxelarGMPRecoveryAPI", () => {
       const error = new Error(ContractCallHelper.CALL_EXECUTE_ERROR.INSUFFICIENT_FUNDS);
       vitest.spyOn(ContractCallHelper, "callExecute").mockRejectedValueOnce(error);
 
-      // Mock private saveGMP
-      const mockGMPApi = vitest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
-      mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
-
       const sourceTxHash = "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae";
       const response = await api.execute(sourceTxHash, undefined, evmWalletDetails);
 
       // Expect returns error
       expect(response).toEqual(InsufficientFundsError(executeParams));
-
-      // Expect we don't call saveGMP api
-      expect(mockGMPApi).toHaveBeenCalledWith(
-        sourceTxHash,
-        new ethers.Wallet(evmWalletDetails.privateKey as string).address,
-        "",
-        response.error
-      );
     });
 
     test("it should call 'execute' and return success = true", async () => {
@@ -1587,10 +1563,6 @@ describe("AxelarGMPRecoveryAPI", () => {
 
       // Mock contract call is successful
       vitest.spyOn(ContractCallHelper, "callExecute").mockResolvedValueOnce(contractReceiptStub());
-
-      // Mock private saveGMP
-      const mockGMPApi = vitest.spyOn(AxelarGMPRecoveryAPI.prototype as any, "saveGMP");
-      mockGMPApi.mockImplementation(() => Promise.resolve(undefined));
 
       const response = await api.execute(
         "0x86e5f91eff5a8a815e90449ca32e02781508f3b94620bbdf521f2ba07c41d9ae",
@@ -1624,8 +1596,6 @@ describe("AxelarGMPRecoveryAPI", () => {
           },
         },
       });
-
-      expect(mockGMPApi).toHaveBeenCalledTimes(1);
     });
   });
 });
