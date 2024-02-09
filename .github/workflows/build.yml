@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  publish-npm:
-    name: "Publish to NPM"
+  build:
+    name: "Build Package"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
