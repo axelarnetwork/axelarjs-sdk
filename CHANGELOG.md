@@ -16,7 +16,7 @@ Breaking Changes
 
 **AxelarGMPRecoveryAPI**
 
-- `addNativeGas` & `addGasToCosmosChain`: `gasLimit` is now required, removing the default `700,000`.
+- addNativeGas & addGasToCosmosChain: `gasLimit` is now required, removing the default `700,000`.
 
 ## [0.13.10] - 2024-FEBRUARY-9
 
