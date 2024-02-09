@@ -921,6 +921,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * If the transaction details is not valid, it will return an error with reason.
    * @param chain - source chain
    * @param txHash - transaction hash
+   * @param estimatedGasUsed - estimated gas used
    * @param options - options
    * @returns
    */
