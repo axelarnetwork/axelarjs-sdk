@@ -750,6 +750,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         EvmChain.AVALANCHE,
         EvmChain.MOONBEAM,
         GasToken.AVAX,
+        700000,
         { provider }
       );
 
@@ -785,6 +786,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         EvmChain.AVALANCHE,
         EvmChain.MOONBEAM,
         GasToken.AVAX,
+        700000,
         { provider }
       );
 
@@ -873,6 +875,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const response = await api.addNativeGas(
         EvmChain.AVALANCHE,
         tx.transactionHash,
+        700000,
         addNativeGasOptions
       );
 
@@ -893,6 +896,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const response = await api.addNativeGas(
         chain,
         "0xcd1edb36c37caadf852c4614e3bed1082528d7c6a8d2de3fff3c596f8e675b90", // random tx hash
+        700000,
         addNativeGasOptions
       );
 
@@ -910,6 +914,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const response = await api.addNativeGas(
         chain,
         notGmpTx.transactionHash, // random tx hash
+        700000,
         addNativeGasOptions
       );
 
@@ -937,7 +942,12 @@ describe("AxelarGMPRecoveryAPI", () => {
       vitest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValueOnce(gasPaid.toString());
 
       // Call addNativeGas function
-      const response = await api.addNativeGas(chain, tx.transactionHash, addNativeGasOptions);
+      const response = await api.addNativeGas(
+        chain,
+        tx.transactionHash,
+        700000,
+        addNativeGasOptions
+      );
 
       expect(response).toEqual(AlreadyPaidGasFeeError());
     });
@@ -979,6 +989,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const response = await api.addNativeGas(
         chain, // Passing wrong value here will cause the gas price api to return error
         tx.transactionHash,
+        700000,
         addNativeGasOptions
       );
 
@@ -1019,6 +1030,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const response = await api.addNativeGas(
         chain,
         tx.transactionHash,
+        700000,
         overpaidAddNativeGasOptions
       );
 
@@ -1068,7 +1080,12 @@ describe("AxelarGMPRecoveryAPI", () => {
       vitest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValueOnce(mockedGasFee);
 
       // Call addNativeGas function
-      const response = await api.addNativeGas(chain, tx.transactionHash, addNativeGasOptions);
+      const response = await api.addNativeGas(
+        chain,
+        tx.transactionHash,
+        700000,
+        addNativeGasOptions
+      );
 
       // Validate response structure
       expect(response.success).toBe(true);
@@ -1189,6 +1206,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         EvmChain.AVALANCHE,
         tx.transactionHash,
         usdc.address,
+        700000,
         addGasOptions
       );
 
@@ -1201,6 +1219,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         chain,
         "0xcd1edb36c37caadf852c4614e3bed1082528d7c6a8d2de3fff3c596f8e675b90", // random tx hash
         usdc.address,
+        700000,
         addGasOptions
       );
 
@@ -1219,6 +1238,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         chain,
         notGmpTx.transactionHash, // random tx hash
         usdc.address,
+        700000,
         addGasOptions
       );
 
@@ -1252,7 +1272,13 @@ describe("AxelarGMPRecoveryAPI", () => {
         .mockResolvedValue(ethers.utils.parseUnits("0.1", decimals).toString());
 
       // Call addGas function
-      const response = await api.addGas(chain, tx.transactionHash, usdc.address, addGasOptions);
+      const response = await api.addGas(
+        chain,
+        tx.transactionHash,
+        usdc.address,
+        700000,
+        addGasOptions
+      );
 
       expect(response).toEqual(AlreadyPaidGasFeeError());
     });
@@ -1284,6 +1310,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         chain, // Passing wrong value here will cause the gas price api to return error
         tx.transactionHash,
         usdc.address,
+        700000,
         addGasOptions
       );
 
@@ -1316,6 +1343,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         chain,
         tx.transactionHash,
         ethers.constants.AddressZero,
+        700000,
         addGasOptions
       );
 
@@ -1352,6 +1380,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         chain,
         tx.transactionHash,
         testToken.address,
+        700000,
         addGasOptions
       );
 
@@ -1388,6 +1417,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         chain,
         tx.transactionHash,
         usdc.address,
+        700000,
         overridedAddGasOptions
       );
 
@@ -1431,7 +1461,13 @@ describe("AxelarGMPRecoveryAPI", () => {
       vitest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValue(mockedGasFee);
 
       // Call addGas function
-      const response = await api.addGas(chain, tx.transactionHash, usdc.address, addGasOptions);
+      const response = await api.addGas(
+        chain,
+        tx.transactionHash,
+        usdc.address,
+        700000,
+        addGasOptions
+      );
 
       // Validate response structure
       expect(response.success).toBe(true);

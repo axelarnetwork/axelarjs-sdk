@@ -116,14 +116,15 @@ export type SendOptions = {
 };
 
 export type AutocalculateGasOptions = {
-  gasLimit?: bigint;
   gasMultipler?: number;
 };
+
 export type AddGasParams = {
   txHash: string;
   chain: string;
   token: Coin | "autocalculate";
   sendOptions: SendOptions;
+  gasLimit: number;
   autocalculateGasOptions?: AutocalculateGasOptions;
 };
 
@@ -742,6 +743,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     sourceChain: string,
     destinationChain: string,
     gasTokenSymbol: GasToken | string,
+    estimatedGasUsed: number,
     options: QueryGasFeeOptions
   ): Promise<string> {
     await throwIfInvalidChainIds([sourceChain, destinationChain], this.environment);
@@ -752,7 +754,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const hasTxBeenConfirmed = (await this.isConfirmed(txHash)) || false;
     options.shouldSubtractBaseFee = hasTxBeenConfirmed;
 
-    return this.subtractGasFee(sourceChain, destinationChain, gasTokenSymbol, paidGasFee, options);
+    return this.subtractGasFee(
+      sourceChain,
+      destinationChain,
+      gasTokenSymbol,
+      paidGasFee,
+      estimatedGasUsed,
+      options
+    );
   }
 
   /**
@@ -769,6 +778,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     sourceChain: EvmChain,
     destinationChain: EvmChain,
     gasTokenSymbol: GasToken | string,
+    estimatedGasUsed: number,
     options: QueryGasFeeOptions
   ): Promise<string> {
     await throwIfInvalidChainIds([sourceChain, destinationChain], this.environment);
@@ -777,7 +787,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const receipt = await provider.getTransactionReceipt(txHash);
     const paidGasFee = getGasAmountFromTxReceipt(receipt) || "0";
 
-    return this.subtractGasFee(sourceChain, destinationChain, gasTokenSymbol, paidGasFee, options);
+    return this.subtractGasFee(
+      sourceChain,
+      destinationChain,
+      gasTokenSymbol,
+      paidGasFee,
+      estimatedGasUsed,
+      options
+    );
   }
 
   public async getEventIndex(chain: string, txHash: string) {
@@ -796,6 +813,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async addGasToCosmosChain({
+    gasLimit,
     autocalculateGasOptions,
     sendOptions,
     ...params
@@ -847,7 +865,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
               tx.call.chain,
               tx.call.returnValues.destinationChain,
               tx.gas_paid?.returnValues?.denom ?? "uaxl",
-              autocalculateGasOptions?.gasLimit,
+              gasLimit,
               autocalculateGasOptions?.gasMultipler
             ),
           };
@@ -909,6 +927,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async addNativeGas(
     chain: EvmChain,
     txHash: string,
+    estimatedGasUsed: number,
     options?: AddGasOptions
   ): Promise<TxResult> {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
@@ -936,11 +955,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     let gasFeeToAdd = options?.amount;
 
     if (!gasFeeToAdd) {
-      gasFeeToAdd = await this.calculateNativeGasFee(txHash, chain, destinationChain, gasToken, {
-        estimatedGas: options?.estimatedGasUsed,
-        gasMultipler: options?.gasMultipler,
-        provider: evmWalletDetails.provider,
-      }).catch(() => undefined);
+      gasFeeToAdd = await this.calculateNativeGasFee(
+        txHash,
+        chain,
+        destinationChain,
+        gasToken,
+        estimatedGasUsed,
+        {
+          gasMultipler: options?.gasMultipler,
+          provider: evmWalletDetails.provider,
+        }
+      ).catch(() => undefined);
     }
 
     // Check if gas price is queried successfully.
@@ -983,6 +1008,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     chain: EvmChain,
     txHash: string,
     gasTokenAddress: string,
+    estimatedGasUsed: number,
     options?: AddGasOptions
   ): Promise<TxResult> {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
@@ -1028,8 +1054,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         chain,
         destinationChain as EvmChain,
         gasTokenSymbol,
+        estimatedGasUsed,
         {
-          estimatedGas: options?.estimatedGasUsed,
           provider: evmWalletDetails.provider,
         }
       ).catch(() => undefined);
@@ -1136,13 +1162,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     destinationChain: string,
     gasTokenSymbol: string,
     paidGasFee: string,
+    estimatedGas: number,
     options: QueryGasFeeOptions
   ) {
     const totalGasFee = await this.axelarQueryApi.estimateGasFee(
       sourceChain,
       destinationChain,
       gasTokenSymbol,
-      options.estimatedGas,
+      estimatedGas,
       options.gasMultipler,
       undefined,
       undefined

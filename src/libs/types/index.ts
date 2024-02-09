@@ -121,7 +121,6 @@ export type AxelarTransferAPIConfig = {
 export interface AddGasOptions {
   amount?: string;
   refundAddress?: string;
-  estimatedGasUsed?: number;
   gasMultipler?: number;
   logIndex?: number;
   destChain?: string;
@@ -156,7 +155,6 @@ export interface TxResult {
 
 export interface QueryGasFeeOptions {
   provider?: ethers.providers.JsonRpcProvider;
-  estimatedGas?: number;
   gasMultipler?: number;
   shouldSubtractBaseFee?: boolean;
 }
