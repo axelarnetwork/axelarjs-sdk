@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.13.10] - 2024-JANUARY-12
 
 - Remove unused internal APIs
+- Add Fraxtal testnet
 
 ## [0.13.8] - 2023-DECEMBER-18
 

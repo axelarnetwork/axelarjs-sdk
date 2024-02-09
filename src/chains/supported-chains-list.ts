@@ -20,6 +20,7 @@ export const CHAINS = {
     FANTOM: "Fantom",
     FETCH: "fetch",
     FILECOIN: "filecoin-2",
+    FRAXTAL: "fraxtal",
     HAQQ: "haqq",
     HERO: "hero",
     HIGHRISE: "highrise",
