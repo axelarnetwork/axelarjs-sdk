@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.14.0] - 2024-FEBRUARY-9
+
+Breaking Changes
+
+**AxelarQueryAPI**: estimateGasFee
+
+- gasLimit: Changed from optional (default 700,000) to required.
+- gasMultiplier: Default changed from 1.1 to auto, using data from [getFees](https://docs.axelarscan.io/interchain/getFees).
+
+**AxelarGMPRecoveryAPI**
+
+- addNativeGas & addGasToCosmosChain: `gasLimit` is now required, removing the default `700,000`.
+
 ## [0.13.10] - 2024-FEBRUARY-9
 
 - Remove unused internal APIs
