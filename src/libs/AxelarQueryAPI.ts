@@ -218,8 +218,8 @@ export class AxelarQueryAPI {
         destination_native_token,
         express_fee_string,
         express_supported,
-        execute_gas_multiplier,
       } = response.result;
+      const execute_gas_multiplier = response.result.execute_gas_multiplier as number;
       const { decimals: sourceTokenDecimals } = source_token;
       const baseFee = parseUnits(source_base_fee_string, sourceTokenDecimals).toString();
       const expressFee = express_fee_string
@@ -230,7 +230,7 @@ export class AxelarQueryAPI {
         baseFee,
         expressFee,
         sourceToken: source_token,
-        executeGasMultiplier: execute_gas_multiplier,
+        executeGasMultiplier: parseFloat(execute_gas_multiplier.toFixed(2)),
         destToken: {
           gas_price: destination_native_token.gas_price,
           gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
