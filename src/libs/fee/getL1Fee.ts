@@ -69,35 +69,15 @@ async function getOptimismL1Fee(multicall: Multicall, estimateL1FeeParams: Estim
   const dynamicOverhead = BigNumber.from(_dynamicOverhead || 684000);
   const fixedOverhead = BigNumber.from(_fixedOverhead || 2100);
 
+  console.log("gasUsed", gasUsed.toString());
+  console.log("dynamicOverhead", dynamicOverhead.toString());
+  console.log("fixedOverhead", fixedOverhead.toString());
+
   const totalGasUsed = gasUsed.add(fixedOverhead).mul(dynamicOverhead).div(1_000_000);
   const gasPrice = BigNumber.from(l1GasPrice.value);
 
   return totalGasUsed.mul(gasPrice);
 }
-
-// TODO: Not used for now because the gas estimation is already included the L1 fee by default.
-// async function getArbitrumL1Fee(
-//   publicClient: PublicClient,
-//   destinationContractAddress: string,
-//   executeData: string
-// ) {
-//   // Arbitrum NodeInterface contract address
-//   const contractAddress = "0x00000000000000000000000000000000000000C8";
-
-//   // https://github.com/OffchainLabs/nitro-contracts/blob/0a149d2af9aee566c4abf493479ec15e5fc32d98/src/node-interface/NodeInterface.sol#L112
-//   const abi = parseAbi([
-//     "function gasEstimateL1Component(address to, bool contractCreation, bytes calldata data) external payable returns (uint64,uint256,uint256)",
-//   ]);
-
-//   const fee = (await publicClient.readContract({
-//     address: contractAddress,
-//     abi,
-//     functionName: "gasEstimateL1Component" as never,
-//     args: [destinationContractAddress, false, executeData],
-//   })) as [bigint, bigint, bigint];
-
-//   return fee[0];
-// }
 
 async function getMantleL1Fee(multicall: Multicall, estimateL1FeeParams: EstimateL1FeeParams) {
   const contractAddress = "0x420000000000000000000000000000000000000F";
@@ -122,7 +102,7 @@ async function getMantleL1Fee(multicall: Multicall, estimateL1FeeParams: Estimat
 
   // Extract results
   const [fixedOverhead, dynamicOverhead] = results.gasOracle.callsReturnContext.map(
-    (call) => call.returnValues[0]
+    (call) => call.returnValues
   );
 
   // (fixedOverhead * dynamicOverhead) / 1_000_000n;
