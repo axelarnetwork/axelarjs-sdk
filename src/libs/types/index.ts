@@ -81,6 +81,7 @@ export interface BaseFeeResponse {
   destToken: {
     gas_price: string;
     gas_price_gwei: string;
+    gas_price_in_units: TokenUnit;
     decimals: number;
   };
   expressSupported: boolean;
@@ -224,4 +225,14 @@ export const isNativeToken = (
   environment: Environment
 ): boolean => {
   return nativeGasTokenSymbol[environment][chain]?.toLowerCase() === selectedToken?.toLowerCase();
+};
+
+export type TokenUnit = {
+  value: string;
+  decimals: number;
+};
+
+export type EstimateL1FeeParams = {
+  executeData: `0x${string}`;
+  l1GasPrice: TokenUnit;
 };
