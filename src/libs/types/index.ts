@@ -77,12 +77,26 @@ export interface BaseFeeResponse {
     decimals: number;
     name: string;
     symbol: string;
+    token_price: {
+      usd: number;
+    };
   };
   destToken: {
     gas_price: string;
     gas_price_gwei: string;
-    gas_price_in_units: TokenUnit;
+    l1_gas_price_in_units: TokenUnit;
     decimals: number;
+    token_price: {
+      usd: number;
+    };
+  };
+  ethereumToken: {
+    name: string;
+    symbol: string;
+    decimals: number;
+    token_price: {
+      usd: number;
+    };
   };
   expressSupported: boolean;
 }

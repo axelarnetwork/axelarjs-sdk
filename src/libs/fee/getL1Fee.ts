@@ -9,7 +9,7 @@ import { Multicall, ContractCallContext } from "ethereum-multicall";
  * @param env The environment to use. Either "mainnet" or "testnet".
  * @param chain The destination L2 chain.
  * @param params The parameters to use for the estimation.
- * @returns
+ * @returns The estimated L1 fee.
  */
 export function getL1FeeForL2(
   provider: ethers.providers.JsonRpcProvider,
@@ -62,16 +62,11 @@ async function getOptimismL1Fee(multicall: Multicall, estimateL1FeeParams: Estim
 
   const { results } = await multicall.call(contractCallContext);
 
-  const [gasUsed, _dynamicOverhead, _fixedOverhead] = results["gasOracle"].callsReturnContext.map(
-    (call) => BigNumber.from(call.returnValues[0].hex)
-  );
+  const gasUsed = BigNumber.from(results["gasOracle"].callsReturnContext[0].returnValues[0].hex);
 
-  const dynamicOverhead = BigNumber.from(_dynamicOverhead || 684000);
-  const fixedOverhead = BigNumber.from(_fixedOverhead || 2100);
-
-  console.log("gasUsed", gasUsed.toString());
-  console.log("dynamicOverhead", dynamicOverhead.toString());
-  console.log("fixedOverhead", fixedOverhead.toString());
+  const overheads = results["gasOracle"].callsReturnContext.slice(1);
+  const dynamicOverhead = BigNumber.from(overheads[0].returnValues[0] || 684000);
+  const fixedOverhead = BigNumber.from(overheads[1].returnValues[0] || 2100);
 
   const totalGasUsed = gasUsed.add(fixedOverhead).mul(dynamicOverhead).div(1_000_000);
   const gasPrice = BigNumber.from(l1GasPrice.value);
