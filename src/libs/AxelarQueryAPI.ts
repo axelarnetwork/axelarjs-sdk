@@ -42,6 +42,8 @@ export interface AxelarQueryAPIFeeResponse {
   baseFee: string;
   executionFee: string;
   executionFeeWithMultiplier: string;
+  l1ExecutionFeeWithMultiplier: string;
+  l1ExecutionFee: string;
   gasMultiplier: number;
   gasLimit: BigNumberish;
   minGasPrice: string;
@@ -394,6 +396,8 @@ export class AxelarQueryAPI {
           expressFee,
           executionFee: excludedL1ExecutionFeeWithMultiplier.toString(),
           executionFeeWithMultiplier: excludedL1ExecutionFeeWithMultiplier.toString(),
+          l1ExecutionFeeWithMultiplier: l1ExecutionFeeWithMultiplier.toString(),
+          l1ExecutionFee: l1ExecutionFee.toString(),
           gasLimit,
           gasMultiplier: actualGasMultiplier,
           minGasPrice: minGasPrice === "0" ? "NA" : minGasPrice,
