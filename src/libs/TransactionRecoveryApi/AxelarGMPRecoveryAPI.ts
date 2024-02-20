@@ -742,7 +742,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txHash: string,
     sourceChain: string,
     destinationChain: string,
-    gasTokenSymbol: GasToken | string,
     estimatedGasUsed: number,
     options: QueryGasFeeOptions
   ): Promise<string> {
@@ -757,7 +756,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return this.subtractGasFee(
       sourceChain,
       destinationChain,
-      gasTokenSymbol,
       paidGasFee,
       estimatedGasUsed,
       options
@@ -958,7 +956,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         txHash,
         chain,
         destinationChain,
-        gasToken,
         estimatedGasUsed,
         {
           gasMultipler: options?.gasMultipler,
@@ -1052,7 +1049,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         txHash,
         chain,
         destinationChain as EvmChain,
-        gasTokenSymbol,
         estimatedGasUsed,
         {
           provider: evmWalletDetails.provider,
@@ -1176,7 +1172,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     let topupGasAmount = ethers.BigNumber.from(totalGasFee);
     if (options.shouldSubtractBaseFee) {
       const response = await this.axelarQueryApi
-        .getNativeGasBaseFee(sourceChain, destinationChain, gasTokenSymbol as GasToken)
+        .getNativeGasBaseFee(sourceChain, destinationChain)
         .catch(() => undefined);
       if (response && response.baseFee) {
         topupGasAmount = topupGasAmount.sub(response.baseFee);

@@ -749,7 +749,6 @@ describe("AxelarGMPRecoveryAPI", () => {
         tx.transactionHash,
         EvmChain.AVALANCHE,
         EvmChain.MOONBEAM,
-        GasToken.AVAX,
         700000,
         { provider }
       );
@@ -785,7 +784,6 @@ describe("AxelarGMPRecoveryAPI", () => {
         tx.transactionHash,
         EvmChain.AVALANCHE,
         EvmChain.MOONBEAM,
-        GasToken.AVAX,
         700000,
         { provider }
       );
