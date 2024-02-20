@@ -276,11 +276,12 @@ export class AxelarQueryAPI {
    * Calculate estimated gas amount to pay for the gas receiver contract.
    * @param sourceChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
    * @param destinationChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
-   * @param sourceChainTokenSymbol
    * @param gasLimit An estimated gas amount required to execute `executeWithToken` function.
    * @param gasMultiplier (Optional) A multiplier used to create a buffer above the calculated gas fee, to account for potential slippage throughout tx execution, e.g. 1.1 = 10% buffer. supports up to 3 decimal places
    * The default value is "auto", which uses the gas multiplier from the fee response
+   * @param sourceChainTokenSymbol (Optional) the gas token symbol on the source chain.
    * @param minGasPrice (Optional) A minimum value, in wei, for the gas price on the destination chain that is used to override the estimated gas price if it falls below this specified value.
+   * @param executeData (Optional) The data to be executed on the destination chain. Required if the destination chain is an L2 chain.
    * @param gmpParams (Optional) Additional parameters for GMP transactions, including the ability to see a detailed view of the fee response
    * @returns
    */
