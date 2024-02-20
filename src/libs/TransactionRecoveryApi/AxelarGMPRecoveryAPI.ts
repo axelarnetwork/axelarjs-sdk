@@ -934,7 +934,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       chain,
       "gas_service"
     );
-    const gasToken = nativeGasTokenSymbol[this.environment][chain];
     const receipt = await signer.provider.getTransactionReceipt(txHash);
 
     if (!receipt) return InvalidTransactionError(chain);

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [0.15.0] - 2024-FEBRUARY-21
+
+- Improved the accuracy of `estimateGasFee` function by incorporating L1 rollup fee for destination L2 chain.
+
+Breaking Changes:
+
+The `sourceChainTokenSymbol` will not be required anymore. If not specified, the native token of source chain will be used to calculate estimated fee. The following functions are affected:
+
+- `calculateNativeGasFee`
+- `estimateGasFee`
+
 ## [0.14.1] - 2024-FEBRUARY-16
 
 - Fix floating points issue for `executeGasMultiplier` in `estimateGasFee` function.
