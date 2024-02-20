@@ -777,7 +777,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txHash: string,
     sourceChain: EvmChain,
     destinationChain: EvmChain,
-    gasTokenSymbol: GasToken | string,
     estimatedGasUsed: number,
     options: QueryGasFeeOptions
   ): Promise<string> {
@@ -790,7 +789,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return this.subtractGasFee(
       sourceChain,
       destinationChain,
-      gasTokenSymbol,
       paidGasFee,
       estimatedGasUsed,
       options
@@ -864,9 +862,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             amount: await this.axelarQueryApi.estimateGasFee(
               tx.call.chain,
               tx.call.returnValues.destinationChain,
-              tx.gas_paid?.returnValues?.denom ?? "uaxl",
               gasLimit,
-              autocalculateGasOptions?.gasMultipler
+              autocalculateGasOptions?.gasMultipler,
+              tx.gas_paid?.returnValues?.denom ?? "uaxl"
             ),
           };
 
@@ -1161,7 +1159,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private async subtractGasFee(
     sourceChain: string,
     destinationChain: string,
-    gasTokenSymbol: string,
     paidGasFee: string,
     estimatedGas: number,
     options: QueryGasFeeOptions
@@ -1169,9 +1166,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const totalGasFee = await this.axelarQueryApi.estimateGasFee(
       sourceChain,
       destinationChain,
-      gasTokenSymbol,
       estimatedGas,
       options.gasMultipler,
+      options.gasTokenSymbol,
       undefined,
       undefined
     );

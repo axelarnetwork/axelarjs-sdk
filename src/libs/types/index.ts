@@ -170,6 +170,7 @@ export interface TxResult {
 
 export interface QueryGasFeeOptions {
   provider?: ethers.providers.JsonRpcProvider;
+  gasTokenSymbol?: GasToken | string;
   gasMultipler?: number;
   shouldSubtractBaseFee?: boolean;
 }
