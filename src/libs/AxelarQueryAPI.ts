@@ -269,9 +269,7 @@ export class AxelarQueryAPI {
 
     const provider = new ethers.providers.JsonRpcProvider(rpcMap[destChainId]);
 
-    const l1FeeForL2 = await getL1FeeForL2(provider, destChainId, l1FeeParams);
-
-    return l1FeeForL2;
+    return getL1FeeForL2(provider, destChainId, l1FeeParams);
   }
 
   /**
