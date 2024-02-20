@@ -3,7 +3,7 @@ import {
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { BigNumber, BigNumberish, ethers } from "ethers";
-import { formatEther, parseEther, parseUnits } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { CHAINS } from "../../chains";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import { Environment } from "../types";
