@@ -22,7 +22,7 @@ describe("getL1Fee", () => {
 
     const params: EstimateL1FeeParams = {
       executeData: MOCK_EXECUTE_DATA,
-      l1GasPrice: destToken.l1_gas_price_in_units,
+      l1GasPrice: destToken.l1_gas_price_in_units!,
     };
 
     const fee = await getL1FeeForL2(provider, destChain, params);
@@ -42,7 +42,7 @@ describe("getL1Fee", () => {
 
     const params: EstimateL1FeeParams = {
       executeData: MOCK_EXECUTE_DATA,
-      l1GasPrice: destToken.l1_gas_price_in_units,
+      l1GasPrice: destToken.l1_gas_price_in_units!,
     };
 
     const fee = await getL1FeeForL2(provider, destChain, params);
