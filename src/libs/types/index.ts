@@ -65,6 +65,17 @@ export interface AxelarQueryAPIConfig {
   debug?: boolean;
 }
 
+export type FeeToken = {
+  gas_price: string;
+  decimals: number;
+  name: string;
+  l1_gas_price_in_units?: TokenUnit;
+  symbol: string;
+  token_price: {
+    usd: number;
+  };
+};
+
 export interface BaseFeeResponse {
   success: boolean;
   apiResponse?: any;
@@ -72,24 +83,8 @@ export interface BaseFeeResponse {
   baseFee: string;
   expressFee: string;
   executeGasMultiplier: number;
-  sourceToken: {
-    gas_price: string;
-    decimals: number;
-    name: string;
-    symbol: string;
-    token_price: {
-      usd: number;
-    };
-  };
-  destToken: {
-    gas_price: string;
-    gas_price_gwei: string;
-    l1_gas_price_in_units: TokenUnit;
-    decimals: number;
-    token_price: {
-      usd: number;
-    };
-  };
+  sourceToken: FeeToken;
+  destToken: FeeToken;
   ethereumToken: {
     name: string;
     symbol: string;

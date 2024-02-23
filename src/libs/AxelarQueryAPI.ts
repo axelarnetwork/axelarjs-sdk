@@ -3,7 +3,13 @@ import { parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
-import { AxelarQueryAPIConfig, BaseFeeResponse, Environment, EstimateL1FeeParams } from "./types";
+import {
+  AxelarQueryAPIConfig,
+  BaseFeeResponse,
+  Environment,
+  EstimateL1FeeParams,
+  FeeToken,
+} from "./types";
 import { EvmChain } from "../constants/EvmChain";
 import { GasToken } from "../constants/GasToken";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
@@ -240,9 +246,10 @@ export class AxelarQueryAPI {
         executeGasMultiplier: parseFloat(execute_gas_multiplier.toFixed(2)),
         destToken: {
           gas_price: destination_native_token.gas_price,
-          gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
           decimals: destination_native_token.decimals,
           token_price: destination_native_token.token_price,
+          name: destination_native_token.name,
+          symbol: destination_native_token.symbol,
           l1_gas_price_in_units: destination_native_token.l1_gas_price_in_units,
         },
         ethereumToken: ethereum_token as BaseFeeResponse["ethereumToken"],
@@ -253,14 +260,7 @@ export class AxelarQueryAPI {
     });
   }
 
-  public async estimateL1GasFee(
-    destChainId: EvmChain | string,
-    l1FeeParams: EstimateL1FeeParams
-  ): Promise<BigNumber> {
-    if (!isL2Chain(destChainId)) {
-      return BigNumber.from(0);
-    }
-
+  public async estimateL1GasFee(destChainId: EvmChain | string, l1FeeParams: EstimateL1FeeParams) {
     // Retrieve the RPC URL for the source chain to calculate L1 fee
     const rpcMap = this.environment === "mainnet" ? mainnetRpcMap : testnetRpcMap;
 
@@ -272,6 +272,55 @@ export class AxelarQueryAPI {
     const provider = new ethers.providers.JsonRpcProvider(rpcMap[destChainId]);
 
     return getL1FeeForL2(provider, destChainId, l1FeeParams);
+  }
+
+  public async calculateL1FeeForDestL2(
+    destChainId: EvmChain | string,
+    destToken: FeeToken,
+    executeData: `0x${string}` | undefined,
+    sourceToken: FeeToken,
+    ethereumToken: BaseFeeResponse["ethereumToken"],
+    actualGasMultiplier: number
+  ): Promise<[BigNumber, BigNumber]> {
+    let l1ExecutionFee = BigNumber.from(0);
+    let l1ExecutionFeeWithMultiplier = BigNumber.from(0);
+
+    // If the destination chain is L2, calculate the L1 execution fee
+    const isDestinationChainL2 = await isL2Chain(this.environment, destChainId, destToken);
+
+    if (isDestinationChainL2) {
+      if (!executeData) {
+        throw new Error(
+          `executeData is required to calculate the L1 execution fee for ${destChainId}`
+        );
+      }
+
+      if (!destToken.l1_gas_price_in_units) {
+        throw new Error(`Could not find L1 gas price for ${destChainId}. Please try again later.`);
+      }
+
+      // Calculate the L1 execution fee. This value is in ETH.
+      l1ExecutionFee = await this.estimateL1GasFee(destChainId, {
+        executeData: executeData,
+        l1GasPrice: destToken.l1_gas_price_in_units,
+      });
+
+      // Convert the L1 execution fee to the source token
+      const srcTokenPrice = Number(sourceToken.token_price.usd);
+      const ethTokenPrice = Number(ethereumToken.token_price.usd);
+      const ethToSrcTokenPriceRatio = ethTokenPrice / srcTokenPrice;
+
+      const actualL1ExecutionFee = Math.ceil(l1ExecutionFee.toNumber() * ethToSrcTokenPriceRatio);
+
+      l1ExecutionFee = BigNumber.from(actualL1ExecutionFee.toString());
+
+      // Calculate the L1 execution fee with the gas multiplier
+      l1ExecutionFeeWithMultiplier = BigNumber.from(
+        Math.floor(actualGasMultiplier * actualGasMultiplier)
+      );
+    }
+
+    return [l1ExecutionFee, l1ExecutionFeeWithMultiplier];
   }
 
   /**
@@ -352,43 +401,14 @@ export class AxelarQueryAPI {
         ? excludedL1ExecutionFee.mul(actualGasMultiplier * 10000).div(10000)
         : excludedL1ExecutionFee;
 
-    let l1ExecutionFee = BigNumber.from(0);
-    let l1ExecutionFeeWithMultiplier = BigNumber.from(0);
-
-    // If the destination chain is L2, calculate the L1 execution fee
-    if (isL2Chain(destinationChainId)) {
-      if (!executeData) {
-        throw new Error(
-          `executeData is required to calculate the L1 execution fee for ${destinationChainId}`
-        );
-      }
-
-      if (!destToken.l1_gas_price_in_units) {
-        throw new Error(
-          `Could not find L1 gas price for ${destinationChainId}. Please try again later.`
-        );
-      }
-
-      // Calculate the L1 execution fee. This value is in ETH.
-      l1ExecutionFee = await this.estimateL1GasFee(destinationChainId, {
-        executeData: executeData || "0x",
-        l1GasPrice: destToken.l1_gas_price_in_units,
-      });
-
-      // Convert the L1 execution fee to the source token
-      const srcTokenPrice = Number(sourceToken.token_price.usd);
-      const ethTokenPrice = Number(ethereumToken.token_price.usd);
-      const ethToSrcTokenPriceRatio = ethTokenPrice / srcTokenPrice;
-
-      const actualL1ExecutionFee = Math.ceil(l1ExecutionFee.toNumber() * ethToSrcTokenPriceRatio);
-
-      l1ExecutionFee = BigNumber.from(actualL1ExecutionFee.toString());
-
-      // Calculate the L1 execution fee with the gas multiplier
-      l1ExecutionFeeWithMultiplier = BigNumber.from(
-        Math.floor(actualGasMultiplier * actualGasMultiplier)
-      );
-    }
+    const [l1ExecutionFee, l1ExecutionFeeWithMultiplier] = await this.calculateL1FeeForDestL2(
+      destinationChainId,
+      destToken,
+      executeData,
+      sourceToken,
+      ethereumToken,
+      actualGasMultiplier
+    );
 
     return gmpParams?.showDetailedFees
       ? {

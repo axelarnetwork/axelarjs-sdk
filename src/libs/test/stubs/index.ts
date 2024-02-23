@@ -328,7 +328,6 @@ export const getFeeStub = () => ({
         usd: 1674.72,
       },
       gas_price: "0.000000023244098897",
-      gas_price_gwei: "23.244098897",
     },
     destination_base_fee: 0.00514232878886753,
   },
