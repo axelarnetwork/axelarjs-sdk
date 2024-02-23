@@ -1,5 +1,12 @@
-import { L2_CHAINS } from "../constants/L2Chain";
+import { loadChains } from "../chains";
+import { Environment, FeeToken } from "../libs";
 
-export function isL2Chain(chain: string): boolean {
-  return L2_CHAINS.includes(chain);
+export async function isL2Chain(
+  environment: Environment,
+  chain: string,
+  destinationNativeToken: FeeToken
+) {
+  const chains = await loadChains({ environment });
+  const evmChains = chains.filter((chain) => chain.module === "evm").map((chain) => chain.id);
+  return destinationNativeToken.l1_gas_price_in_units && evmChains.includes(chain);
 }
