@@ -290,9 +290,11 @@ export class AxelarQueryAPI {
 
     if (isDestinationChainL2) {
       if (!executeData) {
-        throw new Error(
-          `executeData is required to calculate the L1 execution fee for ${destChainId}`
+        console.warn(
+          `Since you did not provide executeData, this API will not accurately calculate the 
+          total required fee as we will not be able to capture the L1 inclusion fee for this L2 chain.`
         );
+        return [l1ExecutionFee, l1ExecutionFeeWithMultiplier];
       }
 
       if (!destToken.l1_gas_price_in_units) {
@@ -390,16 +392,16 @@ export class AxelarQueryAPI {
       sourceToken.decimals
     );
 
-    const excludedL1ExecutionFee = destGasFeeWei.gt(minDestGasFeeWei)
+    const executionFee = destGasFeeWei.gt(minDestGasFeeWei)
       ? srcGasFeeWei
       : srcGasFeeWei.mul(minDestGasFeeWei).div(destGasFeeWei);
 
     const actualGasMultiplier = gasMultiplier === "auto" ? executeGasMultiplier : gasMultiplier;
 
-    const excludedL1ExecutionFeeWithMultiplier =
+    const executionFeeWithMultiplier =
       actualGasMultiplier > 1
-        ? excludedL1ExecutionFee.mul(actualGasMultiplier * 10000).div(10000)
-        : excludedL1ExecutionFee;
+        ? executionFee.mul(actualGasMultiplier * 10000).div(10000)
+        : executionFee;
 
     const [l1ExecutionFee, l1ExecutionFeeWithMultiplier] = await this.calculateL1FeeForDestL2(
       destinationChainId,
@@ -414,8 +416,8 @@ export class AxelarQueryAPI {
       ? {
           baseFee,
           expressFee,
-          executionFee: excludedL1ExecutionFeeWithMultiplier.toString(),
-          executionFeeWithMultiplier: excludedL1ExecutionFeeWithMultiplier.toString(),
+          executionFee: executionFeeWithMultiplier.toString(),
+          executionFeeWithMultiplier: executionFeeWithMultiplier.toString(),
           l1ExecutionFeeWithMultiplier: l1ExecutionFeeWithMultiplier.toString(),
           l1ExecutionFee: l1ExecutionFee.toString(),
           gasLimit,
@@ -424,7 +426,7 @@ export class AxelarQueryAPI {
           apiResponse,
           isExpressSupported: expressSupported,
         }
-      : l1ExecutionFeeWithMultiplier.add(excludedL1ExecutionFee).add(baseFee).toString();
+      : l1ExecutionFeeWithMultiplier.add(executionFeeWithMultiplier).add(baseFee).toString();
   }
 
   /**
