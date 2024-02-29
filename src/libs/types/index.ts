@@ -85,6 +85,7 @@ export interface BaseFeeResponse {
   executeGasMultiplier: number;
   sourceToken: FeeToken;
   destToken: FeeToken;
+  l2_type: "op" | "arb" | "mantle" | undefined;
   ethereumToken: {
     name: string;
     symbol: string;
@@ -245,4 +246,5 @@ export type TokenUnit = {
 export type EstimateL1FeeParams = {
   executeData: `0x${string}`;
   l1GasPrice: TokenUnit;
+  l2Type?: "op" | "arb" | "mantle" | undefined;
 };

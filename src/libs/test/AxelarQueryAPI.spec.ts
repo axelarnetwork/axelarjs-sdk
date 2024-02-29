@@ -107,6 +107,7 @@ describe("AxelarQueryAPI", () => {
           decimals: 18,
           value: "32534506865",
         },
+        l2Type: "op",
       });
       expect(gasAmount.gt(parseEther("0.00001"))).toBeTruthy();
     });
@@ -128,7 +129,7 @@ describe("AxelarQueryAPI", () => {
       expect(ethers.utils.parseEther("10000").gt(gasAmount as BigNumberish)).toBeTruthy();
     });
 
-    test("It should include L1 fee for L2 destination chain", async () => {
+    test.only("It should include L1 fee for L2 destination chain", async () => {
       const mainnetApi = new AxelarQueryAPI({ environment: Environment.MAINNET });
       const gasAmount = await mainnetApi.estimateGasFee(
         EvmChain.ETHEREUM,

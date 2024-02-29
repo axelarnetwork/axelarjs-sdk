@@ -16,16 +16,17 @@ describe("getL1Fee", () => {
 
     const queryAPI = new AxelarQueryAPI({ environment: env });
 
-    const { destToken } = await queryAPI.getNativeGasBaseFee(srcChain, destChain);
+    const { destToken, l2_type } = await queryAPI.getNativeGasBaseFee(srcChain, destChain);
 
     const provider = new ethers.providers.JsonRpcProvider(rpcMap[destChain]);
 
     const params: EstimateL1FeeParams = {
       executeData: MOCK_EXECUTE_DATA,
       l1GasPrice: destToken.l1_gas_price_in_units!,
+      l2Type: l2_type,
     };
 
-    const fee = await getL1FeeForL2(provider, destChain, params);
+    const fee = await getL1FeeForL2(provider, params);
 
     expect(fee).toBeDefined();
   });
@@ -36,16 +37,17 @@ describe("getL1Fee", () => {
 
     const queryAPI = new AxelarQueryAPI({ environment: env });
 
-    const { destToken } = await queryAPI.getNativeGasBaseFee(srcChain, destChain);
+    const { destToken, l2_type } = await queryAPI.getNativeGasBaseFee(srcChain, destChain);
 
     const provider = new ethers.providers.JsonRpcProvider(rpcMap[destChain]);
 
     const params: EstimateL1FeeParams = {
       executeData: MOCK_EXECUTE_DATA,
       l1GasPrice: destToken.l1_gas_price_in_units!,
+      l2Type: l2_type,
     };
 
-    const fee = await getL1FeeForL2(provider, destChain, params);
+    const fee = await getL1FeeForL2(provider, params);
 
     expect(fee).toBeDefined();
   });

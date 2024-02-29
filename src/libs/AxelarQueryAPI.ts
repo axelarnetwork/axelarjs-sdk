@@ -230,6 +230,7 @@ export class AxelarQueryAPI {
         destination_native_token,
         express_fee_string,
         express_supported,
+        l2_type,
       } = response.result;
       const execute_gas_multiplier = response.result.execute_gas_multiplier as number;
       const { decimals: sourceTokenDecimals } = source_token;
@@ -251,6 +252,7 @@ export class AxelarQueryAPI {
           symbol: destination_native_token.symbol,
           l1_gas_price_in_units: destination_native_token.l1_gas_price_in_units,
         },
+        l2_type,
         ethereumToken: ethereum_token as BaseFeeResponse["ethereumToken"],
         apiResponse: response,
         success: true,
@@ -270,7 +272,7 @@ export class AxelarQueryAPI {
 
     const provider = new ethers.providers.JsonRpcProvider(rpcMap[destChainId]);
 
-    return getL1FeeForL2(provider, destChainId, l1FeeParams);
+    return getL1FeeForL2(provider, l1FeeParams);
   }
 
   public async calculateL1FeeForDestL2(
@@ -279,7 +281,8 @@ export class AxelarQueryAPI {
     executeData: `0x${string}` | undefined,
     sourceToken: FeeToken,
     ethereumToken: BaseFeeResponse["ethereumToken"],
-    actualGasMultiplier: number
+    actualGasMultiplier: number,
+    l2Type: BaseFeeResponse["l2_type"]
   ): Promise<[BigNumber, BigNumber]> {
     let l1ExecutionFee = BigNumber.from(0);
     let l1ExecutionFeeWithMultiplier = BigNumber.from(0);
@@ -296,6 +299,7 @@ export class AxelarQueryAPI {
       l1ExecutionFee = await this.estimateL1GasFee(destChainId, {
         executeData: executeData || "0x",
         l1GasPrice: destToken.l1_gas_price_in_units,
+        l2Type,
       });
 
       // Convert the L1 execution fee to the source token
@@ -353,6 +357,7 @@ export class AxelarQueryAPI {
       executeGasMultiplier,
       destToken,
       apiResponse,
+      l2_type,
       success,
       expressSupported,
     } = await this.getNativeGasBaseFee(
@@ -400,7 +405,8 @@ export class AxelarQueryAPI {
       executeData,
       sourceToken,
       ethereumToken,
-      actualGasMultiplier
+      actualGasMultiplier,
+      l2_type
     );
 
     return gmpParams?.showDetailedFees

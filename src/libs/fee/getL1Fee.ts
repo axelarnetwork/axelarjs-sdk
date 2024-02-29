@@ -22,21 +22,17 @@ const ABI = {
  */
 export function getL1FeeForL2(
   provider: ethers.providers.JsonRpcProvider,
-  chain: string,
   params: EstimateL1FeeParams
 ): Promise<BigNumber> {
   const multicall = new Multicall({ ethersProvider: provider, tryAggregate: true });
 
-  switch (chain) {
+  switch (params.l2Type) {
     case "mantle":
       return getMantleL1Fee(multicall, params);
-    case "optimism":
-    case "scroll":
-    case "base":
+    case "op":
       return getOptimismL1Fee(multicall, params);
     // Most of the ethereum clients are already included L1 fee in the gas estimation for Arbitrum.
-    case "arbitrum":
-    case "arbitrum-sepolia":
+    case "arb":
     default:
       return Promise.resolve(BigNumber.from(0));
   }
