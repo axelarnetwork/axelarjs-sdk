@@ -291,10 +291,9 @@ export class AxelarQueryAPI {
     if (isDestinationChainL2) {
       if (!executeData) {
         console.warn(
-          `Since you did not provide executeData, this API will not accurately calculate the 
+          `Since you did not provide executeData, this API will not accurately calculate the
           total required fee as we will not be able to capture the L1 inclusion fee for this L2 chain.`
         );
-        return [l1ExecutionFee, l1ExecutionFeeWithMultiplier];
       }
 
       if (!destToken.l1_gas_price_in_units) {
@@ -303,7 +302,7 @@ export class AxelarQueryAPI {
 
       // Calculate the L1 execution fee. This value is in ETH.
       l1ExecutionFee = await this.estimateL1GasFee(destChainId, {
-        executeData: executeData,
+        executeData: executeData || "0x",
         l1GasPrice: destToken.l1_gas_price_in_units,
       });
 
@@ -334,7 +333,7 @@ export class AxelarQueryAPI {
    * The default value is "auto", which uses the gas multiplier from the fee response
    * @param sourceChainTokenSymbol (Optional) the gas token symbol on the source chain.
    * @param minGasPrice (Optional) A minimum value, in wei, for the gas price on the destination chain that is used to override the estimated gas price if it falls below this specified value.
-   * @param executeData (Optional) The data to be executed on the destination chain. Required if the destination chain is an L2 chain.
+   * @param executeData (Optional) The data to be executed on the destination chain. It's recommended to specify it if the destination chain is an L2 chain to calculate more accurate gas fee.
    * @param gmpParams (Optional) Additional parameters for GMP transactions, including the ability to see a detailed view of the fee response
    * @returns
    */
