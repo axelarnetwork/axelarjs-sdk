@@ -27,7 +27,6 @@ import { ChainInfo } from "src/chains/types";
 import { BigNumberUtils } from "./BigNumberUtils";
 import { rpcMap as testnetRpcMap } from "./TransactionRecoveryApi/constants/chain/testnet";
 import { rpcMap as mainnetRpcMap } from "./TransactionRecoveryApi/constants/chain/mainnet";
-import { isL2Chain } from "../utils/isL2Chain";
 import { getL1FeeForL2 } from "./fee/getL1Fee";
 
 interface TranslatedTransferRateLimitResponse {
@@ -285,10 +284,7 @@ export class AxelarQueryAPI {
     let l1ExecutionFee = BigNumber.from(0);
     let l1ExecutionFeeWithMultiplier = BigNumber.from(0);
 
-    // If the destination chain is L2, calculate the L1 execution fee
-    const isDestinationChainL2 = await isL2Chain(this.environment, destChainId, destToken);
-
-    if (isDestinationChainL2) {
+    if (destToken.l1_gas_price_in_units) {
       if (!executeData) {
         console.warn(
           `Since you did not provide executeData, this API will not accurately calculate the
