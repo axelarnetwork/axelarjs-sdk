@@ -7,7 +7,6 @@ import {
   EvmWalletDetails,
 } from "../../types";
 import { EvmChain } from "../../../constants/EvmChain";
-import { GasToken } from "../../../constants/GasToken";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
 import { Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
 import DistributionExecutable from "../abi/DistributionExecutable.json";

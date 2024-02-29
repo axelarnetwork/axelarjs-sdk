@@ -11,7 +11,6 @@ import {
   Environment,
 } from "../types";
 import { EvmChain } from "../../constants/EvmChain";
-import { GasToken } from "../../constants/GasToken";
 import {
   AxelarRecoveryApi,
   ExecuteParams,
@@ -21,7 +20,6 @@ import {
 import EVMClient from "./client/EVMClient";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { ContractReceipt, ContractTransaction, ethers } from "ethers";
-import { nativeGasTokenSymbol } from "../../constants";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import rpcInfo from "./constants/chain";
 import {
