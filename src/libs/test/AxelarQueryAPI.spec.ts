@@ -143,18 +143,18 @@ describe("AxelarQueryAPI", () => {
       expect(gasAmount).toBeDefined();
     });
 
-    it("should return error when the source chain is L2, but the executeData is undefuned ", async () => {
-      expect(
-        api.estimateGasFee(
-          "ethereum-2",
-          EvmChain.OPTIMISM,
-          700000,
-          1.1,
-          GasToken.USDC,
-          "500000",
-          undefined
-        )
-      ).rejects.toThrow("executeData is required to calculate the L1 execution fee for optimism");
+    it("should be able to return the gas fee when the source chain is L2, but the executeData is undefined ", async () => {
+      const response = await api.estimateGasFee(
+        "ethereum-2",
+        EvmChain.OPTIMISM,
+        700000,
+        1.1,
+        GasToken.USDC,
+        "500000",
+        undefined
+      );
+
+      expect(response).toBeDefined();
     });
 
     test("It should return estimated gas amount that makes sense for native token", async () => {
