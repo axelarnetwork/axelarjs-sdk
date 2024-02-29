@@ -189,7 +189,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           return currentBlock - gmpTx.call.blockNumber;
         }
 
-        console.log(receipt);
         return receipt.confirmations;
       });
 
