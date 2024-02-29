@@ -296,10 +296,6 @@ export class AxelarQueryAPI {
         );
       }
 
-      if (!destToken.l1_gas_price_in_units) {
-        throw new Error(`Could not find L1 gas price for ${destChainId}. Please try again later.`);
-      }
-
       // Calculate the L1 execution fee. This value is in ETH.
       l1ExecutionFee = await this.estimateL1GasFee(destChainId, {
         executeData: executeData || "0x",
