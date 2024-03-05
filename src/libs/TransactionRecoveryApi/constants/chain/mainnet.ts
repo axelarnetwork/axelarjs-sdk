@@ -22,6 +22,8 @@ export const rpcMap: Partial<Record<EvmChain, string>> = {
   [EvmChain.SCROLL]: "https://rpc.scroll.io",
   [EvmChain.CENTRIFUGE]: "https://fullnode.parachain.centrifuge.io",
   [EvmChain.IMMUTABLE]: "https://rpc.immutable.com",
+  [EvmChain.FRAXTAL]: "https://rpc.frax.com",
+  [EvmChain.BLAST]: "https://rpc.blast.io",
 };
 
 export const networkInfo: Partial<Record<EvmChain, Network>> = {
@@ -104,5 +106,13 @@ export const networkInfo: Partial<Record<EvmChain, Network>> = {
   [EvmChain.IMMUTABLE]: {
     chainId: 13371,
     name: EvmChain.IMMUTABLE,
+  },
+  [EvmChain.FRAXTAL]: {
+    chainId: 252,
+    name: EvmChain.FRAXTAL,
+  },
+  [EvmChain.BLAST]: {
+    chainId: 81457,
+    name: EvmChain.BLAST,
   },
 };
