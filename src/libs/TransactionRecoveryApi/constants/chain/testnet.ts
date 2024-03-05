@@ -26,6 +26,10 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.CENTRIFUGE_TESTNET]:
     "https://node-7118620155331796992.gx.onfinality.io/jsonrpc?apikey=00538f2d-6297-44e3-8812-4b9d579524b2",
   [EvmChain.FRAXTAL]: "https://rpc.testnet.frax.com",
+  [EvmChain.BLAST_SEPOLIA]: "https://sepolia.blast.io",
+  [EvmChain.BASE_SEPOLIA]: "https://sepolia.base.org",
+  [EvmChain.OPTIMISM_SEPOLIA]: "https://sepolia.optimism.io",
+  [EvmChain.MANTLE_SEPOLIA]: "https://rpc.sepolia.mantle.xyz",
 };
 
 export const networkInfo: Record<EvmChain | string, Network> = {
@@ -120,5 +124,21 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.FRAXTAL]: {
     chainId: 2522,
     name: EvmChain.FRAXTAL,
+  },
+  [EvmChain.BASE_SEPOLIA]: {
+    chainId: 84532,
+    name: EvmChain.BASE_SEPOLIA,
+  },
+  [EvmChain.BLAST_SEPOLIA]: {
+    chainId: 168587773,
+    name: EvmChain.BLAST_SEPOLIA,
+  },
+  [EvmChain.MANTLE_SEPOLIA]: {
+    chainId: 5003,
+    name: EvmChain.MANTLE_SEPOLIA,
+  },
+  [EvmChain.OPTIMISM_SEPOLIA]: {
+    chainId: 11155420,
+    name: EvmChain.OPTIMISM_SEPOLIA,
   },
 };
