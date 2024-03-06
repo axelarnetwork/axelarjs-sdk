@@ -6,7 +6,7 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.POLYGON]: "https://rpc-mumbai.maticvigil.com",
   [EvmChain.MOONBEAM]: "https://rpc.api.moonbase.moonbeam.network",
   [EvmChain.AVALANCHE]: "https://api.avax-test.network/ext/bc/C/rpc",
-  "ethereum-2": "https://eth-goerli.api.onfinality.io/public",
+  "ethereum-2": "https://ethereum-goerli-rpc.publicnode.com",
   [EvmChain.AURORA]: "https://testnet.aurora.dev",
   [EvmChain.BINANCE]: "https://data-seed-prebsc-1-s1.binance.org:8545",
   [EvmChain.BNBCHAIN]: "https://data-seed-prebsc-1-s1.binance.org:8545",
