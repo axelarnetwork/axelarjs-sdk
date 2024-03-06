@@ -218,7 +218,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChainId: string,
     destChainId: string,
     srcTxHash: string,
-    srcTxEventIndex: number | undefined
+    srcTxEventIndex: number | undefined,
+    evmWalletDetails?: EvmWalletDetails
   ): Promise<{
     commandId: string;
     eventResponse: EventResponse;
@@ -228,7 +229,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }> {
     const eventIndex =
       srcTxEventIndex ??
-      (await this.getEventIndex(srcChainId, srcTxHash)
+      (await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)
         .then((index) => index as number)
         .catch(() => -1));
 
@@ -321,7 +322,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, txEventIndex);
+      const updatedEvent = await this.getEvmEvent(
+        srcChain,
+        destChain,
+        txHash,
+        txEventIndex,
+        evmWalletDetails
+      );
 
       if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
         return {
@@ -801,8 +808,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     );
   }
 
-  public async getEventIndex(chain: string, txHash: string) {
-    const signer = this.getSigner(chain, { useWindowEthereum: false });
+  public async getEventIndex(chain: string, txHash: string, evmWalletDetails?: EvmWalletDetails) {
+    const signer = this.getSigner(chain, evmWalletDetails || { useWindowEthereum: false });
     const receipt = await signer.provider.getTransactionReceipt(txHash).catch(() => undefined);
 
     if (!receipt) {
