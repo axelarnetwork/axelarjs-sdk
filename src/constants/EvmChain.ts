@@ -23,4 +23,9 @@ export enum EvmChain {
   CENTRIFUGE_TESTNET = "centrifuge-2",
   CENTRIFUGE = "centrifuge",
   FRAXTAL = "fraxtal",
+  BLAST_SEPOLIA = "blast-sepolia",
+  OPTIMISM_SEPOLIA = "optimism-sepolia",
+  MANTLE_SEPOLIA = "mantle-sepolia",
+  BASE_SEPOLIA = "base-sepolia",
+  BLAST = "blast",
 }

@@ -28,6 +28,11 @@ export enum GasToken {
   ARBITRUM_SEPOLIA = "ETH",
   CENTRIFUGE = "CFG",
   FRAXTAL = "frxETH",
+  BLAST_SEPOLIA = "ETH",
+  OPTIMISM_SEPOLIA = "ETH",
+  MANTLE_SEPOLIA = "ETH",
+  BASE_SEPOLIA = "ETH",
+  BLAST = "ETH",
 }
 
 export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasToken>> = {
@@ -55,6 +60,10 @@ export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasT
     [EvmChain.ARBITRUM_SEPOLIA]: GasToken.ARBITRUM_SEPOLIA,
     [EvmChain.CENTRIFUGE_TESTNET]: GasToken.CENTRIFUGE,
     [EvmChain.FRAXTAL]: GasToken.FRAXTAL,
+    [EvmChain.BLAST_SEPOLIA]: GasToken.BLAST_SEPOLIA,
+    [EvmChain.MANTLE_SEPOLIA]: GasToken.MANTLE_SEPOLIA,
+    [EvmChain.BASE_SEPOLIA]: GasToken.BASE_SEPOLIA,
+    [EvmChain.OPTIMISM_SEPOLIA]: GasToken.OPTIMISM_SEPOLIA,
   },
   mainnet: {
     [EvmChain.AVALANCHE]: GasToken.AVAX,
@@ -76,6 +85,8 @@ export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasT
     [EvmChain.MANTLE]: GasToken.MANTLE,
     [EvmChain.SCROLL]: GasToken.SCROLL,
     [EvmChain.CENTRIFUGE]: GasToken.CENTRIFUGE,
+    [EvmChain.FRAXTAL]: GasToken.FRAXTAL,
+    [EvmChain.BLAST]: GasToken.BLAST,
   },
 };
 

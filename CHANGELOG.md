@@ -16,6 +16,10 @@ The `sourceChainTokenSymbol` will not be required anymore. If not specified, the
 - `calculateNativeGasFee`
 - `estimateGasFee`
 
+## [0.14.2] - 2024-MARCH-5
+
+- Add configs for L2s on testnet; add configs for Blast, Fraxtal on mainnet
+
 ## [0.14.1] - 2024-FEBRUARY-16
 
 - Fix floating points issue for `executeGasMultiplier` in `estimateGasFee` function.
