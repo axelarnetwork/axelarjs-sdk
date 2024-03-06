@@ -98,7 +98,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         undefined
       );
       expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
-      expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash);
+      expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash, undefined);
       expect(response).toBeDefined();
       expect(response.infoLogs.length).toBeGreaterThan(0);
       expect(response.eventResponse).toBeDefined();
@@ -165,7 +165,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       );
 
       expect(mockConfirmGatewayTx).toBeCalledTimes(0);
-      expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash);
+      expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash, undefined);
       expect(response.success).toBeFalsy();
       expect(response.eventResponse).toBeDefined();
       expect(response.commandId).toBe("commandId");
@@ -198,7 +198,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       );
 
       expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
-      expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash);
+      expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash, undefined);
       expect(response.success).toBeFalsy();
       expect(response.eventResponse).toBeDefined();
       expect(response.commandId).toBe("commandId");

@@ -466,7 +466,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (routeDir === RouteDir.COSMOS_TO_EVM) {
       return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails, messageId);
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
-      return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex);
+      return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex, _evmWalletDetails);
     } else {
       return this.recoverEvmToEvmTx(
         srcChain,
@@ -492,10 +492,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private async recoverEvmToCosmosTx(
     srcChain: string,
     txHash: string,
-    txEventIndex?: number | null
+    txEventIndex?: number | null,
+    evmWalletDetails?: EvmWalletDetails
   ) {
     // Check if the tx is confirmed on the source chain
-    const isConfirmed = await this.doesTxMeetConfirmHt(srcChain, txHash);
+    const isConfirmed = await this.doesTxMeetConfirmHt(
+      srcChain,
+      txHash,
+      evmWalletDetails?.provider
+    );
     if (!isConfirmed) {
       const minConfirmLevel = await this.axelarQueryApi.getConfirmationHeight(srcChain);
       return {
