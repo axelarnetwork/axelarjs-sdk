@@ -57,6 +57,7 @@ import s3 from "./constants/s3";
 import { Coin, OfflineSigner } from "@cosmjs/proto-signing";
 import { DeliverTxResponse, SigningStargateClient, StdFee } from "@cosmjs/stargate";
 import { COSMOS_GAS_RECEIVER_OPTIONS } from "./constants/cosmosGasReceiverOptions";
+import { JsonRpcProvider } from "@ethersproject/providers";
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
   [GMPStatus.DEST_EXECUTED]: ApproveGatewayError.ALREADY_EXECUTED,
@@ -175,14 +176,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return getCommandId(destChainId, txHash, eventIndex, this.environment, rpcInfo);
   }
 
-  public async doesTxMeetConfirmHt(chain: string, txHash: string) {
-    const confirmations = await this.getSigner(chain, { useWindowEthereum: false })
+  public async doesTxMeetConfirmHt(chain: string, txHash: string, provider?: JsonRpcProvider) {
+    const confirmations = await this.getSigner(chain, { useWindowEthereum: false, provider })
       .provider.getTransactionReceipt(txHash)
       .then(async (receipt?: TransactionReceipt) => {
         if (!receipt) {
           const gmpTx = await this.fetchGMPTransaction(txHash);
           const currentBlock = await this.getSigner(chain, {
             useWindowEthereum: false,
+            provider,
           }).provider.getBlockNumber();
           return currentBlock - gmpTx.call.blockNumber;
         }
@@ -292,7 +294,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         ],
       };
     } else {
-      const isConfirmFinalized = await this.doesTxMeetConfirmHt(srcChain, txHash);
+      const isConfirmFinalized = await this.doesTxMeetConfirmHt(
+        srcChain,
+        txHash,
+        evmWalletDetails.provider
+      );
       if (!isConfirmFinalized) {
         const minConfirmLevel = await this.axelarQueryApi.getConfirmationHeight(srcChain);
         return {

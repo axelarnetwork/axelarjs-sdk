@@ -15,7 +15,7 @@ export default class EVMClient {
       this.provider =
         useWindowEthereum && typeof window !== "undefined" && window?.ethereum
           ? new ethers.providers.Web3Provider(window.ethereum, networkOptions)
-          : new ethers.providers.JsonRpcProvider(rpcUrl, networkOptions);
+          : provider || new ethers.providers.JsonRpcProvider(rpcUrl, networkOptions);
     }
     this.signer = privateKey
       ? new ethers.Wallet(privateKey).connect(this.provider)
