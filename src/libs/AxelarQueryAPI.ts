@@ -3,7 +3,13 @@ import { parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
-import { AxelarQueryAPIConfig, BaseFeeResponse, Environment } from "./types";
+import {
+  AxelarQueryAPIConfig,
+  BaseFeeResponse,
+  Environment,
+  EstimateL1FeeParams,
+  FeeToken,
+} from "./types";
 import { EvmChain } from "../constants/EvmChain";
 import { GasToken } from "../constants/GasToken";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
@@ -16,9 +22,12 @@ import {
 import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber, BigNumberish, ethers } from "ethers";
 import { ChainInfo } from "src/chains/types";
 import { BigNumberUtils } from "./BigNumberUtils";
+import { rpcMap as testnetRpcMap } from "./TransactionRecoveryApi/constants/chain/testnet";
+import { rpcMap as mainnetRpcMap } from "./TransactionRecoveryApi/constants/chain/mainnet";
+import { getL1FeeForL2 } from "./fee/getL1Fee";
 
 interface TranslatedTransferRateLimitResponse {
   incoming: string;
@@ -38,6 +47,8 @@ export interface AxelarQueryAPIFeeResponse {
   baseFee: string;
   executionFee: string;
   executionFeeWithMultiplier: string;
+  l1ExecutionFeeWithMultiplier: string;
+  l1ExecutionFee: string;
   gasMultiplier: number;
   gasLimit: BigNumberish;
   minGasPrice: string;
@@ -215,9 +226,11 @@ export class AxelarQueryAPI {
       const {
         source_base_fee_string,
         source_token,
+        ethereum_token,
         destination_native_token,
         express_fee_string,
         express_supported,
+        l2_type,
       } = response.result;
       const execute_gas_multiplier = response.result.execute_gas_multiplier as number;
       const { decimals: sourceTokenDecimals } = source_token;
@@ -229,13 +242,18 @@ export class AxelarQueryAPI {
       return {
         baseFee,
         expressFee,
-        sourceToken: source_token,
+        sourceToken: source_token as BaseFeeResponse["sourceToken"],
         executeGasMultiplier: parseFloat(execute_gas_multiplier.toFixed(2)),
         destToken: {
           gas_price: destination_native_token.gas_price,
-          gas_price_gwei: parseInt(destination_native_token.gas_price_gwei).toString(),
           decimals: destination_native_token.decimals,
+          token_price: destination_native_token.token_price,
+          name: destination_native_token.name,
+          symbol: destination_native_token.symbol,
+          l1_gas_price_in_units: destination_native_token.l1_gas_price_in_units,
         },
+        l2_type,
+        ethereumToken: ethereum_token as BaseFeeResponse["ethereumToken"],
         apiResponse: response,
         success: true,
         expressSupported: express_supported,
@@ -243,30 +261,106 @@ export class AxelarQueryAPI {
     });
   }
 
+  public async estimateL1GasFee(destChainId: EvmChain | string, l1FeeParams: EstimateL1FeeParams) {
+    // Retrieve the RPC URL for the source chain to calculate L1 fee
+    const rpcMap = this.environment === "mainnet" ? mainnetRpcMap : testnetRpcMap;
+
+    // Throw an error if the RPC URL is not found
+    if (!rpcMap[destChainId]) {
+      throw new Error(`RPC URL not found for chain ${destChainId}`);
+    }
+
+    const provider = new ethers.providers.JsonRpcProvider(rpcMap[destChainId]);
+
+    return getL1FeeForL2(provider, l1FeeParams);
+  }
+
+  public async calculateL1FeeForDestL2(
+    destChainId: EvmChain | string,
+    destToken: FeeToken,
+    executeData: `0x${string}` | undefined,
+    sourceToken: FeeToken,
+    ethereumToken: BaseFeeResponse["ethereumToken"],
+    actualGasMultiplier: number,
+    l2Type: BaseFeeResponse["l2_type"]
+  ): Promise<[BigNumber, BigNumber]> {
+    let l1ExecutionFee = BigNumber.from(0);
+    let l1ExecutionFeeWithMultiplier = BigNumber.from(0);
+
+    if (destToken.l1_gas_price_in_units) {
+      if (!executeData) {
+        console.warn(
+          `Since you did not provide executeData, this API will not accurately calculate the
+          total required fee as we will not be able to capture the L1 inclusion fee for this L2 chain.`
+        );
+      }
+
+      // Calculate the L1 execution fee. This value is in ETH.
+      l1ExecutionFee = await this.estimateL1GasFee(destChainId, {
+        executeData: executeData || "0x",
+        l1GasPrice: destToken.l1_gas_price_in_units,
+        l2Type,
+      });
+
+      // Convert the L1 execution fee to the source token
+      const srcTokenPrice = Number(sourceToken.token_price.usd);
+      const ethTokenPrice = Number(ethereumToken.token_price.usd);
+      const ethToSrcTokenPriceRatio = ethTokenPrice / srcTokenPrice;
+
+      const actualL1ExecutionFee = Math.ceil(l1ExecutionFee.toNumber() * ethToSrcTokenPriceRatio);
+
+      l1ExecutionFee = BigNumber.from(actualL1ExecutionFee.toString());
+
+      // Calculate the L1 execution fee with the gas multiplier
+      l1ExecutionFeeWithMultiplier = BigNumber.from(
+        Math.floor(actualGasMultiplier * actualGasMultiplier)
+      );
+    }
+
+    return [l1ExecutionFee, l1ExecutionFeeWithMultiplier];
+  }
+
   /**
    * Calculate estimated gas amount to pay for the gas receiver contract.
    * @param sourceChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
    * @param destinationChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
-   * @param sourceChainTokenSymbol
    * @param gasLimit An estimated gas amount required to execute `executeWithToken` function.
    * @param gasMultiplier (Optional) A multiplier used to create a buffer above the calculated gas fee, to account for potential slippage throughout tx execution, e.g. 1.1 = 10% buffer. supports up to 3 decimal places
    * The default value is "auto", which uses the gas multiplier from the fee response
+   * @param sourceChainTokenSymbol (Optional) the gas token symbol on the source chain.
    * @param minGasPrice (Optional) A minimum value, in wei, for the gas price on the destination chain that is used to override the estimated gas price if it falls below this specified value.
+   * @param executeData (Optional) The data to be executed on the destination chain. It's recommended to specify it if the destination chain is an L2 chain to calculate more accurate gas fee.
    * @param gmpParams (Optional) Additional parameters for GMP transactions, including the ability to see a detailed view of the fee response
    * @returns
    */
   public async estimateGasFee(
     sourceChainId: EvmChain | string,
     destinationChainId: EvmChain | string,
-    sourceChainTokenSymbol: GasToken | string,
     gasLimit: BigNumberish,
     gasMultiplier: number | "auto" = "auto",
+    sourceChainTokenSymbol?: GasToken | string,
     minGasPrice = "0",
+    executeData?: `0x${string}`,
     gmpParams?: GMPParams
   ): Promise<string | AxelarQueryAPIFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
 
-    const response = await this.getNativeGasBaseFee(
+    if (!BigNumber.from(gasLimit).gt(0)) {
+      throw new Error("Gas limit must be provided");
+    }
+
+    const {
+      baseFee,
+      expressFee,
+      sourceToken,
+      ethereumToken,
+      executeGasMultiplier,
+      destToken,
+      apiResponse,
+      l2_type,
+      success,
+      expressSupported,
+    } = await this.getNativeGasBaseFee(
       sourceChainId,
       destinationChainId,
       sourceChainTokenSymbol as GasToken,
@@ -277,23 +371,8 @@ export class AxelarQueryAPI {
       gmpParams?.transferAmountInUnits
     );
 
-    const {
-      baseFee,
-      expressFee,
-      sourceToken,
-      executeGasMultiplier,
-      destToken,
-      apiResponse,
-      success,
-      expressSupported,
-    } = response;
-
     if (!success || !baseFee || !sourceToken) {
       throw new Error("Failed to estimate gas fee");
-    }
-
-    if (!BigNumber.from(gasLimit).gt(0)) {
-      throw new Error("Gas limit must be provided");
     }
 
     const destGasFeeWei = BigNumberUtils.multiplyToGetWei(
@@ -320,19 +399,31 @@ export class AxelarQueryAPI {
         ? executionFee.mul(actualGasMultiplier * 10000).div(10000)
         : executionFee;
 
+    const [l1ExecutionFee, l1ExecutionFeeWithMultiplier] = await this.calculateL1FeeForDestL2(
+      destinationChainId,
+      destToken,
+      executeData,
+      sourceToken,
+      ethereumToken,
+      actualGasMultiplier,
+      l2_type
+    );
+
     return gmpParams?.showDetailedFees
       ? {
           baseFee,
           expressFee,
-          executionFee: executionFee.toString(),
+          executionFee: executionFeeWithMultiplier.toString(),
           executionFeeWithMultiplier: executionFeeWithMultiplier.toString(),
+          l1ExecutionFeeWithMultiplier: l1ExecutionFeeWithMultiplier.toString(),
+          l1ExecutionFee: l1ExecutionFee.toString(),
           gasLimit,
           gasMultiplier: actualGasMultiplier,
           minGasPrice: minGasPrice === "0" ? "NA" : minGasPrice,
           apiResponse,
           isExpressSupported: expressSupported,
         }
-      : executionFeeWithMultiplier.add(baseFee).toString();
+      : l1ExecutionFeeWithMultiplier.add(executionFeeWithMultiplier).add(baseFee).toString();
   }
 
   /**

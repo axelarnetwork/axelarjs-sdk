@@ -65,6 +65,17 @@ export interface AxelarQueryAPIConfig {
   debug?: boolean;
 }
 
+export type FeeToken = {
+  gas_price: string;
+  decimals: number;
+  name: string;
+  l1_gas_price_in_units?: TokenUnit;
+  symbol: string;
+  token_price: {
+    usd: number;
+  };
+};
+
 export interface BaseFeeResponse {
   success: boolean;
   apiResponse?: any;
@@ -72,16 +83,16 @@ export interface BaseFeeResponse {
   baseFee: string;
   expressFee: string;
   executeGasMultiplier: number;
-  sourceToken: {
-    gas_price: string;
-    decimals: number;
+  sourceToken: FeeToken;
+  destToken: FeeToken;
+  l2_type: "op" | "arb" | "mantle" | undefined;
+  ethereumToken: {
     name: string;
     symbol: string;
-  };
-  destToken: {
-    gas_price: string;
-    gas_price_gwei: string;
     decimals: number;
+    token_price: {
+      usd: number;
+    };
   };
   expressSupported: boolean;
 }
@@ -155,6 +166,7 @@ export interface TxResult {
 
 export interface QueryGasFeeOptions {
   provider?: ethers.providers.JsonRpcProvider;
+  gasTokenSymbol?: GasToken | string;
   gasMultipler?: number;
   shouldSubtractBaseFee?: boolean;
 }
@@ -224,4 +236,15 @@ export const isNativeToken = (
   environment: Environment
 ): boolean => {
   return nativeGasTokenSymbol[environment][chain]?.toLowerCase() === selectedToken?.toLowerCase();
+};
+
+export type TokenUnit = {
+  value: string;
+  decimals: number;
+};
+
+export type EstimateL1FeeParams = {
+  executeData: `0x${string}`;
+  l1GasPrice: TokenUnit;
+  l2Type?: "op" | "arb" | "mantle" | undefined;
 };

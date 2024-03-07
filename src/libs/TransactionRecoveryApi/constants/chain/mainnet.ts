@@ -1,12 +1,12 @@
 import { EvmChain } from "../../../../constants/EvmChain";
 import { Network } from "@ethersproject/networks";
 
-export const rpcMap: Partial<Record<EvmChain, string>> = {
+export const rpcMap: Partial<Record<EvmChain | string, string>> = {
   [EvmChain.FANTOM]: "https://rpc.ftm.tools",
   [EvmChain.POLYGON]: "https://polygon-rpc.com",
   [EvmChain.MOONBEAM]: "https://rpc.api.moonbeam.network",
   [EvmChain.AVALANCHE]: "https://api.avax.network/ext/bc/C/rpc",
-  [EvmChain.ETHEREUM]: "https://mainnet.infura.io/v3/510b6d5b3c56497b8070626a54f565a9",
+  [EvmChain.ETHEREUM]: "https://ethereum.publicnode.com",
   [EvmChain.AURORA]: "https://mainnet.aurora.dev",
   [EvmChain.BINANCE]: "https://bsc-dataseed.binance.org",
   [EvmChain.BNBCHAIN]: "https://bsc-dataseed.binance.org",

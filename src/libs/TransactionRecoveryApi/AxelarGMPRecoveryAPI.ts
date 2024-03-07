@@ -11,7 +11,6 @@ import {
   Environment,
 } from "../types";
 import { EvmChain } from "../../constants/EvmChain";
-import { GasToken } from "../../constants/GasToken";
 import {
   AxelarRecoveryApi,
   ExecuteParams,
@@ -21,7 +20,6 @@ import {
 import EVMClient from "./client/EVMClient";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
 import { ContractReceipt, ContractTransaction, ethers } from "ethers";
-import { nativeGasTokenSymbol } from "../../constants";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import rpcInfo from "./constants/chain";
 import {
@@ -189,7 +187,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           return currentBlock - gmpTx.call.blockNumber;
         }
 
-        console.log(receipt);
         return receipt.confirmations;
       });
 
@@ -742,7 +739,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txHash: string,
     sourceChain: string,
     destinationChain: string,
-    gasTokenSymbol: GasToken | string,
     estimatedGasUsed: number,
     options: QueryGasFeeOptions
   ): Promise<string> {
@@ -757,7 +753,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return this.subtractGasFee(
       sourceChain,
       destinationChain,
-      gasTokenSymbol,
       paidGasFee,
       estimatedGasUsed,
       options
@@ -777,7 +772,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txHash: string,
     sourceChain: EvmChain,
     destinationChain: EvmChain,
-    gasTokenSymbol: GasToken | string,
     estimatedGasUsed: number,
     options: QueryGasFeeOptions
   ): Promise<string> {
@@ -790,7 +784,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return this.subtractGasFee(
       sourceChain,
       destinationChain,
-      gasTokenSymbol,
       paidGasFee,
       estimatedGasUsed,
       options
@@ -864,9 +857,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             amount: await this.axelarQueryApi.estimateGasFee(
               tx.call.chain,
               tx.call.returnValues.destinationChain,
-              tx.gas_paid?.returnValues?.denom ?? "uaxl",
               gasLimit,
-              autocalculateGasOptions?.gasMultipler
+              autocalculateGasOptions?.gasMultipler,
+              tx.gas_paid?.returnValues?.denom ?? "uaxl"
             ),
           };
 
@@ -938,7 +931,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       chain,
       "gas_service"
     );
-    const gasToken = nativeGasTokenSymbol[this.environment][chain];
     const receipt = await signer.provider.getTransactionReceipt(txHash);
 
     if (!receipt) return InvalidTransactionError(chain);
@@ -960,7 +952,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         txHash,
         chain,
         destinationChain,
-        gasToken,
         estimatedGasUsed,
         {
           gasMultipler: options?.gasMultipler,
@@ -1054,7 +1045,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         txHash,
         chain,
         destinationChain as EvmChain,
-        gasTokenSymbol,
         estimatedGasUsed,
         {
           provider: evmWalletDetails.provider,
@@ -1161,7 +1151,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private async subtractGasFee(
     sourceChain: string,
     destinationChain: string,
-    gasTokenSymbol: string,
     paidGasFee: string,
     estimatedGas: number,
     options: QueryGasFeeOptions
@@ -1169,9 +1158,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const totalGasFee = await this.axelarQueryApi.estimateGasFee(
       sourceChain,
       destinationChain,
-      gasTokenSymbol,
       estimatedGas,
       options.gasMultipler,
+      options.gasTokenSymbol,
       undefined,
       undefined
     );
@@ -1179,7 +1168,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     let topupGasAmount = ethers.BigNumber.from(totalGasFee);
     if (options.shouldSubtractBaseFee) {
       const response = await this.axelarQueryApi
-        .getNativeGasBaseFee(sourceChain, destinationChain, gasTokenSymbol as GasToken)
+        .getNativeGasBaseFee(sourceChain, destinationChain)
         .catch(() => undefined);
       if (response && response.baseFee) {
         topupGasAmount = topupGasAmount.sub(response.baseFee);
