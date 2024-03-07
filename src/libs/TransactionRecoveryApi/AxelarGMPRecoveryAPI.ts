@@ -57,6 +57,7 @@ import s3 from "./constants/s3";
 import { Coin, OfflineSigner } from "@cosmjs/proto-signing";
 import { DeliverTxResponse, SigningStargateClient, StdFee } from "@cosmjs/stargate";
 import { COSMOS_GAS_RECEIVER_OPTIONS } from "./constants/cosmosGasReceiverOptions";
+import { JsonRpcProvider } from "@ethersproject/providers";
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
   [GMPStatus.DEST_EXECUTED]: ApproveGatewayError.ALREADY_EXECUTED,
@@ -175,14 +176,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return getCommandId(destChainId, txHash, eventIndex, this.environment, rpcInfo);
   }
 
-  public async doesTxMeetConfirmHt(chain: string, txHash: string) {
-    const confirmations = await this.getSigner(chain, { useWindowEthereum: false })
+  public async doesTxMeetConfirmHt(chain: string, txHash: string, provider?: JsonRpcProvider) {
+    const confirmations = await this.getSigner(chain, { useWindowEthereum: false, provider })
       .provider.getTransactionReceipt(txHash)
       .then(async (receipt?: TransactionReceipt) => {
         if (!receipt) {
           const gmpTx = await this.fetchGMPTransaction(txHash);
           const currentBlock = await this.getSigner(chain, {
             useWindowEthereum: false,
+            provider,
           }).provider.getBlockNumber();
           return currentBlock - gmpTx.call.blockNumber;
         }
@@ -216,7 +218,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChainId: string,
     destChainId: string,
     srcTxHash: string,
-    srcTxEventIndex: number | undefined
+    srcTxEventIndex: number | undefined,
+    evmWalletDetails?: EvmWalletDetails
   ): Promise<{
     commandId: string;
     eventResponse: EventResponse;
@@ -226,7 +229,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }> {
     const eventIndex =
       srcTxEventIndex ??
-      (await this.getEventIndex(srcChainId, srcTxHash)
+      (await this.getEventIndex(srcChainId, srcTxHash, evmWalletDetails)
         .then((index) => index as number)
         .catch(() => -1));
 
@@ -292,7 +295,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         ],
       };
     } else {
-      const isConfirmFinalized = await this.doesTxMeetConfirmHt(srcChain, txHash);
+      const isConfirmFinalized = await this.doesTxMeetConfirmHt(
+        srcChain,
+        txHash,
+        evmWalletDetails.provider
+      );
       if (!isConfirmFinalized) {
         const minConfirmLevel = await this.axelarQueryApi.getConfirmationHeight(srcChain);
         return {
@@ -315,7 +322,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      const updatedEvent = await this.getEvmEvent(srcChain, destChain, txHash, txEventIndex);
+      const updatedEvent = await this.getEvmEvent(
+        srcChain,
+        destChain,
+        txHash,
+        txEventIndex,
+        evmWalletDetails
+      );
 
       if (this.isEVMEventCompleted(updatedEvent?.eventResponse)) {
         return {
@@ -460,7 +473,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (routeDir === RouteDir.COSMOS_TO_EVM) {
       return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails, messageId);
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
-      return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex);
+      return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex, _evmWalletDetails);
     } else {
       return this.recoverEvmToEvmTx(
         srcChain,
@@ -486,10 +499,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private async recoverEvmToCosmosTx(
     srcChain: string,
     txHash: string,
-    txEventIndex?: number | null
+    txEventIndex?: number | null,
+    evmWalletDetails?: EvmWalletDetails
   ) {
     // Check if the tx is confirmed on the source chain
-    const isConfirmed = await this.doesTxMeetConfirmHt(srcChain, txHash);
+    const isConfirmed = await this.doesTxMeetConfirmHt(
+      srcChain,
+      txHash,
+      evmWalletDetails?.provider
+    );
     if (!isConfirmed) {
       const minConfirmLevel = await this.axelarQueryApi.getConfirmationHeight(srcChain);
       return {
@@ -790,8 +808,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     );
   }
 
-  public async getEventIndex(chain: string, txHash: string) {
-    const signer = this.getSigner(chain, { useWindowEthereum: false });
+  public async getEventIndex(chain: string, txHash: string, evmWalletDetails?: EvmWalletDetails) {
+    const signer = this.getSigner(chain, evmWalletDetails || { useWindowEthereum: false });
     const receipt = await signer.provider.getTransactionReceipt(txHash).catch(() => undefined);
 
     if (!receipt) {
