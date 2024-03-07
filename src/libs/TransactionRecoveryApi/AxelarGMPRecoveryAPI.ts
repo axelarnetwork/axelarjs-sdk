@@ -104,6 +104,7 @@ export enum RouteDir {
   COSMOS_TO_EVM = "cosmos_to_evm",
   EVM_TO_COSMOS = "evm_to_cosmos",
   EVM_TO_EVM = "evm_to_evm",
+  COSMOS_TO_COSMOS = "cosmos_to_cosmos",
 }
 
 export type SendOptions = {
@@ -473,7 +474,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (routeDir === RouteDir.COSMOS_TO_EVM) {
       return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails, messageId);
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
-      return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex, _evmWalletDetails);
+      return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex);
+    } else if (routeDir === RouteDir.COSMOS_TO_COSMOS) {
+      return this.recoverCosmosToCosmosTx(txHash);
     } else {
       return this.recoverEvmToEvmTx(
         srcChain,
@@ -491,9 +494,39 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       return RouteDir.COSMOS_TO_EVM;
     } else if (srcChain.module === "evm" && destChain.module === "axelarnet") {
       return RouteDir.EVM_TO_COSMOS;
+    } else if (srcChain.module === "axelarnet" && destChain.module === "axelarnet") {
+      return RouteDir.COSMOS_TO_COSMOS;
     } else {
       return RouteDir.EVM_TO_EVM;
     }
+  }
+
+  private async recoverCosmosToCosmosTx(txHash: string) {
+    const gmpTx = await this.fetchGMPTransaction(txHash);
+
+    // Fetch all necessary data to send the route message tx
+    const payload = gmpTx.call.returnValues.payload;
+    const messageId = gmpTx.call.id;
+
+    // Send the route message tx
+    const routeMessageTx = await this.routeMessageRequest(messageId, payload, -1).catch(
+      () => undefined
+    );
+
+    // If the `success` flag is false, return the error response
+    if (!routeMessageTx) {
+      return {
+        success: false,
+        error: "Failed to send RouteMessage to Axelar",
+      };
+    }
+
+    // Return the success response
+    return {
+      success: true,
+      routeMessageTx,
+      infoLogs: [`Successfully sent RouteMessage tx for given tx hash ${txHash}`],
+    };
   }
 
   private async recoverEvmToCosmosTx(

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Improved the accuracy of `estimateGasFee` function by incorporating L1 rollup fee for destination L2 chain.
 - Fix for `manualRelayToDestinationChain` to respect optional `provider` parameter
+- Add support for recovery of cosmos-to-cosmos GMP calls
 
 Breaking Changes:
 
