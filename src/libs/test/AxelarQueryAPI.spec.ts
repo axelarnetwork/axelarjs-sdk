@@ -92,6 +92,7 @@ describe("AxelarQueryAPI", () => {
     test("it should return 0 if the destination chain is not a L2 chain", async () => {
       const gasAmount = await mainnetApi.estimateL1GasFee(EvmChain.AVALANCHE, {
         executeData: "0x",
+        destChain: EvmChain.AVALANCHE,
         l1GasPrice: {
           decimals: 18,
           value: "32534506865",
@@ -103,6 +104,7 @@ describe("AxelarQueryAPI", () => {
     test("it should return the logical L1 gas fee for a destination L2 chain", async () => {
       const gasAmount = await mainnetApi.estimateL1GasFee(EvmChain.OPTIMISM, {
         executeData: MOCK_EXECUTE_DATA,
+        destChain: EvmChain.OPTIMISM,
         l1GasPrice: {
           decimals: 18,
           value: "32534506865",
