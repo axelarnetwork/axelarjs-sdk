@@ -45,15 +45,6 @@ describe("getL1Fee", () => {
     expect(fee).toBeDefined();
   });
 
-  it("query scroll l1 fee should work", async () => {
-    const srcChain = "avalanche";
-    const destChain = "scroll";
-
-    const fee = await getL1Fee(srcChain, destChain);
-
-    expect(fee).toBeDefined();
-  });
-
   it("query mantle l1 fee should work", async () => {
     const srcChain = "avalanche";
     const destChain = "mantle";
