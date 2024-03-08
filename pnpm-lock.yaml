@@ -39,8 +39,8 @@ dependencies:
     specifier: ^3.1.5
     version: 3.1.5
   ethereum-multicall:
-    specifier: ^2.21.0
-    version: 2.21.0
+    specifier: ^2.23.0
+    version: 2.23.0
   ethers:
     specifier: ^5.7.2
     version: 5.7.2
@@ -3566,8 +3566,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /ethereum-multicall@2.21.0:
-    resolution: {integrity: sha512-J234OuvUheTKvZVhMk41SwyB66m+MU+Xe2FFWOln8xu6TXKzOzsjSFQn/f5OTDGEiRStKMnJpCvQDim+Uk+qBQ==}
+  /ethereum-multicall@2.23.0:
+    resolution: {integrity: sha512-KVboRQSXzJ/czaD9UXIuYFKF9YwDsWORGDDRNyOtkBRYg7TUk2RkmqLcu/+uXUemdb3+XRcAU7c8bfdfOGfoiQ==}
     dependencies:
       '@ethersproject/providers': 5.7.2
       ethers: 5.7.2
