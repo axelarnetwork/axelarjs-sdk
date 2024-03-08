@@ -10,7 +10,7 @@ describe("Validations - Testnet", () => {
     describe("when called", () => {
       it("should validate chain identifiers", () => {
         expect(
-          throwIfInvalidChainIds([CHAINS.TESTNET.AVALANCHE, CHAINS.TESTNET.ETHEREUM], environment)
+          throwIfInvalidChainIds([CHAINS.TESTNET.AVALANCHE, CHAINS.TESTNET.SEPOLIA], environment)
         ).resolves.toBeUndefined();
       });
     });

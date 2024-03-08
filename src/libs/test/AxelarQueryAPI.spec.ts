@@ -198,7 +198,7 @@ describe("AxelarQueryAPI", () => {
       const baseFee = ethers.utils.parseEther(feeStub.result.base_fee.toString());
       const gasAmount = await api.estimateGasFee(
         CHAINS.TESTNET.AVALANCHE as EvmChain,
-        CHAINS.TESTNET.ETHEREUM as EvmChain,
+        CHAINS.TESTNET.SEPOLIA as EvmChain,
         gasLimit.toNumber(),
         1.1,
         undefined,
@@ -237,7 +237,7 @@ describe("AxelarQueryAPI", () => {
       const baseFee = ethers.utils.parseEther(feeStub.result.base_fee.toString());
       const gasAmount = await api.estimateGasFee(
         CHAINS.TESTNET.AVALANCHE as EvmChain,
-        CHAINS.TESTNET.ETHEREUM as EvmChain,
+        CHAINS.TESTNET.SEPOLIA as EvmChain,
         gasLimit.toNumber(),
         1.1,
         undefined,
