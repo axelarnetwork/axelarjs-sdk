@@ -163,7 +163,7 @@ describe("AxelarQueryAPI", () => {
 
     it("should be able to return the gas fee when the source chain is L2, but the executeData is undefined ", async () => {
       const response = await api.estimateGasFee(
-        "ethereum-2",
+        "ethereum-sepolia",
         EvmChain.OPTIMISM,
         700000,
         1.1,
