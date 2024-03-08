@@ -146,6 +146,21 @@ describe("AxelarQueryAPI", () => {
       expect(gasAmount).toBeDefined();
     });
 
+    test("It should work for scroll since it uses different gas oracle contract address", async () => {
+      const mainnetApi = new AxelarQueryAPI({ environment: Environment.MAINNET });
+      const gasAmount = await mainnetApi.estimateGasFee(
+        EvmChain.ETHEREUM,
+        EvmChain.SCROLL,
+        529994,
+        1,
+        undefined,
+        undefined,
+        MOCK_EXECUTE_DATA
+      );
+
+      expect(gasAmount).toBeDefined();
+    });
+
     it("should be able to return the gas fee when the source chain is L2, but the executeData is undefined ", async () => {
       const response = await api.estimateGasFee(
         "ethereum-2",
