@@ -310,7 +310,7 @@ export class AxelarQueryAPI {
       const ethTokenPrice = Number(ethereumToken.token_price.usd);
       const ethToSrcTokenPriceRatio = ethTokenPrice / srcTokenPrice;
 
-      const actualL1ExecutionFee = Math.ceil(l1ExecutionFee.toNumber() * ethToSrcTokenPriceRatio);
+      const actualL1ExecutionFee = l1ExecutionFee.mul(ethToSrcTokenPriceRatio * 1000).div(1000);
 
       l1ExecutionFee = BigNumber.from(actualL1ExecutionFee.toString());
 
