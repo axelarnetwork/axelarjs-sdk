@@ -24,13 +24,30 @@ export function getL1FeeForL2(
   provider: ethers.providers.JsonRpcProvider,
   params: EstimateL1FeeParams
 ): Promise<BigNumber> {
-  const multicall = new Multicall({ ethersProvider: provider, tryAggregate: true });
+  const { l1GasOracleAddress, destChain } = params;
+
+  // Temporary fix for the multicall contract address for blast. For other chains, it will be automatically detected by the library.
+  const multicallCustomContractAddress =
+    destChain === "blast" ? "0xcA11bde05977b3631167028862bE2a173976CA11" : undefined;
+
+  const multicall = new Multicall({
+    ethersProvider: provider,
+    tryAggregate: true,
+    multicallCustomContractAddress,
+  });
+  const _l1GasOracleAddress = l1GasOracleAddress || "0x420000000000000000000000000000000000000F";
 
   switch (params.l2Type) {
     case "mantle":
-      return getMantleL1Fee(multicall, params);
+      return getMantleL1Fee(multicall, {
+        ...params,
+        l1GasOracleAddress: _l1GasOracleAddress,
+      });
     case "op":
-      return getOptimismL1Fee(multicall, params);
+      return getOptimismL1Fee(multicall, {
+        ...params,
+        l1GasOracleAddress: _l1GasOracleAddress,
+      });
     // Most of the ethereum clients are already included L1 fee in the gas estimation for Arbitrum.
     case "arb":
     default:
@@ -39,15 +56,20 @@ export function getL1FeeForL2(
 }
 
 async function getOptimismL1Fee(multicall: Multicall, estimateL1FeeParams: EstimateL1FeeParams) {
-  const { l1GasPrice, executeData } = estimateL1FeeParams;
-  const results = await multicall.call(buildContractCallContext("optimism", executeData));
+  const { l1GasPrice, executeData, l1GasOracleAddress } = estimateL1FeeParams;
+
+  const results = await multicall.call(
+    buildContractCallContext("optimism", l1GasOracleAddress as string, executeData)
+  );
   const { gasUsed, fixedOverhead, dynamicOverhead } = extractMulticallResults("optimism", results);
   return calculateL1Fee(gasUsed, fixedOverhead, dynamicOverhead, BigNumber.from(l1GasPrice.value));
 }
 
 async function getMantleL1Fee(multicall: Multicall, estimateL1FeeParams: EstimateL1FeeParams) {
-  const { l1GasPrice, executeData } = estimateL1FeeParams;
-  const results = await multicall.call(buildContractCallContext("mantle", executeData));
+  const { l1GasPrice, executeData, l1GasOracleAddress } = estimateL1FeeParams;
+  const results = await multicall.call(
+    buildContractCallContext("mantle", l1GasOracleAddress as string, executeData)
+  );
   const { gasUsed, fixedOverhead, dynamicOverhead } = extractMulticallResults("mantle", results);
   return calculateL1Fee(gasUsed, fixedOverhead, dynamicOverhead, BigNumber.from(l1GasPrice.value));
 }
@@ -94,14 +116,14 @@ function calculateL1Fee(
 
 function buildContractCallContext(
   type: L1FeeCalculationType,
+  l1GasOracleAddress: string,
   executeData: string
 ): ContractCallContext[] {
-  const contractAddress = "0x420000000000000000000000000000000000000F";
   if (type === "optimism") {
     return [
       {
         reference: "gasOracle",
-        contractAddress,
+        contractAddress: l1GasOracleAddress,
         abi: ABI.Optimism,
         calls: [
           {
@@ -118,7 +140,7 @@ function buildContractCallContext(
     return [
       {
         reference: "gasOracle",
-        contractAddress,
+        contractAddress: l1GasOracleAddress,
         abi: ABI.Mantle,
         calls: [
           { reference: "overhead", methodName: "overhead", methodParameters: [] },

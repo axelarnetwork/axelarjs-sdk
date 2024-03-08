@@ -250,6 +250,7 @@ export class AxelarQueryAPI {
           token_price: destination_native_token.token_price,
           name: destination_native_token.name,
           symbol: destination_native_token.symbol,
+          l1_gas_oracle_address: destination_native_token.l1_gas_oracle_address,
           l1_gas_price_in_units: destination_native_token.l1_gas_price_in_units,
         },
         l2_type,
@@ -299,6 +300,8 @@ export class AxelarQueryAPI {
       l1ExecutionFee = await this.estimateL1GasFee(destChainId, {
         executeData: executeData || "0x",
         l1GasPrice: destToken.l1_gas_price_in_units,
+        l1GasOracleAddress: destToken.l1_gas_oracle_address,
+        destChain: destChainId,
         l2Type,
       });
 
