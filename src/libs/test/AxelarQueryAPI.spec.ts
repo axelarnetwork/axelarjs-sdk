@@ -164,7 +164,7 @@ describe("AxelarQueryAPI", () => {
     it("should be able to return the gas fee when the source chain is L2, but the executeData is undefined ", async () => {
       const response = await api.estimateGasFee(
         "ethereum-sepolia",
-        EvmChain.OPTIMISM,
+        EvmChain.OPTIMISM_SEPOLIA,
         700000,
         1.1,
         GasToken.USDC,
@@ -178,7 +178,7 @@ describe("AxelarQueryAPI", () => {
     test("It should return estimated gas amount that makes sense for native token", async () => {
       const gasAmount = await api.estimateGasFee(
         CHAINS.TESTNET.AVALANCHE as EvmChain,
-        CHAINS.TESTNET.ETHEREUM as EvmChain,
+        CHAINS.TESTNET.SEPOLIA as EvmChain,
         700000,
         1.1,
         undefined,
@@ -260,7 +260,7 @@ describe("AxelarQueryAPI", () => {
       vitest.spyOn(api, "getActiveChains").mockResolvedValueOnce(activeChainsStub());
       const gasResult = await api.getNativeGasBaseFee(
         CHAINS.TESTNET.AVALANCHE as EvmChain,
-        CHAINS.TESTNET.ETHEREUM as EvmChain
+        CHAINS.TESTNET.SEPOLIA as EvmChain
       );
       expect(gasResult.success).toBeTruthy();
       expect(gasResult.baseFee).toBeDefined();

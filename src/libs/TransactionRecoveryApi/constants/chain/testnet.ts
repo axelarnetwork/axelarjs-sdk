@@ -6,19 +6,13 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.POLYGON]: "https://rpc-mumbai.maticvigil.com",
   [EvmChain.MOONBEAM]: "https://rpc.api.moonbase.moonbeam.network",
   [EvmChain.AVALANCHE]: "https://api.avax-test.network/ext/bc/C/rpc",
-  "ethereum-2": "https://ethereum-goerli-rpc.publicnode.com",
   [EvmChain.AURORA]: "https://testnet.aurora.dev",
   [EvmChain.BINANCE]: "https://data-seed-prebsc-1-s1.binance.org:8545",
   [EvmChain.BNBCHAIN]: "https://data-seed-prebsc-1-s1.binance.org:8545",
-  [EvmChain.ARBITRUM]: "https://goerli-rollup.arbitrum.io/rpc",
   [EvmChain.CELO]: "https://alfajores-forno.celo-testnet.org",
   [EvmChain.KAVA]: "https://evm.testnet.kava.io",
-  [EvmChain.BASE]: "https://goerli.base.org",
   "filecoin-2": "https://rpc.ankr.com/filecoin_testnet",
-  [EvmChain.OPTIMISM]: "https://goerli.optimism.io",
-  [EvmChain.LINEA]: "https://rpc.goerli.linea.build",
   [EvmChain.POLYGON_ZKEVM]: "https://testnet-zkevm.polygonscan.com",
-  [EvmChain.MANTLE]: "https://rpc.testnet.mantle.xyz",
   [EvmChain.SCROLL]: "https://sepolia-rpc.scroll.io",
   [EvmChain.IMMUTABLE]: "https://rpc.testnet.immutable.com",
   [EvmChain.SEPOLIA]: "https://1rpc.io/sepolia",
@@ -53,10 +47,6 @@ export const networkInfo: Record<EvmChain | string, Network> = {
     chainId: 43113,
     name: EvmChain.AVALANCHE,
   },
-  "ethereum-2": {
-    chainId: 5,
-    name: EvmChain.ETHEREUM,
-  },
   [EvmChain.AURORA]: {
     chainId: 1313161555,
     name: EvmChain.AURORA,
@@ -69,10 +59,6 @@ export const networkInfo: Record<EvmChain | string, Network> = {
     chainId: 97,
     name: EvmChain.BNBCHAIN,
   },
-  [EvmChain.ARBITRUM]: {
-    chainId: 421613,
-    name: `${EvmChain.ARBITRUM}-goerli`,
-  },
   [EvmChain.CELO]: {
     chainId: 44787,
     name: EvmChain.CELO,
@@ -81,25 +67,13 @@ export const networkInfo: Record<EvmChain | string, Network> = {
     chainId: 2221,
     name: EvmChain.KAVA,
   },
-  [EvmChain.BASE]: {
-    chainId: 84_531,
-    name: EvmChain.BASE,
-  },
   "filecoin-2": {
     chainId: 314159,
     name: EvmChain.FILECOIN,
   },
-  [EvmChain.OPTIMISM]: {
-    chainId: 420,
-    name: `${EvmChain.OPTIMISM}-goerli`,
-  },
   [EvmChain.LINEA]: {
     chainId: 59140,
     name: EvmChain.LINEA,
-  },
-  [EvmChain.MANTLE]: {
-    chainId: 5001,
-    name: EvmChain.MANTLE,
   },
   [EvmChain.SCROLL]: {
     chainId: 534351,
