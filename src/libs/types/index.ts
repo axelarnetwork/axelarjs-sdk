@@ -69,6 +69,7 @@ export type FeeToken = {
   gas_price: string;
   decimals: number;
   name: string;
+  l1_gas_oracle_address?: string;
   l1_gas_price_in_units?: TokenUnit;
   symbol: string;
   token_price: {
@@ -246,5 +247,7 @@ export type TokenUnit = {
 export type EstimateL1FeeParams = {
   executeData: `0x${string}`;
   l1GasPrice: TokenUnit;
+  destChain: string;
+  l1GasOracleAddress?: string | undefined;
   l2Type?: "op" | "arb" | "mantle" | undefined;
 };

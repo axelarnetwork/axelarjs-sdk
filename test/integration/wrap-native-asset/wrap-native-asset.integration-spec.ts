@@ -14,7 +14,7 @@ describe(
       beforeAll(async () => {
         depositAddress = await sdk.getDepositAddressForNativeWrap(
           CHAINS.TESTNET.AVALANCHE,
-          CHAINS.TESTNET.ETHEREUM,
+          CHAINS.TESTNET.SEPOLIA,
           evmAddress
         );
       });
