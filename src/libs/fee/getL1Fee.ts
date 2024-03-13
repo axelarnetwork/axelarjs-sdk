@@ -5,10 +5,10 @@ import { EstimateL1FeeParams } from "../types";
 
 const ABI = {
   Optimism: [
-    // "function getL1GasUsed(bytes executeData) view returns (uint256)",
+    "function getL1GasUsed(bytes executeData) view returns (uint256)",
     // "function scalar() view returns (uint256)",
     // "function overhead() view returns (uint256)",
-    "function getL1Fee(bytes executeData) view returns (uint256)",
+    // "function getL1Fee(bytes executeData) view returns (uint256)",
   ],
   Mantle: [
     "function overhead() view returns (uint256)",
@@ -68,15 +68,9 @@ async function getOptimismL1Fee(
   );
 
   const contract = new ethers.Contract(callContext.contractAddress, callContext.abi, provider);
-  const _l1GasUsed = contract.getL1Fee(executeData);
-  const [gasUsed] = await Promise.all([_l1GasUsed]);
+  const l1GasUsed = await contract.getL1GasUsed(executeData);
 
-  return calculateL1Fee(
-    gasUsed,
-    BigNumber.from(0),
-    BigNumber.from(1_000_000),
-    BigNumber.from(l1GasPrice.value)
-  );
+  return l1GasUsed.mul(BigNumber.from(l1GasPrice.value));
 }
 
 async function getMantleL1Fee(
