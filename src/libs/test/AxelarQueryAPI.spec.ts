@@ -131,7 +131,7 @@ describe("AxelarQueryAPI", () => {
       expect(ethers.utils.parseEther("10000").gt(gasAmount as BigNumberish)).toBeTruthy();
     });
 
-    test.only("It should include L1 fee for L2 destination chain", async () => {
+    test("It should include L1 fee for L2 destination chain", async () => {
       // Testnet
       const l2Chains = [
         "fraxtal",
