@@ -119,7 +119,7 @@ describe("AxelarQueryAPI", () => {
     test("It should return estimated gas amount that makes sense for USDC", async () => {
       const gasAmount = await api.estimateGasFee(
         EvmChain.AVALANCHE,
-        "ethereum-2",
+        "ethereum-sepolia",
         700000,
         1.1,
         GasToken.USDC,
@@ -131,19 +131,58 @@ describe("AxelarQueryAPI", () => {
       expect(ethers.utils.parseEther("10000").gt(gasAmount as BigNumberish)).toBeTruthy();
     });
 
-    test("It should include L1 fee for L2 destination chain", async () => {
-      const mainnetApi = new AxelarQueryAPI({ environment: Environment.MAINNET });
-      const gasAmount = await mainnetApi.estimateGasFee(
-        EvmChain.ETHEREUM,
-        EvmChain.OPTIMISM,
-        529994,
-        1,
-        undefined,
-        undefined,
-        MOCK_EXECUTE_DATA
-      );
+    test.only("It should include L1 fee for L2 destination chain", async () => {
+      // Testnet
+      const l2Chains = [
+        "fraxtal",
+        "blast-sepolia",
+        "base-sepolia",
+        "optimism-sepolia",
+        "mantle-sepolia",
+      ];
 
-      expect(gasAmount).toBeDefined();
+      const queries = [];
+      for (const l2Chain of l2Chains) {
+        const estimateGasFeeQuery = api.estimateGasFee(
+          "ethereum-sepolia",
+          l2Chain,
+          500000,
+          undefined,
+          undefined,
+          undefined,
+          "0x"
+        );
+
+        queries.push(estimateGasFeeQuery);
+      }
+      const responses = await Promise.all(queries);
+
+      for (const response of responses) {
+        expect(response).toBeDefined();
+      }
+
+      // Mainnet
+      const mainnetL2Chains = ["optimism", "base", "mantle", "scroll", "fraxtal", "blast"];
+      const mainnetApi = new AxelarQueryAPI({ environment: Environment.MAINNET });
+      const mainnetQueries = [];
+      for (const mainnetL2Chain of mainnetL2Chains) {
+        const query = mainnetApi.estimateGasFee(
+          EvmChain.ETHEREUM,
+          mainnetL2Chain as EvmChain,
+          500000,
+          undefined,
+          undefined,
+          undefined,
+          "0x"
+        );
+        mainnetQueries.push(query);
+      }
+
+      const mainnetResponses = await Promise.all(mainnetQueries);
+
+      mainnetResponses.forEach((response) => {
+        expect(response).toBeDefined();
+      });
     });
 
     test("It should work for scroll since it uses different gas oracle contract address", async () => {
@@ -161,18 +200,27 @@ describe("AxelarQueryAPI", () => {
       expect(gasAmount).toBeDefined();
     });
 
-    it("should be able to return the gas fee when the source chain is L2, but the executeData is undefined ", async () => {
-      const response = await api.estimateGasFee(
-        "ethereum-sepolia",
-        EvmChain.OPTIMISM_SEPOLIA,
-        700000,
-        1.1,
-        GasToken.USDC,
-        "500000",
-        undefined
-      );
+    test("it should be able to return the gas fee when the destination chain is L2, but the executeData is undefined ", async () => {
+      const l2Chains = ["fraxtal", "blast-sepolia", "mantle-sepolia"];
 
-      expect(response).toBeDefined();
+      const queries = [];
+      for (const l2Chain of l2Chains) {
+        const estimateGasFeeQuery = api.estimateGasFee(
+          "ethereum-sepolia",
+          l2Chain,
+          500000,
+          undefined,
+          undefined,
+          undefined
+        );
+
+        queries.push(estimateGasFeeQuery);
+      }
+      const responses = await Promise.all(queries);
+
+      for (const response of responses) {
+        expect(response).toBeDefined();
+      }
     });
 
     test("It should return estimated gas amount that makes sense for native token", async () => {

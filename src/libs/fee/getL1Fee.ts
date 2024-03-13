@@ -2,15 +2,24 @@
 
 import { BigNumber, ethers } from "ethers";
 import { EstimateL1FeeParams } from "../types";
-import { Multicall, ContractCallContext, ContractCallResults } from "ethereum-multicall";
 
 const ABI = {
   Optimism: [
-    "function getL1GasUsed(bytes executeData) returns (uint256)",
-    "function scalar() returns (uint256)",
-    "function overhead() returns (uint256)",
+    // "function getL1GasUsed(bytes executeData) view returns (uint256)",
+    // "function scalar() view returns (uint256)",
+    // "function overhead() view returns (uint256)",
+    "function getL1Fee(bytes executeData) view returns (uint256)",
   ],
-  Mantle: ["function overhead() returns (uint256)", "function scalar() returns (uint256)"],
+  Mantle: [
+    "function overhead() view returns (uint256)",
+    "function scalar() view returns (uint256)",
+  ],
+};
+
+export type ContractCallContext = {
+  reference: string;
+  contractAddress: string;
+  abi: any;
 };
 
 /**
@@ -24,27 +33,18 @@ export function getL1FeeForL2(
   provider: ethers.providers.JsonRpcProvider,
   params: EstimateL1FeeParams
 ): Promise<BigNumber> {
-  const { l1GasOracleAddress, destChain } = params;
+  const { l1GasOracleAddress } = params;
 
-  // Temporary fix for the multicall contract address for blast. For other chains, it will be automatically detected by the library.
-  const multicallCustomContractAddress =
-    destChain === "blast" ? "0xcA11bde05977b3631167028862bE2a173976CA11" : undefined;
-
-  const multicall = new Multicall({
-    ethersProvider: provider,
-    tryAggregate: true,
-    multicallCustomContractAddress,
-  });
   const _l1GasOracleAddress = l1GasOracleAddress || "0x420000000000000000000000000000000000000F";
 
   switch (params.l2Type) {
     case "mantle":
-      return getMantleL1Fee(multicall, {
+      return getMantleL1Fee(provider, {
         ...params,
         l1GasOracleAddress: _l1GasOracleAddress,
       });
     case "op":
-      return getOptimismL1Fee(multicall, {
+      return getOptimismL1Fee(provider, {
         ...params,
         l1GasOracleAddress: _l1GasOracleAddress,
       });
@@ -55,51 +55,53 @@ export function getL1FeeForL2(
   }
 }
 
-async function getOptimismL1Fee(multicall: Multicall, estimateL1FeeParams: EstimateL1FeeParams) {
-  const { l1GasPrice, executeData, l1GasOracleAddress } = estimateL1FeeParams;
-
-  const results = await multicall.call(
-    buildContractCallContext("optimism", l1GasOracleAddress as string, executeData)
-  );
-  const { gasUsed, fixedOverhead, dynamicOverhead } = extractMulticallResults("optimism", results);
-  return calculateL1Fee(gasUsed, fixedOverhead, dynamicOverhead, BigNumber.from(l1GasPrice.value));
-}
-
-async function getMantleL1Fee(multicall: Multicall, estimateL1FeeParams: EstimateL1FeeParams) {
-  const { l1GasPrice, executeData, l1GasOracleAddress } = estimateL1FeeParams;
-  const results = await multicall.call(
-    buildContractCallContext("mantle", l1GasOracleAddress as string, executeData)
-  );
-  const { gasUsed, fixedOverhead, dynamicOverhead } = extractMulticallResults("mantle", results);
-  return calculateL1Fee(gasUsed, fixedOverhead, dynamicOverhead, BigNumber.from(l1GasPrice.value));
-}
-
-function extractMulticallResults(
-  type: L1FeeCalculationType,
-  contractCallResults: ContractCallResults
+async function getOptimismL1Fee(
+  provider: ethers.providers.Provider,
+  estimateL1FeeParams: EstimateL1FeeParams
 ) {
-  const { results } = contractCallResults;
+  const { l1GasPrice, executeData, l1GasOracleAddress } = estimateL1FeeParams;
 
-  if (type === "optimism") {
-    const returnContexts = results["gasOracle"].callsReturnContext;
-    const gasUsed = BigNumber.from(returnContexts[0].returnValues[0].hex);
-    const dynamicOverhead = BigNumber.from(returnContexts[1].returnValues[0] || 684000);
-    const fixedOverhead = BigNumber.from(returnContexts[2].returnValues[0] || 2100);
+  const [callContext] = buildContractCallContext(
+    "optimism",
+    l1GasOracleAddress as string,
+    executeData
+  );
 
-    return { gasUsed, fixedOverhead, dynamicOverhead };
-  } else if (type === "mantle") {
-    const [fixedOverhead, dynamicOverhead] = results.gasOracle.callsReturnContext.map(
-      (call) => call.returnValues
-    );
+  const contract = new ethers.Contract(callContext.contractAddress, callContext.abi, provider);
+  const _l1GasUsed = contract.getL1Fee(executeData);
+  const [gasUsed] = await Promise.all([_l1GasUsed]);
 
-    return {
-      gasUsed: BigNumber.from(0),
-      fixedOverhead: BigNumber.from(fixedOverhead),
-      dynamicOverhead: BigNumber.from(dynamicOverhead),
-    };
-  }
+  return calculateL1Fee(
+    gasUsed,
+    BigNumber.from(0),
+    BigNumber.from(1_000_000),
+    BigNumber.from(l1GasPrice.value)
+  );
+}
 
-  throw new Error("Invalid type");
+async function getMantleL1Fee(
+  provider: ethers.providers.Provider,
+  estimateL1FeeParams: EstimateL1FeeParams
+) {
+  const { l1GasPrice, executeData, l1GasOracleAddress } = estimateL1FeeParams;
+
+  const [callContext] = buildContractCallContext(
+    "mantle",
+    l1GasOracleAddress as string,
+    executeData
+  );
+
+  const contract = new ethers.Contract(callContext.contractAddress, callContext.abi, provider);
+  const _scalar = contract.scalar();
+  const _overhead = contract.overhead();
+  const [dynamicOverhead, fixedOverhead] = await Promise.all([_scalar, _overhead]);
+
+  return calculateL1Fee(
+    BigNumber.from(0),
+    fixedOverhead || 2100,
+    dynamicOverhead || 684000,
+    BigNumber.from(l1GasPrice.value)
+  );
 }
 
 type L1FeeCalculationType = "optimism" | "mantle";
@@ -125,15 +127,6 @@ function buildContractCallContext(
         reference: "gasOracle",
         contractAddress: l1GasOracleAddress,
         abi: ABI.Optimism,
-        calls: [
-          {
-            reference: "l1GasUsed",
-            methodName: "getL1GasUsed(bytes)",
-            methodParameters: [executeData],
-          },
-          { reference: "scalar", methodName: "scalar()", methodParameters: [] },
-          { reference: "overhead", methodName: "overhead()", methodParameters: [] },
-        ],
       },
     ];
   } else if (type === "mantle") {
@@ -142,10 +135,6 @@ function buildContractCallContext(
         reference: "gasOracle",
         contractAddress: l1GasOracleAddress,
         abi: ABI.Mantle,
-        calls: [
-          { reference: "overhead", methodName: "overhead", methodParameters: [] },
-          { reference: "scalar", methodName: "scalar", methodParameters: [] },
-        ],
       },
     ];
   }
