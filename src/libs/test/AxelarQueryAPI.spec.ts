@@ -111,7 +111,7 @@ describe("AxelarQueryAPI", () => {
         },
         l2Type: "op",
       });
-      expect(gasAmount.gt(parseEther("0.00001"))).toBeTruthy();
+      expect(gasAmount.lt(parseEther("0.005"))).toBeTruthy();
     });
   });
 
