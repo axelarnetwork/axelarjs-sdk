@@ -26,30 +26,15 @@ async function getL1Fee(srcChain: string, destChain: string) {
 }
 
 describe("getL1Fee", () => {
-  it.only("query optimism l1 fee should work", async () => {
-    const srcChain = "avalanche";
-    const destChain = "base";
+  it("query l1 fee for l2 chains should work", async () => {
+    const srcChain = "ethereum";
+    const destChains = ["optimism", "blast", "mantle", "fraxtal", "base"];
 
-    const fee = await getL1Fee(srcChain, destChain);
+    const queries = destChains.map((destChain) => getL1Fee(srcChain, destChain));
 
-    expect(fee).toBeDefined();
-  });
+    const fees = await Promise.all(queries);
 
-  it("query blast l1 fee should work", async () => {
-    const srcChain = "avalanche";
-    const destChain = "blast";
-
-    const fee = await getL1Fee(srcChain, destChain);
-
-    expect(fee).toBeDefined();
-  });
-
-  it("query mantle l1 fee should work", async () => {
-    const srcChain = "avalanche";
-    const destChain = "mantle";
-
-    const fee = await getL1Fee(srcChain, destChain);
-
-    expect(fee).toBeDefined();
+    expect(fees.length).toBe(destChains.length);
+    expect(fees.every((fee) => fee.gt(0))).toBe(true);
   });
 });
