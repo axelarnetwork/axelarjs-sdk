@@ -172,8 +172,7 @@ describe("AxelarQueryAPI", () => {
           500000,
           undefined,
           undefined,
-          undefined,
-          "0x"
+          undefined
         );
         mainnetQueries.push(query);
       }
