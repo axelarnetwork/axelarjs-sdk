@@ -1,7 +1,7 @@
 import { AssetConfig } from "../assets/types";
 import { parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
-import { EnvironmentConfigs, getConfigs } from "../constants";
+import { DEFAULT_L1_EXECUTE_DATA, EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
 import {
   AxelarQueryAPIConfig,
@@ -23,7 +23,7 @@ import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 import { BigNumber, BigNumberish, ethers } from "ethers";
-import { ChainInfo } from "src/chains/types";
+import { ChainInfo } from "../chains/types";
 import { BigNumberUtils } from "./BigNumberUtils";
 import { rpcMap as testnetRpcMap } from "./TransactionRecoveryApi/constants/chain/testnet";
 import { rpcMap as mainnetRpcMap } from "./TransactionRecoveryApi/constants/chain/mainnet";
@@ -298,7 +298,7 @@ export class AxelarQueryAPI {
 
       // Calculate the L1 execution fee. This value is in ETH.
       l1ExecutionFee = await this.estimateL1GasFee(destChainId, {
-        executeData: executeData || "0x",
+        executeData: executeData || DEFAULT_L1_EXECUTE_DATA,
         l1GasPrice: destToken.l1_gas_price_in_units,
         l1GasOracleAddress: destToken.l1_gas_oracle_address,
         destChain: destChainId,
@@ -317,9 +317,7 @@ export class AxelarQueryAPI {
       l1ExecutionFee = BigNumber.from(actualL1ExecutionFee.toString());
 
       // Calculate the L1 execution fee with the gas multiplier
-      l1ExecutionFeeWithMultiplier = BigNumber.from(
-        Math.floor(actualGasMultiplier * actualGasMultiplier)
-      );
+      l1ExecutionFeeWithMultiplier = l1ExecutionFee.mul(actualGasMultiplier * 10000).div(10000);
     }
 
     return [l1ExecutionFee, l1ExecutionFeeWithMultiplier];
@@ -418,7 +416,7 @@ export class AxelarQueryAPI {
       ? {
           baseFee,
           expressFee,
-          executionFee: executionFeeWithMultiplier.toString(),
+          executionFee: executionFee.toString(),
           executionFeeWithMultiplier: executionFeeWithMultiplier.toString(),
           l1ExecutionFeeWithMultiplier: l1ExecutionFeeWithMultiplier.toString(),
           l1ExecutionFee: l1ExecutionFee.toString(),
