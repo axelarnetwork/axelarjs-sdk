@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.15.0] - 2024-MARCH-X
+## [0.15.0] - 2024-MARCH-20
 
 - Improved the accuracy of `estimateGasFee` function by incorporating L1 rollup fee for destination L2 chain.
 - Fixed gas estimation for scroll and blast
