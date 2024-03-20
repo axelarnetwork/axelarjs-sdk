@@ -16,6 +16,7 @@ async function getL1Fee(srcChain: string, destChain: string) {
     executeData: DEFAULT_L1_EXECUTE_DATA,
     destChain,
     l1GasPrice: destToken.l1_gas_price_in_units!,
+    l1GasOracleAddress: destToken.l1_gas_oracle_address,
     l2Type: l2_type,
   };
 
@@ -28,13 +29,26 @@ async function getL1Fee(srcChain: string, destChain: string) {
 describe("getL1Fee", () => {
   it("query l1 fee for l2 chains should work", async () => {
     const srcChain = "ethereum";
-    const destChains = ["optimism", "blast", "mantle", "fraxtal", "base"];
+    const destChainsThatShouldIncludeL1Fees = ["optimism", "blast", "fraxtal", "base", "scroll"];
 
-    const queries = destChains.map((destChain) => getL1Fee(srcChain, destChain));
+    const l1FeeQueries = destChainsThatShouldIncludeL1Fees.map((destChain) =>
+      getL1Fee(srcChain, destChain)
+    );
 
-    const fees = await Promise.all(queries);
+    const fees = await Promise.all(l1FeeQueries);
 
-    expect(fees.length).toBe(destChains.length);
+    expect(fees.length).toBe(destChainsThatShouldIncludeL1Fees.length);
     expect(fees.every((fee) => fee.gt(0))).toBe(true);
+
+    const destChainsThatShouldNotIncludeL1Fees = ["mantle", "arbitrum"];
+
+    const ZeroL1FeeQueries = destChainsThatShouldNotIncludeL1Fees.map((destChain) =>
+      getL1Fee(srcChain, destChain)
+    );
+
+    const fees2 = await Promise.all(ZeroL1FeeQueries);
+
+    expect(fees2.length).toBe(destChainsThatShouldNotIncludeL1Fees.length);
+    expect(fees2.every((fee) => fee.eq(0))).toBe(true);
   });
 });
