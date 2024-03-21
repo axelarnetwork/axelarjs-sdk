@@ -474,7 +474,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (routeDir === RouteDir.COSMOS_TO_EVM) {
       return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails, messageId);
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
-      return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex);
+      return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex, _evmWalletDetails);
     } else if (routeDir === RouteDir.COSMOS_TO_COSMOS) {
       return this.recoverCosmosToCosmosTx(txHash);
     } else {
