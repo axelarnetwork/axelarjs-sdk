@@ -16,4 +16,10 @@ export class BigNumberUtils {
   public static divideToGetWei(bn: BigNumber | string, number: string, units: number): BigNumber {
     return BigNumber.from(bn).div(parseUnits(number, units));
   }
+
+  public static convertTokenAmount(eth: string, sourceDecimals: number, targetDecimals: number) {
+    return parseUnits(eth, sourceDecimals)
+      .mul(BigNumber.from(10).pow(targetDecimals))
+      .div(BigNumber.from(10).pow(sourceDecimals));
+  }
 }
