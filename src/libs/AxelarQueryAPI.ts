@@ -343,7 +343,7 @@ export class AxelarQueryAPI {
     gasMultiplier: number | "auto" = "auto",
     sourceChainTokenSymbol?: GasToken | string,
     minGasPrice = "0",
-    executeData?: `0x${string}`,
+    executeData?: string,
     gmpParams?: GMPParams
   ): Promise<string | AxelarQueryAPIFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
