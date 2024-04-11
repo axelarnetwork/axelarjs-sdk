@@ -31,8 +31,6 @@ describe("AxelarDepositRecoveryAPI", () => {
       const txHash = "0x2c9083bebd1f82b86b7b0d3298885f90767b584742df9ec3a9c9f15872a1fff9";
       const eventIndex = await api.getEventIndex("ethereum-2" as EvmChain, txHash);
       const res = await api.getCidFromSrcTxHash(EvmChain.MOONBEAM, txHash, eventIndex as number);
-      console.log("eventIndex", eventIndex);
-      console.log("res", res);
       expect(res).toEqual("58c46960e6483f61bf206d1bd1819917d2b009f58d7050e05b4be1d13247b4ed");
     }, 60000);
   });
