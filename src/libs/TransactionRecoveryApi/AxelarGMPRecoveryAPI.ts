@@ -1152,7 +1152,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const executeParams = response.data as ExecuteParams;
     const gasLimitBuffer = evmWalletDetails?.gasLimitBuffer || 0;
-    const { destinationChain, destinationContractAddress, srcTxInfo } = executeParams;
+    const { destinationChain, destinationContractAddress } = executeParams;
 
     const signer = this.getSigner(
       destinationChain,
