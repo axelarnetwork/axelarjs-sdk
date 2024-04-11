@@ -245,7 +245,7 @@ export type TokenUnit = {
 };
 
 export type EstimateL1FeeParams = {
-  executeData: `0x${string}`;
+  executeData: string;
   l1GasPrice: TokenUnit;
   destChain: string;
   l1GasOracleAddress?: string | undefined;

@@ -279,7 +279,7 @@ export class AxelarQueryAPI {
   public async calculateL1FeeForDestL2(
     destChainId: EvmChain | string,
     destToken: FeeToken,
-    executeData: `0x${string}` | undefined,
+    executeData: string | undefined,
     sourceToken: FeeToken,
     ethereumToken: BaseFeeResponse["ethereumToken"],
     actualGasMultiplier: number,
