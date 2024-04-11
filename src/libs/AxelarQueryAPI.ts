@@ -279,7 +279,7 @@ export class AxelarQueryAPI {
   public async calculateL1FeeForDestL2(
     destChainId: EvmChain | string,
     destToken: FeeToken,
-    executeData: `0x${string}` | undefined,
+    executeData: string | undefined,
     sourceToken: FeeToken,
     ethereumToken: BaseFeeResponse["ethereumToken"],
     actualGasMultiplier: number,
@@ -343,7 +343,7 @@ export class AxelarQueryAPI {
     gasMultiplier: number | "auto" = "auto",
     sourceChainTokenSymbol?: GasToken | string,
     minGasPrice = "0",
-    executeData?: `0x${string}`,
+    executeData?: string,
     gmpParams?: GMPParams
   ): Promise<string | AxelarQueryAPIFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
