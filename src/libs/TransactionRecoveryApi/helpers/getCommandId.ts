@@ -2,7 +2,7 @@ import { arrayify, concat, hexlify, hexZeroPad, keccak256 } from "ethers/lib/uti
 
 const stringToCharcodeArray = (text: string) => Array.from(text, (char) => char.charCodeAt(0));
 
-// This function should be called from evm source chain only. It doesn't work properly if it's called from cosmos-based or others chains.
+// This function is specifically designed for use with EVM-based chains. Its behavior may not be as expected if used with Cosmos-based chains or other types of chains.
 export const getCommandId = (messageId: string, sourceEventIndex: number, chainId: number) => {
   if (messageId.includes("-")) {
     return keccak256(concat([stringToCharcodeArray(messageId), hexlify(chainId)]));
