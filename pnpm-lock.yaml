@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@axelar-network/axelar-cgp-solidity':
-    specifier: ^4.5.0
-    version: 4.5.0
+    specifier: ^6.3.0
+    version: 6.3.0
   '@axelar-network/axelarjs-types':
     specifier: ^0.33.0
     version: 0.33.0
@@ -165,6 +165,19 @@ packages:
   /@axelar-network/axelar-cgp-solidity@4.5.0:
     resolution: {integrity: sha512-4F4rmHei0cmzeUR7/mW4Bap5rc/KlPV2crD9HA7HTRfl15mVcN6/3z8p+pAm9We6bOrQplNW9KBZ3HJFP3C1Gw==}
     engines: {node: ^16.0.0 || ^18.0.0}
+    dev: true
+
+  /@axelar-network/axelar-cgp-solidity@6.3.0:
+    resolution: {integrity: sha512-dHE2UgaFZvQvL0ythMi+aBsr4t+eR6zrVGmCU5BxslEqi6Tx+Wmjwg1O1p15EqoztalSqRKj+r57n3GtgeUpig==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@axelar-network/axelar-gmp-sdk-solidity': 5.7.0
+    dev: false
+
+  /@axelar-network/axelar-gmp-sdk-solidity@5.7.0:
+    resolution: {integrity: sha512-JlokiWFxvR6bFQtDjdErtk0mZrr3GH1A8bKps1zVP/Bu4XOHR0WsrWGPVhWIbvT8a8Ag3dva4hskBYgdq+pLig==}
+    engines: {node: '>=18'}
+    dev: false
 
   /@axelar-network/axelar-local-dev@1.0.2:
     resolution: {integrity: sha512-sb+8gLNF/xMztN2m05mm8Rh1hpG298DPOqEtOZsQz0LTbhzFe/yKoIgOuO++0G9w5o4u/skTQA1SOSpMWC0M/w==}
