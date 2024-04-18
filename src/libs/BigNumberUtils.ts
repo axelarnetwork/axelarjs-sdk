@@ -17,9 +17,11 @@ export class BigNumberUtils {
     return BigNumber.from(bn).div(parseUnits(number, units));
   }
 
-  public static convertTokenAmount(eth: string, sourceDecimals: number, targetDecimals: number) {
-    return parseUnits(eth, sourceDecimals)
-      .mul(parseUnits("1", targetDecimals))
-      .div(parseUnits("1", sourceDecimals));
+  public static convertTokenAmount(
+    ethAmount: BigNumber,
+    sourceDecimals: number,
+    targetDecimals: number
+  ) {
+    return ethAmount.mul(parseUnits("1", targetDecimals)).div(parseUnits("1", sourceDecimals));
   }
 }

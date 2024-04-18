@@ -316,7 +316,7 @@ export class AxelarQueryAPI {
 
       if (sourceToken.decimals !== destToken.decimals) {
         actualL1ExecutionFee = BigNumberUtils.convertTokenAmount(
-          formatUnits(actualL1ExecutionFee, destToken.decimals),
+          actualL1ExecutionFee,
           destToken.decimals,
           sourceToken.decimals
         );
