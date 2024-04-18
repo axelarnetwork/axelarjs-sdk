@@ -19,7 +19,7 @@ export class BigNumberUtils {
 
   public static convertTokenAmount(eth: string, sourceDecimals: number, targetDecimals: number) {
     return parseUnits(eth, sourceDecimals)
-      .mul(BigNumber.from(10).pow(targetDecimals))
-      .div(BigNumber.from(10).pow(sourceDecimals));
+      .mul(parseUnits("1", targetDecimals))
+      .div(parseUnits("1", sourceDecimals));
   }
 }
