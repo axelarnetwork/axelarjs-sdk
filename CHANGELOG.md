@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.16.0] - 2024-APRIL-18
+
+- Upgraded axelar-cgp-solidity to `6.3.0` to enable support for Node.js version >= 20
+- Fixed an issue with the generation of `commandId`
+- Changed the type of `executeData` from `0x${string}` to `string` to ensure compatibility with most libraries and clients
+- Corrected the documentation for the `estimateGasFee` function regarding gas limit calculation
+- Resolved an issue with the calculation of L1 gas fees when the source and destination tokens have different decimal places
+
 ## [0.15.0] - 2024-MARCH-20
 
 - Improved the accuracy of `estimateGasFee` function by incorporating L1 rollup fee for destination L2 chain.
