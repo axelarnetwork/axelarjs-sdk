@@ -687,6 +687,32 @@ describe("AxelarGMPRecoveryAPI", () => {
     });
   });
 
+  describe("getCidFromSrcTxHash", () => {
+    const mainnetApi = new AxelarGMPRecoveryAPI({ environment: Environment.MAINNET });
+
+    // https://axelarscan.io/gmp/0x3828bf893801f337e08d15b89efc9c3c2d9196fe7f83f3b7640425b24d122cb2:12
+    it("should return the correct commandId from evm -> evm for ContractCallWithToken event", () => {
+      expect(
+        mainnetApi.getCidFromSrcTxHash(
+          "celo",
+          "0x3828bf893801f337e08d15b89efc9c3c2d9196fe7f83f3b7640425b24d122cb2",
+          8
+        )
+      ).toEqual("0xa45da101fcfed541b8251cb8a288b5b7dd84086377eb9cf3f8d4a99f11e062e0");
+    });
+
+    // https://axelarscan.io/gmp/0x92f676751feccab46a048a16aaf81b26620a3683933b56a722ce742de8ea7429:349
+    it("should return the correct commandId from evm -> evm for ContractCall event", () => {
+      expect(
+        mainnetApi.getCidFromSrcTxHash(
+          "blast",
+          "0x92f676751feccab46a048a16aaf81b26620a3683933b56a722ce742de8ea7429-5",
+          5
+        )
+      ).toEqual("0xe6868c6e94240fa6a37cc71d265106a00ad8fa0652319f145e3235f703046574");
+    });
+  });
+
   describe.skip("calculateNativeGasFee", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 

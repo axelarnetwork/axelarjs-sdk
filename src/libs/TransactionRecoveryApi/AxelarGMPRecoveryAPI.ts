@@ -173,8 +173,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
   }
 
-  public getCidFromSrcTxHash(destChainId: string, txHash: string, eventIndex: number) {
-    return getCommandId(destChainId, txHash, eventIndex, this.environment, rpcInfo);
+  public getCidFromSrcTxHash(destChainId: string, messageId: string, eventIndex: number) {
+    const chainId = rpcInfo[this.environment].networkInfo[destChainId.toLowerCase()]?.chainId;
+    return getCommandId(messageId, eventIndex, chainId);
   }
 
   public async doesTxMeetConfirmHt(chain: string, txHash: string, provider?: JsonRpcProvider) {
@@ -244,8 +245,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
-    const commandId = this.getCidFromSrcTxHash(destChainId, srcTxHash, eventIndex);
     const eventResponse = await this.axelarQueryApi.getEVMEvent(srcChainId, srcTxHash, eventIndex);
+    const isCallContract = eventResponse?.event?.contractCall ? true : false;
+    const messageId = isCallContract ? `${srcTxHash}-${eventIndex}` : srcTxHash;
+    const commandId = this.getCidFromSrcTxHash(destChainId, messageId, eventIndex);
 
     if (!eventResponse || this.isEVMEventFailed(eventResponse)) {
       const errorMessage = this.isEVMEventFailed(eventResponse)
@@ -1149,7 +1152,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const executeParams = response.data as ExecuteParams;
     const gasLimitBuffer = evmWalletDetails?.gasLimitBuffer || 0;
-    const { destinationChain, destinationContractAddress, srcTxInfo } = executeParams;
+    const { destinationChain, destinationContractAddress } = executeParams;
 
     const signer = this.getSigner(
       destinationChain,
