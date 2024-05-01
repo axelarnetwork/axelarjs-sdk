@@ -1,5 +1,5 @@
 import { AssetConfig } from "../assets/types";
-import { formatUnits, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { loadAssets } from "../assets";
 import { DEFAULT_L1_EXECUTE_DATA, EnvironmentConfigs, getConfigs } from "../constants";
 import { RestService } from "../services";
