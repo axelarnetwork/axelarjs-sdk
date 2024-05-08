@@ -296,7 +296,7 @@ export class AxelarQueryAPI {
         );
       }
 
-      // Calculate the L1 execution fee. This value is in ETH.
+      // Calculate the L1 execution fee. This value is in ETH wei.
       l1ExecutionFee = await this.estimateL1GasFee(destChainId, {
         executeData: executeData || DEFAULT_L1_EXECUTE_DATA,
         l1GasPrice: destToken.l1_gas_price_in_units,
@@ -310,9 +310,17 @@ export class AxelarQueryAPI {
       const ethTokenPrice = Number(ethereumToken.token_price.usd);
       const ethToSrcTokenPriceRatio = ethTokenPrice / srcTokenPrice;
 
-      const actualL1ExecutionFee = l1ExecutionFee
+      let actualL1ExecutionFee = l1ExecutionFee
         .mul(Math.ceil(ethToSrcTokenPriceRatio * 1000))
         .div(1000);
+
+      if (sourceToken.decimals !== destToken.decimals) {
+        actualL1ExecutionFee = BigNumberUtils.convertTokenAmount(
+          actualL1ExecutionFee,
+          destToken.decimals,
+          sourceToken.decimals
+        );
+      }
 
       l1ExecutionFee = BigNumber.from(actualL1ExecutionFee.toString());
 
