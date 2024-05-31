@@ -33,6 +33,7 @@ export const CHAINS = {
     OSMOSIS: "osmosis-7",
     PERSISTENCE: "persistence",
     POLYGON: "Polygon",
+    POLYGON_SEPOLIA: "polygon-sepolia",
     POLYGONZKEVM: "polygon-zkevm",
     PROVENANCE: "provenance",
     SEPOLIA: "ethereum-sepolia",
@@ -46,6 +47,7 @@ export const CHAINS = {
     OPTIMISM_SEPOLIA: "optimism-sepolia",
     MANTLE_SEPOLIA: "mantle-sepolia",
     BASE_SEPOLIA: "base-sepolia",
+    LINEA_SEPOLIA: "linea-sepolia",
   },
   MAINNET: {
     ACRE: "acre",

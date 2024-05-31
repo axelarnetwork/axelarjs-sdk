@@ -33,6 +33,7 @@ export enum GasToken {
   MANTLE_SEPOLIA = "ETH",
   BASE_SEPOLIA = "ETH",
   BLAST = "ETH",
+  LINEA_SEPOLIA = "ETH",
 }
 
 export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasToken>> = {
