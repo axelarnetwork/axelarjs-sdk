@@ -24,6 +24,8 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.BASE_SEPOLIA]: "https://sepolia.base.org",
   [EvmChain.OPTIMISM_SEPOLIA]: "https://sepolia.optimism.io",
   [EvmChain.MANTLE_SEPOLIA]: "https://rpc.sepolia.mantle.xyz",
+  [EvmChain.POLYGON_SEPOLIA]: "https://rpc-amoy.polygon.technology",
+  [EvmChain.LINEA_SEPOLIA]: "https://rpc.sepolia.linea.build",
 };
 
 export const networkInfo: Record<EvmChain | string, Network> = {
@@ -114,5 +116,13 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.OPTIMISM_SEPOLIA]: {
     chainId: 11155420,
     name: EvmChain.OPTIMISM_SEPOLIA,
+  },
+  [EvmChain.POLYGON_SEPOLIA]: {
+    chainId: 80002,
+    name: EvmChain.POLYGON_SEPOLIA,
+  },
+  [EvmChain.LINEA_SEPOLIA]: {
+    chainId: 59141,
+    name: EvmChain.LINEA_SEPOLIA,
   },
 };
