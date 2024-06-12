@@ -229,8 +229,6 @@ export class AxelarRecoveryApi {
   ): Promise<GMPStatusResponse> {
     const txDetails = await this.fetchGMPTransaction(txHash, txLogIndex);
 
-    console.log(txDetails);
-
     if (!txDetails) return { status: GMPStatus.CANNOT_FETCH_STATUS };
 
     const { call, gas_status, gas_paid, executed, express_executed, approved, callback } =
