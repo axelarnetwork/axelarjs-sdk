@@ -151,13 +151,13 @@ export class AxelarRecoveryApi {
       txHash,
       txLogIndex,
     })
-      .then((data) => {
-        return data.find(
+      .then((data) =>
+        data.find(
           (gmpTx: any) =>
             gmpTx.id.toLowerCase().indexOf(txHash.toLowerCase()) > -1 ||
             gmpTx.call.transactionHash.toLowerCase().indexOf(txHash.toLowerCase()) > -1 // the source transaction hash will be stored at "tx.call.transactionHash", if it is sent from cosmos, otherwise it'll be stored at `tx.id` field.
-        );
-      })
+        )
+      )
       .catch(() => undefined);
   }
 
