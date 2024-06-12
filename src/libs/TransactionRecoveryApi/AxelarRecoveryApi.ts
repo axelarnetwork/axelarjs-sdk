@@ -151,12 +151,13 @@ export class AxelarRecoveryApi {
       txHash,
       txLogIndex,
     })
-      .then((data) =>
-        data.find(
+      .then((data) => {
+        return data.find(
           (gmpTx: any) =>
-            gmpTx.id.indexOf(txHash) > -1 || gmpTx.call.transactionHash.indexOf(txHash) > -1 // the source transaction hash will be stored at "tx.call.transactionHash", if it is sent from cosmos, otherwise it'll be stored at `tx.id` field.
-        )
-      )
+            gmpTx.id.toLowerCase().indexOf(txHash.toLowerCase()) > -1 ||
+            gmpTx.call.transactionHash.toLowerCase().indexOf(txHash.toLowerCase()) > -1 // the source transaction hash will be stored at "tx.call.transactionHash", if it is sent from cosmos, otherwise it'll be stored at `tx.id` field.
+        );
+      })
       .catch(() => undefined);
   }
 
@@ -227,6 +228,8 @@ export class AxelarRecoveryApi {
     txLogIndex?: number | undefined
   ): Promise<GMPStatusResponse> {
     const txDetails = await this.fetchGMPTransaction(txHash, txLogIndex);
+
+    console.log(txDetails);
 
     if (!txDetails) return { status: GMPStatus.CANNOT_FETCH_STATUS };
 
