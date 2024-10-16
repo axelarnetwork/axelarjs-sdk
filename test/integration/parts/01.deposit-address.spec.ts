@@ -46,7 +46,7 @@ describe(
             "uausdc"
           ),
           axelarAssetTransferTestnet.getDepositAddress(
-            CHAINS.TESTNET.AURORA,
+            CHAINS.TESTNET.SEPOLIA,
             CHAINS.TESTNET.MOONBEAM,
             "0xB8Cd93C83A974649D76B1c19f311f639e62272BC",
             "uausdc"

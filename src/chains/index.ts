@@ -39,12 +39,42 @@ export async function loadChains(config: LoadChainConfig) {
   return rawChains;
 }
 
-const urlMap: Record<Environment, string> = {
-  devnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/devnet-chain-config.json",
-  testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-chain-config.json",
-  mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/mainnet-chain-config.json",
+const s3UrlMap: Record<Environment, string> = {
+  [Environment.DEVNET]:
+    "https://axelar-devnet-amplifier.s3.us-east-2.amazonaws.com/configs/devnet-amplifier-config-1.x.json",
+  [Environment.TESTNET]:
+    "https://axelar-testnet.s3.us-east-2.amazonaws.com/configs/testnet-config-1.x.json",
+  [Environment.MAINNET]:
+    "https://axelar-mainnet.s3.us-east-2.amazonaws.com/configs/mainnet-config-1.x.json",
 };
-const chainMap: Record<Environment, any> = { devnet: null, testnet: null, mainnet: null };
+
+const urlMap: Record<Environment, string> = {
+  [Environment.DEVNET]:
+    "https://axelar-testnet.s3.us-east-2.amazonaws.com/devnet-chain-config.json",
+  [Environment.TESTNET]:
+    "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-chain-config.json",
+  [Environment.MAINNET]:
+    "https://axelar-mainnet.s3.us-east-2.amazonaws.com/mainnet-chain-config.json",
+};
+const chainMap: Record<Environment, any> = {
+  [Environment.DEVNET]: null,
+  [Environment.TESTNET]: null,
+  [Environment.MAINNET]: null,
+};
+
+const s3Map: Record<Environment, any> = {
+  [Environment.DEVNET]: null,
+  [Environment.TESTNET]: null,
+  [Environment.MAINNET]: null,
+};
+
+export async function importS3Configs(environment: Environment): Promise<any> {
+  if (s3Map[environment]) return s3Map[environment];
+
+  s3Map[environment] = await execGet(s3UrlMap[environment]);
+
+  return s3Map[environment];
+}
 
 export async function importChains(config: LoadChainConfig): Promise<ChainInfo[]> {
   if (chainMap[config.environment]) return Object.values(chainMap[config.environment]);

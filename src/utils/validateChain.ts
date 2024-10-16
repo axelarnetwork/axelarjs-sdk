@@ -1,12 +1,36 @@
 import { stringSimilarity } from "string-similarity-js";
-import { loadChains } from "../chains";
+import { importS3Configs, loadChains } from "../chains";
 import { Environment } from "../libs";
 
-export async function validateChainIdentifier(chainIdentifier: string, environment: Environment) {
+export async function validateChainIdentifierOld(
+  chainIdentifier: string,
+  environment: Environment
+) {
   const chains = await loadChains({
     environment,
   });
   const chainIdentifiers = chains.map((chain) => chain.chainIdentifier[environment]);
+
+  const foundChain = chainIdentifiers.find(
+    (identifier: string) => identifier === chainIdentifier.toLowerCase()
+  );
+
+  return {
+    foundChain: !!foundChain,
+    bestMatch: foundChain ? false : findSimilarInArray(chainIdentifiers, chainIdentifier),
+  };
+}
+
+export async function validateChainIdentifier(chainIdentifier: string, environment: Environment) {
+  const s3 = await importS3Configs(environment);
+
+  if (!s3 || !s3.chains)
+    return {
+      foundChain: false,
+      bestMatch: false,
+    };
+
+  const chainIdentifiers = Object.keys(s3.chains);
 
   const foundChain = chainIdentifiers.find(
     (identifier: string) => identifier === chainIdentifier.toLowerCase()
