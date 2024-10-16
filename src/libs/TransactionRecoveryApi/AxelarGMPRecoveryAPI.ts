@@ -889,17 +889,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
-    const denomOnSrcChain = getIBCDenomOnSrcChain(
-      tx.gas_paid?.returnValues?.denom,
-      chainConfig,
-      chainConfigs
-    );
+    const denom = tx.gas_paid?.returnValues?.asset;
+
+    const denomOnSrcChain = getIBCDenomOnSrcChain(denom, chainConfig, chainConfigs);
 
     if (!matchesOriginalTokenPayment(params.token, denomOnSrcChain)) {
       return {
         success: false,
         info: `The token you are trying to send does not match the token originally \
-          used for gas payment. Please send ${tx.gas_paid?.returnValues?.denom} instead`,
+          used for gas payment. Please send ${denom} instead`,
       };
     }
 
@@ -913,7 +911,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
               tx.call.returnValues.destinationChain,
               gasLimit,
               autocalculateGasOptions?.gasMultipler,
-              tx.gas_paid?.returnValues?.denom ?? "uaxl"
+              denom ?? "uaxl"
             ),
           };
 
