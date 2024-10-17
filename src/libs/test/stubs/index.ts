@@ -170,7 +170,7 @@ export const chainInfoStub = () => ({
   txFeeInPercent: 0.1,
   module: "axelarnet",
   chainIdentifier: {
-    devnet: "mockedDevnet",
+    "devnet-amplifier": "mockedDevnet",
     testnet: "mockedTestnet",
     mainnet: "mockedMainnet",
   },
