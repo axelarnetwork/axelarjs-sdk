@@ -264,6 +264,20 @@ describe("AxelarQueryAPI", () => {
       // gasAmount should be greater than 0.0000001, otherwise we handle decimal conversion incorrectly.
       expect(ethers.utils.parseEther("0.0000001").lt(gasAmount as BigNumberish)).toBeTruthy();
     });
+    test("It should return estimated gas amount for an Amplifier chain", async () => {
+      const gasAmount = await api.estimateGasFee(
+        CHAINS.TESTNET.AVALANCHE as EvmChain,
+        "flow",
+        700000,
+        1.1,
+        undefined,
+        "5000000000"
+      );
+
+      // gasAmount should be greater than 0.0000001, otherwise we handle decimal conversion incorrectly.
+      expect(ethers.utils.parseEther("0.0000001").lt(gasAmount as BigNumberish)).toBeTruthy();
+    });
+
     // TODO: fix this test. Potential rounding issue
     test.skip("It should use `minGasPrice` if it is greater than the destination chain's gas_price returned from the api", async () => {
       const feeStub = getFeeStub();
