@@ -9,7 +9,7 @@ import { GasToken } from "../../constants/GasToken";
 import { EvmChain } from "../../constants/EvmChain";
 
 export enum Environment {
-  DEVNET = "devnet",
+  DEVNET = "devnet-amplifier",
   TESTNET = "testnet",
   MAINNET = "mainnet",
 }

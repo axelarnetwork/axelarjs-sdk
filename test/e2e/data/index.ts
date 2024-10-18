@@ -18,7 +18,7 @@ export const getTransferPayload = (
       txFeeInPercent: 0.1,
       module: "axelarnet",
       chainIdentifier: {
-        devnet: "terra",
+        "devnet-amplifier": "terra",
         testnet: "terra",
         mainnet: "terra",
       },
@@ -45,7 +45,7 @@ export const getTransferPayload = (
       module: "evm",
       confirmLevel: 12,
       chainIdentifier: {
-        devnet: "avalanche",
+        "devnet-amplifier": "avalanche",
         testnet: "avalanche",
         mainnet: "avalanche",
       },

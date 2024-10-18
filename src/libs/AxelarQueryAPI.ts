@@ -195,7 +195,6 @@ export class AxelarQueryAPI {
     amountInUnits?: BigNumber | string
   ): Promise<BaseFeeResponse> {
     await throwIfInvalidChainIds([sourceChainId, destinationChainId], this.environment);
-    await this.throwIfInactiveChains([sourceChainId, destinationChainId]);
 
     const params: {
       method: string;
