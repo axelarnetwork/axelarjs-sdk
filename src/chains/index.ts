@@ -63,7 +63,7 @@ const s3Map: Record<Environment, any> = {
   mainnet: null,
 };
 
-export async function importS3Configs(environment: Environment): Promise<any> {
+export async function importS3Config(environment: Environment): Promise<any> {
   if (s3Map[environment]) return s3Map[environment];
 
   s3Map[environment] = await execGet(s3UrlMap[environment]);
