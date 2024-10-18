@@ -1,5 +1,5 @@
 import { stringSimilarity } from "string-similarity-js";
-import { importS3Configs, loadChains } from "../chains";
+import { importS3Config, loadChains } from "../chains";
 import { Environment } from "../libs";
 
 export async function validateChainIdentifierOld(
@@ -22,7 +22,7 @@ export async function validateChainIdentifierOld(
 }
 
 export async function validateChainIdentifier(chainIdentifier: string, environment: Environment) {
-  const s3 = await importS3Configs(environment);
+  const s3 = await importS3Config(environment);
 
   if (!s3 || !s3.chains)
     return {

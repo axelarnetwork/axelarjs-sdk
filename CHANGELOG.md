@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.17.0] - 2024-OCTOBER-18
+
+- Fixed the error when trying to add gas for cosmos source chain from the axelarscan ui. #333
+- update SDK to support Amplifier chains #334
+
 ## [0.16.1] - 2024-MAY-31
 
 - Add Linea and Polygon Sepolia chains to testnet
