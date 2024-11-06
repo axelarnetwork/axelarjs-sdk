@@ -40,8 +40,9 @@ export async function loadChains(config: LoadChainConfig) {
 }
 
 const s3UrlMap: Record<Environment, string> = {
+  // TODO: update this once we have a proper devnet-amplifier config
   "devnet-amplifier":
-    "https://axelar-devnet-amplifier.s3.us-east-2.amazonaws.com/configs/devnet-amplifier-config-1.x.json",
+    "https://raw.githubusercontent.com/axelarnetwork/axelar-contract-deployments/refs/heads/main/axelar-chains-config/info/devnet-amplifier.json",
   testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/configs/testnet-config-1.x.json",
   mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/configs/mainnet-config-1.x.json",
 };

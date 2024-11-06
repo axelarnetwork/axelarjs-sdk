@@ -62,6 +62,7 @@ import { Coin, OfflineSigner } from "@cosmjs/proto-signing";
 import { DeliverTxResponse, SigningStargateClient, StdFee } from "@cosmjs/stargate";
 import { COSMOS_GAS_RECEIVER_OPTIONS } from "./constants/cosmosGasReceiverOptions";
 import { JsonRpcProvider } from "@ethersproject/providers";
+import { importS3Config, loadChains } from "../../chains";
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
   [GMPStatus.DEST_EXECUTED]: ApproveGatewayError.ALREADY_EXECUTED,
@@ -134,8 +135,8 @@ export type AddGasParams = {
 
 export type AddGasSuiParams = {
   amount?: string;
+  refundAddress?: string;
   messageId: string;
-  refundAddress: string;
   gasParams: string;
   suiSigner: SuiSigner;
 };
@@ -873,13 +874,18 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   public async addGasToSuiChain(params: AddGasSuiParams): Promise<SuiTransactionBlockResponse> {
     const { amount, messageId, refundAddress, gasParams, suiSigner } = params;
-    // hardcoded for now
-    // object id for devnet amplifier
-    const gasServiceObjectId = "0x9e22d1435e1d22abb178440f9cc8d3be27fbf95960b5ad787057a0b1a4dce1a4";
-    const suiRpcUrl =
-      this.environment === "mainnet"
-        ? "https://fullnode.mainnet.sui.io"
-        : "https://fullnode.testnet.sui.io";
+    const chains = await importS3Config(this.environment);
+    const suiKey = Object.keys(chains.chains).find((chainName) => chainName.includes("sui"));
+
+    if (!suiKey) throw new Error("Cannot find sui chain config");
+
+    const suiConfig = chains.chains[suiKey];
+    const gasServicePackageAddress = suiConfig.contracts.GasService.address;
+    const gasServiceObjectId = suiConfig.contracts.GasService.objects.GasService;
+
+    console.log("GasServiceObjectId", gasServiceObjectId);
+    const suiRpcUrl = suiConfig.rpc;
+    console.log("SuiRpcUrl", suiRpcUrl);
     const suiClient = new SuiClient({
       url: suiRpcUrl,
     });
@@ -888,14 +894,21 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const tx = new Transaction();
 
-    const gas = tx.splitCoins(tx.gas, [tx.pure.u64(gasAmount)]);
+    console.log("gasParams", gasParams);
+    console.log("gasAmount", gasAmount);
+    console.log("refundAddress", refundAddress);
+    console.log("messageId", messageId);
+    console.log("refund", suiSigner.toSuiAddress());
+
+    const gas = await tx.splitCoins(tx.gas, [tx.pure.u64(gasAmount)]);
+
     tx.moveCall({
-      target: `${gasServiceObjectId}::gas_service::add_gas`,
+      target: `${gasServicePackageAddress}::gas_service::add_gas`,
       arguments: [
         tx.object(gasServiceObjectId),
         gas,
         tx.pure(bcs.string().serialize(messageId).toBytes()),
-        tx.pure.address(refundAddress),
+        tx.pure.address(refundAddress || suiSigner.toSuiAddress()),
         tx.pure(bcs.vector(bcs.u8()).serialize(arrayify(gasParams)).toBytes()),
       ],
     });

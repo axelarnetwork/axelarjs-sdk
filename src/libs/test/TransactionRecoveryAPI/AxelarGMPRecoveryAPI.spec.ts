@@ -6,9 +6,11 @@ import {
   Environment,
   EvmWalletDetails,
 } from "../../types";
+import { decodeSuiPrivateKey } from "@mysten/sui/cryptography";
+import { Secp256k1Keypair } from "@mysten/sui/keypairs/secp256k1";
 import { EvmChain } from "../../../constants/EvmChain";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
-import { Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
+import { Contract, ContractReceipt, ContractTransaction, ethers, Signer, Wallet } from "ethers";
 import DistributionExecutable from "../abi/DistributionExecutable.json";
 import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGasToken.json";
 import TestToken from "../abi/TestToken.json";
@@ -1136,6 +1138,29 @@ describe("AxelarGMPRecoveryAPI", () => {
       // Validate that the additional gas fee is equal to "total gas fee" - "gas paid".
       expect(eventGasFeeAmount).toBe(ethers.BigNumber.from(mockedGasFee).sub(gasPaid).toString());
       expect(args?.refundAddress).toBe(userWallet.address);
+    });
+  });
+
+  describe.only("addGasToSuiChain", () => {
+    let api: AxelarGMPRecoveryAPI;
+    beforeEach(() => {
+      vitest.clearAllMocks();
+      api = new AxelarGMPRecoveryAPI({ environment: Environment.DEVNET });
+    });
+
+    test("addGasToSuiChain should work given valid params", async () => {
+      const privateKey = "suiprivkey1qy89v4ldaeaqulqk0lu2jda2pqpwjayt6s5lu00lhkhy0egnt522speay0g";
+      const decodedKey = decodeSuiPrivateKey(privateKey);
+      const secretKey = decodedKey.secretKey;
+      const keypair = Secp256k1Keypair.fromSecretKey(secretKey);
+
+      const response = await api.addGasToSuiChain({
+        gasParams: "0x",
+        messageId: "9oqJAXRpUiktAKyGhbmsHownQVhysTaEqb92tdH51z1K-1",
+        suiSigner: keypair,
+      });
+
+      console.log(response);
     });
   });
 

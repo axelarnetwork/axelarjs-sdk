@@ -64,6 +64,7 @@ const mainnetConfigs: EnvironmentConfigs = {
 
 configsMap["local"] = localConfigs;
 configsMap["devnet"] = devnetConfigs;
+configsMap["devnet-amplifier"] = devnetConfigs;
 configsMap["testnet"] = testnetConfigs;
 configsMap["mainnet"] = mainnetConfigs;
 
