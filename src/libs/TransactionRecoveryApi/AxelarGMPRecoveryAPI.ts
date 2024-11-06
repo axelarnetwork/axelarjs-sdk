@@ -19,7 +19,7 @@ import {
 } from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
-import { ContractReceipt, ContractTransaction, ethers } from "ethers";
+import { ContractReceipt, ContractTransaction, ethers, Signer } from "ethers";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import rpcInfo from "./constants/chain";
 import {
@@ -32,6 +32,10 @@ import {
 import Erc20 from "../abi/erc20Abi.json";
 import { AxelarGateway } from "../AxelarGateway";
 import { getDefaultProvider } from "./helpers/providerHelper";
+import { Transaction } from "@mysten/sui/transactions";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiTransactionBlockResponse } from "@mysten/sui/client";
+import { Signer as SuiSigner } from "@mysten/sui/cryptography";
 import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
@@ -50,7 +54,7 @@ import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
 import { retry, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
-import { Interface } from "ethers/lib/utils";
+import { arrayify, Interface, parseUnits } from "ethers/lib/utils";
 import { ChainInfo } from "src/chains/types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import s3 from "./constants/s3";
@@ -126,6 +130,14 @@ export type AddGasParams = {
   sendOptions: SendOptions;
   gasLimit: number;
   autocalculateGasOptions?: AutocalculateGasOptions;
+};
+
+export type AddGasSuiParams = {
+  amount?: string;
+  messageId: string;
+  refundAddress: string;
+  gasParams: string;
+  suiSigner: SuiSigner;
 };
 
 export type AddGasResponse = {
@@ -857,6 +869,46 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       const eventIndex = getEventIndexFromTxReceipt(receipt);
       return eventIndex;
     }
+  }
+
+  public async addGasToSuiChain(params: AddGasSuiParams): Promise<SuiTransactionBlockResponse> {
+    const { amount, messageId, refundAddress, gasParams, suiSigner } = params;
+    // hardcoded for now
+    // object id for devnet amplifier
+    const gasServiceObjectId = "0x9e22d1435e1d22abb178440f9cc8d3be27fbf95960b5ad787057a0b1a4dce1a4";
+    const suiRpcUrl =
+      this.environment === "mainnet"
+        ? "https://fullnode.mainnet.sui.io"
+        : "https://fullnode.testnet.sui.io";
+    const suiClient = new SuiClient({
+      url: suiRpcUrl,
+    });
+
+    const gasAmount = amount ? BigInt(amount) : parseUnits("0.01", 9).toBigInt();
+
+    const tx = new Transaction();
+
+    const gas = tx.splitCoins(tx.gas, [tx.pure.u64(gasAmount)]);
+    tx.moveCall({
+      target: `${gasServiceObjectId}::gas_service::add_gas`,
+      arguments: [
+        tx.object(gasServiceObjectId),
+        gas,
+        tx.pure(bcs.string().serialize(messageId).toBytes()),
+        tx.pure.address(refundAddress),
+        tx.pure(bcs.vector(bcs.u8()).serialize(arrayify(gasParams)).toBytes()),
+      ],
+    });
+
+    return suiClient.signAndExecuteTransaction({
+      transaction: tx,
+      signer: suiSigner,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    });
   }
 
   public async addGasToCosmosChain({
