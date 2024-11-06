@@ -48,6 +48,7 @@
     "@ethersproject/abstract-provider": "^5.7.0",
     "@ethersproject/networks": "^5.7.1",
     "@ethersproject/providers": "^5.7.2",
+    "@mysten/sui": "^1.14.2",
     "@types/uuid": "^8.3.1",
     "bech32": "^2.0.0",
     "clone-deep": "^4.0.1",
