@@ -135,11 +135,9 @@ export type AddGasParams = {
 
 export type AddGasSuiParams = {
   amount?: string;
-  refundAddress?: string;
+  refundAddress: string;
   messageId: string;
   gasParams: string;
-  rpcUrl?: string;
-  suiSigner: SuiSigner;
 };
 
 export type AddGasResponse = {
@@ -873,8 +871,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
-  public async addGasToSuiChain(params: AddGasSuiParams): Promise<SuiTransactionBlockResponse> {
-    const { amount, messageId, gasParams, suiSigner } = params;
+  public async addGasToSuiChain(params: AddGasSuiParams): Promise<Transaction> {
+    const { amount, messageId, gasParams, refundAddress } = params;
     const chains = await importS3Config(this.environment);
     const suiKey = Object.keys(chains.chains).find((chainName) => chainName.includes("sui"));
 
@@ -882,13 +880,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const suiConfig = chains.chains[suiKey];
     const gasServiceContract = suiConfig.contracts.GasService;
-    const suiRpcUrl = params.rpcUrl || suiConfig.rpc;
-    const suiClient = new SuiClient({
-      url: suiRpcUrl,
-    });
 
     const gasAmount = amount ? BigInt(amount) : parseUnits("0.01", 9).toBigInt();
-    const refundAddress = params.refundAddress || suiSigner.toSuiAddress();
 
     const tx = new Transaction();
 
@@ -905,15 +898,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       ],
     });
 
-    return suiClient.signAndExecuteTransaction({
-      transaction: tx,
-      signer: suiSigner,
-      options: {
-        showEffects: true,
-        showEvents: true,
-        showObjectChanges: true,
-      },
-    });
+    return tx;
   }
 
   public async addGasToCosmosChain({

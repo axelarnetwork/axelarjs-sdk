@@ -1149,7 +1149,7 @@ describe("AxelarGMPRecoveryAPI", () => {
     const testRpcUrl = "https://sui-testnet-rpc.publicnode.com";
     const api: AxelarGMPRecoveryAPI = new AxelarGMPRecoveryAPI({ environment: Environment.DEVNET });
     const suiClient = new SuiClient({
-      url: getFullnodeUrl(network),
+      url: testRpcUrl,
     });
     const keypair: Secp256k1Keypair = Secp256k1Keypair.deriveKeypair(
       "test test test test test test test test test test test junk"
@@ -1174,11 +1174,20 @@ describe("AxelarGMPRecoveryAPI", () => {
     }, 15000);
 
     test("addGasToSuiChain should work given valid params", async () => {
-      const response = await api.addGasToSuiChain({
+      const tx = await api.addGasToSuiChain({
         gasParams: "0x",
         messageId: "test-1",
-        suiSigner: keypair,
-        rpcUrl: testRpcUrl,
+        refundAddress: keypair.toSuiAddress(),
+      });
+
+      const response = await suiClient.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: {
+          showEffects: true,
+          showEvents: true,
+          showObjectChanges: true,
+        },
       });
 
       expect(response.events).toBeDefined();
