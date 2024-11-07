@@ -1163,7 +1163,8 @@ describe("AxelarGMPRecoveryAPI", () => {
         owner: keypair.toSuiAddress(),
       });
 
-      // If the balance is less than 0.2 SUI, request funds from the faucet
+      // If the balance is less than 0.2 SUI, request funds from the faucet.
+      // This is to avoid too many requests error.
       if (BigInt(balance.totalBalance) < 2e8) {
         console.log("Requesting faucet funds...");
         await requestSuiFromFaucetV0({
