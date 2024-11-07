@@ -1146,7 +1146,7 @@ describe("AxelarGMPRecoveryAPI", () => {
   describe("addGasToSuiChain", () => {
     const network = "testnet";
     // The default rpc url for testnet doesn't work as of 07 November 2024, so we need to use a custom one for testing.
-    const testRpcUrl = "https://sui-testnet-endpoint.blockvision.org";
+    const testRpcUrl = "https://sui-testnet-rpc.publicnode.com";
     const api: AxelarGMPRecoveryAPI = new AxelarGMPRecoveryAPI({ environment: Environment.DEVNET });
     const suiClient = new SuiClient({
       url: getFullnodeUrl(network),
