@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { AxelarGMPRecoveryAPI, RouteDir } from "../../TransactionRecoveryApi/AxelarGMPRecoveryAPI";
 import {
   AddGasOptions,
@@ -6,7 +7,7 @@ import {
   Environment,
   EvmWalletDetails,
 } from "../../types";
-import { decodeSuiPrivateKey } from "@mysten/sui/cryptography";
+import { requestSuiFromFaucetV0, getFaucetHost } from "@mysten/sui/faucet";
 import { Secp256k1Keypair } from "@mysten/sui/keypairs/secp256k1";
 import { EvmChain } from "../../../constants/EvmChain";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
@@ -46,6 +47,7 @@ import * as Sleep from "../../../utils/sleep";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { ChainInfo } from "../../../chains/types";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
+import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -1142,25 +1144,46 @@ describe("AxelarGMPRecoveryAPI", () => {
   });
 
   describe.only("addGasToSuiChain", () => {
-    let api: AxelarGMPRecoveryAPI;
-    beforeEach(() => {
-      vitest.clearAllMocks();
-      api = new AxelarGMPRecoveryAPI({ environment: Environment.DEVNET });
+    const network = "testnet";
+    // The default rpc url for testnet doesn't work as of 07 November 2024, so we need to use a custom one for testing.
+    const testRpcUrl = "https://sui-testnet-endpoint.blockvision.org";
+    const api: AxelarGMPRecoveryAPI = new AxelarGMPRecoveryAPI({ environment: Environment.DEVNET });
+    const suiClient = new SuiClient({
+      url: getFullnodeUrl(network),
     });
+    const keypair: Secp256k1Keypair = Secp256k1Keypair.deriveKeypair(
+      "test test test test test test test test test test test junk"
+    );
 
-    test("addGasToSuiChain should work given valid params", async () => {
-      const privateKey = "suiprivkey1qy89v4ldaeaqulqk0lu2jda2pqpwjayt6s5lu00lhkhy0egnt522speay0g";
-      const decodedKey = decodeSuiPrivateKey(privateKey);
-      const secretKey = decodedKey.secretKey;
-      const keypair = Secp256k1Keypair.fromSecretKey(secretKey);
+    beforeEach(async () => {
+      vitest.clearAllMocks();
+      console.log("Sui Wallet address", keypair.toSuiAddress());
 
-      const response = await api.addGasToSuiChain({
-        gasParams: "0x",
-        messageId: "9oqJAXRpUiktAKyGhbmsHownQVhysTaEqb92tdH51z1K-1",
-        suiSigner: keypair,
+      const balance = await suiClient.getBalance({
+        owner: keypair.toSuiAddress(),
       });
 
-      console.log(response);
+      // If the balance is less than 0.2 SUI, request funds from the faucet
+      if (BigInt(balance.totalBalance) < 2e8) {
+        console.log("Requesting faucet funds...");
+        await requestSuiFromFaucetV0({
+          host: getFaucetHost(network),
+          recipient: keypair.toSuiAddress(),
+        });
+      }
+    }, 15000);
+
+    test("addGasToSuiChain should work given valid params", async () => {
+      const response = await api.addGasToSuiChain({
+        gasParams: "0x",
+        messageId: "test-1",
+        suiSigner: keypair,
+        rpcUrl: testRpcUrl,
+      });
+
+      expect(response.events).toBeDefined();
+      expect(response.events!.length).toBeGreaterThan(0);
+      expect(response.events![0].type).toContain("GasAdded");
     });
   });
 
