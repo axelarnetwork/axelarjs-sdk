@@ -11,7 +11,7 @@ import { requestSuiFromFaucetV0, getFaucetHost } from "@mysten/sui/faucet";
 import { Secp256k1Keypair } from "@mysten/sui/keypairs/secp256k1";
 import { EvmChain } from "../../../constants/EvmChain";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
-import { Contract, ContractReceipt, ContractTransaction, ethers, Signer, Wallet } from "ethers";
+import { Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
 import DistributionExecutable from "../abi/DistributionExecutable.json";
 import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGasToken.json";
 import TestToken from "../abi/TestToken.json";
