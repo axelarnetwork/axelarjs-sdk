@@ -55,14 +55,75 @@ export interface AxelarQueryAPIFeeResponse {
   apiResponse: any;
   isExpressSupported: boolean;
 }
+
+interface HopParams {
+  /** The destination chain for the GMP transaction */
+  destinationChain: string;
+
+  /** The source chain for the GMP transaction */
+  sourceChain: string;
+
+  /**
+   * The gasLimit needed for execution on the destination chain.
+   * For OP Stack chains (Optimism, Base, Scroll, Fraxtal, Blast, Mantle, etc.),
+   * only specify the gasLimit for L2 (L2GasLimit).
+   * The endpoint estimates and bundles the gas needed for L1 (L1GasLimit) automatically.
+   */
+  gasLimit: string;
+
+  /**
+   * The multiplier of gas to be used on execution
+   * @default 'auto' (multiplier used by relayer)
+   */
+  gasMultiplier?: number;
+
+  /**
+   * Minimum destination gas price
+   * @default minimum gas price used by relayer
+   */
+  minGasPrice?: string;
+
+  /** The token symbol on the source chain */
+  sourceTokenSymbol?: string;
+
+  /**
+   * The token address on the source chain
+   * @default "ZeroAddress"
+   */
+  sourceTokenAddress?: string;
+
+  /** Source address for checking if express is supported */
+  sourceContractAddress?: string;
+
+  /** The payload that will be used on destination */
+  executeData?: string;
+
+  /** Destination contract address for checking if express is supported */
+  destinationContractAddress?: string;
+
+  /** Symbol that is used in callContractWithToken for checking if express is supported */
+  symbol?: string;
+
+  /**
+   * Token amount (in units) that is used in callContractWithToken for checking if express is supported
+   */
+  amountInUnits?: string;
+}
+
+interface EstimateMultihopFeeOptions {
+  showDetailedFees?: boolean;
+}
+
 export class AxelarQueryAPI {
   readonly environment: Environment;
   readonly lcdApi: RestService;
   readonly rpcApi: RestService;
   readonly axelarGMPServiceApi: RestService;
+  readonly axelarscanApi: RestService;
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
   readonly axelarGMPServiceUrl: string;
+  readonly axelarscanBaseApiUrl: string;
   private allAssets: AssetConfig[];
   private axelarQueryClient: AxelarQueryClientType;
   private chainsList: ChainInfo[] = [];
@@ -74,11 +135,13 @@ export class AxelarQueryAPI {
     this.axelarRpcUrl = axelarRpcUrl || links.axelarRpcUrl;
     this.axelarLcdUrl = axelarLcdUrl || links.axelarLcdUrl;
     this.axelarGMPServiceUrl = links.axelarGMPApiUrl;
+    this.axelarscanBaseApiUrl = links.axelarscanBaseApiUrl;
     this.environment = environment;
 
     this.lcdApi = new RestService(this.axelarLcdUrl);
     this.rpcApi = new RestService(this.axelarRpcUrl);
     this.axelarGMPServiceApi = new RestService(this.axelarGMPServiceUrl);
+    this.axelarscanApi = new RestService(this.axelarscanBaseApiUrl);
 
     this._initializeAssets();
   }
@@ -434,6 +497,10 @@ export class AxelarQueryAPI {
           isExpressSupported: expressSupported,
         }
       : l1ExecutionFeeWithMultiplier.add(executionFeeWithMultiplier).add(baseFee).toString();
+  }
+
+  public async estimateMultihopFee(params: HopParams, options: EstimateMultihopFeeOptions) {
+    const response = this.axelarscanApi.post("estimateGasFeeForNHops", {});
   }
 
   /**
