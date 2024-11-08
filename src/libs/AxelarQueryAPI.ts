@@ -606,7 +606,7 @@ export class AxelarQueryAPI {
       },
     ];
 
-    // Clean up undefined values
+    // Clean up undefined values to make it easier for validation
     const cleanHop = (hop: HopParams): HopParams => {
       return Object.fromEntries(
         Object.entries(hop).filter(([_, value]) => value !== undefined)
