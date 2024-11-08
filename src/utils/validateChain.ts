@@ -31,7 +31,7 @@ export async function validateChainIdentifier(chainIdentifier: string, environme
     };
 
   const chainIdentifiers = Object.keys(s3.chains);
-  const axelarIdentifier = s3["axelar"].axelarId;
+  const axelarIdentifier = s3["axelar"]?.axelarId || "axelar";
   chainIdentifiers.push(axelarIdentifier);
 
   const foundChain = chainIdentifiers.find(
