@@ -5,7 +5,7 @@ import {
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { CHAINS } from "../../chains";
-import { AxelarQueryAPI } from "../AxelarQueryAPI";
+import { AxelarQueryAPI, DetailedFeeResponse } from "../AxelarQueryAPI";
 import { Environment } from "../types";
 import { EvmChain } from "../../constants/EvmChain";
 import { GasToken } from "../../constants/GasToken";
@@ -134,11 +134,11 @@ describe("AxelarQueryAPI", () => {
         .mockResolvedValue({ test: "response" });
       mockThrowIfInvalidChainIds = vi
         .spyOn(await import("../../utils/validateChain"), "throwIfInvalidChainIds")
-        .mockResolvedValue(undefined);
+        .mockResolvedValueOnce(undefined);
     });
 
     afterEach(() => {
-      vitest.restoreAllMocks();
+      vi.resetAllMocks();
     });
 
     test("should call API with correct path and parameters", async () => {
@@ -249,7 +249,8 @@ describe("AxelarQueryAPI", () => {
     });
 
     test("should chain validation fail before API call", async () => {
-      mockThrowIfInvalidChainIds.mockRejectedValueOnce(new Error("Invalid chain"));
+      mockThrowIfInvalidChainIds.mockReset();
+      mockThrowIfInvalidChainIds.mockRejectedValueOnce("Invalid chain");
 
       const hops = [
         {
@@ -264,7 +265,7 @@ describe("AxelarQueryAPI", () => {
       expect(mockAxelarscanApiPost).not.toHaveBeenCalled();
     });
 
-    test("should return API response directly", async () => {
+    test("should return API response directly if showDetailedFees is undefined", async () => {
       const mockResponse = { test: "response" };
       mockAxelarscanApiPost.mockResolvedValueOnce(mockResponse);
 
@@ -280,6 +281,65 @@ describe("AxelarQueryAPI", () => {
 
       expect(response).toBe(mockResponse);
     });
+
+    test("should map the response to HopFeeDetails if showDetailedFees is true", async () => {
+      const mockResponse = {
+        isExpressSupported: false,
+        baseFee: "1",
+        expressFee: "2",
+        executionFee: "3",
+        executionFeeWithMultiplier: "1",
+        totalFee: "3",
+        details: [
+          {
+            isExpressSupported: false,
+            baseFee: "1",
+            expressFee: "2",
+            executionFee: "3",
+            executionFeeWithMultiplier: "1",
+            totalFee: "3",
+            gasLimit: "700000",
+            gasLimitWithL1Fee: "700000",
+            gasMultiplier: 1,
+            minGasPrice: "1",
+          },
+        ],
+      };
+      mockAxelarscanApiPost.mockResolvedValueOnce(mockResponse);
+
+      const hops = [
+        {
+          destinationChain: "avalanche-fuji",
+          sourceChain: "axelarnet",
+          gasLimit: "700000",
+        },
+      ];
+
+      const response = await amplifierApi.estimateMultihopFee(hops, { showDetailedFees: true });
+
+      expect(response).toEqual<DetailedFeeResponse>({
+        isExpressSupported: false,
+        baseFee: "1",
+        expressFee: "2",
+        executionFee: "3",
+        executionFeeWithMultiplier: "1",
+        totalFee: "3",
+        details: [
+          {
+            isExpressSupported: false,
+            baseFee: "1",
+            expressFee: "2",
+            executionFee: "3",
+            executionFeeWithMultiplier: "1",
+            totalFee: "3",
+            gasLimit: "700000",
+            gasLimitWithL1Fee: "700000",
+            gasMultiplier: 1,
+            minGasPrice: "1",
+          },
+        ],
+      });
+    });
   });
 
   describe("estimateAmplifierFee", () => {
@@ -294,7 +354,7 @@ describe("AxelarQueryAPI", () => {
 
       mockImportS3Config = vi
         .spyOn(await import("../../chains"), "importS3Config")
-        .mockResolvedValue({
+        .mockResolvedValueOnce({
           axelar: {
             axelarId: "axelar-test",
           },
@@ -306,12 +366,16 @@ describe("AxelarQueryAPI", () => {
         .mockResolvedValue("1");
     });
 
+    afterEach(() => {
+      vi.resetAllMocks();
+    });
+
     test("should correctly split into two hops using config axelarId", async () => {
       const params = {
         sourceChain: "ethereum",
         destinationChain: "avalanche",
         gasLimit: "700000",
-        sourceTokenSymbol: "USDC",
+        sourceTokenSymbol: "axlUSDC",
       };
 
       await amplifierApi.estimateAmplifierFee(params);
@@ -319,14 +383,14 @@ describe("AxelarQueryAPI", () => {
       expect(mockEstimateMultihopFee).toHaveBeenCalledWith(
         [
           {
-            sourceChain: "ethereum",
+            sourceChain: params.sourceChain,
             destinationChain: "axelar-test",
-            gasLimit: "700000",
-            sourceTokenSymbol: "USDC",
+            gasLimit: params.gasLimit,
+            sourceTokenSymbol: params.sourceTokenSymbol,
           },
           {
             sourceChain: "axelar-test",
-            destinationChain: "avalanche",
+            destinationChain: params.destinationChain,
             gasLimit: "700000",
           },
         ],
@@ -346,10 +410,18 @@ describe("AxelarQueryAPI", () => {
       await amplifierApi.estimateAmplifierFee(params);
 
       expect(mockEstimateMultihopFee).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({ destinationChain: "axelar" }),
-          expect.objectContaining({ sourceChain: "axelar" }),
-        ]),
+        [
+          {
+            sourceChain: params.sourceChain,
+            destinationChain: "axelar-test",
+            gasLimit: params.gasLimit,
+          },
+          {
+            sourceChain: "axelar-test",
+            destinationChain: params.destinationChain,
+            gasLimit: params.gasLimit,
+          },
+        ],
         undefined
       );
     });
@@ -359,7 +431,7 @@ describe("AxelarQueryAPI", () => {
         sourceChain: "ethereum",
         destinationChain: "avalanche",
         gasLimit: "700000",
-        sourceTokenSymbol: "USDC",
+        sourceTokenSymbol: "axlUSDC",
         sourceContractAddress: "0xsource",
         destinationContractAddress: "0xdest",
         executeData: "0xdata",
@@ -374,7 +446,7 @@ describe("AxelarQueryAPI", () => {
             sourceChain: "ethereum",
             destinationChain: "axelar-test",
             gasLimit: "700000",
-            sourceTokenSymbol: "USDC",
+            sourceTokenSymbol: "axlUSDC",
             sourceContractAddress: "0xsource",
           },
           {

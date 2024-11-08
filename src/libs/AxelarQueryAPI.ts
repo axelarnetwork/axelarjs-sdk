@@ -129,7 +129,7 @@ interface HopFeeDetails {
 /**
  * Response for fee estimation with detailed breakdown
  */
-interface DetailedFeeResponse {
+export interface DetailedFeeResponse {
   isExpressSupported: boolean;
   baseFee: string;
   expressFee: string;
