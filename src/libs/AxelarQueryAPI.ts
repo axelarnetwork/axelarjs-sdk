@@ -110,6 +110,35 @@ interface HopParams {
   amountInUnits?: string;
 }
 
+/**
+ * Represents detailed fee information for a single hop
+ */
+interface HopFeeDetails {
+  isExpressSupported: boolean;
+  baseFee: string;
+  expressFee: string;
+  executionFee: string;
+  executionFeeWithMultiplier: string;
+  totalFee: string;
+  gasLimit: string;
+  gasLimitWithL1Fee: string;
+  gasMultiplier: number;
+  minGasPrice: string;
+}
+
+/**
+ * Response for fee estimation with detailed breakdown
+ */
+interface DetailedFeeResponse {
+  isExpressSupported: boolean;
+  baseFee: string;
+  expressFee: string;
+  executionFee: string;
+  executionFeeWithMultiplier: string;
+  totalFee: string;
+  details?: HopFeeDetails[];
+}
+
 interface EstimateMultihopFeeOptions {
   showDetailedFees?: boolean;
 }
@@ -509,7 +538,7 @@ export class AxelarQueryAPI {
   public async estimateMultihopFee(
     hops: HopParams[],
     options?: EstimateMultihopFeeOptions
-  ): Promise<string | AxelarQueryAPIFeeResponse> {
+  ): Promise<string | DetailedFeeResponse> {
     if (hops.length === 0) {
       throw new Error("At least one hop parameter must be provided");
     }
@@ -525,6 +554,10 @@ export class AxelarQueryAPI {
         params: hops,
         showDetailedFees: options?.showDetailedFees ?? false,
       });
+
+      if (options?.showDetailedFees) {
+        return this.mapToDetailedFeeResponse(response);
+      }
 
       return response;
     } catch (error) {
@@ -545,7 +578,10 @@ export class AxelarQueryAPI {
    * @returns Promise containing the estimated fees
    * @throws {Error} If config loading fails or required parameters are missing
    */
-  public async estimateAmplifierFee(params: HopParams, options?: EstimateMultihopFeeOptions) {
+  public async estimateAmplifierFee(
+    params: HopParams,
+    options?: EstimateMultihopFeeOptions
+  ): Promise<string | DetailedFeeResponse> {
     const config = await importS3Config(this.environment);
     const axelarChainId = config["axelar"]?.axelarId || "axelar";
 
@@ -810,5 +846,38 @@ export class AxelarQueryAPI {
     );
     if (!assetConfig) throw `Asset ${denom} not found`;
     return assetConfig.wrapped_erc20 ? assetConfig.wrapped_erc20 : denom;
+  }
+
+  /**
+   * Maps raw API response to simplified hop fee details
+   */
+  private mapToHopFeeDetails(rawHopDetails: any): HopFeeDetails {
+    return {
+      isExpressSupported: rawHopDetails.isExpressSupported,
+      baseFee: rawHopDetails.baseFee,
+      expressFee: rawHopDetails.expressFee,
+      executionFee: rawHopDetails.executionFee,
+      executionFeeWithMultiplier: rawHopDetails.executionFeeWithMultiplier,
+      totalFee: rawHopDetails.totalFee,
+      gasLimit: rawHopDetails.gasLimit,
+      gasLimitWithL1Fee: rawHopDetails.gasLimitWithL1Fee,
+      gasMultiplier: rawHopDetails.gasMultiplier,
+      minGasPrice: rawHopDetails.minGasPrice,
+    };
+  }
+
+  /**
+   * Maps raw API response to simplified detailed fee response
+   */
+  private mapToDetailedFeeResponse(rawResponse: any): DetailedFeeResponse {
+    return {
+      isExpressSupported: rawResponse.isExpressSupported,
+      baseFee: rawResponse.baseFee,
+      expressFee: rawResponse.expressFee,
+      executionFee: rawResponse.executionFee,
+      executionFeeWithMultiplier: rawResponse.executionFeeWithMultiplier,
+      totalFee: rawResponse.totalFee,
+      details: rawResponse.details?.map(this.mapToHopFeeDetails),
+    };
   }
 }
