@@ -282,29 +282,131 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
-  // describe.only("estimateMultihopFee", () => {
-  //   const amplifierApi = new AxelarQueryAPI({
-  //     environment: Environment.DEVNET,
-  //   });
-  //
-  //   test("It should return estimated gas fee", async () => {
-  //     const fee = await amplifierApi.estimateMultihopFee([
-  //       {
-  //         destinationChain: "avalanche-fuji",
-  //         sourceChain: "axelarnet",
-  //         gasLimit: "700000",
-  //       },
-  //       {
-  //         destinationChain: "sui-test2",
-  //         sourceChain: "axelarnet",
-  //         gasLimit: "700000",
-  //       },
-  //     ]);
-  //
-  //     expect(fee).toBeDefined();
-  //   });
-  // });
-  //
+  describe("estimateAmplifierFee", () => {
+    let amplifierApi: AxelarQueryAPI;
+    let mockImportS3Config: SpyInstance;
+    let mockEstimateMultihopFee: SpyInstance;
+
+    beforeEach(async () => {
+      amplifierApi = new AxelarQueryAPI({
+        environment: Environment.DEVNET,
+      });
+
+      mockImportS3Config = vi
+        .spyOn(await import("../../chains"), "importS3Config")
+        .mockResolvedValue({
+          axelar: {
+            axelarId: "axelar-test",
+          },
+        });
+
+      // Mock estimateMultihopFee to avoid duplication of its tests
+      mockEstimateMultihopFee = vi
+        .spyOn(amplifierApi, "estimateMultihopFee")
+        .mockResolvedValue("1");
+    });
+
+    test("should correctly split into two hops using config axelarId", async () => {
+      const params = {
+        sourceChain: "ethereum",
+        destinationChain: "avalanche",
+        gasLimit: "700000",
+        sourceTokenSymbol: "USDC",
+      };
+
+      await amplifierApi.estimateAmplifierFee(params);
+
+      expect(mockEstimateMultihopFee).toHaveBeenCalledWith(
+        [
+          {
+            sourceChain: "ethereum",
+            destinationChain: "axelar-test",
+            gasLimit: "700000",
+            sourceTokenSymbol: "USDC",
+          },
+          {
+            sourceChain: "axelar-test",
+            destinationChain: "avalanche",
+            gasLimit: "700000",
+          },
+        ],
+        undefined
+      );
+    });
+
+    test("should use default axelarId when not in config", async () => {
+      mockImportS3Config.mockResolvedValueOnce({});
+
+      const params = {
+        sourceChain: "ethereum",
+        destinationChain: "avalanche",
+        gasLimit: "700000",
+      };
+
+      await amplifierApi.estimateAmplifierFee(params);
+
+      expect(mockEstimateMultihopFee).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ destinationChain: "axelar" }),
+          expect.objectContaining({ sourceChain: "axelar" }),
+        ]),
+        undefined
+      );
+    });
+
+    test("should pass through all relevant parameters to correct hops", async () => {
+      const params = {
+        sourceChain: "ethereum",
+        destinationChain: "avalanche",
+        gasLimit: "700000",
+        sourceTokenSymbol: "USDC",
+        sourceContractAddress: "0xsource",
+        destinationContractAddress: "0xdest",
+        executeData: "0xdata",
+        amountInUnits: "1000000",
+      };
+
+      await amplifierApi.estimateAmplifierFee(params);
+
+      expect(mockEstimateMultihopFee).toHaveBeenCalledWith(
+        [
+          {
+            sourceChain: "ethereum",
+            destinationChain: "axelar-test",
+            gasLimit: "700000",
+            sourceTokenSymbol: "USDC",
+            sourceContractAddress: "0xsource",
+          },
+          {
+            sourceChain: "axelar-test",
+            destinationChain: "avalanche",
+            gasLimit: "700000",
+            destinationContractAddress: "0xdest",
+            executeData: "0xdata",
+            amountInUnits: "1000000",
+          },
+        ],
+        undefined
+      );
+    });
+
+    test("should pass through showDetailedFees option", async () => {
+      const params = {
+        sourceChain: "ethereum",
+        destinationChain: "avalanche",
+        gasLimit: "700000",
+      };
+
+      await amplifierApi.estimateAmplifierFee(params, {
+        showDetailedFees: true,
+      });
+
+      expect(mockEstimateMultihopFee).toHaveBeenCalledWith(expect.any(Array), {
+        showDetailedFees: true,
+      });
+    });
+  });
+
   describe("estimateGasFee", () => {
     test("It should return estimated gas amount that makes sense for USDC", async () => {
       const gasAmount = await api.estimateGasFee(

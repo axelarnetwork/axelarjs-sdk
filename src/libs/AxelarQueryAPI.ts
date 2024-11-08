@@ -20,7 +20,7 @@ import {
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { throwIfInvalidChainIds } from "../utils";
-import { loadChains } from "../chains";
+import { importS3Config, loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { ChainInfo } from "../chains/types";
@@ -533,6 +533,52 @@ export class AxelarQueryAPI {
       }
       throw error;
     }
+  }
+
+  /**
+   * Estimates the fee for an Amplifier transaction by splitting it into two hops:
+   * 1. Source chain to Axelar
+   * 2. Axelar to destination chain
+   *
+   * @param params Parameters for the end-to-end transfer
+   * @param options Optional parameters for fee estimation
+   * @returns Promise containing the estimated fees
+   * @throws {Error} If config loading fails or required parameters are missing
+   */
+  public async estimateAmplifierFee(params: HopParams, options?: EstimateMultihopFeeOptions) {
+    const config = await importS3Config(this.environment);
+    const axelarChainId = config["axelar"]?.axelarId || "axelar";
+
+    const hops = [
+      {
+        sourceChain: params.sourceChain,
+        destinationChain: axelarChainId,
+        gasLimit: params.gasLimit,
+        sourceTokenSymbol: params.sourceTokenSymbol,
+        sourceTokenAddress: params.sourceTokenAddress,
+        sourceContractAddress: params.sourceContractAddress,
+      },
+      {
+        sourceChain: axelarChainId,
+        destinationChain: params.destinationChain,
+        gasLimit: params.gasLimit,
+        symbol: params.symbol,
+        minGasPrice: params.minGasPrice,
+        executeData: params.executeData,
+        destinationContractAddress: params.destinationContractAddress,
+        amountInUnits: params.amountInUnits,
+      },
+    ];
+
+    // Clean up undefined values
+    const cleanHop = (hop: HopParams): HopParams => {
+      return Object.fromEntries(
+        Object.entries(hop).filter(([_, value]) => value !== undefined)
+      ) as HopParams;
+    };
+
+    // Estimate fees for both hops
+    return this.estimateMultihopFee(hops.map(cleanHop), options);
   }
 
   /**
