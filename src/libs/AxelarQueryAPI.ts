@@ -75,7 +75,7 @@ interface HopParams {
    * The multiplier of gas to be used on execution
    * @default 'auto' (multiplier used by relayer)
    */
-  gasMultiplier?: number;
+  gasMultiplier?: number | "auto";
 
   /**
    * Minimum destination gas price
@@ -88,7 +88,7 @@ interface HopParams {
 
   /**
    * The token address on the source chain
-   * @default "ZeroAddress"
+   * @default "ZeroAddress" for native token
    */
   sourceTokenAddress?: string;
 
@@ -499,8 +499,40 @@ export class AxelarQueryAPI {
       : l1ExecutionFeeWithMultiplier.add(executionFeeWithMultiplier).add(baseFee).toString();
   }
 
-  public async estimateMultihopFee(params: HopParams, options: EstimateMultihopFeeOptions) {
-    const response = this.axelarscanApi.post("estimateGasFeeForNHops", {});
+  /**
+   * Estimates the total gas fee for a multi-hop GMP transfer via Axelar
+   * @param hops Array of hop parameters defining each step of the transfer path
+   * @param options Optional parameters for fee estimation
+   * @throws {Error} If no hops are provided or chain validation fails
+   * @returns Promise containing the estimated fees if the showDetailedFees option is not provided, or an object containing the detailed fees if showDetailedFees is true
+   */
+  public async estimateMultihopFee(
+    hops: HopParams[],
+    options?: EstimateMultihopFeeOptions
+  ): Promise<string | AxelarQueryAPIFeeResponse> {
+    if (hops.length === 0) {
+      throw new Error("At least one hop parameter must be provided");
+    }
+
+    const chainsToValidate = Array.from(
+      new Set([...hops.map((hop) => hop.destinationChain), ...hops.map((hop) => hop.sourceChain)])
+    );
+
+    await throwIfInvalidChainIds(chainsToValidate, this.environment);
+
+    try {
+      const response = await this.axelarscanApi.post("/gmp/estimateGasFeeForNHops", {
+        params: hops,
+        showDetailedFees: options?.showDetailedFees ?? false,
+      });
+
+      return response;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to estimate multi-hop gas fee: ${error.message}`);
+      }
+      throw error;
+    }
   }
 
   /**
