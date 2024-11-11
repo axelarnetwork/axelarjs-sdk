@@ -41,8 +41,7 @@ export async function loadChains(config: LoadChainConfig) {
 
 const s3UrlMap: Record<Environment, string> = {
   // TODO: update this once we have a proper devnet-amplifier config
-  "devnet-amplifier":
-    "https://corsproxy.io/?https://raw.githubusercontent.com/axelarnetwork/axelar-contract-deployments/refs/heads/main/axelar-chains-config/info/devnet-amplifier.json",
+  "devnet-amplifier": "https://melted-fayth-nptytn-57e5d396.koyeb.app/chain/devnet-amplifier",
   testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/configs/testnet-config-1.x.json",
   mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/configs/mainnet-config-1.x.json",
 };
@@ -83,7 +82,9 @@ export async function importChains(config: LoadChainConfig): Promise<ChainInfo[]
 async function execGet(url: string) {
   return fetch(url, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
   })
     .then((res) => res.json())
     .catch((error) => {
