@@ -427,7 +427,7 @@ export class AxelarQueryAPI {
 
   /**
    * This method is a wrapper around `estimateMultihopFee` for GMP transaction.
-   * The `estimateGasFee` method is deprecated and will be removed in the future.
+   * The `estimateGasFee` method is no longer maintained. We recommend using this function instead.
    * @param hop The hop parameters for the GMP transaction
    * @param options Optional parameters for fee estimation
    * @throws {Error} If no hops are provided or chain validation fails
@@ -438,7 +438,8 @@ export class AxelarQueryAPI {
   }
 
   /**
-   * deprecated. Use `estimateGasFeeGMP` instead.
+   * @deprecated. We recommend using `estimateGasFeeGMP` instead.
+   *
    * Calculate estimated gas amount to pay for the gas receiver contract.
    * @param sourceChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
    * @param destinationChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
