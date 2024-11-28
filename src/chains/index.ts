@@ -40,7 +40,6 @@ export async function loadChains(config: LoadChainConfig) {
 }
 
 const s3UrlMap: Record<Environment, string> = {
-  // TODO: update this once we have a proper devnet-amplifier config
   "devnet-amplifier": "https://melted-fayth-nptytn-57e5d396.koyeb.app/chain/devnet-amplifier",
   testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/configs/testnet-config-1.x.json",
   mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/configs/mainnet-config-1.x.json",

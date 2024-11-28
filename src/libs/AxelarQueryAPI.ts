@@ -20,7 +20,7 @@ import {
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { throwIfInvalidChainIds } from "../utils";
-import { loadChains } from "../chains";
+import { importS3Config, loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { ChainInfo } from "../chains/types";
@@ -55,14 +55,104 @@ export interface AxelarQueryAPIFeeResponse {
   apiResponse: any;
   isExpressSupported: boolean;
 }
+
+interface HopParams {
+  /** The destination chain for the GMP transaction */
+  destinationChain: string;
+
+  /** The source chain for the GMP transaction */
+  sourceChain: string;
+
+  /**
+   * The gasLimit needed for execution on the destination chain.
+   * For OP Stack chains (Optimism, Base, Scroll, Fraxtal, Blast, Mantle, etc.),
+   * only specify the gasLimit for L2 (L2GasLimit).
+   * The endpoint estimates and bundles the gas needed for L1 (L1GasLimit) automatically.
+   */
+  gasLimit: string;
+
+  /**
+   * The multiplier of gas to be used on execution
+   * @default 'auto' (multiplier used by relayer)
+   */
+  gasMultiplier?: number | "auto";
+
+  /**
+   * Minimum destination gas price
+   * @default minimum gas price used by relayer
+   */
+  minGasPrice?: string;
+
+  /** The token symbol on the source chain */
+  sourceTokenSymbol?: string;
+
+  /**
+   * The token address on the source chain
+   * @default "ZeroAddress" for native token
+   */
+  sourceTokenAddress?: string;
+
+  /** Source address for checking if express is supported */
+  sourceContractAddress?: string;
+
+  /** The payload that will be used on destination */
+  executeData?: string;
+
+  /** Destination contract address for checking if express is supported */
+  destinationContractAddress?: string;
+
+  /** Symbol that is used in callContractWithToken for checking if express is supported */
+  symbol?: string;
+
+  /**
+   * Token amount (in units) that is used in callContractWithToken for checking if express is supported
+   */
+  amountInUnits?: string;
+}
+
+/**
+ * Represents detailed fee information for a single hop
+ */
+interface HopFeeDetails {
+  isExpressSupported: boolean;
+  baseFee: string;
+  expressFee: string;
+  executionFee: string;
+  executionFeeWithMultiplier: string;
+  totalFee: string;
+  gasLimit: string;
+  gasLimitWithL1Fee: string;
+  gasMultiplier: number;
+  minGasPrice: string;
+}
+
+/**
+ * Response for fee estimation with detailed breakdown
+ */
+export interface DetailedFeeResponse {
+  isExpressSupported: boolean;
+  baseFee: string;
+  expressFee: string;
+  executionFee: string;
+  executionFeeWithMultiplier: string;
+  totalFee: string;
+  details?: HopFeeDetails[];
+}
+
+interface EstimateMultihopFeeOptions {
+  showDetailedFees?: boolean;
+}
+
 export class AxelarQueryAPI {
   readonly environment: Environment;
   readonly lcdApi: RestService;
   readonly rpcApi: RestService;
   readonly axelarGMPServiceApi: RestService;
+  readonly axelarscanApi: RestService;
   readonly axelarRpcUrl: string;
   readonly axelarLcdUrl: string;
   readonly axelarGMPServiceUrl: string;
+  readonly axelarscanBaseApiUrl: string;
   private allAssets: AssetConfig[];
   private axelarQueryClient: AxelarQueryClientType;
   private chainsList: ChainInfo[] = [];
@@ -74,11 +164,13 @@ export class AxelarQueryAPI {
     this.axelarRpcUrl = axelarRpcUrl || links.axelarRpcUrl;
     this.axelarLcdUrl = axelarLcdUrl || links.axelarLcdUrl;
     this.axelarGMPServiceUrl = links.axelarGMPApiUrl;
+    this.axelarscanBaseApiUrl = links.axelarscanBaseApiUrl;
     this.environment = environment;
 
     this.lcdApi = new RestService(this.axelarLcdUrl);
     this.rpcApi = new RestService(this.axelarRpcUrl);
     this.axelarGMPServiceApi = new RestService(this.axelarGMPServiceUrl);
+    this.axelarscanApi = new RestService(this.axelarscanBaseApiUrl);
 
     this._initializeAssets();
   }
@@ -437,6 +529,46 @@ export class AxelarQueryAPI {
   }
 
   /**
+   * Estimates the total gas fee for a multi-hop GMP transfer via Axelar
+   * @param hops Array of hop parameters defining each step of the transfer path
+   * @param options Optional parameters for fee estimation
+   * @throws {Error} If no hops are provided or chain validation fails
+   * @returns Promise containing the estimated fees if the showDetailedFees option is not provided, or an object containing the detailed fees if showDetailedFees is true
+   */
+  public async estimateMultihopFee(
+    hops: HopParams[],
+    options?: EstimateMultihopFeeOptions
+  ): Promise<string | DetailedFeeResponse> {
+    if (hops.length === 0) {
+      throw new Error("At least one hop parameter must be provided");
+    }
+
+    const chainsToValidate = Array.from(
+      new Set([...hops.map((hop) => hop.destinationChain), ...hops.map((hop) => hop.sourceChain)])
+    );
+
+    await throwIfInvalidChainIds(chainsToValidate, this.environment);
+
+    try {
+      const response = await this.axelarscanApi.post("/gmp/estimateGasFeeForNHops", {
+        params: hops,
+        showDetailedFees: options?.showDetailedFees ?? false,
+      });
+
+      if (options?.showDetailedFees) {
+        return this.mapToDetailedFeeResponse(response);
+      }
+
+      return response;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to estimate multi-hop gas fee: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Get the denom for an asset given its symbol on a chain
    * @param symbol
    * @param chainName
@@ -665,5 +797,38 @@ export class AxelarQueryAPI {
     );
     if (!assetConfig) throw `Asset ${denom} not found`;
     return assetConfig.wrapped_erc20 ? assetConfig.wrapped_erc20 : denom;
+  }
+
+  /**
+   * Maps raw API response to simplified hop fee details
+   */
+  private mapToHopFeeDetails(rawHopDetails: any): HopFeeDetails {
+    return {
+      isExpressSupported: rawHopDetails.isExpressSupported,
+      baseFee: rawHopDetails.baseFee,
+      expressFee: rawHopDetails.expressFee,
+      executionFee: rawHopDetails.executionFee,
+      executionFeeWithMultiplier: rawHopDetails.executionFeeWithMultiplier,
+      totalFee: rawHopDetails.totalFee,
+      gasLimit: rawHopDetails.gasLimit,
+      gasLimitWithL1Fee: rawHopDetails.gasLimitWithL1Fee,
+      gasMultiplier: rawHopDetails.gasMultiplier,
+      minGasPrice: rawHopDetails.minGasPrice,
+    };
+  }
+
+  /**
+   * Maps raw API response to simplified detailed fee response
+   */
+  private mapToDetailedFeeResponse(rawResponse: any): DetailedFeeResponse {
+    return {
+      isExpressSupported: rawResponse.isExpressSupported,
+      baseFee: rawResponse.baseFee,
+      expressFee: rawResponse.expressFee,
+      executionFee: rawResponse.executionFee,
+      executionFeeWithMultiplier: rawResponse.executionFeeWithMultiplier,
+      totalFee: rawResponse.totalFee,
+      details: rawResponse.details?.map(this.mapToHopFeeDetails),
+    };
   }
 }
