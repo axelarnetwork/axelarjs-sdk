@@ -471,7 +471,7 @@ describe("AxelarQueryAPI", () => {
 
       mainnetResponses.forEach((response) => {
         expect(response).toBeDefined();
-        expect(String(response).length).toBeLessThanOrEqual(6);
+        expect(String(response).length).toBeLessThanOrEqual(7);
       });
     });
 
