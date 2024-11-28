@@ -9,7 +9,6 @@ export const rpcMap: Partial<Record<EvmChain | string, string>> = {
   [EvmChain.ETHEREUM]: "https://ethereum.publicnode.com",
   [EvmChain.AURORA]: "https://mainnet.aurora.dev",
   [EvmChain.BINANCE]: "https://bsc-dataseed.binance.org",
-  [EvmChain.BNBCHAIN]: "https://bsc-dataseed.binance.org",
   [EvmChain.ARBITRUM]: "https://arb1.arbitrum.io/rpc",
   [EvmChain.CELO]: "https://forno.celo.org",
   [EvmChain.KAVA]: "https://evm.kava.io",
@@ -62,10 +61,6 @@ export const networkInfo: Partial<Record<EvmChain, Network>> = {
   [EvmChain.BINANCE]: {
     chainId: 56,
     name: EvmChain.BINANCE,
-  },
-  [EvmChain.BNBCHAIN]: {
-    chainId: 56,
-    name: EvmChain.BNBCHAIN,
   },
   [EvmChain.ARBITRUM]: {
     chainId: 42161,
