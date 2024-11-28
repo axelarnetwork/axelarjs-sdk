@@ -70,6 +70,42 @@ interface HopParams {
    * The endpoint estimates and bundles the gas needed for L1 (L1GasLimit) automatically.
    */
   gasLimit: string;
+}
+
+/**
+ * Represents detailed fee information for a single hop
+ */
+interface HopFeeDetails {
+  isExpressSupported: boolean;
+  baseFee: string;
+  expressFee: string;
+  executionFee: string;
+  executionFeeWithMultiplier: string;
+  totalFee: string;
+  gasLimit: string;
+  gasLimitWithL1Fee: string;
+  gasMultiplier: number;
+  minGasPrice: string;
+}
+
+/**
+ * Response for fee estimation with detailed breakdown
+ */
+export interface DetailedFeeResponse {
+  isExpressSupported: boolean;
+  baseFee: string;
+  expressFee: string;
+  executionFee: string;
+  executionFeeWithMultiplier: string;
+  totalFee: string;
+  details?: HopFeeDetails[];
+}
+
+interface EstimateMultihopFeeOptions {
+  /**
+   * If true, returns a `DetailedFeeResponse` instead of a `string`
+   */
+  showDetailedFees?: boolean;
 
   /**
    * The multiplier of gas to be used on execution
@@ -108,39 +144,6 @@ interface HopParams {
    * Token amount (in units) that is used in callContractWithToken for checking if express is supported
    */
   amountInUnits?: string;
-}
-
-/**
- * Represents detailed fee information for a single hop
- */
-interface HopFeeDetails {
-  isExpressSupported: boolean;
-  baseFee: string;
-  expressFee: string;
-  executionFee: string;
-  executionFeeWithMultiplier: string;
-  totalFee: string;
-  gasLimit: string;
-  gasLimitWithL1Fee: string;
-  gasMultiplier: number;
-  minGasPrice: string;
-}
-
-/**
- * Response for fee estimation with detailed breakdown
- */
-export interface DetailedFeeResponse {
-  isExpressSupported: boolean;
-  baseFee: string;
-  expressFee: string;
-  executionFee: string;
-  executionFeeWithMultiplier: string;
-  totalFee: string;
-  details?: HopFeeDetails[];
-}
-
-interface EstimateMultihopFeeOptions {
-  showDetailedFees?: boolean;
 }
 
 export class AxelarQueryAPI {
@@ -423,6 +426,19 @@ export class AxelarQueryAPI {
   }
 
   /**
+   * This method is a wrapper around `estimateMultihopFee` for GMP transaction.
+   * The `estimateGasFee` method is deprecated and will be removed in the future.
+   * @param hop The hop parameters for the GMP transaction
+   * @param options Optional parameters for fee estimation
+   * @throws {Error} If no hops are provided or chain validation fails
+   * @returns Promise containing the estimated fees if the showDetailedFees option is not provided, or an object containing the detailed fees if showDetailedFees is true
+   */
+  public async estimateGasFeeGMP(hop: HopParams, options?: EstimateMultihopFeeOptions) {
+    return this.estimateMultihopFee([hop], options);
+  }
+
+  /**
+   * deprecated. Use `estimateGasFeeGMP` instead.
    * Calculate estimated gas amount to pay for the gas receiver contract.
    * @param sourceChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
    * @param destinationChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
@@ -562,7 +578,7 @@ export class AxelarQueryAPI {
       return response;
     } catch (error) {
       if (error instanceof Error) {
-        throw new Error(`Failed to estimate multi-hop gas fee: ${error.message}`);
+        throw new Error(`Failed to estimate gas fee: ${error.message}`);
       }
       throw error;
     }
