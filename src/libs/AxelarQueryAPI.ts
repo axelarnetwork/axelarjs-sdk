@@ -433,12 +433,12 @@ export class AxelarQueryAPI {
    * @throws {Error} If no hops are provided or chain validation fails
    * @returns Promise containing the estimated fees if the showDetailedFees option is not provided, or an object containing the detailed fees if showDetailedFees is true
    */
-  public async estimateGasFeeGMP(hop: HopParams, options?: EstimateMultihopFeeOptions) {
+  public async estimateGMPFee(hop: HopParams, options?: EstimateMultihopFeeOptions) {
     return this.estimateMultihopFee([hop], options);
   }
 
   /**
-   * @deprecated. We recommend using `estimateGasFeeGMP` instead.
+   * @deprecated. We recommend using `estimateGMPFee` instead.
    *
    * Calculate estimated gas amount to pay for the gas receiver contract.
    * @param sourceChainId Can be of the EvmChain enum or string. If string, should try to generalize to use the CHAINS constants (e.g. CHAINS.MAINNET.ETHEREUM)
