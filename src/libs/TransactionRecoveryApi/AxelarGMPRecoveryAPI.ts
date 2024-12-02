@@ -59,6 +59,7 @@ import { DeliverTxResponse, SigningStargateClient, StdFee } from "@cosmjs/starga
 import { COSMOS_GAS_RECEIVER_OPTIONS } from "./constants/cosmosGasReceiverOptions";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import * as StellarSdk from "@stellar/stellar-sdk";
+import { tokenToScVal } from "./helpers/stellarHelper";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -118,10 +119,11 @@ export type SendOptions = {
 };
 
 export type AddGasStellarParams = {
-  senderAddress: string;
-  amount?: string;
-  refundAddress: string;
-  messageId: string;
+  senderAddress: string; // the contract address that initiates the gateway contract call.
+  tokenAddress?: string; // defaults to native token, XLM.
+  amount?: string; // defaults to estimated gas fee value.
+  spender: string; // The address that pays for the gas fee.
+  messageId: string; // The message ID of the transaction.
 };
 
 export type AutocalculateGasOptions = {
@@ -878,11 +880,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * @example
    * ```typescript
    * const xdr = await sdk.addGasToStellarChain{
-   *     senderPublicKey: 'GCXXX...',
-   *     contractId: 'CXXX...',
-   *     messageId: 'msg-123',
-   *     tokenAmount: '10000000', // 1 XLM
-   *     refundAddress: 'GXXX...'
+   *     senderAddress: 'GCXXX...', // The address that sent the cross-chain message via the `axelar_gateway`
+   *     messageId: 'tx-123',
+   *     amount: '10000000', // default value will be set by the estimateGasFee function
+   *     spender: 'GXXX...' // The spender pays for the gas fee.
    * });
    *
    * // Sign with Freighter wallet
@@ -894,55 +895,42 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    */
   public async addGasToStellarChain(params: AddGasStellarParams): Promise<string> {
     const isTestnet = this.environment === Environment.TESTNET;
-    // TODO: Replace with actual contract ID
-    const contractId = "CAMI6IZJFE5CKR5BWUT5ADFKRZHFFB6QHN7GYU2THR7PW5OS6YVU2EQK";
-    const server = new StellarSdk.rpc.Server(
-      isTestnet ? "https://horizon-testnet.stellar.org" : "https://horizon.stellar.org"
-    );
-    const networkPassphrase = isTestnet ? StellarSdk.Networks.TESTNET : StellarSdk.Networks.PUBLIC;
-    const { messageId, refundAddress } = params;
 
-    // Convert string amount to UInt128Parts
-    const amount = new StellarSdk.xdr.UInt128Parts({
-      hi: StellarSdk.xdr.Uint64.fromString("0"), // For amounts less than 2^64, hi will be 0
-      lo: StellarSdk.xdr.Uint64.fromString(params.amount || "0"), // For amounts less than 2^64, lo will be 0
+    // TODO: remove this once this supports on mainnet
+    if (!isTestnet) throw new Error("This method only supports testnet");
+
+    // TODO: Replace with the value from the config file
+    const contractId = "CDBPOARU5MFSC7ZWXTVPVKDZRHKOPS5RCY2VP2OKOBLCMQM3NKVP6HO7";
+
+    const server = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
+
+    // this will be StellarSdk.Networks.PUBLIC once mainnet is supported
+    const networkPassphrase = StellarSdk.Networks.TESTNET;
+
+    const { senderAddress, messageId, tokenAddress, amount, spender } = params;
+
+    const senderAccount = await server.getAccount(senderAddress);
+
+    const caller = StellarSdk.nativeToScVal(StellarSdk.Address.fromString(senderAddress), {
+      type: "address",
     });
 
-    const txParams = [
-      // sender parameter (Address type)
-      StellarSdk.xdr.ScVal.scvAddress(
-        StellarSdk.Address.fromString(params.senderAddress).toScAddress()
-      ),
-      // message_id parameter (String type)
-      StellarSdk.xdr.ScVal.scvString(messageId),
-      // token parameter (Token struct type)
-      StellarSdk.xdr.ScVal.scvVec([
-        // token address
-        StellarSdk.xdr.ScVal.scvAddress(
-          StellarSdk.Address.fromString(
-            StellarSdk.Asset.native().contractId(networkPassphrase)
-          ).toScAddress()
-        ),
-        // token amount
-        StellarSdk.xdr.ScVal.scvU128(amount),
-      ]),
-      // refund_address parameter (Address type)
-      StellarSdk.xdr.ScVal.scvAddress(StellarSdk.Address.fromString(refundAddress).toScAddress()),
-    ];
+    const contract = new StellarSdk.Contract(contractId);
+    const nativeAssetAddress = StellarSdk.Asset.native().contractId(networkPassphrase);
 
-    const senderAccount = await server.getAccount(params.senderAddress);
+    const operation = contract.call(
+      "add_gas",
+      caller,
+      StellarSdk.nativeToScVal(messageId, { type: "string" }),
+      StellarSdk.nativeToScVal(spender, { type: "address" }),
+      tokenToScVal(tokenAddress || nativeAssetAddress, amount || "1")
+    );
 
     const transaction = new StellarSdk.TransactionBuilder(senderAccount, {
       fee: StellarSdk.BASE_FEE,
       networkPassphrase,
     })
-      .addOperation(
-        StellarSdk.Operation.invokeContractFunction({
-          function: "add_gas",
-          contract: contractId,
-          args: txParams,
-        })
-      )
+      .addOperation(operation)
       .setTimeout(30)
       .build();
 
