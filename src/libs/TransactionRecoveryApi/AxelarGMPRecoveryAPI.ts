@@ -121,7 +121,7 @@ export type SendOptions = {
 export type AddGasStellarParams = {
   senderAddress: string; // the contract address that initiates the gateway contract call.
   tokenAddress?: string; // defaults to native token, XLM.
-  amount?: string; // defaults to estimated gas fee value.
+  amount: string; // the token amount to pay for the gas fee
   spender: string; // The address that pays for the gas fee.
   messageId: string; // The message ID of the transaction.
 };
@@ -882,7 +882,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * const xdr = await sdk.addGasToStellarChain{
    *     senderAddress: 'GCXXX...', // The address that sent the cross-chain message via the `axelar_gateway`
    *     messageId: 'tx-123',
-   *     amount: '10000000', // default value will be set by the estimateGasFee function
+   *     amount: '10000000', // the token amount to pay for the gas fee
    *     spender: 'GXXX...' // The spender pays for the gas fee.
    * });
    *
