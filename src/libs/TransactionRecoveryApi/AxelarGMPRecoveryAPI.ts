@@ -874,7 +874,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * Builds an XDR transaction to add gas payment to the Axelar Gas Service contract.
    *
    * This function creates a Stellar transaction that adds gas payment to the Axelar Gas Service.
-   * The payment is made in native XLM tokens and is used to cover the execution costs of
+   * The payment is made in native XLM token by default and is used to cover the execution costs of
    * cross-chain messages.
    *
    * @example
