@@ -121,6 +121,7 @@ export type SendOptions = {
 export type AddGasStellarParams = {
   senderAddress: string; // the contract address that initiates the gateway contract call.
   tokenAddress?: string; // defaults to native token, XLM.
+  contractAddress?: string; // custom contract address. this will be useful for testnet since it's reset every quarter.
   amount: string; // the token amount to pay for the gas fee
   spender: string; // The address that pays for the gas fee.
   messageId: string; // The message ID of the transaction.
@@ -899,15 +900,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     // TODO: remove this once this supports on mainnet
     if (!isTestnet) throw new Error("This method only supports testnet");
 
+    const { senderAddress, messageId, contractAddress, tokenAddress, amount, spender } = params;
+
     // TODO: Replace with the value from the config file
-    const contractId = "CDBPOARU5MFSC7ZWXTVPVKDZRHKOPS5RCY2VP2OKOBLCMQM3NKVP6HO7";
+    const contractId =
+      contractAddress || "CDBPOARU5MFSC7ZWXTVPVKDZRHKOPS5RCY2VP2OKOBLCMQM3NKVP6HO7";
 
     const server = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
 
     // this will be StellarSdk.Networks.PUBLIC once mainnet is supported
     const networkPassphrase = StellarSdk.Networks.TESTNET;
-
-    const { senderAddress, messageId, tokenAddress, amount, spender } = params;
 
     const senderAccount = await server.getAccount(senderAddress);
 
