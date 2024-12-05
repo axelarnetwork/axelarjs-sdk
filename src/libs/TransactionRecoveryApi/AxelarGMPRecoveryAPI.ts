@@ -895,10 +895,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * @returns {Promise<string>} The transaction encoded as an XDR string, ready for signing
    */
   public async addGasToStellarChain(params: AddGasStellarParams): Promise<string> {
-    const isTestnet = this.environment === Environment.TESTNET;
+    const isDevnet = this.environment === Environment.DEVNET;
 
     // TODO: remove this once this supports on mainnet
-    if (!isTestnet) throw new Error("This method only supports testnet");
+    if (!isDevnet) throw new Error("This method only supports on devnet");
 
     const { senderAddress, messageId, contractAddress, tokenAddress, amount, spender } = params;
 
