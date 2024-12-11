@@ -911,8 +911,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     // this will be StellarSdk.Networks.PUBLIC once mainnet is supported
     const networkPassphrase = StellarSdk.Networks.TESTNET;
 
-    const senderAccount = await server.getAccount(senderAddress);
-
     const caller = StellarSdk.nativeToScVal(StellarSdk.Address.fromString(senderAddress), {
       type: "address",
     });
@@ -928,7 +926,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       tokenToScVal(tokenAddress || nativeAssetAddress, amount || "1")
     );
 
-    const transaction = new StellarSdk.TransactionBuilder(senderAccount, {
+    const spenderAccount = await server.getAccount(spender);
+    const transaction = new StellarSdk.TransactionBuilder(spenderAccount, {
       fee: StellarSdk.BASE_FEE,
       networkPassphrase,
     })
