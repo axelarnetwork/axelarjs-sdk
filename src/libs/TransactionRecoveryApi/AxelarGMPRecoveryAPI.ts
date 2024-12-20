@@ -63,6 +63,9 @@ import { DeliverTxResponse, SigningStargateClient, StdFee } from "@cosmjs/starga
 import { COSMOS_GAS_RECEIVER_OPTIONS } from "./constants/cosmosGasReceiverOptions";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { importS3Config, loadChains } from "../../chains";
+import * as StellarSdk from "@stellar/stellar-sdk";
+import { tokenToScVal } from "./helpers/stellarHelper";
+
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
   [GMPStatus.DEST_EXECUTED]: ApproveGatewayError.ALREADY_EXECUTED,
@@ -118,6 +121,15 @@ export type SendOptions = {
   offlineSigner: OfflineSigner;
   rpcUrl?: string;
   timeoutTimestamp?: number;
+};
+
+export type AddGasStellarParams = {
+  senderAddress: string; // the contract address that initiates the gateway contract call.
+  tokenAddress?: string; // defaults to native token, XLM.
+  contractAddress?: string; // custom contract address. this will be useful for testnet since it's reset every quarter.
+  amount: string; // the token amount to pay for the gas fee
+  spender: string; // The address that pays for the gas fee.
+  messageId: string; // The message ID of the transaction.
 };
 
 export type AutocalculateGasOptions = {
@@ -899,6 +911,71 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
 
     return tx;
+  /**
+   * Builds an XDR transaction to add gas payment to the Axelar Gas Service contract.
+   *
+   * This function creates a Stellar transaction that adds gas payment to the Axelar Gas Service.
+   * The payment is made in native XLM token by default and is used to cover the execution costs of
+   * cross-chain messages.
+   *
+   * @example
+   * ```typescript
+   * const xdr = await sdk.addGasToStellarChain{
+   *     senderAddress: 'GCXXX...', // The address that sent the cross-chain message via the `axelar_gateway`
+   *     messageId: 'tx-123',
+   *     amount: '10000000', // the token amount to pay for the gas fee
+   *     spender: 'GXXX...' // The spender pays for the gas fee.
+   * });
+   *
+   * // Sign with Freighter wallet
+   * const signedXDR = await window.freighter.signTransaction(xdr);
+   * ```
+   *
+   * @param {AddGasStellarParams} params - The parameters for the add gas transaction
+   * @returns {Promise<string>} The transaction encoded as an XDR string, ready for signing
+   */
+  public async addGasToStellarChain(params: AddGasStellarParams): Promise<string> {
+    const isDevnet = this.environment === Environment.DEVNET;
+
+    // TODO: remove this once this supports on mainnet
+    if (!isDevnet) throw new Error("This method only supports on devnet");
+
+    const { senderAddress, messageId, contractAddress, tokenAddress, amount, spender } = params;
+
+    // TODO: Replace with the value from the config file
+    const contractId =
+      contractAddress || "CDBPOARU5MFSC7ZWXTVPVKDZRHKOPS5RCY2VP2OKOBLCMQM3NKVP6HO7";
+
+    const server = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
+
+    // this will be StellarSdk.Networks.PUBLIC once mainnet is supported
+    const networkPassphrase = StellarSdk.Networks.TESTNET;
+
+    const caller = StellarSdk.nativeToScVal(StellarSdk.Address.fromString(senderAddress), {
+      type: "address",
+    });
+
+    const contract = new StellarSdk.Contract(contractId);
+    const nativeAssetAddress = StellarSdk.Asset.native().contractId(networkPassphrase);
+
+    const operation = contract.call(
+      "add_gas",
+      caller,
+      StellarSdk.nativeToScVal(messageId, { type: "string" }),
+      StellarSdk.nativeToScVal(spender, { type: "address" }),
+      tokenToScVal(tokenAddress || nativeAssetAddress, amount || "1")
+    );
+
+    const spenderAccount = await server.getAccount(spender);
+    const transaction = new StellarSdk.TransactionBuilder(spenderAccount, {
+      fee: StellarSdk.BASE_FEE,
+      networkPassphrase,
+    })
+      .addOperation(operation)
+      .setTimeout(30)
+      .build();
+
+    return transaction.toXDR();
   }
 
   public async addGasToCosmosChain({

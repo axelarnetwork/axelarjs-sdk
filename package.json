@@ -1,6 +1,6 @@
 {
   "name": "@axelar-network/axelarjs-sdk",
-  "version": "0.17.1-alpha.5",
+  "version": "0.17.1-alpha.9",
   "description": "The JavaScript SDK for Axelar Network",
   "repository": {
     "type": "git",
@@ -49,6 +49,7 @@
     "@ethersproject/networks": "^5.7.1",
     "@ethersproject/providers": "^5.7.2",
     "@mysten/sui": "^1.14.2",
+    "@stellar/stellar-sdk": "^13.0.0",
     "@types/uuid": "^8.3.1",
     "bech32": "^2.0.0",
     "clone-deep": "^4.0.1",
