@@ -909,6 +909,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
 
     return tx;
+  }
+
   /**
    * Builds an XDR transaction to add gas payment to the Axelar Gas Service contract.
    *
