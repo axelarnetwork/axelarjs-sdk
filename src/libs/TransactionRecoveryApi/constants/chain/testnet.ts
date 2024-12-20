@@ -8,7 +8,6 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.AVALANCHE]: "https://api.avax-test.network/ext/bc/C/rpc",
   [EvmChain.AURORA]: "https://testnet.aurora.dev",
   [EvmChain.BINANCE]: "https://data-seed-prebsc-1-s1.binance.org:8545",
-  [EvmChain.BNBCHAIN]: "https://data-seed-prebsc-1-s1.binance.org:8545",
   [EvmChain.CELO]: "https://alfajores-forno.celo-testnet.org",
   [EvmChain.KAVA]: "https://evm.testnet.kava.io",
   "filecoin-2": "https://rpc.ankr.com/filecoin_testnet",
@@ -56,10 +55,6 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.BINANCE]: {
     chainId: 97,
     name: EvmChain.BINANCE,
-  },
-  [EvmChain.BNBCHAIN]: {
-    chainId: 97,
-    name: EvmChain.BNBCHAIN,
   },
   [EvmChain.CELO]: {
     chainId: 44787,
