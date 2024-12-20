@@ -883,12 +883,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   public async addGasToSuiChain(params: AddGasSuiParams): Promise<Transaction> {
     const { amount, messageId, gasParams, refundAddress } = params;
-    const chains = await importS3Config(this.environment);
-    const suiKey = Object.keys(chains.chains).find((chainName) => chainName.includes("sui"));
+    const suiConfig = await importS3Config(this.environment);
 
-    if (!suiKey) throw new Error("Cannot find sui chain config");
-
-    const suiConfig = chains.chains[suiKey];
     const gasServiceContract = suiConfig.contracts.GasService;
 
     const gasAmount = amount ? BigInt(amount) : parseUnits("0.01", 9).toBigInt();
