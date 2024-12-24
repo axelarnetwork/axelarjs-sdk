@@ -19,7 +19,7 @@ import {
 } from "./AxelarRecoveryApi";
 import EVMClient from "./client/EVMClient";
 import IAxelarExecutable from "../abi/IAxelarExecutable";
-import { ContractReceipt, ContractTransaction, ethers, Signer } from "ethers";
+import { ContractReceipt, ContractTransaction, ethers } from "ethers";
 import { AxelarQueryAPI } from "../AxelarQueryAPI";
 import rpcInfo from "./constants/chain";
 import {
@@ -34,8 +34,6 @@ import { AxelarGateway } from "../AxelarGateway";
 import { getDefaultProvider } from "./helpers/providerHelper";
 import { Transaction } from "@mysten/sui/transactions";
 import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiTransactionBlockResponse } from "@mysten/sui/client";
-import { Signer as SuiSigner } from "@mysten/sui/cryptography";
 import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
@@ -62,7 +60,7 @@ import { Coin, OfflineSigner } from "@cosmjs/proto-signing";
 import { DeliverTxResponse, SigningStargateClient, StdFee } from "@cosmjs/stargate";
 import { COSMOS_GAS_RECEIVER_OPTIONS } from "./constants/cosmosGasReceiverOptions";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { importS3Config, loadChains } from "../../chains";
+import { importS3Config } from "../../chains";
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { tokenToScVal } from "./helpers/stellarHelper";
 
@@ -911,6 +909,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
 
     return tx;
+  }
   /**
    * Builds an XDR transaction to add gas payment to the Axelar Gas Service contract.
    *
