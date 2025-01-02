@@ -32,6 +32,8 @@ import {
 import Erc20 from "../abi/erc20Abi.json";
 import { AxelarGateway } from "../AxelarGateway";
 import { getDefaultProvider } from "./helpers/providerHelper";
+import { Transaction } from "@mysten/sui/transactions";
+import { bcs } from "@mysten/sui/bcs";
 import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
@@ -50,7 +52,7 @@ import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
 import { retry, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
-import { Interface } from "ethers/lib/utils";
+import { arrayify, Interface, parseUnits } from "ethers/lib/utils";
 import { ChainInfo } from "src/chains/types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import s3 from "./constants/s3";
@@ -58,6 +60,7 @@ import { Coin, OfflineSigner } from "@cosmjs/proto-signing";
 import { DeliverTxResponse, SigningStargateClient, StdFee } from "@cosmjs/stargate";
 import { COSMOS_GAS_RECEIVER_OPTIONS } from "./constants/cosmosGasReceiverOptions";
 import { JsonRpcProvider } from "@ethersproject/providers";
+import { importS3Config } from "../../chains";
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { tokenToScVal } from "./helpers/stellarHelper";
 
@@ -138,6 +141,13 @@ export type AddGasParams = {
   sendOptions: SendOptions;
   gasLimit: number;
   autocalculateGasOptions?: AutocalculateGasOptions;
+};
+
+export type AddGasSuiParams = {
+  amount?: string;
+  refundAddress: string;
+  messageId: string;
+  gasParams: string;
 };
 
 export type AddGasResponse = {
@@ -871,6 +881,35 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
+  public async addGasToSuiChain(params: AddGasSuiParams): Promise<Transaction> {
+    const { amount, messageId, gasParams, refundAddress } = params;
+    const chains = await importS3Config(this.environment);
+    const suiKey = Object.keys(chains.chains).find((chainName) => chainName.includes("sui"));
+
+    if (!suiKey) throw new Error("Cannot find sui chain config");
+
+    const suiConfig = chains.chains[suiKey];
+    const gasServiceContract = suiConfig.contracts.GasService;
+
+    const gasAmount = amount ? BigInt(amount) : parseUnits("0.01", 9).toBigInt();
+
+    const tx = new Transaction();
+
+    const [gas] = tx.splitCoins(tx.gas, [tx.pure.u64(gasAmount)]);
+
+    tx.moveCall({
+      target: `${gasServiceContract.address}::gas_service::add_gas`,
+      arguments: [
+        tx.object(gasServiceContract.objects.GasService),
+        gas,
+        tx.pure(bcs.string().serialize(messageId).toBytes()),
+        tx.pure.address(refundAddress),
+        tx.pure(bcs.vector(bcs.u8()).serialize(arrayify(gasParams)).toBytes()),
+      ],
+    });
+
+    return tx;
+  }
   /**
    * Builds an XDR transaction to add gas payment to the Axelar Gas Service contract.
    *

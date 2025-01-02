@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { AxelarGMPRecoveryAPI, RouteDir } from "../../TransactionRecoveryApi/AxelarGMPRecoveryAPI";
 import {
   AddGasOptions,
@@ -6,6 +7,8 @@ import {
   Environment,
   EvmWalletDetails,
 } from "../../types";
+import { requestSuiFromFaucetV0, getFaucetHost } from "@mysten/sui/faucet";
+import { Secp256k1Keypair } from "@mysten/sui/keypairs/secp256k1";
 import { EvmChain } from "../../../constants/EvmChain";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
 import { Contract, ContractReceipt, ContractTransaction, ethers, Wallet } from "ethers";
@@ -44,6 +47,7 @@ import * as Sleep from "../../../utils/sleep";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { ChainInfo } from "../../../chains/types";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
+import { SuiClient } from "@mysten/sui/client";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -1136,6 +1140,60 @@ describe("AxelarGMPRecoveryAPI", () => {
       // Validate that the additional gas fee is equal to "total gas fee" - "gas paid".
       expect(eventGasFeeAmount).toBe(ethers.BigNumber.from(mockedGasFee).sub(gasPaid).toString());
       expect(args?.refundAddress).toBe(userWallet.address);
+    });
+  });
+
+  describe("addGasToSuiChain", () => {
+    const network = "testnet";
+    // The default rpc url for testnet doesn't work as of 07 November 2024, so we need to use a custom one for testing.
+    const api: AxelarGMPRecoveryAPI = new AxelarGMPRecoveryAPI({ environment: Environment.DEVNET });
+    const testRpcUrl = "https://sui-testnet-rpc.publicnode.com";
+    const suiClient = new SuiClient({
+      url: testRpcUrl,
+    });
+    const keypair: Secp256k1Keypair = Secp256k1Keypair.deriveKeypair(
+      "test test test test test test test test test test test junk"
+    );
+
+    beforeEach(async () => {
+      vitest.clearAllMocks();
+      console.log("Sui Wallet address", keypair.toSuiAddress());
+
+      const balance = await suiClient.getBalance({
+        owner: keypair.toSuiAddress(),
+      });
+
+      // If the balance is less than 0.2 SUI, request funds from the faucet.
+      // This is to avoid too many requests error.
+      if (BigInt(balance.totalBalance) < 2e8) {
+        console.log("Requesting faucet funds...");
+        await requestSuiFromFaucetV0({
+          host: getFaucetHost(network),
+          recipient: keypair.toSuiAddress(),
+        });
+      }
+    }, 15000);
+
+    test("addGasToSuiChain should work given valid params", async () => {
+      const tx = await api.addGasToSuiChain({
+        gasParams: "0x",
+        messageId: "test-1",
+        refundAddress: keypair.toSuiAddress(),
+      });
+
+      const response = await suiClient.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: {
+          showEffects: true,
+          showEvents: true,
+          showObjectChanges: true,
+        },
+      });
+
+      expect(response.events).toBeDefined();
+      expect(response.events!.length).toBeGreaterThan(0);
+      expect(response.events![0].type).toContain("GasAdded");
     });
   });
 
