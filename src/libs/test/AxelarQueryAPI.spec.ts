@@ -656,6 +656,12 @@ describe("AxelarQueryAPI", () => {
         expect(res).toBeDefined();
       });
     });
+
+    test.only("test flow contract address", async () => {
+      await api.getContractAddressFromConfig("flow", "gas_service").then((res) => {
+        expect(res).toBeDefined();
+      });
+    });
   });
 
   describe("getTransferLimit", () => {
