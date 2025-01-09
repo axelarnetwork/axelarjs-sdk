@@ -47,8 +47,7 @@ const s3UrlMap: Record<Environment, string> = {
 
 const urlMap: Record<Environment, string> = {
   "devnet-amplifier": "https://axelar-testnet.s3.us-east-2.amazonaws.com/devnet-chain-config.json",
-  testnet:
-    "https://raw.githubusercontent.com/axelarnetwork/chains/83f580097fbbbecc0db59d75d6cf1b453d940273/testnet-chain-config.json?token=GHSAT0AAAAAACKZG6QV7AV7PCWVGQRJ76BWZ37TI5A",
+  testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-chain-config.json",
   mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/mainnet-chain-config.json",
 };
 const chainMap: Record<Environment, any> = {
