@@ -1,5 +1,6 @@
 import {
   SetGatewayRequest,
+  ConfirmGatewayTxsRequest,
   ConfirmGatewayTxRequest,
   ConfirmDepositRequest,
   ConfirmTokenRequest,
@@ -20,6 +21,7 @@ import { Registry } from "@cosmjs/proto-signing";
 const TxTypeUrlMap = {
   EvmLinkRequest: `/${protobufPackage}.LinkRequest`,
   EvmSetGatewayRequest: `/${protobufPackage}.SetGatewayRequest`,
+  EvmConfirmGatewayTxsRequest: `/${protobufPackage}.ConfirmGatewayTxsRequest`,
   EvmConfirmGatewayTxRequest: `/${protobufPackage}.ConfirmGatewayTxRequest`,
   EvmConfirmDepositRequest: `/${protobufPackage}.ConfirmDepositRequest`,
   EvmConfirmTokenRequest: `/${protobufPackage}.ConfirmTokenRequest`,
@@ -37,6 +39,7 @@ const TxTypeUrlMap = {
 export const registerEvmTxTypes = (registry: Registry) => {
   registry.register(TxTypeUrlMap.EvmLinkRequest, LinkRequest);
   registry.register(TxTypeUrlMap.EvmSetGatewayRequest, SetGatewayRequest);
+  registry.register(TxTypeUrlMap.EvmConfirmGatewayTxsRequest, ConfirmGatewayTxsRequest);
   registry.register(TxTypeUrlMap.EvmConfirmGatewayTxRequest, ConfirmGatewayTxRequest);
   registry.register(TxTypeUrlMap.EvmConfirmDepositRequest, ConfirmDepositRequest);
   registry.register(TxTypeUrlMap.EvmConfirmTokenRequest, ConfirmTokenRequest);
