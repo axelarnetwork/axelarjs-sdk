@@ -17,7 +17,6 @@ const TxTypeUrlMap = {
   DeactivateChainRequest: `/${protobufPackage}.DeactivateChainRequest`,
   RegisterAssetFeeRequest: `/${protobufPackage}.RegisterAssetFeeRequest`,
   SetTransferRateLimitRequest: `/${protobufPackage}.SetTransferRateLimitRequest`,
-
 };
 
 export const registerNexusTxTypes = (registry: Registry) => {
