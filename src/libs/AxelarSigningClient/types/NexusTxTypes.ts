@@ -21,7 +21,10 @@ const TxTypeUrlMap = {
 
 export const registerNexusTxTypes = (registry: Registry) => {
   registry.register(TxTypeUrlMap.RegisterChainMaintainerRequest, RegisterChainMaintainerRequest);
-  registry.register(TxTypeUrlMap.DeregisterChainMaintainerRequest, DeregisterChainMaintainerRequest);
+  registry.register(
+    TxTypeUrlMap.DeregisterChainMaintainerRequest,
+    DeregisterChainMaintainerRequest
+  );
   registry.register(TxTypeUrlMap.ActivateChainRequest, ActivateChainRequest);
   registry.register(TxTypeUrlMap.DeactivateChainRequest, DeactivateChainRequest);
   registry.register(TxTypeUrlMap.RegisterAssetFeeRequest, RegisterAssetFeeRequest);
