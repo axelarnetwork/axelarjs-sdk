@@ -14,6 +14,10 @@ import {
   QueryService as TSSQS,
   QueryServiceClientImpl as TSSQSCI,
 } from "@axelar-network/axelarjs-types/axelar/tss/v1beta1/service";
+import {
+  QueryService as MultisigQS,
+  QueryServiceClientImpl as MultisigQSCI,
+} from "@axelar-network/axelarjs-types/axelar/multisig/v1beta1/service";
 import { QueryClient, createProtobufRpcClient } from "@cosmjs/stargate";
 
 export interface AxelarQueryService {
@@ -21,6 +25,7 @@ export interface AxelarQueryService {
   readonly axelarnet: AxelarnetQS;
   readonly nexus: NexusQS;
   readonly tss: TSSQS;
+  readonly multisig: MultisigQS;
 }
 
 export function setupQueryExtension(base: QueryClient): AxelarQueryService {
@@ -30,5 +35,6 @@ export function setupQueryExtension(base: QueryClient): AxelarQueryService {
     axelarnet: new AxelarnetQSCI(client),
     nexus: new NexusQSCI(client),
     tss: new TSSQSCI(client),
+    multisig: new MultisigQSCI(client),
   };
 }
