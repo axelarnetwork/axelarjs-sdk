@@ -40,13 +40,13 @@ export async function loadChains(config: LoadChainConfig) {
 }
 
 const s3UrlMap: Record<Environment, string> = {
-  "devnet-amplifier": "https://melted-fayth-nptytn-57e5d396.koyeb.app/chain/devnet-amplifier",
+  "devnet-amplifier": "https://static.npty.online/axelar/devnet-amplifier-config-1.0.x.json",
   testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/configs/testnet-config-1.x.json",
   mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/configs/mainnet-config-1.x.json",
 };
 
 const urlMap: Record<Environment, string> = {
-  "devnet-amplifier": "https://axelar-testnet.s3.us-east-2.amazonaws.com/devnet-chain-config.json",
+  "devnet-amplifier": "https://static.npty.online/axelar/devnet-amplifier-chain-config.json",
   testnet: "https://axelar-testnet.s3.us-east-2.amazonaws.com/testnet-chain-config.json",
   mainnet: "https://axelar-mainnet.s3.us-east-2.amazonaws.com/mainnet-chain-config.json",
 };
