@@ -1,4 +1,5 @@
 import {
+  CallContractRequest,
   ConfirmDepositRequest,
   ExecutePendingTransfersRequest,
   RegisterIBCPathRequest,
@@ -14,6 +15,7 @@ import { Registry } from "@cosmjs/proto-signing";
 
 const TxTypeUrlMap = {
   AxelarnetLinkRequest: `/${protobufPackage}.LinkRequest`,
+  AxelarnetCallContractRequest: `/${protobufPackage}.CallContractRequest`,
   AxelarnetConfirmDepositRequest: `/${protobufPackage}.ConfirmDepositRequest`,
   AxelarnetExecutePendingTransfersRequest: `/${protobufPackage}.ExecutePendingTransfersRequest`,
   AxelarnetRegisterIBCPathRequest: `/${protobufPackage}.RegisterIBCPathRequest`,
@@ -26,6 +28,7 @@ const TxTypeUrlMap = {
 
 export const registerAxelarnetTxTypes = (registry: Registry) => {
   registry.register(TxTypeUrlMap.AxelarnetLinkRequest, LinkRequest);
+  registry.register(TxTypeUrlMap.AxelarnetCallContractRequest, CallContractRequest);
   registry.register(TxTypeUrlMap.AxelarnetConfirmDepositRequest, ConfirmDepositRequest);
   registry.register(
     TxTypeUrlMap.AxelarnetExecutePendingTransfersRequest,
