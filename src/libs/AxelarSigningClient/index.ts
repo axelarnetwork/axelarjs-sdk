@@ -15,6 +15,7 @@ import {
   OfflineSigner,
   Registry,
 } from "@cosmjs/proto-signing";
+import { registerMultisigTxTypes } from "./types/MultisigTxTypes";
 import { registerAxelarnetTxTypes } from "./types/AxelarnetTxTypes";
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
@@ -68,6 +69,7 @@ export class AxelarSigningClient extends SigningStargateClient implements IAxela
     const [account] = await wallet.getAccounts();
 
     const registry = options.registry || new Registry();
+    registerMultisigTxTypes(registry);
     registerAxelarnetTxTypes(registry);
     registerEvmTxTypes(registry);
     registerNexusTxTypes(registry);
