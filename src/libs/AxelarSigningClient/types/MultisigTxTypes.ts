@@ -1,11 +1,11 @@
 import {
-    StartKeygenRequest,
-    SubmitPubKeyRequest,
-    SubmitSignatureRequest,
-    RotateKeyRequest,
-    KeygenOptInRequest,
-    KeygenOptOutRequest,
-    protobufPackage,
+  StartKeygenRequest,
+  SubmitPubKeyRequest,
+  SubmitSignatureRequest,
+  RotateKeyRequest,
+  KeygenOptInRequest,
+  KeygenOptOutRequest,
+  protobufPackage,
 } from "@axelar-network/axelarjs-types/axelar/multisig/v1beta1/tx";
 import { Registry } from "@cosmjs/proto-signing";
 
@@ -19,10 +19,10 @@ const TxTypeUrlMap = {
 };
 
 export const registerMultisigTxTypes = (registry: Registry) => {
-    registry.register(TxTypeUrlMap.MultisigStartKeygenRequest, StartKeygenRequest);
-    registry.register(TxTypeUrlMap.MultisigKeygenOptInRequest, KeygenOptInRequest);
-    registry.register(TxTypeUrlMap.MultisigKeygenOptOutRequest, KeygenOptOutRequest);
-    registry.register(TxTypeUrlMap.MultisigRotateKeyRequest, RotateKeyRequest);
-    registry.register(TxTypeUrlMap.MultisigSubmitPubKeyRequest, SubmitPubKeyRequest);
-    registry.register(TxTypeUrlMap.MultisigSubmitSignatureRequest, SubmitSignatureRequest);
+  registry.register(TxTypeUrlMap.MultisigStartKeygenRequest, StartKeygenRequest);
+  registry.register(TxTypeUrlMap.MultisigKeygenOptInRequest, KeygenOptInRequest);
+  registry.register(TxTypeUrlMap.MultisigKeygenOptOutRequest, KeygenOptOutRequest);
+  registry.register(TxTypeUrlMap.MultisigRotateKeyRequest, RotateKeyRequest);
+  registry.register(TxTypeUrlMap.MultisigSubmitPubKeyRequest, SubmitPubKeyRequest);
+  registry.register(TxTypeUrlMap.MultisigSubmitSignatureRequest, SubmitSignatureRequest);
 };
