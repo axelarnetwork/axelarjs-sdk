@@ -25,13 +25,10 @@ import rpcInfo from "./constants/chain";
 import {
   getDestinationChainFromTxReceipt,
   getEventIndexFromTxReceipt,
-  getGasAmountFromTxReceipt,
   getLogIndexFromTxReceipt,
-  getNativeGasAmountFromTxReceipt,
 } from "./helpers/contractEventHelper";
 import Erc20 from "../abi/erc20Abi.json";
 import { AxelarGateway } from "../AxelarGateway";
-import { getDefaultProvider } from "./helpers/providerHelper";
 import { Transaction } from "@mysten/sui/transactions";
 import { bcs } from "@mysten/sui/bcs";
 import {
@@ -819,11 +816,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     options: QueryGasFeeOptions
   ): Promise<string> {
     await throwIfInvalidChainIds([sourceChain, destinationChain], this.environment);
-    const srcChainConfig = await this.getChainInfo(sourceChain);
 
-    const provider =
-      options.provider || new ethers.providers.JsonRpcProvider(srcChainConfig.rpc[0]);
-    const receipt = await provider.getTransactionReceipt(txHash);
     const hasTxBeenConfirmed = (await this.isConfirmed(txHash)) || false;
     options.shouldSubtractBaseFee = hasTxBeenConfirmed;
 
@@ -846,8 +839,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     options: QueryGasFeeOptions
   ): Promise<string> {
     await throwIfInvalidChainIds([sourceChain, destinationChain], this.environment);
-
-    const provider = options.provider || getDefaultProvider(sourceChain, this.environment);
 
     return this.subtractGasFee(sourceChain, destinationChain, estimatedGasUsed, options);
   }
@@ -1082,11 +1073,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   ): Promise<TxResult> {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
     const selectedChain = await this.getChainInfo(chain);
-    const evmProvider =
-      options?.evmWalletDetails?.provider ||
-      new ethers.providers.JsonRpcProvider(selectedChain.rpc[0]);
 
-    const signer = this.getSigner(chain, evmWalletDetails).connect(evmProvider);
+    if (!evmWalletDetails.rpcUrl) evmWalletDetails.rpcUrl = selectedChain.rpc[0];
+
+    const signer = this.getSigner(chain, evmWalletDetails);
     const signerAddress = await signer.getAddress();
 
     const gasReceiverAddress = await this.axelarQueryApi.getContractAddressFromConfig(
@@ -1094,14 +1084,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       "gas_service"
     );
 
-    const receipt = await signer.provider.getTransactionReceipt(txHash);
+    const { logIndex, destinationChain } = await this._getLogIndexAndDestinationChain(
+      chain,
+      txHash,
+      options
+    );
 
-    if (!receipt) return InvalidTransactionError(chain);
+    if (!logIndex) {
+      return InvalidTransactionError(chain);
+    }
 
-    const destinationChain = options?.destChain || getDestinationChainFromTxReceipt(receipt);
-    const logIndex = options?.logIndex ?? getLogIndexFromTxReceipt(receipt);
-
-    // Check if given txHash is valid
     if (!destinationChain) return NotGMPTransactionError();
 
     // Check if the transaction status is already executed or not.
@@ -1137,6 +1129,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       ],
       signer
     );
+
     return contract
       .addNativeGas(txHash, logIndex, refundAddress, {
         value: gasFeeToAdd,
@@ -1338,13 +1331,42 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return topupGasAmount.gt(0) ? topupGasAmount.toString() : "0";
   }
 
+  private async _getLogIndexAndDestinationChain(
+    chain: string,
+    txHash: string,
+    options?: AddGasOptions
+  ): Promise<{ logIndex?: number; destinationChain?: string }> {
+    const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
+    const signer = this.getSigner(chain, evmWalletDetails);
+    const gmpTx = await this.fetchGMPTransaction(txHash, options?.logIndex);
+
+    let logIndex = options?.logIndex;
+    let destinationChain = options?.destChain;
+
+    if (!destinationChain || !logIndex) {
+      if (!gmpTx) {
+        const receipt = await signer.provider.getTransactionReceipt(txHash).catch(() => undefined);
+
+        if (!receipt) return {};
+
+        destinationChain = options?.destChain || getDestinationChainFromTxReceipt(receipt);
+        logIndex = options?.logIndex ?? getLogIndexFromTxReceipt(receipt);
+      } else {
+        logIndex = gmpTx.call.eventIndex;
+        destinationChain = gmpTx.call.returnValues.destinationChain;
+      }
+    }
+
+    return { logIndex, destinationChain };
+  }
+
   private getSigner(
     chain: string,
     evmWalletDetails: EvmWalletDetails = { useWindowEthereum: true }
   ) {
     const { rpcMap, networkInfo } = rpcInfo[this.environment];
     const evmClientConfig: EVMClientConfig = {
-      rpcUrl: rpcMap[chain],
+      rpcUrl: evmWalletDetails.rpcUrl || rpcMap[chain],
       networkOptions: networkInfo[chain],
       evmWalletDetails,
     };
