@@ -1080,7 +1080,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const signerAddress = await signer.getAddress();
 
     const gasReceiverAddress = await this.axelarQueryApi.getContractAddressFromConfig(
-      selectedChain.id,
+      chain,
       "gas_service"
     );
 
