@@ -29,6 +29,7 @@ import {
 } from "./helpers/contractEventHelper";
 import Erc20 from "../abi/erc20Abi.json";
 import { AxelarGateway } from "../AxelarGateway";
+import { SUI_TYPE_ARG } from "@mysten/sui/utils";
 import { Transaction } from "@mysten/sui/transactions";
 import { bcs } from "@mysten/sui/bcs";
 import {
@@ -866,7 +867,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (!suiKey) throw new Error("Cannot find sui chain config");
 
     const suiConfig = chains.chains[suiKey];
-    const gasServiceContract = suiConfig.contracts.GasService;
+    const gasServiceContract = suiConfig.config.contracts.GasService;
 
     const gasAmount = amount ? BigInt(amount) : parseUnits("0.01", 9).toBigInt();
 
@@ -876,6 +877,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     tx.moveCall({
       target: `${gasServiceContract.address}::gas_service::add_gas`,
+      typeArguments: [SUI_TYPE_ARG],
       arguments: [
         tx.object(gasServiceContract.objects.GasService),
         gas,
