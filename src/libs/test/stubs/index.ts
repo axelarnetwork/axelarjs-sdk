@@ -163,6 +163,7 @@ export const evmEventStubResponse = () => ({
 export const chainInfoStub = () => ({
   id: "mockedId",
   assets: [],
+  rpc: [],
   chainSymbol: "mockedSymbol",
   chainName: "mockedName",
   fullySupported: true,
