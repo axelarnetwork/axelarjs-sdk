@@ -29,7 +29,7 @@ const devnetConfigs: EnvironmentConfigs = {
   resourceUrl: "https://nest-server-devnet.axelar.dev",
   axelarRpcUrl: "",
   axelarLcdUrl: "",
-  axelarGMPApiUrl: "https://devnet.api.gmp.axelarscan.io",
+  axelarGMPApiUrl: "https://devnet-amplifier.api.axelarscan.io/gmp/",
   axelarscanBaseApiUrl: "",
   depositServiceUrl: "https://deposit-service-devnet-release.devnet.axelar.dev",
   recoveryApiUrl: "",
