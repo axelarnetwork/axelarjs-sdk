@@ -24,6 +24,7 @@ export interface ChainInfo {
   txFeeInPercent: number;
   module: "axelarnet" | "evm";
   confirmLevel?: number;
+  rpc: string[];
   chainIdentifier: {
     "devnet-amplifier": string;
     testnet: string;
