@@ -1092,7 +1092,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       options
     );
 
-    if (!logIndex) {
+    if (!logIndex && !destinationChain) {
       return InvalidTransactionError(chain);
     }
 
