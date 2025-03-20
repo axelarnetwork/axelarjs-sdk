@@ -41,7 +41,7 @@ const devnetAmplifierConfigs: EnvironmentConfigs = {
   resourceUrl: "https://nest-server-testnet.axelar.dev",
   axelarRpcUrl: "",
   axelarLcdUrl: "",
-  axelarGMPApiUrl: "https://devnet-amplifier.api.gmp.axelarscan.io",
+  axelarGMPApiUrl: "https://devnet-amplifier.api.axelarscan.io/gmp",
   axelarscanBaseApiUrl: "https://devnet-amplifier.api.axelarscan.io",
   depositServiceUrl: "",
   recoveryApiUrl: "",
