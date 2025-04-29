@@ -128,6 +128,15 @@ export type AddGasStellarParams = {
   messageId: string; // The message ID of the transaction.
 };
 
+export type AddGasXrplParams = {
+  senderAddress: string; // the contract address that initiates the gateway contract call.
+  tokenAddress?: string; // defaults to native token, XRP.
+  contractAddress?: string; // custom contract address. this will be useful for testnet since it's reset every quarter.
+  amount: string; // the token amount to pay for the gas fee
+  spender: string; // The address that pays for the gas fee.
+  messageId: string; // The message ID of the transaction.
+};
+
 export type AutocalculateGasOptions = {
   gasMultipler?: number;
 };
@@ -889,6 +898,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     return tx;
   }
+
+  public async addGasToXrplChain(params: AddGasXrplParams): Promise<string> {}
+
   /**
    * Builds an XDR transaction to add gas payment to the Axelar Gas Service contract.
    *
@@ -913,16 +925,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * @returns {Promise<string>} The transaction encoded as an XDR string, ready for signing
    */
   public async addGasToStellarChain(params: AddGasStellarParams): Promise<string> {
-    const isDevnet = this.environment === Environment.DEVNET;
+    const chainConfig = await this.findChainConfig("stellar");
 
-    // TODO: remove this once this supports on mainnet
-    if (!isDevnet) throw new Error("This method only supports on devnet");
+    if (!chainConfig) throw new Error("Stellar chain config not found");
 
     const { senderAddress, messageId, contractAddress, tokenAddress, amount, spender } = params;
 
-    // TODO: Replace with the value from the config file
-    const contractId =
-      contractAddress || "CDBPOARU5MFSC7ZWXTVPVKDZRHKOPS5RCY2VP2OKOBLCMQM3NKVP6HO7";
+    const contractId = contractAddress || chainConfig.config.contracts.AxelarGasService.address;
+
+    console.log(contractId);
 
     const server = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
 
@@ -954,6 +965,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       .build();
 
     return transaction.toXDR();
+  }
+
+  private async findChainConfig(chain: string): Promise<any> {
+    const { chains } = await importS3Config(this.environment);
+    const chainKey = Object.keys(chains).find((chainName) => chainName.includes(chain));
+
+    if (!chainKey) return undefined;
+
+    return chains[chainKey];
   }
 
   public async addGasToCosmosChain({
