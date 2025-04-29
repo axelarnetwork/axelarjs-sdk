@@ -9,7 +9,7 @@ const generalErrorMsg = (e: any) => e.message;
 
 export const ErrorMsg = (e: any) => ethersErrorMsg(e) || metamaskErrorMsg(e) || generalErrorMsg(e);
 
-export const InvalidTransactionError = (chain: EvmChain) => ({
+export const InvalidTransactionError = (chain: EvmChain | string) => ({
   success: false,
   error: `Couldn't find a transaction on ${chain}`,
 });

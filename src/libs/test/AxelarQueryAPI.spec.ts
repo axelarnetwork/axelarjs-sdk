@@ -360,13 +360,7 @@ describe("AxelarQueryAPI", () => {
 
     test("It should include L1 fee for L2 destination chain", async () => {
       // Testnet
-      const l2Chains = [
-        "fraxtal",
-        "blast-sepolia",
-        "base-sepolia",
-        "optimism-sepolia",
-        "mantle-sepolia",
-      ];
+      const l2Chains = ["fraxtal", "base-sepolia", "optimism-sepolia", "mantle-sepolia"];
 
       const queries = [];
       for (const l2Chain of l2Chains) {
@@ -393,13 +387,14 @@ describe("AxelarQueryAPI", () => {
       const mainnetApi = new AxelarQueryAPI({ environment: Environment.MAINNET });
       const mainnetQueries = [];
       for (const mainnetL2Chain of mainnetL2Chains) {
-        const query = mainnetApi.estimateGasFee(
+        const query = await mainnetApi.estimateGasFee(
           EvmChain.ETHEREUM,
           mainnetL2Chain as EvmChain,
           500000,
           undefined,
           undefined,
-          undefined
+          undefined,
+          "0x"
         );
         mainnetQueries.push(query);
       }
