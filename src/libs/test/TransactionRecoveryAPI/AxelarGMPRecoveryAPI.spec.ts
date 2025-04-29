@@ -1172,7 +1172,6 @@ describe("AxelarGMPRecoveryAPI", () => {
       //
       // const signedTx = wallet.sign(response as any);
       //
-      // // 4. Submit Transaction
       // const client = new xrpl.Client("wss://s.altnet.rippletest.net:51233");
       // await client.connect();
       // const result = await client.submit(signedTx.tx_blob);
