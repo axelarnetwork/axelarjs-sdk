@@ -123,6 +123,7 @@ export type AddGasStellarParams = {
   senderAddress: string; // the contract address that initiates the gateway contract call.
   tokenAddress?: string; // defaults to native token, XLM.
   contractAddress?: string; // custom contract address. this will be useful for testnet since it's reset every quarter.
+  rpcUrl?: string;
   amount: string; // the token amount to pay for the gas fee
   spender: string; // The address that pays for the gas fee.
   messageId: string; // The message ID of the transaction.
@@ -925,20 +926,23 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * @returns {Promise<string>} The transaction encoded as an XDR string, ready for signing
    */
   public async addGasToStellarChain(params: AddGasStellarParams): Promise<string> {
-    const chainConfig = await this.findChainConfig("stellar");
+    const chainInfo = await this.findChainInfo("stellar");
 
-    if (!chainConfig) throw new Error("Stellar chain config not found");
+    if (!chainInfo) throw new Error("Stellar chain config not found");
 
-    const { senderAddress, messageId, contractAddress, tokenAddress, amount, spender } = params;
+    const { senderAddress, messageId, contractAddress, tokenAddress, amount, spender, rpcUrl } =
+      params;
 
-    const contractId = contractAddress || chainConfig.config.contracts.AxelarGasService.address;
+    const { config: chainConfig } = chainInfo;
 
-    console.log(contractId);
+    const contractId = contractAddress || chainConfig.contracts.AxelarGasService.address;
 
-    const server = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
+    const server = new StellarSdk.rpc.Server(rpcUrl || chainConfig.rpc[0]);
 
-    // this will be StellarSdk.Networks.PUBLIC once mainnet is supported
-    const networkPassphrase = StellarSdk.Networks.TESTNET;
+    const networkPassphrase =
+      this.environment === Environment.MAINNET
+        ? StellarSdk.Networks.PUBLIC
+        : StellarSdk.Networks.TESTNET;
 
     const caller = StellarSdk.nativeToScVal(StellarSdk.Address.fromString(senderAddress), {
       type: "address",
@@ -967,7 +971,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return transaction.toXDR();
   }
 
-  private async findChainConfig(chain: string): Promise<any> {
+  private async findChainInfo(chain: string): Promise<any> {
     const { chains } = await importS3Config(this.environment);
     const chainKey = Object.keys(chains).find((chainName) => chainName.includes(chain));
 

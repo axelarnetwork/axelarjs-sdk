@@ -48,6 +48,7 @@ import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1
 import { ChainInfo } from "../../../chains/types";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { SuiClient } from "@mysten/sui/client";
+import { Keypair, Horizon } from "@stellar/stellar-sdk";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -1140,6 +1141,33 @@ describe("AxelarGMPRecoveryAPI", () => {
       // Validate that the additional gas fee is equal to "total gas fee" - "gas paid".
       expect(eventGasFeeAmount).toBe(ethers.BigNumber.from(mockedGasFee).sub(gasPaid).toString());
       expect(args?.refundAddress).toBe(userWallet.address);
+    });
+  });
+
+  describe("addGasToStellarChain", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+    const randomAddress = "GBX7EYLXHTS3AZDV23BIZR6KYEGGXM7XHMPRZV55NZT54H4EVD37ORWP";
+
+    async function fundAccountIfNeeded(address: string) {
+      const server = new Horizon.Server("https://soroban-testnet.stellar.org");
+      try {
+        await server.accounts().accountId(address).call();
+      } catch (e: any) {
+        await fetch(`https://friendbot.stellar.org?addr=${encodeURIComponent(address)}`);
+      }
+    }
+
+    it("should return transaction data for adding gas to stellar chain", async () => {
+      await fundAccountIfNeeded(randomAddress);
+
+      const response = await api.addGasToStellarChain({
+        senderAddress: randomAddress, // The address that sent the cross-chain message via the `axelar_gateway`
+        messageId: "tx-123",
+        amount: "10000000", // the token amount to pay for the gas fee
+        spender: randomAddress, // The spender pays for the gas fee.
+      });
+
+      expect(response).toBeDefined();
     });
   });
 
