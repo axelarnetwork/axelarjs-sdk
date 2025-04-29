@@ -942,12 +942,12 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     try {
       // Autofill transaction details (like sequence number)
-      const preparedTx = await client.autofill(args);
-
-      return preparedTx;
+      return await client.autofill(args);
+    } catch (e) {
+      console.log(e);
+      throw e;
     } finally {
       await client.disconnect();
-    }
   }
 
   /**
