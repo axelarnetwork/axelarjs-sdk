@@ -61,6 +61,8 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { importS3Config } from "../../chains";
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { tokenToScVal } from "./helpers/stellarHelper";
+import xrpl from "xrpl";
+import { parseToken, hex } from "./helpers/xrplHelper";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -131,10 +133,9 @@ export type AddGasStellarParams = {
 
 export type AddGasXrplParams = {
   senderAddress: string; // the contract address that initiates the gateway contract call.
-  tokenAddress?: string; // defaults to native token, XRP.
-  contractAddress?: string; // custom contract address. this will be useful for testnet since it's reset every quarter.
+  tokenSymbol?: string; // defaults to native token, XRP.
+  rpcUrl?: string;
   amount: string; // the token amount to pay for the gas fee
-  spender: string; // The address that pays for the gas fee.
   messageId: string; // The message ID of the transaction.
 };
 
@@ -900,7 +901,59 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return tx;
   }
 
-  public async addGasToXrplChain(params: AddGasXrplParams): Promise<string> {}
+  public async addGasToXrplChain(params: AddGasXrplParams): Promise<string> {
+    const { senderAddress, messageId, tokenSymbol, amount, rpcUrl } = params;
+
+    const symbol = tokenSymbol || "XRP";
+
+    const chainInfo = await this.findChainInfo("xrpl");
+
+    if (!chainInfo) throw new Error("XRPL chain config not found");
+
+    const { config: chainConfig } = chainInfo;
+
+    const contractId = chainConfig.contracts.AxelarGateway.address;
+
+    const rpc = rpcUrl || chainConfig.rpc[0];
+
+    const url = new URL(rpc);
+    url.protocol = "wss:";
+    url.port = ""; // Remove port
+    const normalizedRpc = url.toString();
+
+    console.log(normalizedRpc);
+
+    const client = new xrpl.Client(normalizedRpc);
+
+    await client.connect();
+
+    const args: any = {
+      TransactionType: "Payment",
+      Account: senderAddress,
+      Destination: contractId,
+      Amount: parseToken(symbol === "XRP" ? "XRP" : `${symbol}.${contractId}`, amount),
+      Memos: [
+        {
+          Memo: { MemoType: hex("type"), MemoData: hex("add_gas") },
+        },
+        {
+          Memo: {
+            MemoType: hex("msg_id"),
+            MemoData: hex(messageId.toLowerCase().replace("0x", "")),
+          },
+        },
+      ],
+    };
+
+    try {
+      // Autofill transaction details (like sequence number)
+      const preparedTx = await client.autofill(args);
+
+      return preparedTx;
+    } finally {
+      await client.disconnect();
+    }
+  }
 
   /**
    * Builds an XDR transaction to add gas payment to the Axelar Gas Service contract.
@@ -973,7 +1026,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   private async findChainInfo(chain: string): Promise<any> {
     const { chains } = await importS3Config(this.environment);
-    const chainKey = Object.keys(chains).find((chainName) => chainName.includes(chain));
+
+    // if chain is not found, try to find it by name or by partial name
+    const chainKey =
+      Object.keys(chains).find((chainName) => chainName === chain) ||
+      Object.keys(chains).find((chainName) => chainName.includes(chain));
 
     if (!chainKey) return undefined;
 

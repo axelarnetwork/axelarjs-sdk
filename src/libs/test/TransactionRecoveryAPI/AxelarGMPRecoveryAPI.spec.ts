@@ -17,6 +17,7 @@ import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGas
 import TestToken from "../abi/TestToken.json";
 import { findContractEvent, getLogIndexFromTxReceipt } from "../../TransactionRecoveryApi/helpers";
 import { Interface } from "ethers/lib/utils";
+import xrpl from "xrpl";
 import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
@@ -49,6 +50,7 @@ import { ChainInfo } from "../../../chains/types";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { SuiClient } from "@mysten/sui/client";
 import { Keypair, Horizon } from "@stellar/stellar-sdk";
+import { hex } from "../../TransactionRecoveryApi/helpers/xrplHelper";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -1141,6 +1143,41 @@ describe("AxelarGMPRecoveryAPI", () => {
       // Validate that the additional gas fee is equal to "total gas fee" - "gas paid".
       expect(eventGasFeeAmount).toBe(ethers.BigNumber.from(mockedGasFee).sub(gasPaid).toString());
       expect(args?.refundAddress).toBe(userWallet.address);
+    });
+  });
+
+  describe("addGasToXrplChain", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+
+    it("should return transaction data for adding gas to xrpl chain", async () => {
+      const senderAddress = "r9uAV8PfN3v6cDHhNGv3o5fSDsfYbs1vbV";
+      const messageId = "rsEwuNC25grc6zRszZGkLXdkhvkz89zQkN";
+      const amount = "1000000";
+      const tokenSymbol = "XRP";
+
+      const response = await api.addGasToXrplChain({
+        senderAddress,
+        messageId,
+        amount,
+        tokenSymbol,
+      });
+
+      expect(response).toBeDefined();
+
+      // Replace with your XRPL wallet seed for manual testing
+      // const xrplWalletSeed = "";
+      // const wallet = xrpl.Wallet.fromSecret(xrplWalletSeed, {
+      //   algorithm: xrpl.ECDSA.secp256k1,
+      // });
+      //
+      // const signedTx = wallet.sign(response as any);
+      //
+      // // 4. Submit Transaction
+      // const client = new xrpl.Client("wss://s.altnet.rippletest.net:51233");
+      // await client.connect();
+      // const result = await client.submit(signedTx.tx_blob);
+      // console.log(result);
+      // await client.disconnect();
     });
   });
 
