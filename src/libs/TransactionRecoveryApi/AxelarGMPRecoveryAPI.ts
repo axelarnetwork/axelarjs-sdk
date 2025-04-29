@@ -62,7 +62,7 @@ import { importS3Config } from "../../chains";
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { tokenToScVal } from "./helpers/stellarHelper";
 import xrpl from "xrpl";
-import { parseToken, hex } from "./helpers/xrplHelper";
+import { parseToken, hex, convertRpcUrltoWssUrl } from "./helpers/xrplHelper";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -916,14 +916,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const rpc = rpcUrl || chainConfig.rpc[0];
 
-    const url = new URL(rpc);
-    url.protocol = "wss:";
-    url.port = ""; // Remove port
-    const normalizedRpc = url.toString();
+    const wssUrl = convertRpcUrltoWssUrl(rpc);
 
-    console.log(normalizedRpc);
-
-    const client = new xrpl.Client(normalizedRpc);
+    const client = new xrpl.Client(wssUrl);
 
     await client.connect();
 

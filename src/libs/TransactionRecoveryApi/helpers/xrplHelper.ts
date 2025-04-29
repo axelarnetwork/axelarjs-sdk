@@ -16,3 +16,10 @@ export function parseToken(token: string, amount: string) {
 export function hex(value: string) {
   return Buffer.from(value).toString("hex");
 }
+
+export function convertRpcUrltoWssUrl(rpcUrl: string) {
+  const url = new URL(rpcUrl);
+  url.protocol = "wss:";
+  url.port = ""; // Remove port
+  return url.toString();
+}
