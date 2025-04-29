@@ -948,6 +948,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       throw e;
     } finally {
       await client.disconnect();
+    }
   }
 
   /**
