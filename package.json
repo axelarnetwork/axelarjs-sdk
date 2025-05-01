@@ -1,6 +1,6 @@
 {
   "name": "@axelar-network/axelarjs-sdk",
-  "version": "0.17.3-alpha.4",
+  "version": "0.17.3-alpha.8",
   "description": "The JavaScript SDK for Axelar Network",
   "repository": {
     "type": "git",
@@ -59,7 +59,8 @@
     "standard-http-error": "^2.0.1",
     "string-similarity-js": "^2.1.4",
     "uuid": "^8.3.2",
-    "ws": "^8.13.0"
+    "ws": "^8.13.0",
+    "xrpl": "4.2.5"
   },
   "devDependencies": {
     "@axelar-network/axelar-local-dev": "1.0.2",

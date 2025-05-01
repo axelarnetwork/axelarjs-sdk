@@ -17,6 +17,7 @@ import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGas
 import TestToken from "../abi/TestToken.json";
 import { findContractEvent, getLogIndexFromTxReceipt } from "../../TransactionRecoveryApi/helpers";
 import { Interface } from "ethers/lib/utils";
+import xrpl from "xrpl";
 import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
@@ -48,6 +49,8 @@ import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1
 import { ChainInfo } from "../../../chains/types";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { SuiClient } from "@mysten/sui/client";
+import { Keypair, Horizon } from "@stellar/stellar-sdk";
+import { hex } from "../../TransactionRecoveryApi/helpers/xrplHelper";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -1140,6 +1143,67 @@ describe("AxelarGMPRecoveryAPI", () => {
       // Validate that the additional gas fee is equal to "total gas fee" - "gas paid".
       expect(eventGasFeeAmount).toBe(ethers.BigNumber.from(mockedGasFee).sub(gasPaid).toString());
       expect(args?.refundAddress).toBe(userWallet.address);
+    });
+  });
+
+  describe("addGasToXrplChain", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+
+    it("should return transaction data for adding gas to xrpl chain", async () => {
+      const senderAddress = "r9uAV8PfN3v6cDHhNGv3o5fSDsfYbs1vbV";
+      const messageId = "rsEwuNC25grc6zRszZGkLXdkhvkz89zQkN";
+      const amount = "1000000";
+      const tokenSymbol = "XRP";
+
+      const response = await api.addGasToXrplChain({
+        senderAddress,
+        messageId,
+        amount,
+        tokenSymbol,
+      });
+
+      expect(response).toBeDefined();
+
+      // Replace with your XRPL wallet seed for manual testing
+      // const xrplWalletSeed = "";
+      // const wallet = xrpl.Wallet.fromSecret(xrplWalletSeed, {
+      //   algorithm: xrpl.ECDSA.secp256k1,
+      // });
+      //
+      // const signedTx = wallet.sign(response as any);
+      //
+      // const client = new xrpl.Client("wss://s.altnet.rippletest.net:51233");
+      // await client.connect();
+      // const result = await client.submit(signedTx.tx_blob);
+      // console.log(result);
+      // await client.disconnect();
+    });
+  });
+
+  describe("addGasToStellarChain", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
+    const randomAddress = "GBX7EYLXHTS3AZDV23BIZR6KYEGGXM7XHMPRZV55NZT54H4EVD37ORWP";
+
+    async function fundAccountIfNeeded(address: string) {
+      const server = new Horizon.Server("https://soroban-testnet.stellar.org");
+      try {
+        await server.accounts().accountId(address).call();
+      } catch (e: any) {
+        await fetch(`https://friendbot.stellar.org?addr=${encodeURIComponent(address)}`);
+      }
+    }
+
+    it("should return transaction data for adding gas to stellar chain", async () => {
+      await fundAccountIfNeeded(randomAddress);
+
+      const response = await api.addGasToStellarChain({
+        senderAddress: randomAddress, // The address that sent the cross-chain message via the `axelar_gateway`
+        messageId: "tx-123",
+        amount: "10000000", // the token amount to pay for the gas fee
+        spender: randomAddress, // The spender pays for the gas fee.
+      });
+
+      expect(response).toBeDefined();
     });
   });
 

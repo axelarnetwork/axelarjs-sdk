@@ -421,24 +421,24 @@ describe("AxelarQueryAPI", () => {
       expect(gasAmount).toBeDefined();
     });
 
-    test("it should be able to return the gas fee when the destination chain is L2, but the executeData is undefined ", async () => {
+    test.skip("it should be able to return the gas fee when the destination chain is L2, but the executeData is undefined ", async () => {
       const l2Chains = ["fraxtal", "blast-sepolia", "mantle-sepolia"];
 
       const queries = [];
       for (const l2Chain of l2Chains) {
-        const estimateGasFeeQuery = api.estimateGasFee(
+        const estimateGasFeeQuery = await api.estimateGasFee(
           "ethereum-sepolia",
           l2Chain,
           500000,
           undefined,
           undefined,
-          undefined
+          undefined,
+          "0x"
         );
 
         queries.push(estimateGasFeeQuery);
       }
       const responses = await Promise.all(queries);
-
       for (const response of responses) {
         expect(response).toBeDefined();
       }

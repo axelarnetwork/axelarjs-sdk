@@ -61,6 +61,8 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { importS3Config } from "../../chains";
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { tokenToScVal } from "./helpers/stellarHelper";
+import { Client as XrplClient } from "xrpl";
+import { parseToken, hex, convertRpcUrltoWssUrl } from "./helpers/xrplHelper";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -123,8 +125,17 @@ export type AddGasStellarParams = {
   senderAddress: string; // the contract address that initiates the gateway contract call.
   tokenAddress?: string; // defaults to native token, XLM.
   contractAddress?: string; // custom contract address. this will be useful for testnet since it's reset every quarter.
+  rpcUrl?: string;
   amount: string; // the token amount to pay for the gas fee
   spender: string; // The address that pays for the gas fee.
+  messageId: string; // The message ID of the transaction.
+};
+
+export type AddGasXrplParams = {
+  senderAddress: string; // the contract address that initiates the gateway contract call.
+  tokenSymbol?: string; // defaults to native token, XRP.
+  rpcUrl?: string;
+  amount: string; // the token amount to pay for the gas fee
   messageId: string; // The message ID of the transaction.
 };
 
@@ -889,6 +900,57 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     return tx;
   }
+
+  public async addGasToXrplChain(params: AddGasXrplParams): Promise<string> {
+    const { senderAddress, messageId, tokenSymbol, amount, rpcUrl } = params;
+
+    const symbol = tokenSymbol || "XRP";
+
+    const chainInfo = await this.findChainInfo("xrpl");
+
+    if (!chainInfo) throw new Error("XRPL chain config not found");
+
+    const { config: chainConfig } = chainInfo;
+
+    const contractId = chainConfig.contracts.AxelarGateway.address;
+
+    const rpc = rpcUrl || chainConfig.rpc[0];
+
+    const wssUrl = convertRpcUrltoWssUrl(rpc);
+
+    const client = new XrplClient(wssUrl);
+
+    await client.connect();
+
+    const args: any = {
+      TransactionType: "Payment",
+      Account: senderAddress,
+      Destination: contractId,
+      Amount: parseToken(symbol === "XRP" ? "XRP" : `${symbol}.${contractId}`, amount),
+      Memos: [
+        {
+          Memo: { MemoType: hex("type"), MemoData: hex("add_gas") },
+        },
+        {
+          Memo: {
+            MemoType: hex("msg_id"),
+            MemoData: hex(messageId.toLowerCase().replace("0x", "")),
+          },
+        },
+      ],
+    };
+
+    try {
+      // Autofill transaction details (like sequence number)
+      return await client.autofill(args);
+    } catch (e) {
+      console.log(e);
+      throw e;
+    } finally {
+      await client.disconnect();
+    }
+  }
+
   /**
    * Builds an XDR transaction to add gas payment to the Axelar Gas Service contract.
    *
@@ -913,21 +975,23 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * @returns {Promise<string>} The transaction encoded as an XDR string, ready for signing
    */
   public async addGasToStellarChain(params: AddGasStellarParams): Promise<string> {
-    const isDevnet = this.environment === Environment.DEVNET;
+    const chainInfo = await this.findChainInfo("stellar");
 
-    // TODO: remove this once this supports on mainnet
-    if (!isDevnet) throw new Error("This method only supports on devnet");
+    if (!chainInfo) throw new Error("Stellar chain config not found");
 
-    const { senderAddress, messageId, contractAddress, tokenAddress, amount, spender } = params;
+    const { senderAddress, messageId, contractAddress, tokenAddress, amount, spender, rpcUrl } =
+      params;
 
-    // TODO: Replace with the value from the config file
-    const contractId =
-      contractAddress || "CDBPOARU5MFSC7ZWXTVPVKDZRHKOPS5RCY2VP2OKOBLCMQM3NKVP6HO7";
+    const { config: chainConfig } = chainInfo;
 
-    const server = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
+    const contractId = contractAddress || chainConfig.contracts.AxelarGasService.address;
 
-    // this will be StellarSdk.Networks.PUBLIC once mainnet is supported
-    const networkPassphrase = StellarSdk.Networks.TESTNET;
+    const server = new StellarSdk.rpc.Server(rpcUrl || chainConfig.rpc[0]);
+
+    const networkPassphrase =
+      this.environment === Environment.MAINNET
+        ? StellarSdk.Networks.PUBLIC
+        : StellarSdk.Networks.TESTNET;
 
     const caller = StellarSdk.nativeToScVal(StellarSdk.Address.fromString(senderAddress), {
       type: "address",
@@ -954,6 +1018,19 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       .build();
 
     return transaction.toXDR();
+  }
+
+  private async findChainInfo(chain: string): Promise<any> {
+    const { chains } = await importS3Config(this.environment);
+
+    // if chain is not found, try to find it by name or by partial name
+    const chainKey =
+      Object.keys(chains).find((chainName) => chainName === chain) ||
+      Object.keys(chains).find((chainName) => chainName.includes(chain));
+
+    if (!chainKey) return undefined;
+
+    return chains[chainKey];
   }
 
   public async addGasToCosmosChain({
