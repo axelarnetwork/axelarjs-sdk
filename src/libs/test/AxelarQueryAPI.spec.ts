@@ -342,6 +342,52 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
+  describe.only("estimateITSFee", () => {
+    let mockEstimateMultihopFee: SpyInstance;
+
+    beforeEach(() => {
+      mockEstimateMultihopFee = vitest.spyOn(api, "estimateMultihopFee").mockResolvedValue("1");
+    });
+
+    test("It should estimate gas by two hops for an amplifier route", async () => {
+      const params = {
+        sourceChain: "ethereum-sepolia",
+        destinationChain: "sui",
+        gasLimit: "1000000",
+      };
+
+      await api.estimateITSFee(params);
+
+      // Expect estimateMultihopFee to be called with two hops for an amplifier route
+      expect(mockEstimateMultihopFee).toHaveBeenCalledWith(
+        [
+          {
+            sourceChain: params.sourceChain,
+            destinationChain: "axelar",
+            gasLimit: "1",
+          },
+          {
+            ...params,
+            sourceChain: "axelar",
+          },
+        ],
+        undefined
+      );
+    });
+
+    test("It should estimate gas by a single hop for a non-amplifier route", async () => {
+      const params = {
+        sourceChain: "optimism-sepolia",
+        destinationChain: "base-sepolia",
+        gasLimit: "1000000",
+      };
+      await api.estimateITSFee(params);
+
+      // Expect estimateMultihopFee to be called with a single hop for a non-amplifier route
+      expect(mockEstimateMultihopFee).toHaveBeenCalledWith([params], undefined);
+    });
+  });
+
   describe("estimateGasFee", () => {
     test("It should return estimated gas amount that makes sense for USDC", async () => {
       const gasAmount = await api.estimateGasFee(
