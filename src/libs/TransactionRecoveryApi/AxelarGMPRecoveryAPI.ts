@@ -61,7 +61,7 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { importS3Config } from "../../chains";
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { tokenToScVal } from "./helpers/stellarHelper";
-import xrpl from "xrpl";
+import { Client as XrplClient, default as xrpl } from "xrpl";
 import { parseToken, hex, convertRpcUrltoWssUrl } from "./helpers/xrplHelper";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
@@ -918,7 +918,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const wssUrl = convertRpcUrltoWssUrl(rpc);
 
-    const client = new xrpl.Client(wssUrl);
+    const client = new XrplClient(wssUrl);
 
     await client.connect();
 
