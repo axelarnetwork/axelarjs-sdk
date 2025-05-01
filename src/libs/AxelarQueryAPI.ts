@@ -573,7 +573,7 @@ export class AxelarQueryAPI {
     await throwIfInvalidChainIds([params.sourceChain, params.destinationChain], this.environment);
 
     // TODO: Set this flag dynamically based on the source chain and destination chain
-    const isAmplifierRoute = params.sourceChain.includes("ethereum");
+    const isAmplifierRoute = true;
 
     if (isAmplifierRoute) {
       // estimate the gas fee for two hops for amplifier route
