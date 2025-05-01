@@ -579,7 +579,7 @@ export class AxelarQueryAPI {
       // estimate the gas fee for two hops for amplifier route
       return this.estimateMultihopFee(
         [
-          // first hop is to axelar, the gas limit is calculated by the axelarscan's api, so we set it to 1.
+          // first hop is to axelar, the gas limit is overrided by the axelarscan's api, so we set it to 1.
           {
             sourceChain: params.sourceChain,
             sourceTokenSymbol: params.sourceTokenSymbol,
