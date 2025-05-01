@@ -56,7 +56,7 @@ export interface AxelarQueryAPIFeeResponse {
   isExpressSupported: boolean;
 }
 
-interface HopParams {
+type BaseFeeParams = {
   /** The destination chain for the GMP transaction */
   destinationChain: string;
 
@@ -92,11 +92,13 @@ interface HopParams {
    */
   sourceTokenAddress?: string;
 
-  /** Source address for checking if express is supported */
-  sourceContractAddress?: string;
-
   /** The payload that will be used on destination */
   executeData?: string;
+};
+
+type HopParams = BaseFeeParams & {
+  /** Source address for checking if express is supported */
+  sourceContractAddress?: string;
 
   /** Destination contract address for checking if express is supported */
   destinationContractAddress?: string;
@@ -108,7 +110,12 @@ interface HopParams {
    * Token amount (in units) that is used in callContractWithToken for checking if express is supported
    */
   amountInUnits?: string;
-}
+};
+
+/**
+ * Parameters for estimating the fee for an ITS transfer
+ */
+type ItsFeeParams = BaseFeeParams;
 
 /**
  * Represents detailed fee information for a single hop
@@ -568,35 +575,29 @@ export class AxelarQueryAPI {
     }
   }
 
-  public async estimateITSFee(params: HopParams, options?: EstimateMultihopFeeOptions) {
+  public async estimateITSFee(params: ItsFeeParams, options?: EstimateMultihopFeeOptions) {
     // validate the source and destination chains
-    await throwIfInvalidChainIds([params.sourceChain, params.destinationChain], this.environment);
+    await throwIfInvalidItsChainIds(
+      [params.sourceChain, params.destinationChain],
+      this.environment
+    );
 
-    // TODO: Set this flag dynamically based on the source chain and destination chain
-    const isAmplifierRoute = true;
-
-    if (isAmplifierRoute) {
-      // estimate the gas fee for two hops for amplifier route
-      return this.estimateMultihopFee(
-        [
-          // first hop is to axelar, the gas limit is overrided by the axelarscan's api, so we set it to 1.
-          {
-            sourceChain: params.sourceChain,
-            sourceTokenSymbol: params.sourceTokenSymbol,
-            destinationChain: "axelar",
-            gasLimit: "1",
-          },
-          {
-            ...params,
-            sourceChain: "axelar",
-          },
-        ],
-        options
-      );
-    } else {
-      // estimate the gas fee for a single hop for non-amplifier route
-      return this.estimateMultihopFee([params], options);
-    }
+    return this.estimateMultihopFee(
+      [
+        // first hop is to axelar, the gas limit is overrided by the axelarscan's api, so we set it to 1.
+        {
+          sourceChain: params.sourceChain,
+          sourceTokenSymbol: params.sourceTokenSymbol,
+          destinationChain: "axelar",
+          gasLimit: "1",
+        },
+        {
+          ...params,
+          sourceChain: "axelar",
+        },
+      ],
+      options
+    );
   }
 
   /**
