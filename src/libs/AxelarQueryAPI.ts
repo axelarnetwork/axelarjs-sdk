@@ -568,6 +568,28 @@ export class AxelarQueryAPI {
     }
   }
 
+  /** Estimate the gas fee for an ITS transaction where it routes through axelar */
+  public async estimateITSFee(params: HopParams, options?: EstimateMultihopFeeOptions) {
+    await throwIfInvalidChainIds([params.sourceChain, params.destinationChain], this.environment);
+
+    return this.estimateMultihopFee(
+      [
+        // first hop is to axelar, the gas limit is calculated by the axelarscan's api, so we set it to 1.
+        {
+          sourceChain: params.sourceChain,
+          sourceTokenSymbol: params.sourceTokenSymbol,
+          destinationChain: "axelar",
+          gasLimit: "1",
+        },
+        {
+          ...params,
+          sourceChain: "axelar",
+        },
+      ],
+      options
+    );
+  }
+
   /**
    * Get the denom for an asset given its symbol on a chain
    * @param symbol
