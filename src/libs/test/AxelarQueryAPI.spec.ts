@@ -342,7 +342,7 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
-  describe.only("estimateITSFee", () => {
+  describe("estimateITSFee", () => {
     let mockEstimateMultihopFee: SpyInstance;
 
     beforeEach(() => {
