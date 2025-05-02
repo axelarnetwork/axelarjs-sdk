@@ -19,7 +19,7 @@ import {
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
-import { throwIfInvalidChainIds } from "../utils";
+import { throwIfInvalidChainIds, throwIfInvalidItsChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 import { BigNumber, BigNumberish, ethers } from "ethers";
@@ -56,20 +56,12 @@ export interface AxelarQueryAPIFeeResponse {
   isExpressSupported: boolean;
 }
 
-type BaseFeeParams = {
+type HopParams = {
   /** The destination chain for the GMP transaction */
   destinationChain: string;
 
   /** The source chain for the GMP transaction */
   sourceChain: string;
-
-  /**
-   * The gasLimit needed for execution on the destination chain.
-   * For OP Stack chains (Optimism, Base, Scroll, Fraxtal, Blast, Mantle, etc.),
-   * only specify the gasLimit for L2 (L2GasLimit).
-   * The endpoint estimates and bundles the gas needed for L1 (L1GasLimit) automatically.
-   */
-  gasLimit: string;
 
   /**
    * The multiplier of gas to be used on execution
@@ -94,9 +86,15 @@ type BaseFeeParams = {
 
   /** The payload that will be used on destination */
   executeData?: string;
-};
 
-type HopParams = BaseFeeParams & {
+  /**
+   * The gasLimit needed for execution on the destination chain.
+   * For OP Stack chains (Optimism, Base, Scroll, Fraxtal, Blast, Mantle, etc.),
+   * only specify the gasLimit for L2 (L2GasLimit).
+   * The endpoint estimates and bundles the gas needed for L1 (L1GasLimit) automatically.
+   */
+  gasLimit: string;
+
   /** Source address for checking if express is supported */
   sourceContractAddress?: string;
 
@@ -115,7 +113,51 @@ type HopParams = BaseFeeParams & {
 /**
  * Parameters for estimating the fee for an ITS transfer
  */
-type ItsFeeParams = BaseFeeParams;
+type ItsFeeParams = {
+  /** The destination chain for the GMP transaction */
+  destinationChain: string;
+
+  /** The source chain for the GMP transaction */
+  sourceChain: string;
+
+  /**
+   * The multiplier of gas to be used on execution
+   * @default 'auto' (multiplier used by relayer)
+   */
+  gasMultiplier?: number | "auto";
+
+  /**
+   * Minimum destination gas price
+   * @default minimum gas price used by relayer
+   */
+  minGasPrice?: string;
+
+  /** The token symbol on the source chain */
+  sourceTokenSymbol?: string;
+
+  /**
+   * The token address on the source chain
+   * @default "ZeroAddress" for native token
+   */
+  sourceTokenAddress?: string;
+
+  /** The payload that will be used on destination */
+  executeData?: string;
+
+  /**
+   * The gasLimit needed for execution on the destination chain.
+   * For OP Stack chains (Optimism, Base, Scroll, Fraxtal, Blast, Mantle, etc.),
+   * only specify the gasLimit for L2 (L2GasLimit).
+   * The endpoint estimates and bundles the gas needed for L1 (L1GasLimit) automatically.
+   */
+  gasLimit?: string;
+
+  /** amount for checking if express is supported */
+  amount?: string;
+
+  /** token id for checking if express is supported */
+  tokenId?: string;
+};
 
 /**
  * Represents detailed fee information for a single hop
