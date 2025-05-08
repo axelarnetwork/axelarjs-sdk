@@ -114,11 +114,11 @@ type HopParams = {
  * Parameters for estimating the fee for an ITS transfer
  */
 type ItsFeeParams = {
-  /** The destination chain for the GMP transaction */
-  destinationChain: string;
-
-  /** The source chain for the GMP transaction */
+  /** The source chain for the ITS transaction */
   sourceChain: string;
+
+  /** The destination chain for the ITS transaction */
+  destinationChain: string;
 
   /**
    * The multiplier of gas to be used on execution
@@ -127,36 +127,22 @@ type ItsFeeParams = {
   gasMultiplier?: number | "auto";
 
   /**
-   * Minimum destination gas price
-   * @default minimum gas price used by relayer
-   */
-  minGasPrice?: string;
-
-  /** The token symbol on the source chain */
-  sourceTokenSymbol?: string;
-
-  /**
    * The token address on the source chain
    * @default "ZeroAddress" for native token
    */
   sourceTokenAddress?: string;
 
-  /** The payload that will be used on destination */
-  executeData?: string;
+  /** source token symbol for checking if express is supported */
+  sourceTokenSymbol?: string;
 
-  /**
-   * The gasLimit needed for execution on the destination chain.
-   * For OP Stack chains (Optimism, Base, Scroll, Fraxtal, Blast, Mantle, etc.),
-   * only specify the gasLimit for L2 (L2GasLimit).
-   * The endpoint estimates and bundles the gas needed for L1 (L1GasLimit) automatically.
-   */
-  gasLimit?: string;
+  /** minimum gas price on the destination chain */
+  minGasPrice?: string;
 
-  /** amount for checking if express is supported */
-  amount?: string;
+  /** whether to show detailed fees */
+  showDetailedFees?: boolean;
 
-  /** token id for checking if express is supported */
-  tokenId?: string;
+  /** The type of ITS transaction */
+  event?: "InterchainTransfer" | "InterchainDeployment" | "LinkToken";
 };
 
 /**
@@ -617,29 +603,22 @@ export class AxelarQueryAPI {
     }
   }
 
-  public async estimateITSFee(params: ItsFeeParams, options?: EstimateMultihopFeeOptions) {
+  /**
+   * Estimates the total gas fee for an Interchain Token Service (ITS) transaction
+   * @param params - The parameters for the ITS transaction
+   * @param options - Options for the ITS transaction
+   * @returns Promise<string> - The estimated gas fee for the ITS transaction
+   */
+  public async estimateITSFee(params: ItsFeeParams) {
     // validate the source and destination chains
     await throwIfInvalidItsChainIds(
       [params.sourceChain, params.destinationChain],
       this.environment
     );
 
-    return this.estimateMultihopFee(
-      [
-        // first hop is to axelar, the gas limit is overrided by the axelarscan's api, so we set it to 1.
-        {
-          sourceChain: params.sourceChain,
-          sourceTokenSymbol: params.sourceTokenSymbol,
-          destinationChain: "axelar",
-          gasLimit: "1",
-        },
-        {
-          ...params,
-          sourceChain: "axelar",
-        },
-      ],
-      options
-    );
+    return this.axelarscanApi.post("/gmp/estimateITSFee", {
+      params,
+    });
   }
 
   /**
