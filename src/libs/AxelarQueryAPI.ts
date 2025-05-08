@@ -174,6 +174,13 @@ export interface DetailedFeeResponse {
   details?: HopFeeDetails[];
 }
 
+export interface ITSDetailedFeeResponse {
+  totalFee: string;
+  baseFee: string;
+  executionFee: string;
+  executionFeeWithMultiplier: string;
+}
+
 interface EstimateMultihopFeeOptions {
   showDetailedFees?: boolean;
 }
@@ -609,7 +616,7 @@ export class AxelarQueryAPI {
    * @param options - Options for the ITS transaction
    * @returns Promise<string> - The estimated gas fee for the ITS transaction
    */
-  public async estimateITSFee(params: ItsFeeParams) {
+  public async estimateITSFee(params: ItsFeeParams): Promise<string | ITSDetailedFeeResponse> {
     // validate the source and destination chains
     await throwIfInvalidItsChainIds(
       [params.sourceChain, params.destinationChain],
