@@ -19,7 +19,7 @@ import {
   FeeInfoResponse,
   TransferFeeResponse,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
-import { throwIfInvalidChainIds, throwIfInvalidItsChainIds } from "../utils";
+import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
 import s3 from "./TransactionRecoveryApi/constants/s3";
 import { BigNumber, BigNumberish, ethers } from "ethers";
