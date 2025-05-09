@@ -343,48 +343,21 @@ describe("AxelarQueryAPI", () => {
   });
 
   describe("estimateITSFee", () => {
-    let mockEstimateMultihopFee: SpyInstance;
+    let mockEstimateITSFee: SpyInstance;
 
     beforeEach(() => {
-      mockEstimateMultihopFee = vitest.spyOn(api, "estimateMultihopFee").mockResolvedValue("1");
+      mockEstimateITSFee = vitest.spyOn(api.axelarscanApi, "post").mockResolvedValue("1");
     });
 
-    test("It should estimate gas by two hops for an amplifier route", async () => {
+    test("It should estimate ITS transaction gas successfully", async () => {
       const params = {
-        sourceChain: "ethereum-sepolia",
-        destinationChain: "sui",
-        gasLimit: "1000000",
+        sourceChain: "xrpl",
+        destinationChain: "xrpl-evm",
       };
 
-      await api.estimateITSFee(params);
-
-      // Expect estimateMultihopFee to be called with two hops for an amplifier route
-      expect(mockEstimateMultihopFee).toHaveBeenCalledWith(
-        [
-          {
-            sourceChain: params.sourceChain,
-            destinationChain: "axelar",
-            gasLimit: "1",
-          },
-          {
-            ...params,
-            sourceChain: "axelar",
-          },
-        ],
-        undefined
-      );
-    });
-
-    test("It should estimate gas by a single hop for a non-amplifier route", async () => {
-      const params = {
-        sourceChain: "optimism-sepolia",
-        destinationChain: "base-sepolia",
-        gasLimit: "1000000",
-      };
-      await api.estimateITSFee(params);
-
-      // Expect estimateMultihopFee to be called with a single hop for a non-amplifier route
-      expect(mockEstimateMultihopFee).toHaveBeenCalledWith([params], undefined);
+      const response = await api.estimateITSFee(params);
+      expect(response).equals("1");
+      expect(mockEstimateITSFee).toHaveBeenCalledWith("/gmp/estimateITSFee", params);
     });
   });
 
