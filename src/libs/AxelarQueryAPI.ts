@@ -618,14 +618,9 @@ export class AxelarQueryAPI {
    */
   public async estimateITSFee(params: ItsFeeParams): Promise<string | ITSDetailedFeeResponse> {
     // validate the source and destination chains
-    await throwIfInvalidItsChainIds(
-      [params.sourceChain, params.destinationChain],
-      this.environment
-    );
+    await throwIfInvalidChainIds([params.sourceChain, params.destinationChain], this.environment);
 
-    return this.axelarscanApi.post("/gmp/estimateITSFee", {
-      params,
-    });
+    return this.axelarscanApi.post("/gmp/estimateITSFee", params);
   }
 
   /**
