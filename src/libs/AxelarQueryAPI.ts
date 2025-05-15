@@ -114,12 +114,14 @@ type HopParams = {
  * Parameters for estimating the fee for an ITS transfer
  */
 type ItsFeeParams = {
+  /** Required parameters **/
   /** The source chain for the ITS transaction */
   sourceChain: string;
 
   /** The destination chain for the ITS transaction */
   destinationChain: string;
 
+  /** Optional parameters **/
   /**
    * The multiplier of gas to be used on execution
    * @default 'auto' (multiplier used by relayer)
