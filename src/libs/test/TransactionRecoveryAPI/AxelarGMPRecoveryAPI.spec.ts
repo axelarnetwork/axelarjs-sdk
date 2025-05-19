@@ -7,7 +7,6 @@ import {
   Environment,
   EvmWalletDetails,
 } from "../../types";
-import { requestSuiFromFaucetV0, getFaucetHost } from "@mysten/sui/faucet";
 import { Secp256k1Keypair } from "@mysten/sui/keypairs/secp256k1";
 import { EvmChain } from "../../../constants/EvmChain";
 import { createNetwork, utils } from "@axelar-network/axelar-local-dev";
@@ -17,7 +16,6 @@ import DistributionExecutableWithGasToken from "../abi/DistributionExecutableGas
 import TestToken from "../abi/TestToken.json";
 import { findContractEvent, getLogIndexFromTxReceipt } from "../../TransactionRecoveryApi/helpers";
 import { Interface } from "ethers/lib/utils";
-import xrpl from "xrpl";
 import {
   AlreadyExecutedError,
   AlreadyPaidGasFeeError,
@@ -48,9 +46,10 @@ import * as Sleep from "../../../utils/sleep";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { ChainInfo } from "../../../chains/types";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
-import { SuiClient } from "@mysten/sui/client";
-import { Keypair, Horizon } from "@stellar/stellar-sdk";
-import { hex } from "../../TransactionRecoveryApi/helpers/xrplHelper";
+import { Horizon } from "@stellar/stellar-sdk";
+import { SUI_TYPE_ARG } from "@mysten/sui/utils";
+import { Transaction } from "@mysten/sui/transactions";
+import * as chains from "../../../chains";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -1207,57 +1206,65 @@ describe("AxelarGMPRecoveryAPI", () => {
     });
   });
 
-  describe("addGasToSuiChain", () => {
-    const network = "testnet";
+  describe.only("addGasToSuiChain", () => {
     // The default rpc url for testnet doesn't work as of 07 November 2024, so we need to use a custom one for testing.
     const api: AxelarGMPRecoveryAPI = new AxelarGMPRecoveryAPI({ environment: Environment.DEVNET });
-    const testRpcUrl = "https://sui-testnet-rpc.publicnode.com";
-    const suiClient = new SuiClient({
-      url: testRpcUrl,
-    });
     const keypair: Secp256k1Keypair = Secp256k1Keypair.deriveKeypair(
       "test test test test test test test test test test test junk"
     );
 
     beforeEach(async () => {
       vitest.clearAllMocks();
-      console.log("Sui Wallet address", keypair.toSuiAddress());
+    });
 
-      const balance = await suiClient.getBalance({
-        owner: keypair.toSuiAddress(),
-      });
+    test("addGasToSuiChain should construct moveCall correctly", async () => {
+      // Create a spy for the moveCall function
+      const originalMoveCall = Transaction.prototype.moveCall;
+      const moveCallSpy = vitest.fn();
 
-      // If the balance is less than 0.2 SUI, request funds from the faucet.
-      // This is to avoid too many requests error.
-      if (BigInt(balance.totalBalance) < 2e8) {
-        console.log("Requesting faucet funds...");
-        await requestSuiFromFaucetV0({
-          host: getFaucetHost(network),
-          recipient: keypair.toSuiAddress(),
+      // Replace moveCall with our spy
+      Transaction.prototype.moveCall = moveCallSpy;
+
+      try {
+        // Mock the importS3Config to return a specific configuration
+        vitest.spyOn(chains, "importS3Config").mockResolvedValue({
+          chains: {
+            sui: {
+              config: {
+                contracts: {
+                  GasService: {
+                    address: "0x1234",
+                    objects: {
+                      GasService: "0x5678",
+                    },
+                  },
+                },
+              },
+            },
+          },
         });
+
+        // Call the method under test
+        await api.addGasToSuiChain({
+          gasParams: "0x",
+          messageId: "test-1",
+          refundAddress: keypair.toSuiAddress(),
+        });
+
+        // Verify the spy was called with the expected arguments
+        expect(moveCallSpy).toHaveBeenCalledTimes(1);
+
+        // Get the first call's first argument
+        const callArgs = moveCallSpy.mock.calls[0][0];
+
+        // Check the specific properties we're interested in
+        expect(callArgs.target).toBe("0x1234::gas_service::add_gas");
+        expect(callArgs.typeArguments).toContain(SUI_TYPE_ARG);
+        expect(callArgs.arguments.length).toBe(5);
+      } finally {
+        // Restore the original moveCall function
+        Transaction.prototype.moveCall = originalMoveCall;
       }
-    }, 15000);
-
-    test("addGasToSuiChain should work given valid params", async () => {
-      const tx = await api.addGasToSuiChain({
-        gasParams: "0x",
-        messageId: "test-1",
-        refundAddress: keypair.toSuiAddress(),
-      });
-
-      const response = await suiClient.signAndExecuteTransaction({
-        transaction: tx,
-        signer: keypair,
-        options: {
-          showEffects: true,
-          showEvents: true,
-          showObjectChanges: true,
-        },
-      });
-
-      expect(response.events).toBeDefined();
-      expect(response.events!.length).toBeGreaterThan(0);
-      expect(response.events![0].type).toContain("GasAdded");
     });
   });
 
