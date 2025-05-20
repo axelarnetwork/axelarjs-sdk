@@ -1206,7 +1206,7 @@ describe("AxelarGMPRecoveryAPI", () => {
     });
   });
 
-  describe.only("addGasToSuiChain", () => {
+  describe("addGasToSuiChain", () => {
     // The default rpc url for testnet doesn't work as of 07 November 2024, so we need to use a custom one for testing.
     const api: AxelarGMPRecoveryAPI = new AxelarGMPRecoveryAPI({ environment: Environment.DEVNET });
     const keypair: Secp256k1Keypair = Secp256k1Keypair.deriveKeypair(
