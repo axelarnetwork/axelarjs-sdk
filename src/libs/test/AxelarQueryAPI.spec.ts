@@ -342,6 +342,25 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
+  describe("estimateITSFee", () => {
+    let mockEstimateITSFee: SpyInstance;
+
+    beforeEach(() => {
+      mockEstimateITSFee = vitest.spyOn(api.axelarscanApi, "post").mockResolvedValue("1");
+    });
+
+    test("It should estimate ITS transaction gas successfully", async () => {
+      const params = {
+        sourceChain: "xrpl",
+        destinationChain: "xrpl-evm",
+      };
+
+      const response = await api.estimateITSFee(params);
+      expect(response).equals("1");
+      expect(mockEstimateITSFee).toHaveBeenCalledWith("/gmp/estimateITSFee", params);
+    });
+  });
+
   describe("estimateGasFee", () => {
     test("It should return estimated gas amount that makes sense for USDC", async () => {
       const gasAmount = await api.estimateGasFee(
