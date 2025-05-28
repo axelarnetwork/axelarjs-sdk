@@ -56,20 +56,12 @@ export interface AxelarQueryAPIFeeResponse {
   isExpressSupported: boolean;
 }
 
-interface HopParams {
+type HopParams = {
   /** The destination chain for the GMP transaction */
   destinationChain: string;
 
   /** The source chain for the GMP transaction */
   sourceChain: string;
-
-  /**
-   * The gasLimit needed for execution on the destination chain.
-   * For OP Stack chains (Optimism, Base, Scroll, Fraxtal, Blast, Mantle, etc.),
-   * only specify the gasLimit for L2 (L2GasLimit).
-   * The endpoint estimates and bundles the gas needed for L1 (L1GasLimit) automatically.
-   */
-  gasLimit: string;
 
   /**
    * The multiplier of gas to be used on execution
@@ -92,11 +84,19 @@ interface HopParams {
    */
   sourceTokenAddress?: string;
 
-  /** Source address for checking if express is supported */
-  sourceContractAddress?: string;
-
   /** The payload that will be used on destination */
   executeData?: string;
+
+  /**
+   * The gasLimit needed for execution on the destination chain.
+   * For OP Stack chains (Optimism, Base, Scroll, Fraxtal, Blast, Mantle, etc.),
+   * only specify the gasLimit for L2 (L2GasLimit).
+   * The endpoint estimates and bundles the gas needed for L1 (L1GasLimit) automatically.
+   */
+  gasLimit: string;
+
+  /** Source address for checking if express is supported */
+  sourceContractAddress?: string;
 
   /** Destination contract address for checking if express is supported */
   destinationContractAddress?: string;
@@ -108,7 +108,44 @@ interface HopParams {
    * Token amount (in units) that is used in callContractWithToken for checking if express is supported
    */
   amountInUnits?: string;
-}
+};
+
+/**
+ * Parameters for estimating the fee for an ITS transfer
+ */
+type ItsFeeParams = {
+  /** Required parameters **/
+  /** The source chain for the ITS transaction */
+  sourceChain: string;
+
+  /** The destination chain for the ITS transaction */
+  destinationChain: string;
+
+  /** Optional parameters **/
+  /**
+   * The multiplier of gas to be used on execution
+   * @default 'auto' (multiplier used by relayer)
+   */
+  gasMultiplier?: number | "auto";
+
+  /**
+   * The token address on the source chain
+   * @default "ZeroAddress" for native token
+   */
+  sourceTokenAddress?: string;
+
+  /** source token symbol for checking if express is supported */
+  sourceTokenSymbol?: string;
+
+  /** minimum gas price on the destination chain */
+  minGasPrice?: string;
+
+  /** whether to show detailed fees */
+  showDetailedFees?: boolean;
+
+  /** The type of ITS transaction */
+  event?: "InterchainTransfer" | "InterchainDeployment" | "LinkToken";
+};
 
 /**
  * Represents detailed fee information for a single hop
@@ -137,6 +174,13 @@ export interface DetailedFeeResponse {
   executionFeeWithMultiplier: string;
   totalFee: string;
   details?: HopFeeDetails[];
+}
+
+export interface ITSDetailedFeeResponse {
+  totalFee: string;
+  baseFee: string;
+  executionFee: string;
+  executionFeeWithMultiplier: string;
 }
 
 interface EstimateMultihopFeeOptions {
@@ -566,6 +610,19 @@ export class AxelarQueryAPI {
       }
       throw error;
     }
+  }
+
+  /**
+   * Estimates the total gas fee for an Interchain Token Service (ITS) transaction
+   * @param params - The parameters for the ITS transaction
+   * @param options - Options for the ITS transaction
+   * @returns Promise<string> - The estimated gas fee for the ITS transaction
+   */
+  public async estimateITSFee(params: ItsFeeParams): Promise<string | ITSDetailedFeeResponse> {
+    // validate the source and destination chains
+    await throwIfInvalidChainIds([params.sourceChain, params.destinationChain], this.environment);
+
+    return this.axelarscanApi.post("/gmp/estimateITSFee", params);
   }
 
   /**
