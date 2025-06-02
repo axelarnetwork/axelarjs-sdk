@@ -35,7 +35,7 @@ describe.skip("AxelarSigningClient", () => {
       {
         typeUrl: `/${axelarnetProtobufPackage}.LinkRequest`,
         value: AxelarnetLinkRequest.fromPartial({
-          sender: toAccAddress(address),
+          sender: address,
           recipientAddr: "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
           recipientChain: "avalanche",
           asset: "wavax-wei",
@@ -80,7 +80,7 @@ describe.skip("AxelarSigningClient", () => {
         {
           typeUrl: `/${axelarnetProtobufPackage}.ConfirmDepositRequest`,
           value: AxelarnetConfirmDepositRequest.fromPartial({
-            sender: toAccAddress(address),
+            sender: address,
             depositAddress: toAccAddress(_depositAddress),
             denom,
           }),
@@ -100,7 +100,7 @@ describe.skip("AxelarSigningClient", () => {
       {
         typeUrl: `/${EvmProtobufPackage}.LinkRequest`,
         value: EvmLinkRequest.fromPartial({
-          sender: toAccAddress(address),
+          sender: address,
           recipientAddr: "0x74Ccd7d9F1F40417C6F7fD1151429a2c44c34e6d",
           recipientChain: "avalanche",
           asset: "wavax-wei",
@@ -135,7 +135,7 @@ describe.skip("AxelarSigningClient", () => {
         {
           typeUrl: `/${EvmProtobufPackage}.ConfirmDepositRequest`,
           value: EvmConfirmDepositRequest.fromPartial({
-            sender: toAccAddress(address),
+            sender: address,
             chain,
             txId: utils.arrayify(txHash),
             burnerAddress: utils.arrayify(burnerAddress),
@@ -161,7 +161,7 @@ describe.skip("AxelarSigningClient", () => {
         {
           typeUrl: `/${axelarnetProtobufPackage}.ExecutePendingTransfersRequest`,
           value: AxelarnetExecutePendingTransfersRequest.fromPartial({
-            sender: toAccAddress(address),
+            sender: address,
           }),
         },
       ];
