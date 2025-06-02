@@ -1151,9 +1151,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     options?: AddGasOptions
   ): Promise<TxResult> {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
-    const selectedChain = await this.getChainInfo(chain);
+    const selectedChain = await this.findChainInfo(chain);
 
-    if (!evmWalletDetails.rpcUrl) evmWalletDetails.rpcUrl = selectedChain.rpc[0];
+    if (!evmWalletDetails.rpcUrl) evmWalletDetails.rpcUrl = selectedChain.config.rpc[0];
 
     const signer = this.getSigner(chain, evmWalletDetails);
     const signerAddress = await signer.getAddress();
