@@ -1151,17 +1151,26 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     options?: AddGasOptions
   ): Promise<TxResult> {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
-    const selectedChain = await this.getChainInfo(chain);
+    const selectedChain = await this.findChainInfo(chain);
 
-    if (!evmWalletDetails.rpcUrl) evmWalletDetails.rpcUrl = selectedChain.rpc[0];
+    if (!selectedChain) {
+      throw new Error(`Chain ${chain} not found`);
+    }
+
+    if (selectedChain.chainType !== "evm") {
+      throw new Error("Not an EVM chain");
+    }
+
+    if (!evmWalletDetails.rpcUrl) evmWalletDetails.rpcUrl = selectedChain.config.rpc[0];
 
     const signer = this.getSigner(chain, evmWalletDetails);
     const signerAddress = await signer.getAddress();
 
-    const gasReceiverAddress = await this.axelarQueryApi.getContractAddressFromConfig(
-      chain,
-      "gas_service"
-    );
+    const gasReceiverAddress = selectedChain.config.contracts.AxelarGasService.address;
+
+    if (!gasReceiverAddress) {
+      throw new Error("Gas service contract address not found");
+    }
 
     const { logIndex, destinationChain } = await this._getLogIndexAndDestinationChain(
       chain,
