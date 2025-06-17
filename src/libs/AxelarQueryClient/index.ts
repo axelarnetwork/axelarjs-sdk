@@ -1,5 +1,5 @@
 import { QueryClient } from "@cosmjs/stargate";
-import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+import { Comet38Client } from "@cosmjs/tendermint-rpc";
 import { EnvironmentConfigs, getConfigs } from "../../constants";
 import { AxelarQueryClientConfig } from "../types";
 import { AxelarQueryService, setupQueryExtension } from "./types/index";
@@ -11,6 +11,6 @@ export class AxelarQueryClient extends QueryClient {
     const { axelarRpcUrl, environment } = config;
     const links: EnvironmentConfigs = getConfigs(environment);
     const rpc: string = axelarRpcUrl || links.axelarRpcUrl;
-    return QueryClient.withExtensions(await Tendermint34Client.connect(rpc), setupQueryExtension);
+    return QueryClient.withExtensions(await Comet38Client.connect(rpc), setupQueryExtension);
   }
 }
