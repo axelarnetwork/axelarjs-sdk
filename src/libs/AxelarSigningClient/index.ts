@@ -17,7 +17,7 @@ import {
 } from "@cosmjs/proto-signing";
 import { registerMultisigTxTypes } from "./types/MultisigTxTypes";
 import { registerAxelarnetTxTypes } from "./types/AxelarnetTxTypes";
-import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+import { CometClient, connectComet } from "@cosmjs/tendermint-rpc";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { registerEvmTxTypes } from "./types/EvmTxTypes";
 import { registerNexusTxTypes } from "./types/NexusTxTypes";
@@ -44,7 +44,7 @@ export class AxelarSigningClient extends SigningStargateClient implements IAxela
   protected signerClient: SigningStargateClient;
 
   public constructor(
-    tendermintClient: Tendermint34Client,
+    tendermintClient: CometClient,
     signer: OfflineSigner,
     signerAddress: string,
     options: SigningStargateClientOptions
@@ -57,7 +57,7 @@ export class AxelarSigningClient extends SigningStargateClient implements IAxela
     const { axelarRpcUrl, environment, options, cosmosBasedWalletDetails: walletDetails } = config;
     const links: EnvironmentConfigs = getConfigs(environment);
     const rpc: string = axelarRpcUrl || links.axelarRpcUrl;
-    const tmClient = await Tendermint34Client.connect(rpc);
+    const tmClient = await connectComet(rpc);
     const prefix = "axelar";
 
     let wallet;
