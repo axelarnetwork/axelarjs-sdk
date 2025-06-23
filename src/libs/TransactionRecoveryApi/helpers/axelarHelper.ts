@@ -180,8 +180,8 @@ export function convertRpcTxToBroadcastTxSuccess(tx: any): DeliverTxResponse {
   return {
     height: parseInt(tx.height),
     transactionHash: tx.hash,
-    gasUsed: parseInt(tx.tx_result.gas_used),
-    gasWanted: parseInt(tx.tx_result.gas_wanted),
+    gasUsed: BigInt(tx.tx_result.gas_used),
+    gasWanted: BigInt(tx.tx_result.gas_wanted),
     data: tx.tx_result.data,
     rawLog: tx.tx_result.log,
     code: 0,
