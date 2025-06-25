@@ -1184,10 +1184,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     if (!destinationChain) return NotGMPTransactionError();
 
-    // Check if the transaction status is already executed or not.
-    const _isExecuted = await this.isExecuted(txHash);
-    if (_isExecuted) return AlreadyExecutedError();
-
     let gasFeeToAdd = options?.amount;
 
     if (!gasFeeToAdd) {
