@@ -914,6 +914,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const contractId = chainConfig.contracts.AxelarGateway.address;
 
+    const rpcUrls = chainConfig.rpc as string[];
+    const channelIdToAxelar = chainConfig.channelIdToAxelar;
+
     const rpc = rpcUrl || chainConfig.rpc[0];
 
     const wssUrl = convertRpcUrltoWssUrl(rpc);
@@ -1052,7 +1055,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       throw new Error(`chain ID ${params.chain} not found`);
     }
 
-    const { rpc, channelIdToAxelar } = chainConfig;
+    const { rpc, channelIdToAxelar } = chainConfig as { rpc: string[]; channelIdToAxelar: string };
 
     const tx = await this.fetchGMPTransaction(params.txHash);
 
@@ -1066,6 +1069,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const denom = tx.gas_paid?.returnValues?.asset;
 
     const denomOnSrcChain = getIBCDenomOnSrcChain(denom, chainConfig, chainConfigs);
+
+    console.log("params.token", params.token, denomOnSrcChain);
 
     if (!matchesOriginalTokenPayment(params.token, denomOnSrcChain)) {
       return {
@@ -1091,6 +1096,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const sender = await sendOptions.offlineSigner.getAccounts().then(([acc]: any) => acc?.address);
 
+    console.log("sender", sender);
+
     if (!sender) {
       return {
         success: false,
@@ -1098,7 +1105,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
-    const rpcUrl = sendOptions.rpcUrl ?? rpc[0];
+    let rpcUrl = sendOptions.rpcUrl ?? rpc[0];
 
     if (!rpcUrl) {
       return {
@@ -1107,7 +1114,47 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
+    if (sendOptions.rpcUrl) {
+      rpc.unshift(sendOptions.rpcUrl);
+    }
+
+    // Ensure 'rpc' is an array before iterating over it
+    if (!rpcUrl && (!Array.isArray(rpc) || rpc.length === 0)) {
+      throw new Error("RPC URLs are not available or not an array");
+    }
+
+    // New logic to find a working RPC URL by checking the chain height
+    const getWorkingRpcUrl = async () => {
+      for (const url of rpc) {
+        console.log("url", url);
+        try {
+          const client = (await Promise.race([
+            SigningStargateClient.connect(url),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("Connection timed out")), 5000)
+            ),
+          ])) as SigningStargateClient;
+          await client.getHeight(); // Attempt to get the chain height
+          return url; // Return the working URL
+        } catch (error) {
+          console.log(`RPC URL ${url} is not working:`, error);
+        }
+      }
+      throw new Error("No working RPC URL found");
+    };
+
+    rpcUrl = await getWorkingRpcUrl();
+
     const signer = await getCosmosSigner(rpcUrl, sendOptions.offlineSigner);
+    console.log("params", {
+      sourcePort: "transfer",
+      sourceChannel: channelIdToAxelar,
+      token: coin,
+      sender,
+      receiver: COSMOS_GAS_RECEIVER_OPTIONS[this.environment],
+      timeoutTimestamp: sendOptions.timeoutTimestamp ?? (Date.now() + 60 * 1000) * 1e6, // Converts from milliseconds to nanoseconds
+      memo: tx.call.id,
+    });
 
     const broadcastResult = await signer.signAndBroadcast(
       sender,
@@ -1120,7 +1167,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             token: coin,
             sender,
             receiver: COSMOS_GAS_RECEIVER_OPTIONS[this.environment],
-            timeoutTimestamp: sendOptions.timeoutTimestamp ?? (Date.now() + 60 * 1000) * 1e6, // Converts from milliseconds to nanoseconds
+            timeoutTimestamp: sendOptions.timeoutTimestamp ?? (Date.now() + 60 * 1000) * 1e6,
             memo: tx.call.id,
           },
         },
