@@ -46,7 +46,7 @@ import {
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "./constants/error";
-import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
+import { callExecute, CALL_EXECUTE_ERROR, getCommandId, findWorkingRpcUrl } from "./helpers";
 import { retry, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
@@ -1070,8 +1070,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const denomOnSrcChain = getIBCDenomOnSrcChain(denom, chainConfig, chainConfigs);
 
-    console.log("params.token", params.token, denomOnSrcChain);
-
     if (!matchesOriginalTokenPayment(params.token, denomOnSrcChain)) {
       return {
         success: false,
@@ -1096,8 +1094,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const sender = await sendOptions.offlineSigner.getAccounts().then(([acc]: any) => acc?.address);
 
-    console.log("sender", sender);
-
     if (!sender) {
       return {
         success: false,
@@ -1105,56 +1101,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
-    let rpcUrl = sendOptions.rpcUrl ?? rpc[0];
+    const availableRpcUrls: string[] = [sendOptions.rpcUrl, ...rpc].filter(
+      (url) => url
+    ) as string[];
 
-    if (!rpcUrl) {
-      return {
-        success: false,
-        info: "Missing RPC URL. Please pass in an rpcUrl parameter in the sendOptions parameter",
-      };
-    }
-
-    if (sendOptions.rpcUrl) {
-      rpc.unshift(sendOptions.rpcUrl);
-    }
-
-    // Ensure 'rpc' is an array before iterating over it
-    if (!rpcUrl && (!Array.isArray(rpc) || rpc.length === 0)) {
+    if (availableRpcUrls.length === 0) {
       throw new Error("RPC URLs are not available or not an array");
     }
 
-    // New logic to find a working RPC URL by checking the chain height
-    const getWorkingRpcUrl = async () => {
-      for (const url of rpc) {
-        console.log("url", url);
-        try {
-          const client = (await Promise.race([
-            SigningStargateClient.connect(url),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error("Connection timed out")), 5000)
-            ),
-          ])) as SigningStargateClient;
-          await client.getHeight(); // Attempt to get the chain height
-          return url; // Return the working URL
-        } catch (error) {
-          console.log(`RPC URL ${url} is not working:`, error);
-        }
-      }
-      throw new Error("No working RPC URL found");
-    };
-
-    rpcUrl = await getWorkingRpcUrl();
+    const rpcUrl = await findWorkingRpcUrl(availableRpcUrls);
 
     const signer = await getCosmosSigner(rpcUrl, sendOptions.offlineSigner);
-    console.log("params", {
-      sourcePort: "transfer",
-      sourceChannel: channelIdToAxelar,
-      token: coin,
-      sender,
-      receiver: COSMOS_GAS_RECEIVER_OPTIONS[this.environment],
-      timeoutTimestamp: sendOptions.timeoutTimestamp ?? (Date.now() + 60 * 1000) * 1e6, // Converts from milliseconds to nanoseconds
-      memo: tx.call.id,
-    });
 
     const broadcastResult = await signer.signAndBroadcast(
       sender,
