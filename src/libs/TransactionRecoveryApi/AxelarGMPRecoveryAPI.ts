@@ -1103,7 +1103,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     ) as string[];
 
     if (availableRpcUrls.length === 0) {
-      throw new Error("RPC URLs are not available or not an array");
+      return {
+        success: false,
+        info: `No available RPC URLs found. Please pass in an rpcUrl parameter in the sendOptions parameter`,
+      };
     }
 
     const rpcUrl = await findWorkingRpcUrl(availableRpcUrls);
