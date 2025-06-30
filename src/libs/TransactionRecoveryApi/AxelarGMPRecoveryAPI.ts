@@ -914,9 +914,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const contractId = chainConfig.contracts.AxelarGateway.address;
 
-    const rpcUrls = chainConfig.rpc as string[];
-    const channelIdToAxelar = chainConfig.channelIdToAxelar;
-
     const rpc = rpcUrl || chainConfig.rpc[0];
 
     const wssUrl = convertRpcUrltoWssUrl(rpc);
