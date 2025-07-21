@@ -46,12 +46,18 @@ import {
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "./constants/error";
-import { callExecute, CALL_EXECUTE_ERROR, getCommandId, findWorkingRpcUrl } from "./helpers";
+import {
+  callExecute,
+  CALL_EXECUTE_ERROR,
+  getCommandId,
+  findWorkingRpcUrl,
+  validateSolanaAddress,
+} from "./helpers";
 import { retry, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { arrayify, Interface, parseUnits } from "ethers/lib/utils";
-import { PublicKey } from "@solana/web3.js";
+import bs58 from "bs58";
 import { ChainInfo } from "src/chains/types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import s3 from "./constants/s3";
@@ -161,7 +167,7 @@ export type AddGasSuiParams = {
 };
 
 export type AddGasSolanaParams = {
-  txHash: string; // 64-byte transaction hash (hex string)
+  txHash: string; // Solana transaction signature (base58 string) - will be decoded automatically
   logIndex: number; // Log index for the transaction (will be converted to u64)
   gasFeeAmount: string; // Amount of SOL to add as gas (in lamports, will be converted to u64)
   sender: string; // Sender's Solana wallet address (base58 string) - must be signer
@@ -941,42 +947,27 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     // Validate all Solana addresses
-    let senderPublicKey: PublicKey;
-    let configPdaPublicKey: PublicKey;
-    let programIdPublicKey: PublicKey;
-    let refundAddressPublicKey: PublicKey;
+    validateSolanaAddress(sender, "sender address");
+    validateSolanaAddress(configPda, "config PDA address");
+    validateSolanaAddress(programId, "program ID");
+    const refundAddressPublicKey = validateSolanaAddress(refundAddress, "refund address");
+
+    // Decode Solana transaction signature from base58
+    let txHashBytes: Uint8Array;
 
     try {
-      senderPublicKey = new PublicKey(sender);
-    } catch (error) {
-      throw new Error(`Invalid sender address: ${sender}. ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+      // Decode base58 Solana transaction signature to bytes
+      const decoded = bs58.decode(txHash);
 
-    try {
-      configPdaPublicKey = new PublicKey(configPda);
-    } catch (error) {
-      throw new Error(`Invalid config PDA address: ${configPda}. ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+      if (decoded.length !== 64) {
+        throw new Error(
+          `Solana transaction signature must be 64 bytes when decoded, got ${decoded.length} bytes`
+        );
+      }
 
-    try {
-      programIdPublicKey = new PublicKey(programId);
-    } catch (error) {
-      throw new Error(`Invalid program ID: ${programId}. ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-
-    try {
-      refundAddressPublicKey = new PublicKey(refundAddress);
-    } catch (error) {
-      throw new Error(`Invalid refund address: ${refundAddress}. ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-
-    // Convert hex string to 64-byte array
-    const txHashBytes = txHash.startsWith("0x")
-      ? Array.from(Buffer.from(txHash.slice(2), "hex"))
-      : Array.from(Buffer.from(txHash, "hex"));
-
-    if (txHashBytes.length !== 64) {
-      throw new Error("Transaction hash must be 64 bytes");
+      txHashBytes = decoded;
+    } catch {
+      throw new Error(`Failed to decode Solana transaction signature: ${txHash}`);
     }
 
     // Manual Borsh-like serialization to match Rust enum structure
@@ -997,16 +988,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     buffer.set(txHashBytes, offset);
     offset += 64;
 
-    // log_index: u64 (little endian)
-    view.setBigUint64(offset, BigInt(logIndex), true); // true = little endian
+    view.setBigUint64(offset, BigInt(logIndex), true);
     offset += 8;
 
-    // gas_fee_amount: u64 (little endian)
-    view.setBigUint64(offset, BigInt(gasFeeAmount), true); // true = little endian
+    view.setBigUint64(offset, BigInt(gasFeeAmount), true);
     offset += 8;
 
     // refund_address: Pubkey (32 bytes)
-    // Convert base58 address to bytes using validated PublicKey
     const refundAddressBytes = refundAddressPublicKey.toBytes();
     buffer.set(refundAddressBytes, offset);
     offset += 32;
