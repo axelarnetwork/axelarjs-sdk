@@ -951,36 +951,35 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     // Manual Borsh-like serialization to match Rust enum structure
     // GasServiceInstruction::Native(PayWithNativeToken::AddGas { ... })
-    const buffer = Buffer.alloc(1000); // Allocate enough space
+    const buffer = new Uint8Array(1000); // Allocate enough space
+    const view = new DataView(buffer.buffer);
     let offset = 0;
 
     // Outer enum discriminant (GasServiceInstruction::Native = 2)
-    buffer.writeUInt8(2, offset);
+    buffer[offset] = 2;
     offset += 1;
 
     // Inner enum discriminant (PayWithNativeToken::AddGas = 1)
-    buffer.writeUInt8(1, offset);
+    buffer[offset] = 1;
     offset += 1;
 
     // tx_hash: [u8; 64]
-    const txHashBuffer = Buffer.from(txHashBytes);
-    txHashBuffer.copy(buffer, offset);
+    buffer.set(txHashBytes, offset);
     offset += 64;
 
     // log_index: u64 (little endian)
-    buffer.writeBigUInt64LE(BigInt(logIndex), offset);
+    view.setBigUint64(offset, BigInt(logIndex), true); // true = little endian
     offset += 8;
 
     // gas_fee_amount: u64 (little endian)
-    buffer.writeBigUInt64LE(BigInt(gasFeeAmount), offset);
+    view.setBigUint64(offset, BigInt(gasFeeAmount), true); // true = little endian
     offset += 8;
 
     // refund_address: Pubkey (32 bytes)
     // Convert base58 address to bytes using Solana PublicKey
     try {
       const refundAddressBytes = new PublicKey(refundAddress).toBytes();
-      const refundAddressBuffer = Buffer.from(refundAddressBytes);
-      refundAddressBuffer.copy(buffer, offset);
+      buffer.set(refundAddressBytes, offset);
       offset += 32;
     } catch (error) {
       throw new Error(`Invalid Solana address format: ${refundAddress}`);
@@ -1005,7 +1004,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           isWritable: false,
         },
       ],
-      data: new Uint8Array(buffer.slice(0, offset)),
+      data: buffer.slice(0, offset),
     };
   }
 
