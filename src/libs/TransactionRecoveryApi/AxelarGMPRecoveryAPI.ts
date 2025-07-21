@@ -940,6 +940,36 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       throw new Error("Config PDA is required for Solana gas service");
     }
 
+    // Validate all Solana addresses
+    let senderPublicKey: PublicKey;
+    let configPdaPublicKey: PublicKey;
+    let programIdPublicKey: PublicKey;
+    let refundAddressPublicKey: PublicKey;
+
+    try {
+      senderPublicKey = new PublicKey(sender);
+    } catch (error) {
+      throw new Error(`Invalid sender address: ${sender}. ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    try {
+      configPdaPublicKey = new PublicKey(configPda);
+    } catch (error) {
+      throw new Error(`Invalid config PDA address: ${configPda}. ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    try {
+      programIdPublicKey = new PublicKey(programId);
+    } catch (error) {
+      throw new Error(`Invalid program ID: ${programId}. ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    try {
+      refundAddressPublicKey = new PublicKey(refundAddress);
+    } catch (error) {
+      throw new Error(`Invalid refund address: ${refundAddress}. ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
     // Convert hex string to 64-byte array
     const txHashBytes = txHash.startsWith("0x")
       ? Array.from(Buffer.from(txHash.slice(2), "hex"))
@@ -976,14 +1006,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     offset += 8;
 
     // refund_address: Pubkey (32 bytes)
-    // Convert base58 address to bytes using Solana PublicKey
-    try {
-      const refundAddressBytes = new PublicKey(refundAddress).toBytes();
-      buffer.set(refundAddressBytes, offset);
-      offset += 32;
-    } catch (error) {
-      throw new Error(`Invalid Solana address format: ${refundAddress}`);
-    }
+    // Convert base58 address to bytes using validated PublicKey
+    const refundAddressBytes = refundAddressPublicKey.toBytes();
+    buffer.set(refundAddressBytes, offset);
+    offset += 32;
 
     return {
       programId,
