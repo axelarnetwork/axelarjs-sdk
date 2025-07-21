@@ -51,6 +51,7 @@ import { retry, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { arrayify, Interface, parseUnits } from "ethers/lib/utils";
+import { PublicKey } from "@solana/web3.js";
 import { ChainInfo } from "src/chains/types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import s3 from "./constants/s3";
@@ -160,12 +161,13 @@ export type AddGasSuiParams = {
 };
 
 export type AddGasSolanaParams = {
-  txHash: string; // 64-byte transaction hash
-  logIndex: number; // Log index for the transaction
-  gasFeeAmount: string; // Amount of SOL to add as gas (in lamports)
-  refundAddress: string; // Address to refund excess gas to
-  configPda: string; // Config PDA address (required)
-  programId: string; // Axelar Solana gas service program ID (required)
+  txHash: string; // 64-byte transaction hash (hex string)
+  logIndex: number; // Log index for the transaction (will be converted to u64)
+  gasFeeAmount: string; // Amount of SOL to add as gas (in lamports, will be converted to u64)
+  sender: string; // Sender's Solana wallet address (base58 string) - must be signer
+  refundAddress: string; // Refund address (base58 string) - goes in instruction data
+  configPda: string; // Config PDA address (required, base58 string)
+  programId: string; // Axelar Solana gas service program ID (required, base58 string)
 };
 
 export type SolanaInstruction = {
@@ -921,7 +923,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaInstruction> {
-    const { txHash, logIndex, gasFeeAmount, refundAddress, configPda, programId } = params;
+    const { txHash, logIndex, gasFeeAmount, sender, refundAddress, configPda, programId } = params;
 
     // Validate required parameters
     if (!programId) {
@@ -932,57 +934,60 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       throw new Error("Config PDA is required for Solana gas service");
     }
 
-    // Convert hex string to bytes if needed
+    // Convert hex string to 64-byte array
     const txHashBytes = txHash.startsWith("0x")
-      ? new Uint8Array(Buffer.from(txHash.slice(2), "hex"))
-      : new Uint8Array(Buffer.from(txHash, "hex"));
+      ? Array.from(Buffer.from(txHash.slice(2), "hex"))
+      : Array.from(Buffer.from(txHash, "hex"));
 
     if (txHashBytes.length !== 64) {
       throw new Error("Transaction hash must be 64 bytes");
     }
 
-    // Encode instruction data according to Solana Axelar gas service format
-    // This follows the add_native_gas instruction structure
-    const instructionData = Buffer.concat([
-      // Instruction discriminator (8 bytes) - would be specific to the program
-      Buffer.from([0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]), // add_native_gas discriminator
+    // Manual Borsh-like serialization to match Rust enum structure
+    // GasServiceInstruction::Native(PayWithNativeToken::AddGas { ... })
+    const buffer = Buffer.alloc(1000); // Allocate enough space
+    let offset = 0;
 
-      // tx_hash (64 bytes)
-      Buffer.from(txHashBytes),
+    // Outer enum discriminant (GasServiceInstruction::Native = 2)
+    buffer.writeUInt8(2, offset);
+    offset += 1;
 
-      // log_index (4 bytes, little endian)
-      Buffer.alloc(4),
+    // Inner enum discriminant (PayWithNativeToken::AddGas = 1)
+    buffer.writeUInt8(1, offset);
+    offset += 1;
 
-      // gas_fee_amount (8 bytes, little endian)
-      Buffer.alloc(8),
+    // tx_hash: [u8; 64]
+    Buffer.from(txHashBytes).copy(buffer, offset);
+    offset += 64;
 
-      // refund_address (32 bytes)
-      Buffer.from(
-        refundAddress.length === 44
-          ? Buffer.from(refundAddress, "base64")
-          : Buffer.from(refundAddress, "hex")
-      ),
-    ]);
+    // log_index: u64 (little endian)
+    buffer.writeBigUInt64LE(BigInt(logIndex), offset);
+    offset += 8;
 
-    // Write log_index as little endian
-    instructionData.writeUInt32LE(logIndex, 72);
+    // gas_fee_amount: u64 (little endian)
+    buffer.writeBigUInt64LE(BigInt(gasFeeAmount), offset);
+    offset += 8;
 
-    // Write gas_fee_amount as little endian
-    const gasFeeAmountBN = BigInt(gasFeeAmount);
-    const gasFeeBuffer = Buffer.alloc(8);
-    gasFeeBuffer.writeBigUInt64LE(gasFeeAmountBN, 0);
-    gasFeeBuffer.copy(instructionData, 76);
+    // refund_address: Pubkey (32 bytes)
+    // Convert base58 address to bytes using Solana PublicKey
+    try {
+      const refundAddressBytes = new PublicKey(refundAddress).toBytes();
+      Buffer.from(refundAddressBytes).copy(buffer, offset);
+      offset += 32;
+    } catch (error) {
+      throw new Error(`Invalid Solana address format: ${refundAddress}`);
+    }
 
     return {
       programId,
       accounts: [
         {
-          pubkey: refundAddress, // sender (signer)
+          pubkey: sender, // sender (signer, writable) - the account paying for gas
           isSigner: true,
           isWritable: true,
         },
         {
-          pubkey: configPda, // config_pda (writable)
+          pubkey: configPda, // config_pda (writable) - receives the lamports
           isSigner: false,
           isWritable: true,
         },
@@ -992,7 +997,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           isWritable: false,
         },
       ],
-      data: new Uint8Array(instructionData),
+      data: new Uint8Array(buffer.slice(0, offset)),
     };
   }
 
