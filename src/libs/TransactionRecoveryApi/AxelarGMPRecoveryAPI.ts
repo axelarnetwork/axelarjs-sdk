@@ -963,7 +963,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     offset += 1;
 
     // tx_hash: [u8; 64]
-    Buffer.from(txHashBytes).copy(buffer, offset);
+    const txHashBuffer = Buffer.from(txHashBytes);
+    txHashBuffer.copy(buffer, offset);
     offset += 64;
 
     // log_index: u64 (little endian)
@@ -978,7 +979,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     // Convert base58 address to bytes using Solana PublicKey
     try {
       const refundAddressBytes = new PublicKey(refundAddress).toBytes();
-      Buffer.from(refundAddressBytes).copy(buffer, offset);
+      const refundAddressBuffer = Buffer.from(refundAddressBytes);
+      refundAddressBuffer.copy(buffer, offset);
       offset += 32;
     } catch (error) {
       throw new Error(`Invalid Solana address format: ${refundAddress}`);
