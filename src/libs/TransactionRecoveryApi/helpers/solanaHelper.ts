@@ -18,4 +18,3 @@ export function validateSolanaAddress(address: string, fieldName: string): Publi
     );
   }
 }
-
