@@ -58,6 +58,11 @@ import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { arrayify, Interface, parseUnits } from "ethers/lib/utils";
 import bs58 from "bs58";
+import {
+  PublicKey,
+  Transaction as SolanaTransaction,
+  TransactionInstruction,
+} from "@solana/web3.js";
 import { ChainInfo } from "src/chains/types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import s3 from "./constants/s3";
@@ -167,8 +172,7 @@ export type AddGasSuiParams = {
 };
 
 export type AddGasSolanaParams = {
-  txHash: string; // Solana transaction signature (base58 string) - will be decoded automatically
-  logIndex: number; // Log index for the transaction (will be converted to u64)
+  messageId: string; // The message ID of the cross-chain transaction
   gasFeeAmount: string; // Amount of SOL to add as gas (in lamports, will be converted to u64)
   sender: string; // Sender's Solana wallet address (base58 string) - must be signer
   refundAddress: string; // Refund address (base58 string) - goes in instruction data
@@ -928,8 +932,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return tx;
   }
 
-  public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaInstruction> {
-    const { txHash, logIndex, gasFeeAmount, sender, refundAddress, configPda, programId } = params;
+  public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaTransaction> {
+    const { messageId, gasFeeAmount, sender, refundAddress, configPda, programId } = params;
 
     // TODO: Retrieve programId and configPda from Axelar chain configuration
     // Similar to how other chains get contract addresses from S3 config:
@@ -943,9 +947,24 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     validateSolanaAddress(programId, "program ID");
     const refundAddressPublicKey = validateSolanaAddress(refundAddress, "refund address");
 
-    // Validate numeric parameters
+    // Validate and parse messageId (format: "txHash-logIndex")
+    if (!messageId || typeof messageId !== "string") {
+      throw new Error(`Invalid messageId: must be a non-empty string, got ${messageId}`);
+    }
+
+    const messageIdParts = messageId.split("-");
+    if (messageIdParts.length !== 2) {
+      throw new Error(`Invalid messageId format: expected "txHash-logIndex", got "${messageId}"`);
+    }
+
+    const [txHash, logIndexStr] = messageIdParts;
+    const logIndex = parseInt(logIndexStr);
+
+    // Validate logIndex
     if (!Number.isInteger(logIndex) || logIndex < 0) {
-      throw new Error(`Invalid logIndex: must be a non-negative integer, got ${logIndex}`);
+      throw new Error(
+        `Invalid logIndex in messageId: must be a non-negative integer, got ${logIndexStr}`
+      );
     }
 
     // Validate gasFeeAmount can be converted to BigInt and is non-negative
@@ -964,9 +983,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       throw new Error(`Invalid gasFeeAmount: must be non-negative, got ${gasFeeAmount}`);
     }
 
-    // Decode Solana transaction signature from base58
+    // Decode Solana transaction hash from base58
     let txHashBytes: Uint8Array;
-
     try {
       // Decode base58 Solana transaction signature to bytes
       const decoded = bs58.decode(txHash);
@@ -1008,9 +1026,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     buffer.set(txHashBytes, offset);
     offset += 64;
 
+    // log_index: u64
     view.setBigUint64(offset, BigInt(logIndex), true);
     offset += 8;
 
+    // gas_fee_amount: u64
     view.setBigUint64(offset, gasFeeAmountBigInt, true);
     offset += 8;
 
@@ -1019,27 +1039,33 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     buffer.set(refundAddressBytes, offset);
     offset += 32;
 
-    return {
-      programId,
-      accounts: [
+    // Create the transaction instruction
+    const instruction = new TransactionInstruction({
+      keys: [
         {
-          pubkey: sender, // sender (signer, writable) - the account paying for gas
+          pubkey: new PublicKey(sender), // sender (signer, writable) - the account paying for gas
           isSigner: true,
           isWritable: true,
         },
         {
-          pubkey: configPda, // config_pda (writable) - receives the lamports
+          pubkey: new PublicKey(configPda), // config_pda (writable) - receives the lamports
           isSigner: false,
           isWritable: true,
         },
         {
-          pubkey: "11111111111111111111111111111111", // system_program
+          pubkey: new PublicKey("11111111111111111111111111111111"), // system_program
           isSigner: false,
           isWritable: false,
         },
       ],
-      data: buffer.slice(0, offset),
-    };
+      programId: new PublicKey(programId),
+      data: Buffer.from(buffer.slice(0, offset)),
+    });
+
+    // Create and return the transaction
+    const transaction = new SolanaTransaction().add(instruction);
+
+    return transaction;
   }
 
   public async addGasToXrplChain(params: AddGasXrplParams): Promise<string> {
