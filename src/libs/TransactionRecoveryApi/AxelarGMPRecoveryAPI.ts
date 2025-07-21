@@ -159,6 +159,25 @@ export type AddGasSuiParams = {
   gasParams: string;
 };
 
+export type AddGasSolanaParams = {
+  txHash: string; // 64-byte transaction hash
+  logIndex: number; // Log index for the transaction
+  gasFeeAmount: string; // Amount of SOL to add as gas (in lamports)
+  refundAddress: string; // Address to refund excess gas to
+  configPda?: string; // Optional custom config PDA address
+  programId?: string; // Optional custom program ID
+};
+
+export type SolanaInstruction = {
+  programId: string;
+  accounts: Array<{
+    pubkey: string;
+    isSigner: boolean;
+    isWritable: boolean;
+  }>;
+  data: Uint8Array;
+};
+
 export type AddGasResponse = {
   success: boolean;
   info: string;
@@ -899,6 +918,79 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     });
 
     return tx;
+  }
+
+  public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaInstruction> {
+    const { txHash, logIndex, gasFeeAmount, refundAddress, configPda, programId } = params;
+    
+    // Convert hex string to bytes if needed
+    const txHashBytes = txHash.startsWith('0x') ? 
+      new Uint8Array(Buffer.from(txHash.slice(2), 'hex')) : 
+      new Uint8Array(Buffer.from(txHash, 'hex'));
+    
+    if (txHashBytes.length !== 64) {
+      throw new Error('Transaction hash must be 64 bytes');
+    }
+
+    // Default program ID for Axelar Solana Gas Service
+    const defaultProgramId = "AxeGasGW9mFNj7wjT9Nhn8Kqs8xk5AuZM5QqQwztfCzp";
+    const actualProgramId = programId || defaultProgramId;
+    
+    // Default config PDA - in production this would be derived or configured
+    const defaultConfigPda = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
+    const actualConfigPda = configPda || defaultConfigPda;
+
+    // Encode instruction data according to Solana Axelar gas service format
+    // This follows the add_native_gas instruction structure
+    const instructionData = Buffer.concat([
+      // Instruction discriminator (8 bytes) - would be specific to the program
+      Buffer.from([0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]), // add_native_gas discriminator
+      
+      // tx_hash (64 bytes)
+      Buffer.from(txHashBytes),
+      
+      // log_index (4 bytes, little endian)
+      Buffer.alloc(4),
+      
+      // gas_fee_amount (8 bytes, little endian)  
+      Buffer.alloc(8),
+      
+      // refund_address (32 bytes)
+      Buffer.from(refundAddress.length === 44 ? 
+        Buffer.from(refundAddress, 'base64') : 
+        Buffer.from(refundAddress, 'hex'))
+    ]);
+
+    // Write log_index as little endian
+    instructionData.writeUInt32LE(logIndex, 72);
+    
+    // Write gas_fee_amount as little endian
+    const gasFeeAmountBN = BigInt(gasFeeAmount);
+    const gasFeeBuffer = Buffer.alloc(8);
+    gasFeeBuffer.writeBigUInt64LE(gasFeeAmountBN, 0);
+    gasFeeBuffer.copy(instructionData, 76);
+
+    return {
+      programId: actualProgramId,
+      accounts: [
+        {
+          pubkey: refundAddress, // sender (signer)
+          isSigner: true,
+          isWritable: true,
+        },
+        {
+          pubkey: actualConfigPda, // config_pda (writable)
+          isSigner: false,
+          isWritable: true,
+        },
+        {
+          pubkey: "11111111111111111111111111111112", // system_program
+          isSigner: false,
+          isWritable: false,
+        },
+      ],
+      data: new Uint8Array(instructionData),
+    };
   }
 
   public async addGasToXrplChain(params: AddGasXrplParams): Promise<string> {
