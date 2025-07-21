@@ -937,20 +937,32 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     // const programId = selectedChain?.config?.contracts?.AxelarGasService?.address;
     // const configPda = selectedChain?.config?.contracts?.AxelarGasService?.configPda;
 
-    // Validate required parameters
-    if (!programId) {
-      throw new Error("Program ID is required for Solana gas service");
-    }
-
-    if (!configPda) {
-      throw new Error("Config PDA is required for Solana gas service");
-    }
-
     // Validate all Solana addresses
     validateSolanaAddress(sender, "sender address");
     validateSolanaAddress(configPda, "config PDA address");
     validateSolanaAddress(programId, "program ID");
     const refundAddressPublicKey = validateSolanaAddress(refundAddress, "refund address");
+
+    // Validate numeric parameters
+    if (!Number.isInteger(logIndex) || logIndex < 0) {
+      throw new Error(`Invalid logIndex: must be a non-negative integer, got ${logIndex}`);
+    }
+
+    // Validate gasFeeAmount can be converted to BigInt and is non-negative
+    let gasFeeAmountBigInt: bigint;
+    try {
+      gasFeeAmountBigInt = BigInt(gasFeeAmount);
+    } catch (error) {
+      throw new Error(
+        `Invalid gasFeeAmount: must be a valid numeric string, got "${gasFeeAmount}". ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+
+    if (gasFeeAmountBigInt < BigInt(0)) {
+      throw new Error(`Invalid gasFeeAmount: must be non-negative, got ${gasFeeAmount}`);
+    }
 
     // Decode Solana transaction signature from base58
     let txHashBytes: Uint8Array;
@@ -966,8 +978,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       }
 
       txHashBytes = decoded;
-    } catch {
-      throw new Error(`Failed to decode Solana transaction signature: ${txHash}`);
+    } catch (error) {
+      // Preserve specific error messages (like length validation) but catch base58 decode errors
+      if (error instanceof Error && error.message.includes("64 bytes")) {
+        throw error; // Re-throw length validation errors with original message
+      }
+      throw new Error(
+        `Failed to decode Solana transaction signature: ${txHash}. ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
 
     // Manual Borsh-like serialization to match Rust enum structure
@@ -991,7 +1011,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     view.setBigUint64(offset, BigInt(logIndex), true);
     offset += 8;
 
-    view.setBigUint64(offset, BigInt(gasFeeAmount), true);
+    view.setBigUint64(offset, gasFeeAmountBigInt, true);
     offset += 8;
 
     // refund_address: Pubkey (32 bytes)
@@ -1013,7 +1033,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           isWritable: true,
         },
         {
-          pubkey: "11111111111111111111111111111112", // system_program
+          pubkey: "11111111111111111111111111111111", // system_program
           isSigner: false,
           isWritable: false,
         },
