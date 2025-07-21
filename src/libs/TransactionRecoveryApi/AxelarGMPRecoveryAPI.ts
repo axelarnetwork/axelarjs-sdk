@@ -46,7 +46,7 @@ import {
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "./constants/error";
-import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
+import { callExecute, CALL_EXECUTE_ERROR, getCommandId, findWorkingRpcUrl } from "./helpers";
 import { retry, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
@@ -1158,7 +1158,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       throw new Error(`chain ID ${params.chain} not found`);
     }
 
-    const { rpc, channelIdToAxelar } = chainConfig;
+    const { rpc, channelIdToAxelar } = chainConfig as { rpc: string[]; channelIdToAxelar: string };
 
     const tx = await this.fetchGMPTransaction(params.txHash);
 
@@ -1204,14 +1204,18 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
-    const rpcUrl = sendOptions.rpcUrl ?? rpc[0];
+    const availableRpcUrls: string[] = [sendOptions.rpcUrl, ...rpc].filter(
+      (url) => url
+    ) as string[];
 
-    if (!rpcUrl) {
+    if (availableRpcUrls.length === 0) {
       return {
         success: false,
-        info: "Missing RPC URL. Please pass in an rpcUrl parameter in the sendOptions parameter",
+        info: `No available RPC URLs found. Please pass in an rpcUrl parameter in the sendOptions parameter`,
       };
     }
+
+    const rpcUrl = await findWorkingRpcUrl(availableRpcUrls);
 
     const signer = await getCosmosSigner(rpcUrl, sendOptions.offlineSigner);
 
@@ -1226,7 +1230,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             token: coin,
             sender,
             receiver: COSMOS_GAS_RECEIVER_OPTIONS[this.environment],
-            timeoutTimestamp: sendOptions.timeoutTimestamp ?? (Date.now() + 60 * 1000) * 1e6, // Converts from milliseconds to nanoseconds
+            timeoutTimestamp: sendOptions.timeoutTimestamp ?? (Date.now() + 60 * 1000) * 1e6,
             memo: tx.call.id,
           },
         },
