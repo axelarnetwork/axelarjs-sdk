@@ -925,6 +925,12 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaInstruction> {
     const { txHash, logIndex, gasFeeAmount, sender, refundAddress, configPda, programId } = params;
 
+    // TODO: Retrieve programId and configPda from Axelar chain configuration
+    // Similar to how other chains get contract addresses from S3 config:
+    // const selectedChain = await this.getChainInfo('solana');
+    // const programId = selectedChain?.config?.contracts?.AxelarGasService?.address;
+    // const configPda = selectedChain?.config?.contracts?.AxelarGasService?.configPda;
+
     // Validate required parameters
     if (!programId) {
       throw new Error("Program ID is required for Solana gas service");
