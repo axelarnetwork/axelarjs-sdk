@@ -922,23 +922,23 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaInstruction> {
     const { txHash, logIndex, gasFeeAmount, refundAddress, configPda, programId } = params;
-    
+
     // Validate required parameters
     if (!programId) {
-      throw new Error('Program ID is required for Solana gas service');
+      throw new Error("Program ID is required for Solana gas service");
     }
-    
+
     if (!configPda) {
-      throw new Error('Config PDA is required for Solana gas service');
+      throw new Error("Config PDA is required for Solana gas service");
     }
-    
+
     // Convert hex string to bytes if needed
-    const txHashBytes = txHash.startsWith('0x') ? 
-      new Uint8Array(Buffer.from(txHash.slice(2), 'hex')) : 
-      new Uint8Array(Buffer.from(txHash, 'hex'));
-    
+    const txHashBytes = txHash.startsWith("0x")
+      ? new Uint8Array(Buffer.from(txHash.slice(2), "hex"))
+      : new Uint8Array(Buffer.from(txHash, "hex"));
+
     if (txHashBytes.length !== 64) {
-      throw new Error('Transaction hash must be 64 bytes');
+      throw new Error("Transaction hash must be 64 bytes");
     }
 
     // Encode instruction data according to Solana Axelar gas service format
@@ -946,25 +946,27 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const instructionData = Buffer.concat([
       // Instruction discriminator (8 bytes) - would be specific to the program
       Buffer.from([0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]), // add_native_gas discriminator
-      
+
       // tx_hash (64 bytes)
       Buffer.from(txHashBytes),
-      
+
       // log_index (4 bytes, little endian)
       Buffer.alloc(4),
-      
-      // gas_fee_amount (8 bytes, little endian)  
+
+      // gas_fee_amount (8 bytes, little endian)
       Buffer.alloc(8),
-      
+
       // refund_address (32 bytes)
-      Buffer.from(refundAddress.length === 44 ? 
-        Buffer.from(refundAddress, 'base64') : 
-        Buffer.from(refundAddress, 'hex'))
+      Buffer.from(
+        refundAddress.length === 44
+          ? Buffer.from(refundAddress, "base64")
+          : Buffer.from(refundAddress, "hex")
+      ),
     ]);
 
     // Write log_index as little endian
     instructionData.writeUInt32LE(logIndex, 72);
-    
+
     // Write gas_fee_amount as little endian
     const gasFeeAmountBN = BigInt(gasFeeAmount);
     const gasFeeBuffer = Buffer.alloc(8);
