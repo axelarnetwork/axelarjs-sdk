@@ -50,6 +50,8 @@ import { Horizon } from "@stellar/stellar-sdk";
 import { SUI_TYPE_ARG } from "@mysten/sui/utils";
 import { Transaction } from "@mysten/sui/transactions";
 import * as chains from "../../../chains";
+import { STANDARD_FEE } from "../../AxelarSigningClient";
+import { coin, DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -1176,6 +1178,39 @@ describe("AxelarGMPRecoveryAPI", () => {
       // const result = await client.submit(signedTx.tx_blob);
       // console.log(result);
       // await client.disconnect();
+    });
+  });
+
+  describe.skip("addGasToCosmosChain", () => {
+    const api = new AxelarGMPRecoveryAPI({ environment: Environment.MAINNET });
+
+    // this test built for manual testing purpose
+    it("should add gas to cosmos chain", async () => {
+      // enter test mnemonic here. don't commit it to git
+      const testMnemonic = "";
+      const offlineSigner = await DirectSecp256k1HdWallet.fromMnemonic("", {
+        prefix: "jkl",
+      });
+
+      const response = await api.addGasToCosmosChain({
+        gasLimit: 100000,
+        txHash: "97653D04099970A43B173A68103FC98389FD842AD4FFBA21FA5239000AE059C1",
+        chain: "jackal",
+        token: "autocalculate",
+        sendOptions: {
+          txFee: {
+            amount: [
+              {
+                denom: "ujkl",
+                amount: "15000",
+              },
+            ],
+            gas: "5000000",
+          },
+          environment: Environment.MAINNET,
+          offlineSigner,
+        },
+      });
     });
   });
 

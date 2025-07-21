@@ -43,7 +43,7 @@ describe("AxelarQueryAPI", () => {
     test("It should generate a transfer fee for a specific transaction", async () => {
       const [sourceChainName, destinationChainName, assetDenom, amount] = [
         "avalanche",
-        "polygon",
+        "polygon-sepolia",
         "uausdc",
         100000000,
       ];
