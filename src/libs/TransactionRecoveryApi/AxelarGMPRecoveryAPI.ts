@@ -164,8 +164,8 @@ export type AddGasSolanaParams = {
   logIndex: number; // Log index for the transaction
   gasFeeAmount: string; // Amount of SOL to add as gas (in lamports)
   refundAddress: string; // Address to refund excess gas to
-  configPda?: string; // Optional custom config PDA address
-  programId?: string; // Optional custom program ID
+  configPda: string; // Config PDA address (required)
+  programId: string; // Axelar Solana gas service program ID (required)
 };
 
 export type SolanaInstruction = {
@@ -923,6 +923,15 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaInstruction> {
     const { txHash, logIndex, gasFeeAmount, refundAddress, configPda, programId } = params;
     
+    // Validate required parameters
+    if (!programId) {
+      throw new Error('Program ID is required for Solana gas service');
+    }
+    
+    if (!configPda) {
+      throw new Error('Config PDA is required for Solana gas service');
+    }
+    
     // Convert hex string to bytes if needed
     const txHashBytes = txHash.startsWith('0x') ? 
       new Uint8Array(Buffer.from(txHash.slice(2), 'hex')) : 
@@ -931,14 +940,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (txHashBytes.length !== 64) {
       throw new Error('Transaction hash must be 64 bytes');
     }
-
-    // Default program ID for Axelar Solana Gas Service
-    const defaultProgramId = "AxeGasGW9mFNj7wjT9Nhn8Kqs8xk5AuZM5QqQwztfCzp";
-    const actualProgramId = programId || defaultProgramId;
-    
-    // Default config PDA - in production this would be derived or configured
-    const defaultConfigPda = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
-    const actualConfigPda = configPda || defaultConfigPda;
 
     // Encode instruction data according to Solana Axelar gas service format
     // This follows the add_native_gas instruction structure
@@ -971,7 +972,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     gasFeeBuffer.copy(instructionData, 76);
 
     return {
-      programId: actualProgramId,
+      programId,
       accounts: [
         {
           pubkey: refundAddress, // sender (signer)
@@ -979,7 +980,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           isWritable: true,
         },
         {
-          pubkey: actualConfigPda, // config_pda (writable)
+          pubkey: configPda, // config_pda (writable)
           isSigner: false,
           isWritable: true,
         },
