@@ -146,7 +146,7 @@ export const evmEventStubResponse = () => ({
   eventResponse: {
     event: {
       chain: "Moonbeam",
-      txId: new Uint8Array(),
+      txId: Buffer.from([]),
       index: Long.fromNumber(1),
       status: 2,
       tokenSent: undefined,

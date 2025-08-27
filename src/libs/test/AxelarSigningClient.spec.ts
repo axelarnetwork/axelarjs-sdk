@@ -81,7 +81,7 @@ describe.skip("AxelarSigningClient", () => {
           typeUrl: `/${axelarnetProtobufPackage}.ConfirmDepositRequest`,
           value: AxelarnetConfirmDepositRequest.fromPartial({
             sender: address,
-            depositAddress: toAccAddress(_depositAddress),
+            depositAddress: Buffer.from(toAccAddress(_depositAddress)),
             denom,
           }),
         },
@@ -137,8 +137,8 @@ describe.skip("AxelarSigningClient", () => {
           value: EvmConfirmDepositRequest.fromPartial({
             sender: address,
             chain,
-            txId: utils.arrayify(txHash),
-            burnerAddress: utils.arrayify(burnerAddress),
+            txId: Buffer.from(utils.arrayify(txHash)),
+            burnerAddress: Buffer.from(utils.arrayify(burnerAddress)),
           }),
         },
       ];
