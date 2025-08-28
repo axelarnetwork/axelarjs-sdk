@@ -106,8 +106,8 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
       cosmjs-types:
-        specifier: ^0.8.0
-        version: 0.8.0
+        specifier: ^0.10.1
+        version: 0.10.1
       eslint:
         specifier: ^8.24.0
         version: 8.24.0
@@ -1666,6 +1666,9 @@ packages:
 
   core-js-compat@3.30.2:
     resolution: {integrity: sha512-nriW1nuJjUgvkEjIot1Spwakz52V9YkYHZAQG6A1eCgC8AA1p0zngrQEP9R0+V6hji5XilWKG1Bd0YRppmGimA==}
+
+  cosmjs-types@0.10.1:
+    resolution: {integrity: sha512-CENXb4O5GN+VyB68HYXFT2SOhv126Z59631rZC56m8uMWa6/cSlFeai8BwZGT1NMepw0Ecf+U8XSOnBzZUWh9Q==}
 
   cosmjs-types@0.8.0:
     resolution: {integrity: sha512-Q2Mj95Fl0PYMWEhA2LuGEIhipF7mQwd9gTQ85DdP9jjjopeoGaDxvmPa5nakNzsq7FnO1DMTatXTAx6bxMH7Lg==}
@@ -5428,6 +5431,8 @@ snapshots:
   core-js-compat@3.30.2:
     dependencies:
       browserslist: 4.21.6
+
+  cosmjs-types@0.10.1: {}
 
   cosmjs-types@0.8.0:
     dependencies:
