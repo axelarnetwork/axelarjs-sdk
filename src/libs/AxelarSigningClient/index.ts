@@ -74,8 +74,8 @@ export class AxelarSigningClient extends SigningStargateClient implements IAxela
     registerEvmTxTypes(registry);
     registerNexusTxTypes(registry);
 
-    // const aminoTypes = options.aminoTypes || new AminoTypes(createAxelarAminoConverters());
-    const newOpts = { ...options, registry, aminoTypes: undefined };
+    const aminoTypes = options.aminoTypes || new AminoTypes(createAxelarAminoConverters());
+    const newOpts = { ...options, registry, aminoTypes };
 
     return new AxelarSigningClient(tmClient, wallet, account.address, newOpts);
   }
