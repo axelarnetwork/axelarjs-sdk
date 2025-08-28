@@ -65,6 +65,7 @@ export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasT
     [EvmChain.MANTLE_SEPOLIA]: GasToken.MANTLE_SEPOLIA,
     [EvmChain.BASE_SEPOLIA]: GasToken.BASE_SEPOLIA,
     [EvmChain.OPTIMISM_SEPOLIA]: GasToken.OPTIMISM_SEPOLIA,
+    [EvmChain.MONAD]: GasToken.MONAD,
   },
   mainnet: {
     [EvmChain.AVALANCHE]: GasToken.AVAX,
