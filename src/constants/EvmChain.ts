@@ -30,5 +30,5 @@ export enum EvmChain {
   BLAST = "blast",
   POLYGON_SEPOLIA = "polygon-sepolia",
   LINEA_SEPOLIA = "linea-sepolia",
-  MONAD = "monad",
+  MONAD_SEPOLIA = "monad",
 }
