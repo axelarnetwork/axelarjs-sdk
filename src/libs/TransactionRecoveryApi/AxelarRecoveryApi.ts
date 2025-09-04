@@ -270,7 +270,7 @@ export class AxelarRecoveryApi {
    */
   public async subscribeToTx(
     txHash: string,
-    cb: (data: GMPStatusResponse) => void,
+    cb: (data: GMPStatusResponse, unsubscribe?: () => void) => void,
     strategy = DEFAULT_SUBSCRIPTION_STRATEGY
   ) {
     if (strategy.kind === "websocket") {
@@ -285,12 +285,12 @@ export class AxelarRecoveryApi {
    */
   private async subscribeToTxPOLLING(
     txHash: string,
-    cb: (data: GMPStatusResponse) => void,
+    cb: (data: GMPStatusResponse, unsubscribe: () => void) => void,
     interval = 30000 // 30 seconds
   ) {
     const intervalId = setInterval(async () => {
       const response = await this.queryTransactionStatus(txHash);
-      cb(response);
+      cb(response, () => clearInterval(intervalId));
 
       if (response.status === GMPStatus.DEST_EXECUTED) {
         clearInterval(intervalId);
@@ -303,7 +303,7 @@ export class AxelarRecoveryApi {
    */
   private async subscribeToTxWSS_EXPERIMENTAL(
     txHash: string,
-    cb: (data: GMPStatusResponse) => void
+    cb: (data: GMPStatusResponse, unsubscribe: () => void) => void
   ) {
     const conn = new WebSocket(this.wssStatusUrl);
 
@@ -323,7 +323,7 @@ export class AxelarRecoveryApi {
         resData.txStatus = this.parseGMPStatus({ status: resData.txStatus, error: "" });
       }
       if (resData?.txStatus === GMPStatus.DEST_EXECUTED) conn.close();
-      cb?.(resData);
+      cb?.(resData, () => conn.close());
     };
   }
 
