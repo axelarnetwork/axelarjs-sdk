@@ -1,0 +1,1 @@
+{"version":3,"file":"validateDestinationAddress.d.ts","sourceRoot":"","sources":["../../../src/utils/validateDestinationAddress.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,WAAW,EAAE,MAAM,SAAS,CAAC;AAKtC,wBAAsB,uCAAuC,CAC3D,WAAW,EAAE,MAAM,EACnB,kBAAkB,EAAE,MAAM,EAC1B,WAAW,EAAE,WAAW,qCAezB;AAED,wBAAsB,qCAAqC,CACzD,eAAe,EAAE,MAAM,EACvB,kBAAkB,EAAE,MAAM,EAC1B,WAAW,EAAE,WAAW,qCAezB"}
