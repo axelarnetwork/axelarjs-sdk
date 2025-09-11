@@ -1,0 +1,38 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EvmChain = void 0;
+var EvmChain;
+(function (EvmChain) {
+    EvmChain["ETHEREUM"] = "ethereum";
+    EvmChain["AVALANCHE"] = "avalanche";
+    EvmChain["FANTOM"] = "fantom";
+    EvmChain["POLYGON"] = "polygon";
+    EvmChain["POLYGON_ZKEVM"] = "polygon-zkevm";
+    EvmChain["MOONBEAM"] = "moonbeam";
+    EvmChain["AURORA"] = "aurora";
+    EvmChain["BINANCE"] = "binance";
+    EvmChain["BNBCHAIN"] = "binance";
+    EvmChain["ARBITRUM"] = "arbitrum";
+    EvmChain["ARBITRUM_SEPOLIA"] = "arbitrum-sepolia";
+    EvmChain["CELO"] = "celo";
+    EvmChain["KAVA"] = "kava";
+    EvmChain["BASE"] = "base";
+    EvmChain["FILECOIN"] = "filecoin";
+    EvmChain["OPTIMISM"] = "optimism";
+    EvmChain["LINEA"] = "linea";
+    EvmChain["MANTLE"] = "mantle";
+    EvmChain["SCROLL"] = "scroll";
+    EvmChain["SEPOLIA"] = "ethereum-sepolia";
+    EvmChain["IMMUTABLE"] = "immutable";
+    EvmChain["CENTRIFUGE_TESTNET"] = "centrifuge-2";
+    EvmChain["CENTRIFUGE"] = "centrifuge";
+    EvmChain["FRAXTAL"] = "fraxtal";
+    EvmChain["BLAST_SEPOLIA"] = "blast-sepolia";
+    EvmChain["OPTIMISM_SEPOLIA"] = "optimism-sepolia";
+    EvmChain["MANTLE_SEPOLIA"] = "mantle-sepolia";
+    EvmChain["BASE_SEPOLIA"] = "base-sepolia";
+    EvmChain["BLAST"] = "blast";
+    EvmChain["POLYGON_SEPOLIA"] = "polygon-sepolia";
+    EvmChain["LINEA_SEPOLIA"] = "linea-sepolia";
+})(EvmChain || (exports.EvmChain = EvmChain = {}));
+//# sourceMappingURL=EvmChain.js.map
