@@ -2,6 +2,7 @@ export const CHAINS = {
   TESTNET: {
     ACRE: "acre",
     ARBITRUM_SEPOLIA: "arbitrum-sepolia",
+    AGORIC: "agoric",
     AURA: "aura",
     AURORA: "aurora",
     AXELAR: "Axelarnet",
