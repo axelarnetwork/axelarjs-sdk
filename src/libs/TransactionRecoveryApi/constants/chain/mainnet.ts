@@ -23,6 +23,7 @@ export const rpcMap: Partial<Record<EvmChain | string, string>> = {
   [EvmChain.IMMUTABLE]: "https://rpc.immutable.com",
   [EvmChain.FRAXTAL]: "https://rpc.frax.com",
   [EvmChain.BLAST]: "https://rpc.blast.io",
+  [EvmChain.HEDERA]: "https://mainnet.hashio.io/api",
 };
 
 export const networkInfo: Partial<Record<EvmChain, Network>> = {
@@ -109,5 +110,9 @@ export const networkInfo: Partial<Record<EvmChain, Network>> = {
   [EvmChain.BLAST]: {
     chainId: 81457,
     name: EvmChain.BLAST,
+  },
+  [EvmChain.HEDERA]: {
+    chainId: 295,
+    name: EvmChain.HEDERA,
   },
 };
