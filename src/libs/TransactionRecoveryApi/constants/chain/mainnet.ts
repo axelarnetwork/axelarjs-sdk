@@ -111,4 +111,8 @@ export const networkInfo: Partial<Record<EvmChain, Network>> = {
     chainId: 81457,
     name: EvmChain.BLAST,
   },
+  [EvmChain.HEDERA]: {
+    chainId: 295,
+    name: EvmChain.HEDERA,
+  },
 };

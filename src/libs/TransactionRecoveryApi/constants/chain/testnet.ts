@@ -126,4 +126,8 @@ export const networkInfo: Record<EvmChain | string, Network> = {
     chainId: 10143,
     name: EvmChain.MONAD_SEPOLIA,
   },
+  [EvmChain.HEDERA_SEPOLIA]: {
+    chainId: 296,
+    name: EvmChain.HEDERA_SEPOLIA,
+  },
 };
