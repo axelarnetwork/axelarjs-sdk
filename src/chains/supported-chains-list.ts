@@ -50,6 +50,7 @@ export const CHAINS = {
     BASE_SEPOLIA: "base-sepolia",
     LINEA_SEPOLIA: "linea-sepolia",
     MONAD_SEPOLIA: "monad",
+    HEDERA_SEPOLIA: "hedera",
   },
   MAINNET: {
     ACRE: "acre",
@@ -111,5 +112,6 @@ export const CHAINS = {
     TERRA: "terra-2",
     UMEE: "umee",
     XPLA: "xpla",
+    HEDERA: "hedera",
   },
 };

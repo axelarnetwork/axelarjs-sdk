@@ -31,4 +31,6 @@ export enum EvmChain {
   POLYGON_SEPOLIA = "polygon-sepolia",
   LINEA_SEPOLIA = "linea-sepolia",
   MONAD_SEPOLIA = "monad",
+  HEDERA_SEPOLIA = "hedera",
+  HEDERA = "hedera",
 }

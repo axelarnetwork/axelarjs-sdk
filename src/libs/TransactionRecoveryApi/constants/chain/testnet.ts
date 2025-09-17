@@ -26,6 +26,7 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.POLYGON_SEPOLIA]: "https://rpc-amoy.polygon.technology",
   [EvmChain.LINEA_SEPOLIA]: "https://rpc.sepolia.linea.build",
   [EvmChain.MONAD_SEPOLIA]: "https://testnet-rpc.monad.xyz",
+  [EvmChain.HEDERA_SEPOLIA]: "https://testnet.hashio.io/api",
 };
 
 export const networkInfo: Record<EvmChain | string, Network> = {
