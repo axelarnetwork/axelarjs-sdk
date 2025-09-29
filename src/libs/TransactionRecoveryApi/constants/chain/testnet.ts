@@ -3,7 +3,7 @@ import { Network } from "@ethersproject/networks";
 
 export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.FANTOM]: "https://rpc.testnet.fantom.network",
-  [EvmChain.POLYGON]: "https://polygon-mumbai-bor-rpc.publicnode.com",
+  [EvmChain.POLYGON]: "https://polygon-amoy.drpc.org",
   [EvmChain.MOONBEAM]: "https://rpc.api.moonbase.moonbeam.network",
   [EvmChain.AVALANCHE]: "https://api.avax-test.network/ext/bc/C/rpc",
   [EvmChain.AURORA]: "https://testnet.aurora.dev",
@@ -11,7 +11,6 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.CELO]: "https://alfajores-forno.celo-testnet.org",
   [EvmChain.KAVA]: "https://evm.testnet.kava.io",
   "filecoin-2": "https://rpc.ankr.com/filecoin_testnet",
-  [EvmChain.POLYGON_ZKEVM]: "https://testnet-zkevm.polygonscan.com",
   [EvmChain.SCROLL]: "https://sepolia-rpc.scroll.io",
   [EvmChain.IMMUTABLE]: "https://rpc.testnet.immutable.com",
   [EvmChain.SEPOLIA]: "https://1rpc.io/sepolia",
@@ -34,7 +33,7 @@ export const networkInfo: Record<EvmChain | string, Network> = {
     name: EvmChain.FANTOM,
   },
   [EvmChain.POLYGON]: {
-    chainId: 80001,
+    chainId: 80002,
     name: EvmChain.POLYGON,
   },
   [EvmChain.POLYGON_ZKEVM]: {
