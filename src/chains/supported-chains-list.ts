@@ -50,7 +50,7 @@ export const CHAINS = {
     BASE_SEPOLIA: "base-sepolia",
     LINEA_SEPOLIA: "linea-sepolia",
     MONAD_SEPOLIA: "monad",
-    HEDERA_SEPOLIA: "hedera",
+    HEDERA: "hedera",
   },
   MAINNET: {
     ACRE: "acre",

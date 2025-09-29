@@ -35,7 +35,6 @@ export enum GasToken {
   BLAST = "ETH",
   LINEA_SEPOLIA = "ETH",
   MONAD_SEPOLIA = "MON",
-  HEDERA_SEPOLIA = "HBAR",
   HEDERA = "HBAR",
 }
 
@@ -68,7 +67,7 @@ export const nativeGasTokenSymbol: Record<string, Record<EvmChain | string, GasT
     [EvmChain.BASE_SEPOLIA]: GasToken.BASE_SEPOLIA,
     [EvmChain.OPTIMISM_SEPOLIA]: GasToken.OPTIMISM_SEPOLIA,
     [EvmChain.MONAD_SEPOLIA]: GasToken.MONAD_SEPOLIA,
-    [EvmChain.HEDERA_SEPOLIA]: GasToken.HEDERA_SEPOLIA,
+    [EvmChain.HEDERA]: GasToken.HEDERA,
   },
   mainnet: {
     [EvmChain.AVALANCHE]: GasToken.AVAX,
