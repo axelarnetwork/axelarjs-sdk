@@ -720,7 +720,11 @@ export class AxelarQueryAPI {
    * @param chainIds A list of chainIds to check
    */
   public async throwIfInactiveChains(chainIds: EvmChain[] | string[]) {
-    const results = await Promise.all(chainIds.map((chainId) => this.isChainActive(chainId)));
+    const activeChains = await this.getActiveChains();
+    const activeChainsNormalised = activeChains.map((chain) => chain.toLowerCase());
+    const results = chainIds.map((chainId) =>
+      activeChainsNormalised.includes(chainId.toLowerCase())
+    );
 
     for (let i = 0; i < chainIds.length; i++) {
       if (!results[i]) {
