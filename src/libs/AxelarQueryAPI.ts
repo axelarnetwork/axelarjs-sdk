@@ -721,9 +721,9 @@ export class AxelarQueryAPI {
    */
   public async throwIfInactiveChains(chainIds: EvmChain[] | string[]) {
     const activeChains = await this.getActiveChains();
-    const activeChainsNormalised = activeChains.map((chain) => chain.toLowerCase());
+    const activeChainsNormalized = activeChains.map((chain) => chain.toLowerCase());
     const results = chainIds.map((chainId) =>
-      activeChainsNormalised.includes(chainId.toLowerCase())
+      activeChainsNormalized.includes(chainId.toLowerCase())
     );
 
     for (let i = 0; i < chainIds.length; i++) {
