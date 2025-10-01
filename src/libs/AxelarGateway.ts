@@ -7,10 +7,10 @@ import {
   SendTokenArgs,
 } from "./types";
 
-import erc20Abi from "./abi/erc20Abi.json";
-import { GatewayTx } from "./GatewayTx";
-import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import { EvmChain } from "../constants/EvmChain";
+import erc20Abi from "./abi/erc20Abi.json";
+import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
+import { GatewayTx } from "./GatewayTx";
 
 export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string>>> = {
   [Environment.MAINNET]: {
@@ -33,6 +33,7 @@ export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string
     [EvmChain.IMMUTABLE]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.FRAXTAL]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.BLAST]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
+    [EvmChain.HEDERA]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
   },
   [Environment.TESTNET]: {
     [EvmChain.ETHEREUM]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
@@ -64,6 +65,7 @@ export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string
     [EvmChain.POLYGON_SEPOLIA]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.LINEA_SEPOLIA]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     [EvmChain.MONAD_SEPOLIA]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
+    [EvmChain.HEDERA]: "0xe432150cce91c13a887f7D836923d5597adD8E31",
   },
   [Environment.DEVNET]: {
     [EvmChain.ETHEREUM]: "0x7358799e0c8250f0B7D1164824F6Dd5bA31C9Cd6",
