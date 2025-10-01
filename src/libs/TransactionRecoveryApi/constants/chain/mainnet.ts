@@ -2,7 +2,7 @@ import { EvmChain } from "../../../../constants/EvmChain";
 import { Network } from "@ethersproject/networks";
 
 export const rpcMap: Partial<Record<EvmChain | string, string>> = {
-  [EvmChain.FANTOM]: "https://rpc.ftm.tools",
+  [EvmChain.FANTOM]: "https://rpc.fantom.network/",
   [EvmChain.POLYGON]: "https://polygon-rpc.com",
   [EvmChain.MOONBEAM]: "https://rpc.api.moonbeam.network",
   [EvmChain.AVALANCHE]: "https://api.avax.network/ext/bc/C/rpc",
@@ -16,7 +16,7 @@ export const rpcMap: Partial<Record<EvmChain | string, string>> = {
   [EvmChain.OPTIMISM]: "https://optimism-mainnet.public.blastapi.io",
   [EvmChain.BASE]: "https://developer-access-mainnet.base.org",
   [EvmChain.LINEA]: "https://rpc.linea.build",
-  [EvmChain.POLYGON_ZKEVM]: "https://zkevm.polygonscan.com",
+  [EvmChain.POLYGON_ZKEVM]: "https://zkevm-rpc.com",
   [EvmChain.MANTLE]: "https://rpc.mantle.xyz",
   [EvmChain.SCROLL]: "https://rpc.scroll.io",
   [EvmChain.CENTRIFUGE]: "https://fullnode.parachain.centrifuge.io",
