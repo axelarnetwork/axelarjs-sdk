@@ -14,6 +14,9 @@
     "!dist/test",
     "scripts"
   ],
+  "overrides": {
+    "elliptic": "^6.6.1"
+  },  
   "scripts": {
     "build": "rimraf dist && tsc",
     "compile-axelar-cgp-solidity": "cd node_modules/@axelar-network/axelar-cgp-solidity && npm install && npx hardhat compile && cp -R artifacts ../../../artifacts && npm uninstall *",
@@ -56,6 +59,7 @@
     "bs58": "^5.0.0",
     "clone-deep": "^4.0.1",
     "cross-fetch": "^3.1.5",
+    "elliptic": "^6.6.1",
     "ethers": "^5.7.2",
     "socket.io-client": "^4.6.1",
     "standard-http-error": "^2.0.1",
