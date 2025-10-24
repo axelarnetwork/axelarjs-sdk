@@ -53,9 +53,6 @@ importers:
       cross-fetch:
         specifier: ^3.1.5
         version: 3.1.5
-      elliptic:
-        specifier: ^6.6.1
-        version: 6.6.1
       ethers:
         specifier: ^5.7.2
         version: 5.7.2(bufferutil@4.0.5)(utf-8-validate@5.0.7)
