@@ -13,7 +13,7 @@ export const rpcMap: Partial<Record<EvmChain | string, string>> = {
   [EvmChain.CELO]: "https://forno.celo.org",
   [EvmChain.KAVA]: "https://evm.kava.io",
   [EvmChain.FILECOIN]: "https://api.node.glif.io/rpc/v1",
-  [EvmChain.OPTIMISM]: "https://optimism.drpc.org",
+  [EvmChain.OPTIMISM]: "https://mainnet.optimism.io",
   [EvmChain.BASE]: "https://developer-access-mainnet.base.org",
   [EvmChain.LINEA]: "https://rpc.linea.build",
   [EvmChain.POLYGON_ZKEVM]: "https://zkevm-rpc.com",
