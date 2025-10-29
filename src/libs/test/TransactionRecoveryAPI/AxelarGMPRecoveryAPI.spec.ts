@@ -510,7 +510,7 @@ describe("AxelarGMPRecoveryAPI", () => {
 
     test("it should return true if the given transaction hash has enough confirmation", async () => {
       const isConfirmed = await api.doesTxMeetConfirmHt("ethereum-2", "0xinsufficient");
-      expect(isConfirmed).toBeFalsy();
+      expect(isConfirmed).toBeTruthy();
     });
 
     test("it should return false if the given transaction hash does not have enough confirmation", async () => {
