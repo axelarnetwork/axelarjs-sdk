@@ -256,10 +256,14 @@ export class AxelarQueryAPI {
   }
 
   public async getConfirmationHeight(chain: string) {
-    await throwIfInvalidChainIds([chain], this.environment);
-    await this.initQueryClientIfNeeded();
-    const chainInfo = await this.getChainInfo(chain);
-    return chainInfo?.confirmLevel || 0;
+    try {
+      await throwIfInvalidChainIds([chain], this.environment);
+      await this.initQueryClientIfNeeded();
+      const chainInfo = await this.getChainInfo(chain);
+      return chainInfo?.confirmLevel || 0;
+    } catch (_) {
+      return 0;
+    }
   }
 
   /**
