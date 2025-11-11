@@ -46,11 +46,23 @@ import {
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "./constants/error";
-import { callExecute, CALL_EXECUTE_ERROR, getCommandId } from "./helpers";
+import {
+  callExecute,
+  CALL_EXECUTE_ERROR,
+  getCommandId,
+  findWorkingRpcUrl,
+  validateSolanaAddress,
+} from "./helpers";
 import { retry, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 import { Event_Status } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 import { arrayify, Interface, parseUnits } from "ethers/lib/utils";
+import bs58 from "bs58";
+import {
+  PublicKey,
+  Transaction as SolanaTransaction,
+  TransactionInstruction,
+} from "@solana/web3.js";
 import { ChainInfo } from "src/chains/types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import s3 from "./constants/s3";
@@ -61,6 +73,8 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { importS3Config } from "../../chains";
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { tokenToScVal } from "./helpers/stellarHelper";
+import { Client as XrplClient } from "xrpl";
+import { parseToken, hex, convertRpcUrltoWssUrl } from "./helpers/xrplHelper";
 
 export const GMPErrorMap: Record<string, ApproveGatewayError> = {
   [GMPStatus.CANNOT_FETCH_STATUS]: ApproveGatewayError.FETCHING_STATUS_FAILED,
@@ -123,8 +137,17 @@ export type AddGasStellarParams = {
   senderAddress: string; // the contract address that initiates the gateway contract call.
   tokenAddress?: string; // defaults to native token, XLM.
   contractAddress?: string; // custom contract address. this will be useful for testnet since it's reset every quarter.
+  rpcUrl?: string;
   amount: string; // the token amount to pay for the gas fee
   spender: string; // The address that pays for the gas fee.
+  messageId: string; // The message ID of the transaction.
+};
+
+export type AddGasXrplParams = {
+  senderAddress: string; // the contract address that initiates the gateway contract call.
+  tokenSymbol?: string; // defaults to native token, XRP.
+  rpcUrl?: string;
+  amount: string; // the token amount to pay for the gas fee
   messageId: string; // The message ID of the transaction.
 };
 
@@ -146,6 +169,25 @@ export type AddGasSuiParams = {
   refundAddress: string;
   messageId: string;
   gasParams: string;
+};
+
+export type AddGasSolanaParams = {
+  messageId: string; // The message ID of the cross-chain transaction
+  gasFeeAmount: string; // Amount of SOL to add as gas (in lamports, will be converted to u64)
+  sender: string; // Sender's Solana wallet address (base58 string) - must be signer
+  refundAddress: string; // Refund address (base58 string) - goes in instruction data
+  configPda: string; // Config PDA address (required, base58 string)
+  programId: string; // Axelar Solana gas service program ID (required, base58 string)
+};
+
+export type SolanaInstruction = {
+  programId: string;
+  accounts: Array<{
+    pubkey: string;
+    isSigner: boolean;
+    isWritable: boolean;
+  }>;
+  data: Uint8Array;
 };
 
 export type AddGasResponse = {
@@ -889,6 +931,193 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     return tx;
   }
+
+  public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaTransaction> {
+    const { messageId, gasFeeAmount, sender, refundAddress, configPda, programId } = params;
+
+    // TODO: Retrieve programId and configPda from Axelar chain configuration
+    // Similar to how other chains get contract addresses from S3 config:
+    // const selectedChain = await this.getChainInfo('solana');
+    // const programId = selectedChain?.config?.contracts?.AxelarGasService?.address;
+    // const configPda = selectedChain?.config?.contracts?.AxelarGasService?.configPda;
+
+    // Validate all Solana addresses
+    validateSolanaAddress(sender, "sender address");
+    validateSolanaAddress(configPda, "config PDA address");
+    validateSolanaAddress(programId, "program ID");
+    const refundAddressPublicKey = validateSolanaAddress(refundAddress, "refund address");
+
+    // Validate and parse messageId (format: "txHash-logIndex")
+    if (!messageId || typeof messageId !== "string") {
+      throw new Error(`Invalid messageId: must be a non-empty string, got ${messageId}`);
+    }
+
+    const messageIdParts = messageId.split("-");
+    if (messageIdParts.length !== 2) {
+      throw new Error(`Invalid messageId format: expected "txHash-logIndex", got "${messageId}"`);
+    }
+
+    const [txHash, logIndexStr] = messageIdParts;
+    const logIndex = parseInt(logIndexStr);
+
+    // Validate logIndex
+    if (!Number.isInteger(logIndex) || logIndex < 0) {
+      throw new Error(
+        `Invalid logIndex in messageId: must be a non-negative integer, got ${logIndexStr}`
+      );
+    }
+
+    // Validate gasFeeAmount can be converted to BigInt and is non-negative
+    let gasFeeAmountBigInt: bigint;
+    try {
+      gasFeeAmountBigInt = BigInt(gasFeeAmount);
+    } catch (error) {
+      throw new Error(
+        `Invalid gasFeeAmount: must be a valid numeric string, got "${gasFeeAmount}". ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+
+    if (gasFeeAmountBigInt < BigInt(0)) {
+      throw new Error(`Invalid gasFeeAmount: must be non-negative, got ${gasFeeAmount}`);
+    }
+
+    // Decode Solana transaction hash from base58
+    let txHashBytes: Uint8Array;
+    try {
+      // Decode base58 Solana transaction signature to bytes
+      const decoded = bs58.decode(txHash);
+
+      if (decoded.length !== 64) {
+        throw new Error(
+          `Solana transaction signature must be 64 bytes when decoded, got ${decoded.length} bytes`
+        );
+      }
+
+      txHashBytes = decoded;
+    } catch (error) {
+      // Preserve specific error messages (like length validation) but catch base58 decode errors
+      if (error instanceof Error && error.message.includes("64 bytes")) {
+        throw error; // Re-throw length validation errors with original message
+      }
+      throw new Error(
+        `Failed to decode Solana transaction signature: ${txHash}. ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+
+    // Manual Borsh-like serialization to match Rust enum structure
+    // GasServiceInstruction::Native(PayWithNativeToken::AddGas { ... })
+    const buffer = new Uint8Array(1000); // Allocate enough space
+    const view = new DataView(buffer.buffer);
+    let offset = 0;
+
+    // Outer enum discriminant (GasServiceInstruction::Native = 2)
+    buffer[offset] = 2;
+    offset += 1;
+
+    // Inner enum discriminant (PayWithNativeToken::AddGas = 1)
+    buffer[offset] = 1;
+    offset += 1;
+
+    // tx_hash: [u8; 64]
+    buffer.set(txHashBytes, offset);
+    offset += 64;
+
+    // log_index: u64
+    view.setBigUint64(offset, BigInt(logIndex), true);
+    offset += 8;
+
+    // gas_fee_amount: u64
+    view.setBigUint64(offset, gasFeeAmountBigInt, true);
+    offset += 8;
+
+    // refund_address: Pubkey (32 bytes)
+    const refundAddressBytes = refundAddressPublicKey.toBytes();
+    buffer.set(refundAddressBytes, offset);
+    offset += 32;
+
+    // Create the transaction instruction
+    const instruction = new TransactionInstruction({
+      keys: [
+        {
+          pubkey: new PublicKey(sender), // sender (signer, writable) - the account paying for gas
+          isSigner: true,
+          isWritable: true,
+        },
+        {
+          pubkey: new PublicKey(configPda), // config_pda (writable) - receives the lamports
+          isSigner: false,
+          isWritable: true,
+        },
+        {
+          pubkey: new PublicKey("11111111111111111111111111111111"), // system_program
+          isSigner: false,
+          isWritable: false,
+        },
+      ],
+      programId: new PublicKey(programId),
+      data: Buffer.from(buffer.slice(0, offset)),
+    });
+
+    // Create and return the transaction
+    const transaction = new SolanaTransaction().add(instruction);
+
+    return transaction;
+  }
+
+  public async addGasToXrplChain(params: AddGasXrplParams): Promise<string> {
+    const { senderAddress, messageId, tokenSymbol, amount, rpcUrl } = params;
+
+    const symbol = tokenSymbol || "XRP";
+
+    const chainInfo = await this.findChainInfo("xrpl");
+
+    if (!chainInfo) throw new Error("XRPL chain config not found");
+
+    const { config: chainConfig } = chainInfo;
+
+    const contractId = chainConfig.contracts.AxelarGateway.address;
+
+    const rpc = rpcUrl || chainConfig.rpc[0];
+
+    const wssUrl = convertRpcUrltoWssUrl(rpc);
+
+    const client = new XrplClient(wssUrl);
+
+    await client.connect();
+
+    const args: any = {
+      TransactionType: "Payment",
+      Account: senderAddress,
+      Destination: contractId,
+      Amount: parseToken(symbol === "XRP" ? "XRP" : `${symbol}.${contractId}`, amount),
+      Memos: [
+        {
+          Memo: { MemoType: hex("type"), MemoData: hex("add_gas") },
+        },
+        {
+          Memo: {
+            MemoType: hex("msg_id"),
+            MemoData: hex(messageId.toLowerCase().replace("0x", "")),
+          },
+        },
+      ],
+    };
+
+    try {
+      // Autofill transaction details (like sequence number)
+      return await client.autofill(args);
+    } catch (e) {
+      console.log(e);
+      throw e;
+    } finally {
+      await client.disconnect();
+    }
+  }
+
   /**
    * Builds an XDR transaction to add gas payment to the Axelar Gas Service contract.
    *
@@ -913,21 +1142,23 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
    * @returns {Promise<string>} The transaction encoded as an XDR string, ready for signing
    */
   public async addGasToStellarChain(params: AddGasStellarParams): Promise<string> {
-    const isDevnet = this.environment === Environment.DEVNET;
+    const chainInfo = await this.findChainInfo("stellar");
 
-    // TODO: remove this once this supports on mainnet
-    if (!isDevnet) throw new Error("This method only supports on devnet");
+    if (!chainInfo) throw new Error("Stellar chain config not found");
 
-    const { senderAddress, messageId, contractAddress, tokenAddress, amount, spender } = params;
+    const { senderAddress, messageId, contractAddress, tokenAddress, amount, spender, rpcUrl } =
+      params;
 
-    // TODO: Replace with the value from the config file
-    const contractId =
-      contractAddress || "CDBPOARU5MFSC7ZWXTVPVKDZRHKOPS5RCY2VP2OKOBLCMQM3NKVP6HO7";
+    const { config: chainConfig } = chainInfo;
 
-    const server = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
+    const contractId = contractAddress || chainConfig.contracts.AxelarGasService.address;
 
-    // this will be StellarSdk.Networks.PUBLIC once mainnet is supported
-    const networkPassphrase = StellarSdk.Networks.TESTNET;
+    const server = new StellarSdk.rpc.Server(rpcUrl || chainConfig.rpc[0]);
+
+    const networkPassphrase =
+      this.environment === Environment.MAINNET
+        ? StellarSdk.Networks.PUBLIC
+        : StellarSdk.Networks.TESTNET;
 
     const caller = StellarSdk.nativeToScVal(StellarSdk.Address.fromString(senderAddress), {
       type: "address",
@@ -956,6 +1187,19 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return transaction.toXDR();
   }
 
+  private async findChainInfo(chain: string): Promise<any> {
+    const { chains } = await importS3Config(this.environment);
+
+    // if chain is not found, try to find it by name or by partial name
+    const chainKey =
+      Object.keys(chains).find((chainName) => chainName === chain) ||
+      Object.keys(chains).find((chainName) => chainName.includes(chain));
+
+    if (!chainKey) return undefined;
+
+    return chains[chainKey];
+  }
+
   public async addGasToCosmosChain({
     gasLimit,
     autocalculateGasOptions,
@@ -975,7 +1219,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       throw new Error(`chain ID ${params.chain} not found`);
     }
 
-    const { rpc, channelIdToAxelar } = chainConfig;
+    const { rpc, channelIdToAxelar } = chainConfig as { rpc: string[]; channelIdToAxelar: string };
 
     const tx = await this.fetchGMPTransaction(params.txHash);
 
@@ -1021,14 +1265,18 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       };
     }
 
-    const rpcUrl = sendOptions.rpcUrl ?? rpc[0];
+    const availableRpcUrls: string[] = [sendOptions.rpcUrl, ...rpc].filter(
+      (url) => url
+    ) as string[];
 
-    if (!rpcUrl) {
+    if (availableRpcUrls.length === 0) {
       return {
         success: false,
-        info: "Missing RPC URL. Please pass in an rpcUrl parameter in the sendOptions parameter",
+        info: `No available RPC URLs found. Please pass in an rpcUrl parameter in the sendOptions parameter`,
       };
     }
+
+    const rpcUrl = await findWorkingRpcUrl(availableRpcUrls);
 
     const signer = await getCosmosSigner(rpcUrl, sendOptions.offlineSigner);
 
@@ -1043,7 +1291,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             token: coin,
             sender,
             receiver: COSMOS_GAS_RECEIVER_OPTIONS[this.environment],
-            timeoutTimestamp: sendOptions.timeoutTimestamp ? BigInt(sendOptions.timeoutTimestamp) : BigInt((Date.now() + 90) * 1e9),
+            timeoutTimestamp: sendOptions.timeoutTimestamp ? BigInt(sendOptions.timeoutTimestamp) : BigInt((Date.now() + 60 * 1000) * 1e6),
             memo: tx.call.id,
           },
         },
@@ -1074,17 +1322,26 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     options?: AddGasOptions
   ): Promise<TxResult> {
     const evmWalletDetails = options?.evmWalletDetails || { useWindowEthereum: true };
-    const selectedChain = await this.getChainInfo(chain);
+    const selectedChain = await this.findChainInfo(chain);
 
-    if (!evmWalletDetails.rpcUrl) evmWalletDetails.rpcUrl = selectedChain.rpc[0];
+    if (!selectedChain) {
+      throw new Error(`Chain ${chain} not found`);
+    }
+
+    if (selectedChain.chainType !== "evm") {
+      throw new Error("Not an EVM chain");
+    }
+
+    if (!evmWalletDetails.rpcUrl) evmWalletDetails.rpcUrl = selectedChain.config.rpc[0];
 
     const signer = this.getSigner(chain, evmWalletDetails);
     const signerAddress = await signer.getAddress();
 
-    const gasReceiverAddress = await this.axelarQueryApi.getContractAddressFromConfig(
-      chain,
-      "gas_service"
-    );
+    const gasReceiverAddress = selectedChain.config.contracts.AxelarGasService.address;
+
+    if (!gasReceiverAddress) {
+      throw new Error("Gas service contract address not found");
+    }
 
     const { logIndex, destinationChain } = await this._getLogIndexAndDestinationChain(
       chain,
@@ -1097,10 +1354,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     if (!destinationChain) return NotGMPTransactionError();
-
-    // Check if the transaction status is already executed or not.
-    const _isExecuted = await this.isExecuted(txHash);
-    if (_isExecuted) return AlreadyExecutedError();
 
     let gasFeeToAdd = options?.amount;
 

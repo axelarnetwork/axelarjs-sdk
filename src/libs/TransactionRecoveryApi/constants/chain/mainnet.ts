@@ -2,7 +2,7 @@ import { EvmChain } from "../../../../constants/EvmChain";
 import { Network } from "@ethersproject/networks";
 
 export const rpcMap: Partial<Record<EvmChain | string, string>> = {
-  [EvmChain.FANTOM]: "https://rpc.ftm.tools",
+  [EvmChain.FANTOM]: "https://rpc.fantom.network/",
   [EvmChain.POLYGON]: "https://polygon-rpc.com",
   [EvmChain.MOONBEAM]: "https://rpc.api.moonbeam.network",
   [EvmChain.AVALANCHE]: "https://api.avax.network/ext/bc/C/rpc",
@@ -13,16 +13,17 @@ export const rpcMap: Partial<Record<EvmChain | string, string>> = {
   [EvmChain.CELO]: "https://forno.celo.org",
   [EvmChain.KAVA]: "https://evm.kava.io",
   [EvmChain.FILECOIN]: "https://api.node.glif.io/rpc/v1",
-  [EvmChain.OPTIMISM]: "https://optimism-mainnet.public.blastapi.io",
+  [EvmChain.OPTIMISM]: "https://optimism.drpc.org",
   [EvmChain.BASE]: "https://developer-access-mainnet.base.org",
   [EvmChain.LINEA]: "https://rpc.linea.build",
-  [EvmChain.POLYGON_ZKEVM]: "https://zkevm.polygonscan.com",
+  [EvmChain.POLYGON_ZKEVM]: "https://zkevm-rpc.com",
   [EvmChain.MANTLE]: "https://rpc.mantle.xyz",
   [EvmChain.SCROLL]: "https://rpc.scroll.io",
   [EvmChain.CENTRIFUGE]: "https://fullnode.parachain.centrifuge.io",
   [EvmChain.IMMUTABLE]: "https://rpc.immutable.com",
   [EvmChain.FRAXTAL]: "https://rpc.frax.com",
   [EvmChain.BLAST]: "https://rpc.blast.io",
+  [EvmChain.HEDERA]: "https://mainnet.hashio.io/api",
 };
 
 export const networkInfo: Partial<Record<EvmChain, Network>> = {
@@ -109,5 +110,9 @@ export const networkInfo: Partial<Record<EvmChain, Network>> = {
   [EvmChain.BLAST]: {
     chainId: 81457,
     name: EvmChain.BLAST,
+  },
+  [EvmChain.HEDERA]: {
+    chainId: 295,
+    name: EvmChain.HEDERA,
   },
 };

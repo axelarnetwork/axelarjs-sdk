@@ -2,6 +2,7 @@ export const CHAINS = {
   TESTNET: {
     ACRE: "acre",
     ARBITRUM_SEPOLIA: "arbitrum-sepolia",
+    AGORIC: "agoric",
     AURA: "aura",
     AURORA: "aurora",
     AXELAR: "Axelarnet",
@@ -48,6 +49,8 @@ export const CHAINS = {
     MANTLE_SEPOLIA: "mantle-sepolia",
     BASE_SEPOLIA: "base-sepolia",
     LINEA_SEPOLIA: "linea-sepolia",
+    MONAD_SEPOLIA: "monad",
+    HEDERA: "hedera",
   },
   MAINNET: {
     ACRE: "acre",
@@ -109,5 +112,6 @@ export const CHAINS = {
     TERRA: "terra-2",
     UMEE: "umee",
     XPLA: "xpla",
+    HEDERA: "hedera",
   },
 };

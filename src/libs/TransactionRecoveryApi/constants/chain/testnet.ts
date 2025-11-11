@@ -1,5 +1,5 @@
-import { EvmChain } from "../../../../constants/EvmChain";
 import { Network } from "@ethersproject/networks";
+import { EvmChain } from "../../../../constants/EvmChain";
 
 export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.FANTOM]: "https://rpc.testnet.fantom.network",
@@ -25,6 +25,8 @@ export const rpcMap: Record<EvmChain | string, string> = {
   [EvmChain.MANTLE_SEPOLIA]: "https://rpc.sepolia.mantle.xyz",
   [EvmChain.POLYGON_SEPOLIA]: "https://rpc-amoy.polygon.technology",
   [EvmChain.LINEA_SEPOLIA]: "https://rpc.sepolia.linea.build",
+  [EvmChain.MONAD_SEPOLIA]: "https://testnet-rpc.monad.xyz",
+  [EvmChain.HEDERA]: "https://testnet.hashio.io/api",
 };
 
 export const networkInfo: Record<EvmChain | string, Network> = {
@@ -119,5 +121,13 @@ export const networkInfo: Record<EvmChain | string, Network> = {
   [EvmChain.LINEA_SEPOLIA]: {
     chainId: 59141,
     name: EvmChain.LINEA_SEPOLIA,
+  },
+  [EvmChain.MONAD_SEPOLIA]: {
+    chainId: 10143,
+    name: EvmChain.MONAD_SEPOLIA,
+  },
+  [EvmChain.HEDERA]: {
+    chainId: 296,
+    name: EvmChain.HEDERA,
   },
 };

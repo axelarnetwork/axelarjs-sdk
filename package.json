@@ -1,6 +1,6 @@
 {
   "name": "@axelar-network/axelarjs-sdk",
-  "version": "0.17.3-alpha.4",
+  "version": "0.17.9",
   "description": "The JavaScript SDK for Axelar Network",
   "repository": {
     "type": "git",
@@ -50,9 +50,11 @@
     "@ethersproject/networks": "^5.7.1",
     "@ethersproject/providers": "^5.7.2",
     "@mysten/sui": "^1.14.2",
+    "@solana/web3.js": "^1.98.2",
     "@stellar/stellar-sdk": "^13.0.0",
     "@types/uuid": "^8.3.1",
     "bech32": "^2.0.0",
+    "bs58": "^5.0.0",
     "clone-deep": "^4.0.1",
     "cross-fetch": "^3.1.5",
     "ethers": "^5.7.2",
@@ -60,7 +62,8 @@
     "standard-http-error": "^2.0.1",
     "string-similarity-js": "^2.1.4",
     "uuid": "^8.3.2",
-    "ws": "^8.13.0"
+    "ws": "^8.13.0",
+    "xrpl": "4.2.5"
   },
   "devDependencies": {
     "@axelar-network/axelar-local-dev": "1.0.2",
@@ -70,6 +73,7 @@
     "@cosmjs/proto-signing": "0.36.0",
     "@cosmjs/tendermint-rpc": "0.36.0",
     "@ethersproject/abi": "^5.7.0",
+    "@types/bs58": "^4.0.4",
     "@types/clone-deep": "^4.0.1",
     "@types/standard-http-error": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^5.39.0",

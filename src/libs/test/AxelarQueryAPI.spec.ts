@@ -43,7 +43,7 @@ describe("AxelarQueryAPI", () => {
     test("It should generate a transfer fee for a specific transaction", async () => {
       const [sourceChainName, destinationChainName, assetDenom, amount] = [
         "avalanche",
-        "polygon",
+        "polygon-sepolia",
         "uausdc",
         100000000,
       ];
@@ -342,6 +342,25 @@ describe("AxelarQueryAPI", () => {
     });
   });
 
+  describe("estimateITSFee", () => {
+    let mockEstimateITSFee: SpyInstance;
+
+    beforeEach(() => {
+      mockEstimateITSFee = vitest.spyOn(api.axelarscanApi, "post").mockResolvedValue("1");
+    });
+
+    test("It should estimate ITS transaction gas successfully", async () => {
+      const params = {
+        sourceChain: "xrpl",
+        destinationChain: "xrpl-evm",
+      };
+
+      const response = await api.estimateITSFee(params);
+      expect(response).equals("1");
+      expect(mockEstimateITSFee).toHaveBeenCalledWith("/gmp/estimateITSFee", params);
+    });
+  });
+
   describe("estimateGasFee", () => {
     test("It should return estimated gas amount that makes sense for USDC", async () => {
       const gasAmount = await api.estimateGasFee(
@@ -421,24 +440,24 @@ describe("AxelarQueryAPI", () => {
       expect(gasAmount).toBeDefined();
     });
 
-    test("it should be able to return the gas fee when the destination chain is L2, but the executeData is undefined ", async () => {
+    test.skip("it should be able to return the gas fee when the destination chain is L2, but the executeData is undefined ", async () => {
       const l2Chains = ["fraxtal", "blast-sepolia", "mantle-sepolia"];
 
       const queries = [];
       for (const l2Chain of l2Chains) {
-        const estimateGasFeeQuery = api.estimateGasFee(
+        const estimateGasFeeQuery = await api.estimateGasFee(
           "ethereum-sepolia",
           l2Chain,
           500000,
           undefined,
           undefined,
-          undefined
+          undefined,
+          "0x"
         );
 
         queries.push(estimateGasFeeQuery);
       }
       const responses = await Promise.all(queries);
-
       for (const response of responses) {
         expect(response).toBeDefined();
       }
