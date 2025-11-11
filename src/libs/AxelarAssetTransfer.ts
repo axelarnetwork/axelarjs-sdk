@@ -464,7 +464,9 @@ export class AxelarAssetTransfer {
           sourceChannel: chain.channelIdToAxelar,
           sourcePort: "transfer",
           timeoutHeight,
-          timeoutTimestamp: timeoutTimestamp ? BigInt(timeoutTimestamp) : BigInt((Date.now() + 90) * 1e9),
+          timeoutTimestamp: timeoutTimestamp
+            ? BigInt(timeoutTimestamp)
+            : BigInt((Date.now() + 90) * 1e9),
           memo,
         }),
       },

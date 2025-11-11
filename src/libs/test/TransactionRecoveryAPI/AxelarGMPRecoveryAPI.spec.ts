@@ -50,8 +50,7 @@ import { Horizon } from "@stellar/stellar-sdk";
 import { SUI_TYPE_ARG } from "@mysten/sui/utils";
 import { Transaction } from "@mysten/sui/transactions";
 import * as chains from "../../../chains";
-import { STANDARD_FEE } from "../../AxelarSigningClient";
-import { coin, DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
+import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;

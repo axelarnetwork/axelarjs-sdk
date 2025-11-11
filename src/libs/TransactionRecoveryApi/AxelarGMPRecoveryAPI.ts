@@ -1291,7 +1291,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             token: coin,
             sender,
             receiver: COSMOS_GAS_RECEIVER_OPTIONS[this.environment],
-            timeoutTimestamp: sendOptions.timeoutTimestamp ? BigInt(sendOptions.timeoutTimestamp) : BigInt((Date.now() + 60 * 1000) * 1e6),
+            timeoutTimestamp: sendOptions.timeoutTimestamp
+              ? BigInt(sendOptions.timeoutTimestamp)
+              : BigInt((Date.now() + 60 * 1000) * 1e6),
             memo: tx.call.id,
           },
         },
