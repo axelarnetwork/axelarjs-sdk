@@ -1,6 +1,8 @@
 import { BigNumber } from "ethers";
 import Long from "long";
 import { EvmChain } from "../../../constants/EvmChain";
+import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
+import { Event } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/types";
 
 export const uuidStub = () => "83462f97-63cf-4205-a659-6f54bec623f6";
 
@@ -143,11 +145,11 @@ export const evmEventStubResponse = () => ({
   errorMessage: "",
   commandId: "commandId",
   infoLog: "",
-  eventResponse: {
+  eventResponse: EventResponse.create({
     event: {
       chain: "Moonbeam",
       txId: Buffer.from([]),
-      index: Long.fromNumber(1),
+      index: 1,
       status: 2,
       tokenSent: undefined,
       contractCall: undefined,
@@ -157,7 +159,7 @@ export const evmEventStubResponse = () => ({
       multisigOwnershipTransferred: undefined,
       multisigOperatorshipTransferred: undefined,
     },
-  },
+  }),
 });
 
 export const chainInfoStub = () => ({

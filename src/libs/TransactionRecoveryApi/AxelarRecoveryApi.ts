@@ -12,6 +12,7 @@ import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import rpcInfo from "./constants/chain";
 import { mapIntoAxelarscanResponseType } from "./helpers/mappers";
 import { ChainInfo } from "src/chains/types";
+import { BatchedCommandsRequest, GatewayAddressRequest } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 
 export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
@@ -448,14 +449,14 @@ export class AxelarRecoveryApi {
     if (!this.axelarQuerySvc)
       this.axelarQuerySvc = await AxelarQueryClient.initOrGetAxelarQueryClient(this.config);
     await throwIfInvalidChainIds([chainId], this.environment);
-    return this.axelarQuerySvc.evm.BatchedCommands({ chain: chainId, id: batchCommandId });
+    return this.axelarQuerySvc.evm.BatchedCommands(BatchedCommandsRequest.create({ chain: chainId, id: batchCommandId }));
   }
 
   public async queryGatewayAddress({ chain }: { chain: string }) {
     if (!this.axelarQuerySvc)
       this.axelarQuerySvc = await AxelarQueryClient.initOrGetAxelarQueryClient(this.config);
     await throwIfInvalidChainIds([chain], this.environment);
-    return this.axelarQuerySvc.evm.GatewayAddress({ chain });
+    return this.axelarQuerySvc.evm.GatewayAddress(GatewayAddressRequest.create({ chain }));
   }
 
   public async getSignedTxAndBroadcast(chain: string, data: string) {

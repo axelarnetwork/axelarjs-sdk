@@ -302,7 +302,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         success: false,
         errorMessage: `getEvmEvent(): could not find event index for ${srcTxHash}`,
         commandId: "",
-        eventResponse: {},
+        eventResponse: EventResponse.create({}),
         infoLog: "",
       };
     }
@@ -320,7 +320,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         success: false,
         errorMessage,
         commandId,
-        eventResponse: {},
+        eventResponse: EventResponse.create({}),
         infoLog: `srcTxHash: ${srcTxHash}, generated commandId: ${commandId}`,
       };
     }

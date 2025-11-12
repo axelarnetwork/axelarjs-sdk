@@ -23,7 +23,7 @@ describe("AxelarQueryClient", () => {
   describe("Axelar queries", () => {
     test("It should be able to query the evm module", async () => {
       const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient(config);
-      const params: BatchedCommandsRequest = { chain: "avalanche", id: "" };
+      const params = BatchedCommandsRequest.create({ chain: "avalanche", id: "" });
       const result: BatchedCommandsResponse = await api.evm.BatchedCommands(params);
 
       expect(result).toBeDefined();
@@ -38,7 +38,7 @@ describe("AxelarQueryClient", () => {
 
     test("It should be able to query the nexus module", async () => {
       const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient(config);
-      const params: FeeInfoRequest = { chain: "avalanche", asset: "wavax-wei" };
+      const params = FeeInfoRequest.create({ chain: "avalanche", asset: "wavax-wei" });
       const result: FeeInfoResponse = await api.nexus.FeeInfo(params);
 
       expect(result).toBeDefined();
@@ -49,7 +49,7 @@ describe("AxelarQueryClient", () => {
 
     test("It should be able to query the axelarnet module", async () => {
       const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient(config);
-      const params: PendingIBCTransferCountRequest = { chain: "osmosis-3" };
+      const params = PendingIBCTransferCountRequest.create();
       const result: PendingIBCTransferCountResponse = await api.axelarnet.PendingIBCTransferCount(
         params
       );
