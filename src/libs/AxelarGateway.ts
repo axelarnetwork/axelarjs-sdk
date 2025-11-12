@@ -121,7 +121,8 @@ export class AxelarGateway {
       const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient({
         environment: env,
       });
-      gatewayAddr = (await api.evm.GatewayAddress(GatewayAddressRequest.create({ chain })))?.address;
+      gatewayAddr = (await api.evm.GatewayAddress(GatewayAddressRequest.create({ chain })))
+        ?.address;
     }
     return new AxelarGateway(gatewayAddr as string, provider);
   }

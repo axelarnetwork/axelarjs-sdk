@@ -243,20 +243,24 @@ export class AxelarQueryAPI {
 
     await this.initQueryClientIfNeeded();
 
-    return this.axelarQueryClient.nexus.FeeInfo(FeeInfoRequest.create({
-      chain: chainId,
-      asset: await this._convertAssetDenom(assetDenom),
-    }));
+    return this.axelarQueryClient.nexus.FeeInfo(
+      FeeInfoRequest.create({
+        chain: chainId,
+        asset: await this._convertAssetDenom(assetDenom),
+      })
+    );
   }
 
   public async getEVMEvent(sourceChainId: string, srcTxHash: string, srcEventId: number) {
     await throwIfInvalidChainIds([sourceChainId], this.environment);
     await this.initQueryClientIfNeeded();
     return this.axelarQueryClient.evm
-      .Event(EventRequest.create({
-        chain: sourceChainId,
-        eventId: `${srcTxHash}-${srcEventId}`,
-      }))
+      .Event(
+        EventRequest.create({
+          chain: sourceChainId,
+          eventId: `${srcTxHash}-${srcEventId}`,
+        })
+      )
       .catch(() => undefined);
   }
 
@@ -286,11 +290,13 @@ export class AxelarQueryAPI {
 
     await this.initQueryClientIfNeeded();
 
-    return this.axelarQueryClient.nexus.TransferFee(TransferFeeRequest.create({
-      sourceChain: sourceChainId,
-      destinationChain: destinationChainId,
-      amount: `${amountInDenom.toString()}${await this._convertAssetDenom(assetDenom)}`,
-    }));
+    return this.axelarQueryClient.nexus.TransferFee(
+      TransferFeeRequest.create({
+        sourceChain: sourceChainId,
+        destinationChain: destinationChainId,
+        amount: `${amountInDenom.toString()}${await this._convertAssetDenom(assetDenom)}`,
+      })
+    );
   }
 
   /**
@@ -823,7 +829,9 @@ export class AxelarQueryAPI {
 
     try {
       // the "limit" response to the TransferRateLimit RPC query is of type Uint8Array, so need to decode it
-      const res = await api.nexus.TransferRateLimit(TransferRateLimitRequest.create({ chain: chainId, asset }));
+      const res = await api.nexus.TransferRateLimit(
+        TransferRateLimitRequest.create({ chain: chainId, asset })
+      );
       const { transferRateLimit } = res;
       if (
         !transferRateLimit ||
