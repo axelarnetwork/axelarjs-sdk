@@ -14,7 +14,7 @@ import {
 } from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/query";
 
 describe("AxelarQueryClient", () => {
-  const config: AxelarQueryClientConfig = { environment: Environment.TESTNET };
+  const config: AxelarQueryClientConfig = { environment: Environment.MAINNET };
 
   beforeEach(() => {
     vitest.clearAllMocks();

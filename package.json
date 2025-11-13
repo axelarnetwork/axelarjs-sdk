@@ -42,7 +42,7 @@
   "license": "MIT",
   "dependencies": {
     "@axelar-network/axelar-cgp-solidity": "^6.3.0",
-    "@axelar-network/axelarjs-types": "1.2.2-alpha.4",
+    "@axelar-network/axelarjs-types": "1.2.2-alpha.5",
     "@cosmjs/json-rpc": "^0.36.0",
     "@cosmjs/stargate": "0.36.0",
     "@ethersproject/abstract-provider": "^5.7.0",
