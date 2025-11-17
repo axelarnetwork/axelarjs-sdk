@@ -15,9 +15,13 @@ import { GasToken } from "../constants/GasToken";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import fetch from "cross-fetch";
 import {
+  ChainsRequest,
   ChainStatus,
+  FeeInfoRequest,
   FeeInfoResponse,
+  TransferFeeRequest,
   TransferFeeResponse,
+  TransferRateLimitRequest,
 } from "@axelar-network/axelarjs-types/axelar/nexus/v1beta1/query";
 import { throwIfInvalidChainIds } from "../utils";
 import { loadChains } from "../chains";
@@ -28,6 +32,7 @@ import { BigNumberUtils } from "./BigNumberUtils";
 import { rpcMap as testnetRpcMap } from "./TransactionRecoveryApi/constants/chain/testnet";
 import { rpcMap as mainnetRpcMap } from "./TransactionRecoveryApi/constants/chain/mainnet";
 import { getL1FeeForL2 } from "./fee/getL1Fee";
+import { EventRequest } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 
 interface TranslatedTransferRateLimitResponse {
   incoming: string;
@@ -238,20 +243,24 @@ export class AxelarQueryAPI {
 
     await this.initQueryClientIfNeeded();
 
-    return this.axelarQueryClient.nexus.FeeInfo({
-      chain: chainId,
-      asset: await this._convertAssetDenom(assetDenom),
-    });
+    return this.axelarQueryClient.nexus.FeeInfo(
+      FeeInfoRequest.create({
+        chain: chainId,
+        asset: await this._convertAssetDenom(assetDenom),
+      })
+    );
   }
 
   public async getEVMEvent(sourceChainId: string, srcTxHash: string, srcEventId: number) {
     await throwIfInvalidChainIds([sourceChainId], this.environment);
     await this.initQueryClientIfNeeded();
     return this.axelarQueryClient.evm
-      .Event({
-        chain: sourceChainId,
-        eventId: `${srcTxHash}-${srcEventId}`,
-      })
+      .Event(
+        EventRequest.create({
+          chain: sourceChainId,
+          eventId: `${srcTxHash}-${srcEventId}`,
+        })
+      )
       .catch(() => undefined);
   }
 
@@ -281,11 +290,13 @@ export class AxelarQueryAPI {
 
     await this.initQueryClientIfNeeded();
 
-    return this.axelarQueryClient.nexus.TransferFee({
-      sourceChain: sourceChainId,
-      destinationChain: destinationChainId,
-      amount: `${amountInDenom.toString()}${await this._convertAssetDenom(assetDenom)}`,
-    });
+    return this.axelarQueryClient.nexus.TransferFee(
+      TransferFeeRequest.create({
+        sourceChain: sourceChainId,
+        destinationChain: destinationChainId,
+        amount: `${amountInDenom.toString()}${await this._convertAssetDenom(assetDenom)}`,
+      })
+    );
   }
 
   /**
@@ -700,7 +711,7 @@ export class AxelarQueryAPI {
     await this.initQueryClientIfNeeded();
 
     return this.axelarQueryClient.nexus
-      .Chains({ status: ChainStatus.CHAIN_STATUS_ACTIVATED })
+      .Chains(ChainsRequest.create({ status: ChainStatus.CHAIN_STATUS_ACTIVATED }))
       .then((resp) => resp.chains);
   }
 
@@ -818,7 +829,9 @@ export class AxelarQueryAPI {
 
     try {
       // the "limit" response to the TransferRateLimit RPC query is of type Uint8Array, so need to decode it
-      const res = await api.nexus.TransferRateLimit({ chain: chainId, asset });
+      const res = await api.nexus.TransferRateLimit(
+        TransferRateLimitRequest.create({ chain: chainId, asset })
+      );
       const { transferRateLimit } = res;
       if (
         !transferRateLimit ||

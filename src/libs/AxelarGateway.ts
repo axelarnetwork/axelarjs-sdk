@@ -11,6 +11,7 @@ import { EvmChain } from "../constants/EvmChain";
 import erc20Abi from "./abi/erc20Abi.json";
 import { AxelarQueryClient, AxelarQueryClientType } from "./AxelarQueryClient";
 import { GatewayTx } from "./GatewayTx";
+import { GatewayAddressRequest } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
 
 export const AXELAR_GATEWAY: Record<Environment, Partial<Record<EvmChain, string>>> = {
   [Environment.MAINNET]: {
@@ -120,7 +121,8 @@ export class AxelarGateway {
       const api: AxelarQueryClientType = await AxelarQueryClient.initOrGetAxelarQueryClient({
         environment: env,
       });
-      gatewayAddr = (await api.evm.GatewayAddress({ chain }))?.address;
+      gatewayAddr = (await api.evm.GatewayAddress(GatewayAddressRequest.create({ chain })))
+        ?.address;
     }
     return new AxelarGateway(gatewayAddr as string, provider);
   }

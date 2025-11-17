@@ -50,8 +50,7 @@ import { Horizon } from "@stellar/stellar-sdk";
 import { SUI_TYPE_ARG } from "@mysten/sui/utils";
 import { Transaction } from "@mysten/sui/transactions";
 import * as chains from "../../../chains";
-import { STANDARD_FEE } from "../../AxelarSigningClient";
-import { coin, DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
+import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -121,12 +120,12 @@ describe("AxelarGMPRecoveryAPI", () => {
 
       vitest.spyOn(api, "getEvmEvent").mockResolvedValue({
         ...evmEventStubResponse(),
-        eventResponse: {
+        eventResponse: EventResponse.create({
           event: {
             ...evmEventStubResponse().eventResponse.event,
             status: Event_Status.STATUS_COMPLETED,
           },
-        },
+        }),
       });
 
       const response = await api.findEventAndConfirmIfNeeded(
@@ -151,12 +150,12 @@ describe("AxelarGMPRecoveryAPI", () => {
 
       vitest.spyOn(api, "getEvmEvent").mockResolvedValue({
         ...evmEventStubResponse(),
-        eventResponse: {
+        eventResponse: EventResponse.create({
           event: {
             ...evmEventStubResponse().eventResponse.event,
             status: Event_Status.STATUS_UNSPECIFIED,
           },
-        },
+        }),
       });
 
       const mockDoesTxMeetConfirmHt = vitest
@@ -184,12 +183,12 @@ describe("AxelarGMPRecoveryAPI", () => {
     test("It should return success: false if the confirmGatewayTx is failed", async () => {
       vitest.spyOn(api, "getEvmEvent").mockResolvedValue({
         ...evmEventStubResponse(),
-        eventResponse: {
+        eventResponse: EventResponse.create({
           event: {
             ...evmEventStubResponse().eventResponse.event,
             status: Event_Status.STATUS_UNSPECIFIED,
           },
-        },
+        }),
       });
       const mockDoesTxMeetConfirmHt = vitest
         .spyOn(api, "doesTxMeetConfirmHt")
