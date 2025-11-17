@@ -1,6 +1,6 @@
 {
   "name": "@axelar-network/axelarjs-sdk",
-  "version": "0.17.9-alpha.1",
+  "version": "0.17.9-alpha.2",
   "description": "The JavaScript SDK for Axelar Network",
   "repository": {
     "type": "git",
@@ -42,7 +42,7 @@
   "license": "MIT",
   "dependencies": {
     "@axelar-network/axelar-cgp-solidity": "^6.3.0",
-    "@axelar-network/axelarjs-types": "1.2.2-alpha.5",
+    "@axelar-network/axelarjs-types": "1.2.2-alpha.6",
     "@cosmjs/json-rpc": "^0.36.0",
     "@cosmjs/stargate": "0.36.0",
     "@ethersproject/abstract-provider": "^5.7.0",
