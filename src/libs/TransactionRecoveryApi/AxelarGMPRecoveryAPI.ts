@@ -52,6 +52,10 @@ import {
   getCommandId,
   findWorkingRpcUrl,
   validateSolanaAddress,
+  anchorInstructionDiscriminator,
+  encodeU64LE,
+  encodeStringBorsh,
+  encodeU32LE,
 } from "./helpers";
 import { retry, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
@@ -176,8 +180,6 @@ export type AddGasSolanaParams = {
   gasFeeAmount: string; // Amount of SOL to add as gas (in lamports, will be converted to u64)
   sender: string; // Sender's Solana wallet address (base58 string) - must be signer
   refundAddress: string; // Refund address (base58 string) - goes in instruction data
-  configPda: string; // Config PDA address (required, base58 string)
-  programId: string; // Axelar Solana gas service program ID (required, base58 string)
 };
 
 export type SolanaInstruction = {
@@ -933,37 +935,77 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaTransaction> {
-    const { messageId, gasFeeAmount, sender, refundAddress, configPda, programId } = params;
+    const { messageId, gasFeeAmount, sender, refundAddress } = params;
 
-    // TODO: Retrieve programId and configPda from Axelar chain configuration
-    // Similar to how other chains get contract addresses from S3 config:
-    // const selectedChain = await this.getChainInfo('solana');
-    // const programId = selectedChain?.config?.contracts?.AxelarGasService?.address;
-    // const configPda = selectedChain?.config?.contracts?.AxelarGasService?.configPda;
+    const { callTx, status } = await this.queryTransactionStatus(messageId);
+
+    /**first check if transaction is already executed */
+    if (GMPErrorMap[status]) {
+      throw new Error(`GMP query error: ${GMPErrorMap[status]}`);
+    }
+    const srcChain: string = callTx.chain;
+
+    const chains = await importS3Config(this.environment);
+    const solanaKey = Object.keys(chains.chains).find((chainName) => chainName == srcChain);
+
+    if (!solanaKey) throw new Error("Cannot find Solana chain config");
+
+    const solanaConfig = chains.chains[solanaKey];
+    const gasServiceProgramId = solanaConfig.config.contracts.GasService.address;
 
     // Validate all Solana addresses
     validateSolanaAddress(sender, "sender address");
-    validateSolanaAddress(configPda, "config PDA address");
-    validateSolanaAddress(programId, "program ID");
+    const gasServiceProgramIdPublicKey = validateSolanaAddress(gasServiceProgramId, "program ID");
     const refundAddressPublicKey = validateSolanaAddress(refundAddress, "refund address");
 
-    // Validate and parse messageId (format: "txHash-logIndex")
+    // get the treasury pda
+    const treasuryPda = PublicKey.findProgramAddressSync(
+      [Buffer.from("gas-service")],
+      gasServiceProgramIdPublicKey
+    )[0];
+
+    // get the event authority pda
+    const gasServiceEventAuthority = PublicKey.findProgramAddressSync(
+      [Buffer.from("__event_authority")],
+      gasServiceProgramIdPublicKey
+    )[0];
+
+    // Validate and parse messageId (format: "txHash-topLevelIndex.innerIndex")
     if (!messageId || typeof messageId !== "string") {
       throw new Error(`Invalid messageId: must be a non-empty string, got ${messageId}`);
     }
 
     const messageIdParts = messageId.split("-");
     if (messageIdParts.length !== 2) {
-      throw new Error(`Invalid messageId format: expected "txHash-logIndex", got "${messageId}"`);
+      throw new Error(
+        `Invalid messageId format: expected "txHash-topLevelLogIndex.innerLogIndex", got "${messageId}"`
+      );
     }
 
     const [txHash, logIndexStr] = messageIdParts;
-    const logIndex = parseInt(logIndexStr);
 
-    // Validate logIndex
-    if (!Number.isInteger(logIndex) || logIndex < 0) {
+    const logIndexParts = logIndexStr.split(".");
+    if (logIndexParts.length !== 2) {
       throw new Error(
-        `Invalid logIndex in messageId: must be a non-negative integer, got ${logIndexStr}`
+        `Invalid messageId format: expected "txHash-topLevelLogIndex.innerLogIndex", got "${messageId}"`
+      );
+    }
+
+    const [topLevelLogIndexStr, innerLogIndexStr] = logIndexParts;
+    const topLevelLogIndex = parseInt(topLevelLogIndexStr);
+    const innerLogIndex = parseInt(innerLogIndexStr);
+
+    // Validate topLevelLogIndex
+    if (!Number.isInteger(topLevelLogIndex) || topLevelLogIndex < 0) {
+      throw new Error(
+        `Invalid topLevelLogIndex in messageId: must be a non-negative integer, got ${topLevelLogIndex}`
+      );
+    }
+
+    // Validate innerLogIndex
+    if (!Number.isInteger(innerLogIndex) || innerLogIndex < 0) {
+      throw new Error(
+        `Invalid innerLogIndex in messageId: must be a non-negative integer, got ${innerLogIndex}`
       );
     }
 
@@ -1008,36 +1050,19 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
     }
 
+    const instructionId = await anchorInstructionDiscriminator("add_gas");
+
     // Manual Borsh-like serialization to match Rust enum structure
-    // GasServiceInstruction::Native(PayWithNativeToken::AddGas { ... })
-    const buffer = new Uint8Array(1000); // Allocate enough space
-    const view = new DataView(buffer.buffer);
-    let offset = 0;
-
-    // Outer enum discriminant (GasServiceInstruction::Native = 2)
-    buffer[offset] = 2;
-    offset += 1;
-
-    // Inner enum discriminant (PayWithNativeToken::AddGas = 1)
-    buffer[offset] = 1;
-    offset += 1;
-
-    // tx_hash: [u8; 64]
-    buffer.set(txHashBytes, offset);
-    offset += 64;
-
-    // log_index: u64
-    view.setBigUint64(offset, BigInt(logIndex), true);
-    offset += 8;
-
-    // gas_fee_amount: u64
-    view.setBigUint64(offset, gasFeeAmountBigInt, true);
-    offset += 8;
-
-    // refund_address: Pubkey (32 bytes)
-    const refundAddressBytes = refundAddressPublicKey.toBytes();
-    buffer.set(refundAddressBytes, offset);
-    offset += 32;
+    const data = Buffer.concat([
+      // instruction id
+      instructionId,
+      // message_id
+      encodeStringBorsh(messageId),
+      // amount
+      encodeU64LE(gasFeeAmountBigInt),
+      // refund_address
+      refundAddressPublicKey.toBuffer(),
+    ]);
 
     // Create the transaction instruction
     const instruction = new TransactionInstruction({
@@ -1048,7 +1073,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           isWritable: true,
         },
         {
-          pubkey: new PublicKey(configPda), // config_pda (writable) - receives the lamports
+          pubkey: new PublicKey(treasuryPda), // treasury (writable) - receives the lamports
           isSigner: false,
           isWritable: true,
         },
@@ -1057,9 +1082,19 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           isSigner: false,
           isWritable: false,
         },
+        {
+          pubkey: gasServiceEventAuthority,
+          isSigner: false,
+          isWritable: false,
+        },
+        {
+          pubkey: gasServiceProgramIdPublicKey,
+          isSigner: false,
+          isWritable: false,
+        },
       ],
-      programId: new PublicKey(programId),
-      data: Buffer.from(buffer.slice(0, offset)),
+      programId: new PublicKey(gasServiceProgramId),
+      data: data,
     });
 
     // Create and return the transaction
