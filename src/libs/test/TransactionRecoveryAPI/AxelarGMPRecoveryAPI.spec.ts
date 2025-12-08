@@ -52,6 +52,11 @@ import { Transaction } from "@mysten/sui/transactions";
 import * as chains from "../../../chains";
 import { STANDARD_FEE } from "../../AxelarSigningClient";
 import { coin, DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
+import {
+  PublicKey as SolanaPublicKey,
+  Keypair as SolanaKeypair,
+  Transaction as SolanaTransaction,
+} from "@solana/web3.js";
 
 describe("AxelarGMPRecoveryAPI", () => {
   const { setLogger } = utils;
@@ -1299,6 +1304,81 @@ describe("AxelarGMPRecoveryAPI", () => {
       } finally {
         // Restore the original moveCall function
         Transaction.prototype.moveCall = originalMoveCall;
+      }
+    });
+  });
+
+  describe("addGasToSolanaChain", () => {
+    // The default rpc url for testnet doesn't work as of 07 November 2024, so we need to use a custom one for testing.
+    const api: AxelarGMPRecoveryAPI = new AxelarGMPRecoveryAPI({ environment: Environment.DEVNET });
+    const testSignerKeypair: SolanaKeypair = SolanaKeypair.fromSeed(new Uint8Array(32));
+    const testGasServiceAddress = "gas5H48imY2w1j6e6x3EvVxKFtyTuWFhw6pgS5VAPLu";
+    const testMessageId =
+      "5LHQuxRKkFZVSNpggQ5bYxbofrw8TU6ogPBAzAokHiiPjx1NpgJaiPW6EvzU1g2aD7JqLNQVYjssMTguyHsjrVxR-3.3";
+
+    beforeEach(async () => {
+      vitest.clearAllMocks();
+    });
+
+    test("addGasToSolanaChain should construct instruction correctly", async () => {
+      // Create a spy for the add instruction function
+      const originalSolanaAddInstructionCall = SolanaTransaction.prototype.add;
+      const solanaAddInstructionCall = vitest.fn();
+
+      // Replace add instruction with our spy
+      SolanaTransaction.prototype.add = solanaAddInstructionCall;
+
+      try {
+        // Mock the GMP api to get the message id
+        vitest.spyOn(api, "queryTransactionStatus").mockResolvedValueOnce({
+          status: "called",
+          callTx: {
+            chain: "solana-1234",
+            returnValues: {
+              destinationChain: "osmosis-7",
+            },
+          },
+        });
+
+        // Mock the importS3Config to return a specific configuration
+        vitest.spyOn(chains, "importS3Config").mockResolvedValue({
+          chains: {
+            "solana-1234": {
+              config: {
+                contracts: {
+                  GasService: {
+                    address: testGasServiceAddress,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        // Call the method under test
+        await api.addGasToSolanaChain({
+          messageId: testMessageId,
+          gasFeeAmount: "1234",
+          sender: testSignerKeypair.publicKey.toBase58(),
+          refundAddress: testSignerKeypair.publicKey.toBase58(),
+        });
+
+        // Verify the spy was called with the expected arguments
+        expect(solanaAddInstructionCall).toHaveBeenCalledTimes(1);
+
+        // Get the first call's first argument
+        const callArgs = solanaAddInstructionCall.mock.calls[0][0];
+
+        // Check the specific properties we're interested in
+        expect(callArgs.programId).toStrictEqual(new SolanaPublicKey(testGasServiceAddress));
+
+        // TODO: perform more meaningful tests?
+        expect(callArgs.keys).toHaveLength(5);
+        // TODO: expect that the data can be correctly decoded?
+        expect(callArgs.data).toBeInstanceOf(Buffer);
+      } finally {
+        // Restore the original moveCall function
+        SolanaTransaction.prototype.add = originalSolanaAddInstructionCall;
       }
     });
   });
