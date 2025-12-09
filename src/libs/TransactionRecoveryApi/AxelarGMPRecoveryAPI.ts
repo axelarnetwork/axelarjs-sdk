@@ -951,7 +951,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     if (!solanaKey) throw new Error("Cannot find Solana chain config");
 
     const solanaConfig = chains.chains[solanaKey];
-    const gasServiceProgramId = solanaConfig.config.contracts.GasService.address;
+    const gasServiceProgramId = solanaConfig.config.contracts.AxelarGasService.address;
 
     // Validate all Solana addresses
     validateSolanaAddress(sender, "sender address");

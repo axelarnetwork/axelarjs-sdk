@@ -1346,7 +1346,7 @@ describe("AxelarGMPRecoveryAPI", () => {
             "solana-1234": {
               config: {
                 contracts: {
-                  GasService: {
+                  AxelarGasService: {
                     address: testGasServiceAddress,
                   },
                 },
