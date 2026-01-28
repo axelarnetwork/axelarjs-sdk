@@ -748,7 +748,6 @@ describe("AxelarGMPRecoveryAPI", () => {
         .connect(userWallet)
         .approve(contract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
-
     });
 
     test("it should return 'gas required' - 'gas paid' given 'gas required' > 'gas paid'", async () => {
@@ -976,15 +975,10 @@ describe("AxelarGMPRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
       // Call addNativeGas function
-      const response = await api.addNativeGas(
-        chain,
-        tx.transactionHash,
-        700000,
-        {
-          ...addNativeGasOptions,
-          amount: "0",
-        }
-      );
+      const response = await api.addNativeGas(chain, tx.transactionHash, 700000, {
+        ...addNativeGasOptions,
+        amount: "0",
+      });
 
       expect(response).toEqual(AlreadyPaidGasFeeError());
     });
@@ -1195,7 +1189,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       const offlineSigner = await DirectSecp256k1HdWallet.fromMnemonic(
         process.env.LIVE_COSMOS_MNEMONIC!,
         {
-        prefix: "jkl",
+          prefix: "jkl",
         }
       );
 
@@ -1458,16 +1452,10 @@ describe("AxelarGMPRecoveryAPI", () => {
         .then((tx: ContractTransaction) => tx.wait());
 
       // Call addGas function
-      const response = await api.addGas(
-        chain,
-        tx.transactionHash,
-        usdc.address,
-        700000,
-        {
-          ...addGasOptions,
-          amount: "0",
-        }
-      );
+      const response = await api.addGas(chain, tx.transactionHash, usdc.address, 700000, {
+        ...addGasOptions,
+        amount: "0",
+      });
 
       expect(response).toEqual(AlreadyPaidGasFeeError());
     });
@@ -1648,24 +1636,14 @@ describe("AxelarGMPRecoveryAPI", () => {
       vitest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
       const gasFeeAmount = ethers.utils.parseUnits("1", await usdc.decimals()).toString();
 
-      const axelarGateway = await AxelarGateway.create(
-        Environment.TESTNET,
-        chain,
-        provider
-      );
+      const axelarGateway = await AxelarGateway.create(Environment.TESTNET, chain, provider);
       const gatewayTokenAddress = await axelarGateway.getTokenAddress(tokenSymbol);
 
       // Call addGas function
-      const response = await api.addGas(
-        chain,
-        tx.transactionHash,
-        usdc.address,
-        700000,
-        {
-          ...addGasOptions,
-          amount: gasFeeAmount,
-        }
-      );
+      const response = await api.addGas(chain, tx.transactionHash, usdc.address, 700000, {
+        ...addGasOptions,
+        amount: gasFeeAmount,
+      });
 
       if (gatewayTokenAddress === ethers.constants.AddressZero) {
         expect(response).toEqual(UnsupportedGasTokenError(usdc.address));
