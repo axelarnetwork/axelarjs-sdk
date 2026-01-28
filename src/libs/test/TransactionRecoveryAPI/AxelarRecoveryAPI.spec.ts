@@ -8,7 +8,9 @@ import { Environment } from "../../types";
 import { EvmChain } from "../../../constants/EvmChain";
 
 describe("AxelarRecoveryAPI", () => {
-  const api = new AxelarRecoveryApi({ environment: Environment.TESTNET });
+  const api = new AxelarRecoveryApi({
+    environment: Environment.TESTNET,
+  });
 
   beforeEach(() => {
     vitest.clearAllMocks();
@@ -294,7 +296,7 @@ describe("AxelarRecoveryAPI", () => {
 
   describe.skip("create pending transfers", () => {
     test("It should create pending transfers", async () => {
-      const confirmation = await api.createPendingTransfers("ethereum");
+      const confirmation = await api.createPendingTransfers("ethereum-sepolia");
       console.log("confirmation", confirmation);
       expect(confirmation).toBeTruthy();
     }, 60000);
@@ -302,7 +304,7 @@ describe("AxelarRecoveryAPI", () => {
 
   describe.skip("create pending transfers", () => {
     test("It should create pending transfers", async () => {
-      const confirmation = await api.createPendingTransfers("ethereum");
+      const confirmation = await api.createPendingTransfers("ethereum-sepolia");
       console.log("confirmation", confirmation);
       expect(confirmation).toBeTruthy();
     }, 60000);
@@ -310,7 +312,7 @@ describe("AxelarRecoveryAPI", () => {
 
   describe.skip("sign commands", () => {
     test("It should sign commands", async () => {
-      const confirmation = await api.signCommands("ethereum");
+      const confirmation = await api.signCommands("ethereum-sepolia");
       console.log("confirmation", confirmation);
       expect(confirmation).toBeTruthy();
     }, 60000);
@@ -318,85 +320,77 @@ describe("AxelarRecoveryAPI", () => {
 
   describe.skip("execute pending transfers", () => {
     test("It should execute pending transfers", async () => {
-      const confirmation = await api.executePendingTransfers("terra");
+      const confirmation = await api.executePendingTransfers("terra-3");
       console.log("confirmation", confirmation);
       expect(confirmation).toBeTruthy();
     }, 60000);
   });
 
-  describe.skip("query execute params", () => {
+  describe("query execute params", () => {
     test("It should return null when the response is undefined", async () => {
-      vitest.spyOn(api, "execGet").mockResolvedValueOnce(undefined);
-
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce(undefined);
       const response = await api.queryExecuteParams("0x");
 
       expect(response).toBeUndefined();
     });
     test("It should return null when response array is empty", async () => {
       vitest.spyOn(api, "execGet").mockResolvedValueOnce([]);
-
       const response = await api.queryExecuteParams("0x");
 
       expect(response).toBeUndefined();
     });
     test("It should return status: 'call' when the approve transaction hash is undefined", async () => {
-      vitest.spyOn(api, "execGet").mockResolvedValueOnce([{}]);
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce({
+        approved: {},
+      } as any);
       const response = await api.queryExecuteParams("0x");
       expect(response?.status).toBe(GMPStatus.SRC_GATEWAY_CALLED);
 
-      vitest.spyOn(api, "execGet").mockResolvedValueOnce([
-        {
-          approved: {},
-        },
-      ]);
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce({
+        approved: {},
+      } as any);
       const response2 = await api.queryExecuteParams("0x");
       expect(response2?.status).toBe(GMPStatus.SRC_GATEWAY_CALLED);
     });
     test("It should return status: 'executed' when the execute transaction hash is defined", async () => {
-      vitest.spyOn(api, "execGet").mockResolvedValueOnce([
-        {
-          approved: {
-            transactionHash: "0x",
-          },
-          executed: {
-            transactionHash: "0x",
-          },
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce({
+        approved: {
+          transactionHash: "0x",
         },
-      ]);
+        executed: {
+          transactionHash: "0x",
+        },
+      } as any);
       const response = await api.queryExecuteParams("0x");
       expect(response?.status).toBe(GMPStatus.DEST_EXECUTED);
     });
     test("It should get the execute params when the event type is 'ContractCallWithToken'", async () => {
       const txHash = "0x1";
-      vitest.spyOn(api, "execGet").mockResolvedValueOnce([
-        {
-          call: {
-            chain: "Moonbeam",
-            returnValues: {
-              payload: "payload",
-              destinationContractAddress: "destinationContractAddress",
-            },
-            event: "ContractCallWithToken",
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce({
+        call: {
+          transactionHash: txHash,
+          transactionIndex: 1,
+          logIndex: 2,
+          chain: "Moonbeam",
+          returnValues: {
+            payload: "payload",
+            destinationContractAddress: "destinationContractAddress",
           },
-          approved: {
-            transactionHash: txHash,
-            chain: "Avalanche",
-            returnValues: {
-              commandId: "0x1",
-              sourceAddress: "0x2",
-              sourceChain: "Moonbeam",
-              symbol: "UST",
-              amount: ethers.BigNumber.from("1"),
-            },
+          event: "ContractCallWithToken",
+        },
+        approved: {
+          transactionHash: txHash,
+          chain: "Avalanche",
+          returnValues: {
+            commandId: "0x1",
+            sourceAddress: "0x2",
+            sourceChain: "Moonbeam",
+            symbol: "UST",
+            amount: ethers.BigNumber.from("1"),
           },
         },
-      ]);
+      } as any);
       const executeParams = await api.queryExecuteParams(txHash);
-
-      expect(api.execGet).toHaveBeenCalledWith(api.axelarGMPApiUrl, {
-        method: "searchGMP",
-        txHash,
-      });
 
       expect(executeParams).toEqual({
         status: GMPStatus.DEST_GATEWAY_APPROVED,
@@ -406,6 +400,11 @@ describe("AxelarRecoveryAPI", () => {
           destinationContractAddress: "destinationContractAddress",
           isContractCallWithToken: true,
           payload: "payload",
+          srcTxInfo: {
+            transactionHash: txHash,
+            transactionIndex: 1,
+            logIndex: 2,
+          },
           sourceAddress: "0x2",
           sourceChain: "Moonbeam",
           symbol: "UST",
@@ -416,33 +415,29 @@ describe("AxelarRecoveryAPI", () => {
 
     test("It should get the execute params when the event type is 'ContractCall'", async () => {
       const txHash = "0x1";
-      vitest.spyOn(api, "execGet").mockResolvedValueOnce([
-        {
-          call: {
-            chain: "Moonbeam",
-            returnValues: {
-              payload: "payload",
-              destinationContractAddress: "destinationContractAddress",
-            },
-            event: "ContractCall",
+      vitest.spyOn(api, "fetchGMPTransaction").mockResolvedValueOnce({
+        call: {
+          transactionHash: txHash,
+          transactionIndex: 1,
+          logIndex: 2,
+          chain: "Moonbeam",
+          returnValues: {
+            payload: "payload",
+            destinationContractAddress: "destinationContractAddress",
           },
-          approved: {
-            transactionHash: txHash,
-            chain: "Avalanche",
-            returnValues: {
-              commandId: "0x1",
-              sourceAddress: "0x2",
-              sourceChain: "Moonbeam",
-            },
+          event: "ContractCall",
+        },
+        approved: {
+          transactionHash: txHash,
+          chain: "Avalanche",
+          returnValues: {
+            commandId: "0x1",
+            sourceAddress: "0x2",
+            sourceChain: "Moonbeam",
           },
         },
-      ]);
+      } as any);
       const executeParams = await api.queryExecuteParams(txHash);
-
-      expect(api.execGet).toHaveBeenCalledWith(api.axelarGMPApiUrl, {
-        method: "searchGMP",
-        txHash,
-      });
 
       expect(executeParams).toEqual({
         status: GMPStatus.DEST_GATEWAY_APPROVED,
@@ -452,6 +447,11 @@ describe("AxelarRecoveryAPI", () => {
           destinationContractAddress: "destinationContractAddress",
           isContractCallWithToken: false,
           payload: "payload",
+          srcTxInfo: {
+            transactionHash: txHash,
+            transactionIndex: 1,
+            logIndex: 2,
+          },
           sourceAddress: "0x2",
           sourceChain: "Moonbeam",
           symbol: undefined,

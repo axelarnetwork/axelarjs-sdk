@@ -310,6 +310,7 @@ export const getFeeStub = () => ({
   },
   result: {
     base_fee: 0.418869692086198,
+    execute_gas_multiplier: 1.1,
     source_token: {
       contract_address: "0x0000000000000000000000000000000000000000",
       symbol: "AVAX",

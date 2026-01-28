@@ -6,7 +6,7 @@ import { ethers, Wallet } from "ethers";
 import { fork } from "../../testUtils/localChain";
 import type { Mock } from "vitest";
 
-describe.skip("contractCallHelper", () => {
+describe("contractCallHelper", () => {
   describe("callExecute", () => {
     let mockWait: Mock<any, any>;
     const stub = executeParamsStub();

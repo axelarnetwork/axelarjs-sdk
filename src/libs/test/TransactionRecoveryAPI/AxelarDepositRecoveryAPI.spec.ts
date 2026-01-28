@@ -6,20 +6,26 @@ import {
 import { AxelarDepositRecoveryAPI } from "../../TransactionRecoveryApi/AxelarDepositRecoveryAPI";
 import { Environment } from "../../types";
 
-describe.skip("AxelarDepositRecoveryAPI", () => {
-  const api = new AxelarDepositRecoveryAPI({ environment: Environment.TESTNET });
+describe("AxelarDepositRecoveryAPI", () => {
+  const senderAddress = process.env.LIVE_AXELAR_SENDER_ADDRESS;
+  const api = new AxelarDepositRecoveryAPI({
+    environment: Environment.TESTNET,
+    senderAddress,
+  });
+  const testIf = senderAddress ? test : test.skip;
 
   beforeEach(() => {
     vitest.clearAllMocks();
   });
 
-  describe.skip("confirmDeposit", () => {
-    test("It should confirm a deposit", async () => {
+  describe("confirmDeposit", () => {
+    testIf("It should confirm a deposit", async () => {
       const testParamsAxelarnet: ConfirmDepositRequest = {
         hash: "FD6F3C9E63A8A0F47092418CCF3A70D52642B77B940FB6D2BE5A797D7AA97BEB",
-        from: "Osmosis",
+        from: "osmosis-7",
         depositAddress: "axelar192mp2cv2s0hayv6fwgjl64zs72hl97zcxjwcg6g8nkdkjxq89dps0yt6gc",
         denom: "wavax-wei",
+        senderAddress,
       };
       //   const testParamsEvm: ConfirmDepositRequest = {
       //     hash: "0xaea3b215c6a79a47b31f85253f788e928b37a9fe2cfad8484cc6b2a65226d32c",
