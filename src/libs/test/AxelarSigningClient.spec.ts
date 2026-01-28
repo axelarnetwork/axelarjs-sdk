@@ -12,7 +12,7 @@ import {
   protobufPackage as EvmProtobufPackage,
 } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/tx";
 import { EncodeObject } from "@cosmjs/proto-signing";
-import { toAccAddress } from "@cosmjs/stargate/build/queryclient/utils";
+import { fromBech32 } from "@cosmjs/encoding";
 import { STANDARD_FEE } from "../AxelarSigningClient/const";
 import { utils } from "ethers";
 
@@ -81,7 +81,7 @@ describe.skip("AxelarSigningClient", () => {
           typeUrl: `/${axelarnetProtobufPackage}.ConfirmDepositRequest`,
           value: AxelarnetConfirmDepositRequest.fromPartial({
             sender: address,
-            depositAddress: Buffer.from(toAccAddress(_depositAddress)),
+            depositAddress: Buffer.from(fromBech32(_depositAddress).data),
             denom,
           }),
         },
