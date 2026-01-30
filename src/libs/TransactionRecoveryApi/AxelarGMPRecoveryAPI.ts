@@ -302,7 +302,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         success: false,
         errorMessage: `getEvmEvent(): could not find event index for ${srcTxHash}`,
         commandId: "",
-        eventResponse: {},
+        eventResponse: EventResponse.create({}),
         infoLog: "",
       };
     }
@@ -320,7 +320,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         success: false,
         errorMessage,
         commandId,
-        eventResponse: {},
+        eventResponse: EventResponse.create({}),
         infoLog: `srcTxHash: ${srcTxHash}, generated commandId: ${commandId}`,
       };
     }
@@ -1291,7 +1291,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             token: coin,
             sender,
             receiver: COSMOS_GAS_RECEIVER_OPTIONS[this.environment],
-            timeoutTimestamp: sendOptions.timeoutTimestamp ?? (Date.now() + 60 * 1000) * 1e6,
+            timeoutTimestamp: sendOptions.timeoutTimestamp
+              ? BigInt(sendOptions.timeoutTimestamp)
+              : BigInt((Date.now() + 60 * 1000) * 1e6),
             memo: tx.call.id,
           },
         },

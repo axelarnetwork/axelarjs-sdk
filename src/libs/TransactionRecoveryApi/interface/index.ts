@@ -32,4 +32,5 @@ export interface ConfirmDepositRequest {
   from: string; //chain name
   depositAddress: string;
   denom: string; //asset common key
+  senderAddress?: string;
 }
