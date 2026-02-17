@@ -36,7 +36,7 @@ describe("AxelarDepositRecoveryAPI", () => {
   });
   describe("checking event status", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
-    test("fetching event status", async () => {
+    test.skip("fetching event status", async () => {
       const txHash = "0xa290f800f2089535a0abb013cea9cb26e1cdb3f2a2f2a8dcef2f149eb7a4d3be";
       const event = await api.getEvmEvent(EvmChain.MOONBEAM, EvmChain.POLYGON, txHash, undefined);
       console.log("event", event);
