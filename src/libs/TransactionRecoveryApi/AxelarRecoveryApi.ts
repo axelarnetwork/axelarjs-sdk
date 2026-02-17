@@ -415,13 +415,26 @@ export class AxelarRecoveryApi {
   }
 
   private async getCosmosSenderAddress(cosmosWalletDetails?: CosmosBasedWalletDetails) {
-    const offlineSigner = cosmosWalletDetails?.offlineSigner;
-    if (!offlineSigner) {
-      return;
+    if (!cosmosWalletDetails) {
+      return undefined;
     }
 
-    const [account] = await offlineSigner.getAccounts();
-    return account?.address;
+    if (cosmosWalletDetails.offlineSigner) {
+      const [account] = await cosmosWalletDetails.offlineSigner.getAccounts();
+      return account?.address;
+    }
+
+    if (cosmosWalletDetails.mnemonic) {
+      const signingClient = await AxelarSigningClient.initOrGetAxelarSigningClient({
+        environment: this.environment,
+        axelarRpcUrl: this.axelarRpcUrl,
+        cosmosBasedWalletDetails: cosmosWalletDetails,
+        options: {},
+      });
+      return signingClient.signerAddress;
+    }
+
+    return undefined;
   }
 
   private async signRecoveryMessagesWithCosmosWallet(
@@ -449,8 +462,10 @@ export class AxelarRecoveryApi {
       return;
     }
 
-    const offlineSigner = cosmosWalletDetails?.offlineSigner;
-    if (!offlineSigner) {
+    const hasCosmosSigningDetails = Boolean(
+      cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic
+    );
+    if (!hasCosmosSigningDetails) {
       throw new Error(`Recovery self-signing requires a cosmos wallet signer for ${actionType}`);
     }
 
@@ -490,7 +505,7 @@ export class AxelarRecoveryApi {
       async () => {
         const sender = await this.getCosmosSenderAddress(cosmosWalletDetails);
         if (!sender) {
-          throw new Error("offline signer is not connected");
+          throw new Error("cosmos signer is not connected");
         }
 
         return [
@@ -561,7 +576,7 @@ export class AxelarRecoveryApi {
       async () => {
         const sender = await this.getCosmosSenderAddress(cosmosWalletDetails);
         if (!sender) {
-          throw new Error("offline signer is not connected");
+          throw new Error("cosmos signer is not connected");
         }
 
         return [
@@ -608,7 +623,7 @@ export class AxelarRecoveryApi {
       async () => {
         const sender = await this.getCosmosSenderAddress(cosmosWalletDetails);
         if (!sender) {
-          throw new Error("offline signer is not connected");
+          throw new Error("cosmos signer is not connected");
         }
 
         return [
