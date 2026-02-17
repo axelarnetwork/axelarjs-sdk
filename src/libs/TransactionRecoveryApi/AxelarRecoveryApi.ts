@@ -431,7 +431,11 @@ export class AxelarRecoveryApi {
         cosmosBasedWalletDetails: cosmosWalletDetails,
         options: {},
       });
-      return signingClient.signerAddress;
+      try {
+        return signingClient.signerAddress;
+      } finally {
+        await signingClient.disconnect();
+      }
     }
 
     return undefined;
@@ -448,7 +452,11 @@ export class AxelarRecoveryApi {
       options: {},
     });
 
-    return signingClient.signThenBroadcast(messages, STANDARD_FEE);
+    try {
+      return await signingClient.signThenBroadcast(messages, STANDARD_FEE);
+    } finally {
+      await signingClient.disconnect();
+    }
   }
 
   private async trySelfSignAndBroadcast(
