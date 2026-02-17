@@ -588,7 +588,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           return {
             success: true,
             approveTx: normalizedApproveTx,
-            infoLogs: [`broadcasting: batch ID ${batchData.batch_id} broadcasted to ${destChainId}`],
+            infoLogs: [
+              `broadcasting: batch ID ${batchData.batch_id} broadcasted to ${destChainId}`,
+            ],
           };
         } else {
           return Promise.reject(
@@ -823,23 +825,24 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     // Dispatch a SignCommand transaction and an Approve transaction to the Gateway contract.
-    const response = cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic
-      ? await this.signAndApproveGateway(
-          commandId,
-          destinationChain,
-          evmWalletDetails,
-          cosmosWalletDetails,
-          useSelfSigning
-        )
-      : useSelfSigning
-      ? await this.signAndApproveGateway(
-          commandId,
-          destinationChain,
-          evmWalletDetails,
-          undefined,
-          true
-        )
-      : await this.signAndApproveGateway(commandId, destinationChain, evmWalletDetails);
+    const response =
+      cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic
+        ? await this.signAndApproveGateway(
+            commandId,
+            destinationChain,
+            evmWalletDetails,
+            cosmosWalletDetails,
+            useSelfSigning
+          )
+        : useSelfSigning
+        ? await this.signAndApproveGateway(
+            commandId,
+            destinationChain,
+            evmWalletDetails,
+            undefined,
+            true
+          )
+        : await this.signAndApproveGateway(commandId, destinationChain, evmWalletDetails);
 
     // If the response.success is false, we will return the error response
     if (!response.success) {
@@ -872,33 +875,34 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   ) {
     try {
       // ConfirmGatewayTx and check if it is successfully executed
-      const confirmTxRequest = cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic
-        ? await this.findEventAndConfirmIfNeeded(
-            srcChain,
-            destChain,
-            txHash,
-            txEventIndex,
-            evmWalletDetails,
-            cosmosWalletDetails,
-            useSelfSigning
-          )
-        : useSelfSigning
-        ? await this.findEventAndConfirmIfNeeded(
-            srcChain,
-            destChain,
-            txHash,
-            txEventIndex,
-            evmWalletDetails,
-            undefined,
-            true
-          )
-        : await this.findEventAndConfirmIfNeeded(
-            srcChain,
-            destChain,
-            txHash,
-            txEventIndex,
-            evmWalletDetails
-          );
+      const confirmTxRequest =
+        cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic
+          ? await this.findEventAndConfirmIfNeeded(
+              srcChain,
+              destChain,
+              txHash,
+              txEventIndex,
+              evmWalletDetails,
+              cosmosWalletDetails,
+              useSelfSigning
+            )
+          : useSelfSigning
+          ? await this.findEventAndConfirmIfNeeded(
+              srcChain,
+              destChain,
+              txHash,
+              txEventIndex,
+              evmWalletDetails,
+              undefined,
+              true
+            )
+          : await this.findEventAndConfirmIfNeeded(
+              srcChain,
+              destChain,
+              txHash,
+              txEventIndex,
+              evmWalletDetails
+            );
 
       // If the `success` flag is false, we will return the error response
       if (!confirmTxRequest?.success) {
@@ -920,17 +924,24 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       }
 
       // Find the batch and sign it
-      const response = cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic
-        ? await this.signAndApproveGateway(
-            commandId,
-            destChain,
-            evmWalletDetails,
-            cosmosWalletDetails,
-            useSelfSigning
-          )
-        : useSelfSigning
-        ? await this.signAndApproveGateway(commandId, destChain, evmWalletDetails, undefined, true)
-        : await this.signAndApproveGateway(commandId, destChain, evmWalletDetails);
+      const response =
+        cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic
+          ? await this.signAndApproveGateway(
+              commandId,
+              destChain,
+              evmWalletDetails,
+              cosmosWalletDetails,
+              useSelfSigning
+            )
+          : useSelfSigning
+          ? await this.signAndApproveGateway(
+              commandId,
+              destChain,
+              evmWalletDetails,
+              undefined,
+              true
+            )
+          : await this.signAndApproveGateway(commandId, destChain, evmWalletDetails);
 
       // If the response.success is false, we will return the error response
       if (!response.success) {
@@ -967,16 +978,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     useSelfSigning = false
   ): Promise<GMPRecoveryError | GMPRecoverySuccess> {
     try {
-      const signTxRequest = cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic
-        ? await this.findBatchAndSignIfNeeded(
-            commandId,
-            destChain,
-            cosmosWalletDetails,
-            useSelfSigning
-          )
-        : useSelfSigning
-        ? await this.findBatchAndSignIfNeeded(commandId, destChain, undefined, true)
-        : await this.findBatchAndSignIfNeeded(commandId, destChain);
+      const signTxRequest =
+        cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic
+          ? await this.findBatchAndSignIfNeeded(
+              commandId,
+              destChain,
+              cosmosWalletDetails,
+              useSelfSigning
+            )
+          : useSelfSigning
+          ? await this.findBatchAndSignIfNeeded(commandId, destChain, undefined, true)
+          : await this.findBatchAndSignIfNeeded(commandId, destChain);
 
       if (!signTxRequest?.success) {
         return {
