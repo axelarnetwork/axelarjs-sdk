@@ -1,5 +1,6 @@
 import {
   AxelarRecoveryAPIConfig,
+  CosmosBasedWalletDetails,
   EVMClientConfig,
   EvmWalletDetails,
   AddGasOptions,
@@ -278,6 +279,57 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     return eventResponse.event?.status === Event_Status.STATUS_COMPLETED;
   }
 
+  private async confirmGatewayTxWithWallet(
+    txHash: string,
+    chain: string,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
+  ) {
+    if (cosmosWalletDetails?.offlineSigner) {
+      return this.confirmGatewayTx(txHash, chain, cosmosWalletDetails, useSelfSigning);
+    }
+
+    return useSelfSigning
+      ? this.confirmGatewayTx(txHash, chain, undefined, true)
+      : this.confirmGatewayTx(txHash, chain);
+  }
+
+  private async routeMessageRequestWithWallet(
+    txHash: string,
+    payload: string,
+    logIndex: number | undefined,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
+  ) {
+    if (cosmosWalletDetails?.offlineSigner) {
+      return this.routeMessageRequest(
+        txHash,
+        payload,
+        logIndex,
+        cosmosWalletDetails,
+        useSelfSigning
+      );
+    }
+
+    return useSelfSigning
+      ? this.routeMessageRequest(txHash, payload, logIndex, undefined, true)
+      : this.routeMessageRequest(txHash, payload, logIndex);
+  }
+
+  private async signCommandsWithWallet(
+    destChainId: string,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
+  ) {
+    if (cosmosWalletDetails?.offlineSigner) {
+      return this.signCommands(destChainId, cosmosWalletDetails, useSelfSigning);
+    }
+
+    return useSelfSigning
+      ? this.signCommands(destChainId, undefined, true)
+      : this.signCommands(destChainId);
+  }
+
   public async getEvmEvent(
     srcChainId: string,
     destChainId: string,
@@ -339,7 +391,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     destChain: string,
     txHash: string,
     txEventIndex: number | undefined,
-    evmWalletDetails: EvmWalletDetails
+    evmWalletDetails: EvmWalletDetails,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
   ): Promise<ConfirmTxSDKResponse> {
     if (this.debugMode)
       console.debug(`confirmation: checking whether ${txHash} needs to be confirmed on Axelar`);
@@ -377,7 +431,12 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         };
       }
 
-      const confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch(() => undefined);
+      const confirmTx = await this.confirmGatewayTxWithWallet(
+        txHash,
+        srcChain,
+        cosmosWalletDetails,
+        useSelfSigning
+      ).catch(() => undefined);
       if (!confirmTx) {
         return {
           success: false,
@@ -423,7 +482,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
   public async findBatchAndSignIfNeeded(
     commandId: string,
-    destChainId: string
+    destChainId: string,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
   ): Promise<SignTxSDKResponse> {
     let signTxLog = "";
     try {
@@ -436,7 +497,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           infoLogs: [signTxLog],
         };
       } else {
-        const signCommandTx = await this.signCommands(destChainId);
+        const signCommandTx = await this.signCommandsWithWallet(
+          destChainId,
+          cosmosWalletDetails,
+          useSelfSigning
+        );
         signTxLog = `signing: signed batch for commandId (${commandId}) in tx: ${signCommandTx.transactionHash}`;
         if (this.debugMode) console.debug(signTxLog);
         return {
@@ -457,7 +522,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async findBatchAndApproveGateway(
     commandId: string,
     destChainId: string,
-    wallet: EvmWalletDetails
+    wallet: EvmWalletDetails,
+    useSelfSigning = false
   ): Promise<BroadcastTxSDKResponse> {
     if (this.debugMode)
       console.debug(`broadcasting: checking for command ID: ${commandId} to broadcast`);
@@ -484,12 +550,49 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             `findBatchAndApproveGateway(): batch ID ${batchData.batch_id} signing in process`
           );
         } else if (batchData.status === "BATCHED_COMMANDS_STATUS_SIGNED") {
-          const approveTx = await this.sendApproveTx(destChainId, batchData.execute_data, wallet);
+          if (!useSelfSigning) {
+            const approveTx = await this.sendApproveTx(destChainId, batchData.execute_data, wallet);
+            return {
+              success: true,
+              approveTx,
+              infoLogs: [
+                `broadcasting: batch ID ${batchData.batch_id} broadcasted to ${destChainId}`,
+              ],
+            };
+          }
+
+          let approveTx;
+          let usedRelayerFallback = false;
+
+          try {
+            approveTx = await this.broadcastEvmTx(destChainId, batchData.execute_data, wallet);
+          } catch (error) {
+            usedRelayerFallback = true;
+            console.error("[recovery self-sign failed]", {
+              action_type: "send_evm_tx",
+              use_self_signing: true,
+              command_id: commandId,
+              destination_chain: destChainId,
+              batch_id: batchData.batch_id,
+              error,
+            });
+            return Promise.reject("findBatchAndApproveGateway(): self-signing failed");
+          }
+
+          const normalizedApproveTx =
+            approveTx &&
+            typeof approveTx === "object" &&
+            "hash" in approveTx &&
+            !("transactionHash" in approveTx)
+              ? { ...approveTx, transactionHash: approveTx.hash }
+              : approveTx;
+
           return {
             success: true,
-            approveTx,
+            approveTx: normalizedApproveTx,
             infoLogs: [
               `broadcasting: batch ID ${batchData.batch_id} broadcasted to ${destChainId}`,
+              ...(usedRelayerFallback ? ["use_self_signing=true action=send_evm_tx"] : []),
             ],
           };
         } else {
@@ -518,7 +621,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txEventIndex?: number | undefined,
     evmWalletDetails?: EvmWalletDetails,
     escapeAfterConfirm = true,
-    messageId?: string
+    messageId?: string,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
   ): Promise<GMPRecoveryResponse> {
     const { callTx, status } = await this.queryTransactionStatus(txHash, txLogIndex);
 
@@ -537,11 +642,24 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const _evmWalletDetails = evmWalletDetails || { useWindowEthereum: true };
 
     if (routeDir === RouteDir.COSMOS_TO_EVM) {
-      return this.recoverCosmosToEvmTx(txHash, _evmWalletDetails, messageId);
+      return this.recoverCosmosToEvmTx(
+        txHash,
+        _evmWalletDetails,
+        messageId,
+        cosmosWalletDetails,
+        useSelfSigning
+      );
     } else if (routeDir === RouteDir.EVM_TO_COSMOS) {
-      return this.recoverEvmToCosmosTx(srcChain, txHash, eventIndex, _evmWalletDetails);
+      return this.recoverEvmToCosmosTx(
+        srcChain,
+        txHash,
+        eventIndex,
+        _evmWalletDetails,
+        cosmosWalletDetails,
+        useSelfSigning
+      );
     } else if (routeDir === RouteDir.COSMOS_TO_COSMOS) {
-      return this.recoverCosmosToCosmosTx(txHash);
+      return this.recoverCosmosToCosmosTx(txHash, cosmosWalletDetails, useSelfSigning);
     } else {
       return this.recoverEvmToEvmTx(
         srcChain,
@@ -549,7 +667,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         txHash,
         eventIndex,
         _evmWalletDetails,
-        escapeAfterConfirm
+        escapeAfterConfirm,
+        cosmosWalletDetails,
+        useSelfSigning
       );
     }
   }
@@ -566,7 +686,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
   }
 
-  private async recoverCosmosToCosmosTx(txHash: string) {
+  private async recoverCosmosToCosmosTx(
+    txHash: string,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
+  ) {
     const gmpTx = await this.fetchGMPTransaction(txHash);
 
     // Fetch all necessary data to send the route message tx
@@ -574,9 +698,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const messageId = gmpTx.call.id;
 
     // Send the route message tx
-    const routeMessageTx = await this.routeMessageRequest(messageId, payload, -1).catch(
-      () => undefined
-    );
+    const routeMessageTx = await this.routeMessageRequestWithWallet(
+      messageId,
+      payload,
+      -1,
+      cosmosWalletDetails,
+      useSelfSigning
+    ).catch(() => undefined);
 
     // If the `success` flag is false, return the error response
     if (!routeMessageTx) {
@@ -598,7 +726,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     srcChain: string,
     txHash: string,
     txEventIndex?: number | null,
-    evmWalletDetails?: EvmWalletDetails
+    evmWalletDetails?: EvmWalletDetails,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
   ) {
     // Check if the tx is confirmed on the source chain
     const isConfirmed = await this.doesTxMeetConfirmHt(
@@ -615,7 +745,12 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     // ConfirmGatewayTx and check if it is successfully executed
-    const confirmTx = await this.confirmGatewayTx(txHash, srcChain).catch(() => undefined);
+    const confirmTx = await this.confirmGatewayTxWithWallet(
+      txHash,
+      srcChain,
+      cosmosWalletDetails,
+      useSelfSigning
+    ).catch(() => undefined);
 
     if (!confirmTx) {
       return {
@@ -631,9 +766,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const eventIndex = txEventIndex ?? (await this.getEventIndex(srcChain as EvmChain, txHash));
 
     // Send the route message tx
-    const routeMessageTx = await this.routeMessageRequest(txHash, payload, eventIndex).catch(
-      () => undefined
-    );
+    const routeMessageTx = await this.routeMessageRequestWithWallet(
+      txHash,
+      payload,
+      eventIndex,
+      cosmosWalletDetails,
+      useSelfSigning
+    ).catch(() => undefined);
 
     // If the `success` flag is false, return the error response
     if (!routeMessageTx) {
@@ -658,7 +797,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private async recoverCosmosToEvmTx(
     txHash: string,
     evmWalletDetails: EvmWalletDetails,
-    msgIdParam?: string
+    msgIdParam?: string,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
   ) {
     const txDetails = await this.fetchGMPTransaction(txHash);
     const {
@@ -671,9 +812,13 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const messageId: string = msgIdParam ?? msgIdFromAxelarscan;
 
     // Send RouteMessageTx
-    const routeMessageTx = await this.routeMessageRequest(messageId, payload, -1).catch(
-      () => undefined
-    );
+    const routeMessageTx = await this.routeMessageRequestWithWallet(
+      messageId,
+      payload,
+      -1,
+      cosmosWalletDetails,
+      useSelfSigning
+    ).catch(() => undefined);
 
     if (!routeMessageTx) {
       return {
@@ -683,11 +828,23 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     // Dispatch a SignCommand transaction and an Approve transaction to the Gateway contract.
-    const response = await this.signAndApproveGateway(
-      commandId,
-      destinationChain,
-      evmWalletDetails
-    );
+    const response = cosmosWalletDetails?.offlineSigner
+      ? await this.signAndApproveGateway(
+          commandId,
+          destinationChain,
+          evmWalletDetails,
+          cosmosWalletDetails,
+          useSelfSigning
+        )
+      : useSelfSigning
+        ? await this.signAndApproveGateway(
+            commandId,
+            destinationChain,
+            evmWalletDetails,
+            undefined,
+            true
+          )
+        : await this.signAndApproveGateway(commandId, destinationChain, evmWalletDetails);
 
     // If the response.success is false, we will return the error response
     if (!response.success) {
@@ -714,17 +871,39 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     txHash: string,
     txEventIndex: number | undefined,
     evmWalletDetails: EvmWalletDetails,
-    escapeAfterConfirm = true
+    escapeAfterConfirm = true,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
   ) {
     try {
       // ConfirmGatewayTx and check if it is successfully executed
-      const confirmTxRequest = await this.findEventAndConfirmIfNeeded(
-        srcChain,
-        destChain,
-        txHash,
-        txEventIndex,
-        evmWalletDetails
-      );
+      const confirmTxRequest = cosmosWalletDetails?.offlineSigner
+        ? await this.findEventAndConfirmIfNeeded(
+            srcChain,
+            destChain,
+            txHash,
+            txEventIndex,
+            evmWalletDetails,
+            cosmosWalletDetails,
+            useSelfSigning
+          )
+        : useSelfSigning
+          ? await this.findEventAndConfirmIfNeeded(
+              srcChain,
+              destChain,
+              txHash,
+              txEventIndex,
+              evmWalletDetails,
+              undefined,
+              true
+            )
+          : await this.findEventAndConfirmIfNeeded(
+              srcChain,
+              destChain,
+              txHash,
+              txEventIndex,
+              evmWalletDetails
+            );
 
       // If the `success` flag is false, we will return the error response
       if (!confirmTxRequest?.success) {
@@ -746,7 +925,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       }
 
       // Find the batch and sign it
-      const response = await this.signAndApproveGateway(commandId, destChain, evmWalletDetails);
+      const response = cosmosWalletDetails?.offlineSigner
+        ? await this.signAndApproveGateway(
+            commandId,
+            destChain,
+            evmWalletDetails,
+            cosmosWalletDetails,
+            useSelfSigning
+          )
+        : useSelfSigning
+          ? await this.signAndApproveGateway(commandId, destChain, evmWalletDetails, undefined, true)
+          : await this.signAndApproveGateway(commandId, destChain, evmWalletDetails);
 
       // If the response.success is false, we will return the error response
       if (!response.success) {
@@ -778,10 +967,21 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   private async signAndApproveGateway(
     commandId: string,
     destChain: string,
-    evmWalletDetails: EvmWalletDetails
+    evmWalletDetails: EvmWalletDetails,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning = false
   ): Promise<GMPRecoveryError | GMPRecoverySuccess> {
     try {
-      const signTxRequest = await this.findBatchAndSignIfNeeded(commandId, destChain);
+      const signTxRequest = cosmosWalletDetails?.offlineSigner
+        ? await this.findBatchAndSignIfNeeded(
+            commandId,
+            destChain,
+            cosmosWalletDetails,
+            useSelfSigning
+          )
+        : useSelfSigning
+          ? await this.findBatchAndSignIfNeeded(commandId, destChain, undefined, true)
+          : await this.findBatchAndSignIfNeeded(commandId, destChain);
 
       if (!signTxRequest?.success) {
         return {
@@ -793,7 +993,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       const broadcastTxRequest = await this.findBatchAndApproveGateway(
         commandId,
         destChain,
-        evmWalletDetails
+        evmWalletDetails,
+        useSelfSigning
       );
 
       if (!broadcastTxRequest?.success) {
