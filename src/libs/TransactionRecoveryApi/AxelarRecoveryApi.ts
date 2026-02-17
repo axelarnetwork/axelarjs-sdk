@@ -451,9 +451,7 @@ export class AxelarRecoveryApi {
 
     const offlineSigner = cosmosWalletDetails?.offlineSigner;
     if (!offlineSigner) {
-      throw new Error(
-        `Recovery self-signing requires a cosmos wallet signer for ${actionType}`
-      );
+      throw new Error(`Recovery self-signing requires a cosmos wallet signer for ${actionType}`);
     }
 
     try {

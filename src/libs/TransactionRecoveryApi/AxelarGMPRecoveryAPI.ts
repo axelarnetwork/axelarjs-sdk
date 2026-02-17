@@ -837,14 +837,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           useSelfSigning
         )
       : useSelfSigning
-        ? await this.signAndApproveGateway(
-            commandId,
-            destinationChain,
-            evmWalletDetails,
-            undefined,
-            true
-          )
-        : await this.signAndApproveGateway(commandId, destinationChain, evmWalletDetails);
+      ? await this.signAndApproveGateway(
+          commandId,
+          destinationChain,
+          evmWalletDetails,
+          undefined,
+          true
+        )
+      : await this.signAndApproveGateway(commandId, destinationChain, evmWalletDetails);
 
     // If the response.success is false, we will return the error response
     if (!response.success) {
@@ -888,22 +888,22 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             useSelfSigning
           )
         : useSelfSigning
-          ? await this.findEventAndConfirmIfNeeded(
-              srcChain,
-              destChain,
-              txHash,
-              txEventIndex,
-              evmWalletDetails,
-              undefined,
-              true
-            )
-          : await this.findEventAndConfirmIfNeeded(
-              srcChain,
-              destChain,
-              txHash,
-              txEventIndex,
-              evmWalletDetails
-            );
+        ? await this.findEventAndConfirmIfNeeded(
+            srcChain,
+            destChain,
+            txHash,
+            txEventIndex,
+            evmWalletDetails,
+            undefined,
+            true
+          )
+        : await this.findEventAndConfirmIfNeeded(
+            srcChain,
+            destChain,
+            txHash,
+            txEventIndex,
+            evmWalletDetails
+          );
 
       // If the `success` flag is false, we will return the error response
       if (!confirmTxRequest?.success) {
@@ -934,8 +934,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             useSelfSigning
           )
         : useSelfSigning
-          ? await this.signAndApproveGateway(commandId, destChain, evmWalletDetails, undefined, true)
-          : await this.signAndApproveGateway(commandId, destChain, evmWalletDetails);
+        ? await this.signAndApproveGateway(commandId, destChain, evmWalletDetails, undefined, true)
+        : await this.signAndApproveGateway(commandId, destChain, evmWalletDetails);
 
       // If the response.success is false, we will return the error response
       if (!response.success) {
@@ -980,8 +980,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             useSelfSigning
           )
         : useSelfSigning
-          ? await this.findBatchAndSignIfNeeded(commandId, destChain, undefined, true)
-          : await this.findBatchAndSignIfNeeded(commandId, destChain);
+        ? await this.findBatchAndSignIfNeeded(commandId, destChain, undefined, true)
+        : await this.findBatchAndSignIfNeeded(commandId, destChain);
 
       if (!signTxRequest?.success) {
         return {
