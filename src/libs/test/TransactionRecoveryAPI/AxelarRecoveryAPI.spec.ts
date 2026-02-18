@@ -489,13 +489,26 @@ describe("AxelarRecoveryAPI", () => {
       expect(response.rawLog).toBe("");
     });
 
-    test("warns when options object has no cosmos signing material", () => {
+    test("does not warn when options object has no cosmos signing material and self-sign flag is false", () => {
       const warnSpy = vitest.spyOn(console, "warn").mockImplementation(() => undefined);
       const resolved = (api as any).resolveSelfSigningOptions({
         evmWalletDetails: { useWindowEthereum: true },
       });
 
       expect(resolved.shouldSelfSign).toBeFalsy();
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    test("warns when self-sign flag is true but cosmos signing material is missing", () => {
+      const warnSpy = vitest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const resolved = (api as any).resolveSelfSigningOptions(
+        {
+          evmWalletDetails: { useWindowEthereum: true },
+        },
+        true
+      );
+
+      expect(resolved.shouldSelfSign).toBeTruthy();
       expect(warnSpy).toHaveBeenCalledWith("[recovery self-sign options ignored]", {
         reason: "cosmos signing material missing",
       });

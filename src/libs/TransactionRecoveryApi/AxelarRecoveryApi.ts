@@ -439,9 +439,15 @@ export class AxelarRecoveryApi {
     optionsOrCosmosWalletDetails?: CosmosBasedWalletDetails | RecoverySelfSigningOptions,
     useSelfSigning = false
   ): ResolvedSelfSigningOptions {
+    if (!optionsOrCosmosWalletDetails || typeof optionsOrCosmosWalletDetails !== "object") {
+      return {
+        cosmosWalletDetails: undefined,
+        evmWalletDetails: undefined,
+        shouldSelfSign: useSelfSigning,
+      };
+    }
+
     if (
-      optionsOrCosmosWalletDetails &&
-      typeof optionsOrCosmosWalletDetails === "object" &&
       ("offlineSigner" in optionsOrCosmosWalletDetails ||
         "mnemonic" in optionsOrCosmosWalletDetails)
     ) {
@@ -452,30 +458,20 @@ export class AxelarRecoveryApi {
       };
     }
 
-    if (optionsOrCosmosWalletDetails && typeof optionsOrCosmosWalletDetails === "object") {
-      const options = optionsOrCosmosWalletDetails as RecoverySelfSigningOptions;
-      const hasCosmosSigningMaterial = Boolean(
-        options.cosmosWalletDetails?.offlineSigner || options.cosmosWalletDetails?.mnemonic
-      );
-      const shouldSelfSign = hasCosmosSigningMaterial || useSelfSigning;
+    const options = optionsOrCosmosWalletDetails as RecoverySelfSigningOptions;
+    const cosmosSignerDetails = this.getCosmosSignerDetails(options.cosmosWalletDetails);
+    const shouldSelfSign = Boolean(cosmosSignerDetails) || useSelfSigning;
 
-      if (!hasCosmosSigningMaterial && !useSelfSigning) {
-        console.warn("[recovery self-sign options ignored]", {
-          reason: "cosmos signing material missing",
-        });
-      }
-
-      return {
-        cosmosWalletDetails: options.cosmosWalletDetails,
-        evmWalletDetails: options.evmWalletDetails,
-        shouldSelfSign,
-      };
+    if (!cosmosSignerDetails && useSelfSigning) {
+      console.warn("[recovery self-sign options ignored]", {
+        reason: "cosmos signing material missing",
+      });
     }
 
     return {
-      cosmosWalletDetails: undefined,
-      evmWalletDetails: undefined,
-      shouldSelfSign: useSelfSigning,
+      cosmosWalletDetails: cosmosSignerDetails,
+      evmWalletDetails: options.evmWalletDetails,
+      shouldSelfSign,
     };
   }
 
