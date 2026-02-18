@@ -460,4 +460,58 @@ describe("AxelarRecoveryAPI", () => {
       });
     });
   });
+
+  describe("self-signing option handling", () => {
+    test("maps self-signed response into AxelarTxResponse", async () => {
+      vitest.spyOn(api as any, "getChainInfo").mockResolvedValue({
+        module: "evm",
+        chainIdentifier: {
+          [Environment.TESTNET]: "avalanche",
+        },
+      });
+      vitest.spyOn(api as any, "trySelfSignAndBroadcast").mockResolvedValue({
+        code: 0,
+        height: 1,
+        transactionHash: "0x123",
+        events: [],
+        gasUsed: 1,
+        gasWanted: 1,
+      });
+
+      const response = await api.confirmGatewayTx("0xabc", "avalanche", {
+        cosmosWalletDetails: {
+          offlineSigner: {} as any,
+        },
+      });
+
+      expect(response).toBeDefined();
+      expect(response.transactionHash).toBe("0x123");
+      expect(response.rawLog).toBe("");
+    });
+
+    test("warns when options object has no cosmos signing material", () => {
+      const warnSpy = vitest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const resolved = (api as any).resolveSelfSigningOptions({
+        evmWalletDetails: { useWindowEthereum: true },
+      });
+
+      expect(resolved.shouldSelfSign).toBeFalsy();
+      expect(warnSpy).toHaveBeenCalledWith("[recovery self-sign options ignored]", {
+        reason: "cosmos signing material missing",
+      });
+    });
+
+    test("warns when legacy cosmos wallet details are passed without self-sign flag", () => {
+      const warnSpy = vitest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const resolved = (api as any).resolveSelfSigningOptions({
+        offlineSigner: {} as any,
+      });
+
+      expect(resolved.shouldSelfSign).toBeFalsy();
+      expect(warnSpy).toHaveBeenCalledWith("[recovery legacy self-sign params ignored]", {
+        reason: "useSelfSigning flag not set",
+        hint: "pass true as the legacy flag or use options object",
+      });
+    });
+  });
 });

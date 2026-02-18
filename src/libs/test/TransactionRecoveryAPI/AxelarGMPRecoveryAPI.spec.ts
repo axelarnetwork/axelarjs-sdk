@@ -493,6 +493,38 @@ describe("AxelarGMPRecoveryAPI", () => {
       expect(result.infoLogs?.length).toEqual(2);
       expect(result.routeMessageTx).toEqual(axelarTxResponseStub());
     });
+
+    test("it should fail early when legacy self-signing has no cosmos signer", async () => {
+      const result = await api.manualRelayToDestChain(
+        "0xtest",
+        undefined,
+        undefined,
+        evmWalletDetails,
+        true,
+        undefined,
+        undefined,
+        true
+      );
+
+      expect(result.success).toBeFalsy();
+      expect(result.error).toContain("cosmos wallet signer");
+    });
+
+    test("it should warn and prioritize top-level evm wallet when both are provided", () => {
+      const warnSpy = vitest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const normalized = (api as any).normalizeManualRelayArgs({
+        evmWalletDetails: { privateKey: "top-level", useWindowEthereum: false },
+        selfSigning: {
+          evmWalletDetails: { privateKey: "self-signing", useWindowEthereum: false },
+        },
+      });
+
+      expect(normalized.evmWalletDetails.privateKey).toBe("top-level");
+      expect(warnSpy).toHaveBeenCalledWith("[recovery manual relay evm wallet precedence]", {
+        reason: "both evmWalletDetails and selfSigning.evmWalletDetails were provided",
+        using: "evmWalletDetails",
+      });
+    });
   });
 
   describe("doesTxMeetConfirmHt", () => {
@@ -606,7 +638,9 @@ describe("AxelarGMPRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x", undefined, undefined, undefined, false);
+      const res = await api.manualRelayToDestChain("0x", undefined, undefined, {
+        escapeAfterConfirm: false,
+      });
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(
@@ -649,7 +683,9 @@ describe("AxelarGMPRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x", undefined, undefined, undefined, false);
+      const res = await api.manualRelayToDestChain("0x", undefined, undefined, {
+        escapeAfterConfirm: false,
+      });
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(`findBatchAndApproveGateway(): unable to retrieve command ID`);
@@ -677,13 +713,9 @@ describe("AxelarGMPRecoveryAPI", () => {
           infoLogs: ["log"],
         });
 
-      const response = await api.manualRelayToDestChain(
-        "0x",
-        undefined,
-        undefined,
-        undefined,
-        false
-      );
+      const response = await api.manualRelayToDestChain("0x", undefined, undefined, {
+        escapeAfterConfirm: false,
+      });
       expect(mockFindEventAndConfirmIfNeeded).toHaveBeenCalled();
       expect(mockSignAndApproveGateway).toHaveBeenCalled();
       expect(response.success).toBeTruthy();

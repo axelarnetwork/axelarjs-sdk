@@ -20,7 +20,7 @@ import { mapIntoAxelarscanResponseType } from "./helpers/mappers";
 import { ChainInfo } from "src/chains/types";
 import { AxelarSigningClient } from "../AxelarSigningClient";
 import { STANDARD_FEE } from "../AxelarSigningClient/const";
-import { EncodeObject } from "@cosmjs/proto-signing";
+import { DirectSecp256k1HdWallet, EncodeObject } from "@cosmjs/proto-signing";
 import { DeliverTxResponse } from "@cosmjs/stargate";
 import {
   BatchedCommandsRequest,
@@ -80,6 +80,17 @@ export interface GMPError {
   txHash: string;
   chain: string;
   message: string;
+}
+
+export interface RecoverySelfSigningOptions {
+  cosmosWalletDetails: CosmosBasedWalletDetails;
+  evmWalletDetails?: EvmWalletDetails;
+}
+
+interface ResolvedSelfSigningOptions {
+  cosmosWalletDetails?: CosmosBasedWalletDetails;
+  evmWalletDetails?: EvmWalletDetails;
+  shouldSelfSign: boolean;
 }
 
 export interface ExecuteParams {
@@ -414,28 +425,77 @@ export class AxelarRecoveryApi {
     return chainInfo;
   }
 
+  protected getCosmosSignerDetails(
+    cosmosWalletDetails?: CosmosBasedWalletDetails
+  ): CosmosBasedWalletDetails | undefined {
+    if (cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic) {
+      return cosmosWalletDetails;
+    }
+
+    return undefined;
+  }
+
+  protected resolveSelfSigningOptions(
+    optionsOrCosmosWalletDetails?: CosmosBasedWalletDetails | RecoverySelfSigningOptions,
+    useSelfSigning = false
+  ): ResolvedSelfSigningOptions {
+    if (
+      optionsOrCosmosWalletDetails &&
+      typeof optionsOrCosmosWalletDetails === "object" &&
+      ("offlineSigner" in optionsOrCosmosWalletDetails ||
+        "mnemonic" in optionsOrCosmosWalletDetails)
+    ) {
+      return {
+        cosmosWalletDetails: optionsOrCosmosWalletDetails as CosmosBasedWalletDetails,
+        evmWalletDetails: undefined,
+        shouldSelfSign: useSelfSigning,
+      };
+    }
+
+    if (optionsOrCosmosWalletDetails && typeof optionsOrCosmosWalletDetails === "object") {
+      const options = optionsOrCosmosWalletDetails as RecoverySelfSigningOptions;
+      const hasCosmosSigningMaterial = Boolean(
+        options.cosmosWalletDetails?.offlineSigner || options.cosmosWalletDetails?.mnemonic
+      );
+      const shouldSelfSign = hasCosmosSigningMaterial || useSelfSigning;
+
+      if (!hasCosmosSigningMaterial && !useSelfSigning) {
+        console.warn("[recovery self-sign options ignored]", {
+          reason: "cosmos signing material missing",
+        });
+      }
+
+      return {
+        cosmosWalletDetails: options.cosmosWalletDetails,
+        evmWalletDetails: options.evmWalletDetails,
+        shouldSelfSign,
+      };
+    }
+
+    return {
+      cosmosWalletDetails: undefined,
+      evmWalletDetails: undefined,
+      shouldSelfSign: useSelfSigning,
+    };
+  }
+
   private async getCosmosSenderAddress(cosmosWalletDetails?: CosmosBasedWalletDetails) {
-    if (!cosmosWalletDetails) {
+    const cosmosSignerDetails = this.getCosmosSignerDetails(cosmosWalletDetails);
+    if (!cosmosSignerDetails) {
       return undefined;
     }
 
-    if (cosmosWalletDetails.offlineSigner) {
-      const [account] = await cosmosWalletDetails.offlineSigner.getAccounts();
+    if (cosmosSignerDetails.offlineSigner) {
+      const [account] = await cosmosSignerDetails.offlineSigner.getAccounts();
       return account?.address;
     }
 
-    if (cosmosWalletDetails.mnemonic) {
-      const signingClient = await AxelarSigningClient.initOrGetAxelarSigningClient({
-        environment: this.environment,
-        axelarRpcUrl: this.axelarRpcUrl,
-        cosmosBasedWalletDetails: cosmosWalletDetails,
-        options: {},
+    if (cosmosSignerDetails.mnemonic) {
+      const wallet = await DirectSecp256k1HdWallet.fromMnemonic(cosmosSignerDetails.mnemonic, {
+        prefix: "axelar",
       });
-      try {
-        return signingClient.signerAddress;
-      } finally {
-        await signingClient.disconnect();
-      }
+      const [account] = await wallet.getAccounts();
+      return account?.address;
     }
 
     return undefined;
@@ -464,25 +524,20 @@ export class AxelarRecoveryApi {
     context: Record<string, unknown>,
     buildMessages: () => Promise<readonly EncodeObject[]>,
     cosmosWalletDetails?: CosmosBasedWalletDetails,
-    useSelfSigning = false
+    shouldSelfSign = false
   ): Promise<DeliverTxResponse | undefined> {
-    if (!useSelfSigning) {
+    if (!shouldSelfSign) {
       return;
     }
 
-    const hasCosmosSigningDetails = Boolean(
-      cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic
-    );
-    if (!hasCosmosSigningDetails) {
+    const cosmosSignerDetails = this.getCosmosSignerDetails(cosmosWalletDetails);
+    if (!cosmosSignerDetails) {
       throw new Error(`Recovery self-signing requires a cosmos wallet signer for ${actionType}`);
     }
 
     try {
       const messages = await buildMessages();
-      return await this.signRecoveryMessagesWithCosmosWallet(
-        messages,
-        cosmosWalletDetails as CosmosBasedWalletDetails
-      );
+      return await this.signRecoveryMessagesWithCosmosWallet(messages, cosmosSignerDetails);
     } catch (error) {
       console.error("[recovery self-sign failed]", {
         action_type: actionType,
@@ -494,12 +549,34 @@ export class AxelarRecoveryApi {
     }
   }
 
+  private toAxelarTxResponse(txResponse: DeliverTxResponse): AxelarTxResponse {
+    return {
+      ...txResponse,
+      rawLog: (txResponse as { rawLog?: unknown }).rawLog ?? "",
+    } as AxelarTxResponse;
+  }
+
+  public async confirmGatewayTx(
+    txHash: string,
+    chainName: string,
+    options?: RecoverySelfSigningOptions
+  ): Promise<AxelarTxResponse>;
   public async confirmGatewayTx(
     txHash: string,
     chainName: string,
     cosmosWalletDetails?: CosmosBasedWalletDetails,
-    useSelfSigning = false
+    useSelfSigning?: boolean
+  ): Promise<AxelarTxResponse>;
+  public async confirmGatewayTx(
+    txHash: string,
+    chainName: string,
+    optionsOrCosmosWalletDetails?: CosmosBasedWalletDetails | RecoverySelfSigningOptions,
+    legacyUseSelfSigning = false
   ): Promise<AxelarTxResponse> {
+    const { cosmosWalletDetails, shouldSelfSign } = this.resolveSelfSigningOptions(
+      optionsOrCosmosWalletDetails,
+      legacyUseSelfSigning
+    );
     const { module, chainIdentifier } = await this.getChainInfo(chainName);
     const chain = chainIdentifier[this.environment];
 
@@ -528,11 +605,11 @@ export class AxelarRecoveryApi {
         ];
       },
       cosmosWalletDetails,
-      useSelfSigning
+      shouldSelfSign
     );
 
     if (selfSignedTx) {
-      return selfSignedTx as unknown as AxelarTxResponse;
+      return this.toAxelarTxResponse(selfSignedTx);
     }
 
     const txBytes = await this.execRecoveryUrlFetch("/confirm_gateway_tx", {
@@ -569,9 +646,26 @@ export class AxelarRecoveryApi {
     txHash: string,
     payload: string,
     logIndex?: number,
+    options?: RecoverySelfSigningOptions
+  ): Promise<AxelarTxResponse>;
+  public async routeMessageRequest(
+    txHash: string,
+    payload: string,
+    logIndex?: number,
     cosmosWalletDetails?: CosmosBasedWalletDetails,
-    useSelfSigning = false
+    useSelfSigning?: boolean
+  ): Promise<AxelarTxResponse>;
+  public async routeMessageRequest(
+    txHash: string,
+    payload: string,
+    logIndex?: number,
+    optionsOrCosmosWalletDetails?: CosmosBasedWalletDetails | RecoverySelfSigningOptions,
+    legacyUseSelfSigning = false
   ): Promise<AxelarTxResponse> {
+    const { cosmosWalletDetails, shouldSelfSign } = this.resolveSelfSigningOptions(
+      optionsOrCosmosWalletDetails,
+      legacyUseSelfSigning
+    );
     const id = logIndex === -1 ? `${txHash}` : `${txHash}-${logIndex}`;
 
     const selfSignedTx = await this.trySelfSignAndBroadcast(
@@ -599,11 +693,11 @@ export class AxelarRecoveryApi {
         ];
       },
       cosmosWalletDetails,
-      useSelfSigning
+      shouldSelfSign
     );
 
     if (selfSignedTx) {
-      return selfSignedTx as unknown as AxelarTxResponse;
+      return this.toAxelarTxResponse(selfSignedTx);
     }
 
     const txBytes = await this.execRecoveryUrlFetch("/route_message", {
@@ -616,9 +710,22 @@ export class AxelarRecoveryApi {
 
   public async signCommands(
     chainName: string,
+    options?: RecoverySelfSigningOptions
+  ): Promise<AxelarTxResponse>;
+  public async signCommands(
+    chainName: string,
     cosmosWalletDetails?: CosmosBasedWalletDetails,
-    useSelfSigning = false
+    useSelfSigning?: boolean
+  ): Promise<AxelarTxResponse>;
+  public async signCommands(
+    chainName: string,
+    optionsOrCosmosWalletDetails?: CosmosBasedWalletDetails | RecoverySelfSigningOptions,
+    legacyUseSelfSigning = false
   ): Promise<AxelarTxResponse> {
+    const { cosmosWalletDetails, shouldSelfSign } = this.resolveSelfSigningOptions(
+      optionsOrCosmosWalletDetails,
+      legacyUseSelfSigning
+    );
     const { module, chainIdentifier } = await this.getChainInfo(chainName);
     const chain = chainIdentifier[this.environment];
 
@@ -645,11 +752,11 @@ export class AxelarRecoveryApi {
         ];
       },
       cosmosWalletDetails,
-      useSelfSigning
+      shouldSelfSign
     );
 
     if (selfSignedTx) {
-      return selfSignedTx as unknown as AxelarTxResponse;
+      return this.toAxelarTxResponse(selfSignedTx);
     }
 
     const txBytes = await this.execRecoveryUrlFetch("/sign_commands", {
