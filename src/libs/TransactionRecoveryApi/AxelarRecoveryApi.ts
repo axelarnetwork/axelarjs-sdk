@@ -448,8 +448,8 @@ export class AxelarRecoveryApi {
     }
 
     if (
-      ("offlineSigner" in optionsOrCosmosWalletDetails ||
-        "mnemonic" in optionsOrCosmosWalletDetails)
+      "offlineSigner" in optionsOrCosmosWalletDetails ||
+      "mnemonic" in optionsOrCosmosWalletDetails
     ) {
       return {
         cosmosWalletDetails: optionsOrCosmosWalletDetails as CosmosBasedWalletDetails,
