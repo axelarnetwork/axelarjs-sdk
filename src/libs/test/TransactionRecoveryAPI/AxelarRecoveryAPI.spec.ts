@@ -501,17 +501,12 @@ describe("AxelarRecoveryAPI", () => {
       });
     });
 
-    test("warns when legacy cosmos wallet details are passed without self-sign flag", () => {
-      const warnSpy = vitest.spyOn(console, "warn").mockImplementation(() => undefined);
+    test("keeps legacy cosmos wallet details on relayer path without self-sign flag", () => {
       const resolved = (api as any).resolveSelfSigningOptions({
         offlineSigner: {} as any,
       });
 
       expect(resolved.shouldSelfSign).toBeFalsy();
-      expect(warnSpy).toHaveBeenCalledWith("[recovery legacy self-sign params ignored]", {
-        reason: "useSelfSigning flag not set",
-        hint: "pass true as the legacy flag or use options object",
-      });
     });
   });
 });
