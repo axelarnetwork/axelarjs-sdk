@@ -486,7 +486,7 @@ describe("AxelarRecoveryAPI", () => {
 
       expect(response).toBeDefined();
       expect(response.transactionHash).toBe("0x123");
-      expect(response.rawLog).toBe("");
+      expect(response.rawLog).toBe("[]");
     });
 
     test("does not warn when options object has no cosmos signing material and self-sign flag is false", () => {

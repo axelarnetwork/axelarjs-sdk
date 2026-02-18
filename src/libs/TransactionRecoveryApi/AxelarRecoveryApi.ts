@@ -548,7 +548,7 @@ export class AxelarRecoveryApi {
   private toAxelarTxResponse(txResponse: DeliverTxResponse): AxelarTxResponse {
     return {
       ...txResponse,
-      rawLog: (txResponse as { rawLog?: unknown }).rawLog ?? "",
+      rawLog: (txResponse as { rawLog?: unknown }).rawLog || "[]",
     } as AxelarTxResponse;
   }
 

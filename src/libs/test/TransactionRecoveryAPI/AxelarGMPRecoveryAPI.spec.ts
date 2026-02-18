@@ -104,7 +104,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         txHash,
         undefined
       );
-      expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
+      expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE, undefined);
       expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash, undefined);
       expect(response).toBeDefined();
       expect(response.infoLogs.length).toBeGreaterThan(0);
@@ -204,7 +204,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         evmWalletDetails
       );
 
-      expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
+      expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE, undefined);
       expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash, undefined);
       expect(response.success).toBeFalsy();
       expect(response.eventResponse).toBeDefined();
@@ -224,7 +224,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       vitest.spyOn(api, "fetchBatchData").mockResolvedValue(undefined);
 
       const signResult = await api.findBatchAndSignIfNeeded("conmmandId", EvmChain.AVALANCHE);
-      expect(mockSignCommandTx).toHaveBeenLastCalledWith(EvmChain.AVALANCHE);
+      expect(mockSignCommandTx).toHaveBeenLastCalledWith(EvmChain.AVALANCHE, undefined);
       expect(signResult).toBeDefined();
     });
     test("It should skip sign an event if batch is found", async () => {
@@ -484,10 +484,18 @@ describe("AxelarGMPRecoveryAPI", () => {
         });
 
       const result = await api.manualRelayToDestChain("0xtest");
-      expect(mockRouteMesssageRequest).toHaveBeenLastCalledWith("messageID", "payload", -1);
-      expect(mockSignAndApproveGateway).toHaveBeenLastCalledWith("commandID", "avalanche", {
-        useWindowEthereum: true,
-      });
+      expect(mockRouteMesssageRequest).toHaveBeenLastCalledWith(
+        "messageID",
+        "payload",
+        -1,
+        undefined
+      );
+      expect(mockSignAndApproveGateway).toHaveBeenLastCalledWith(
+        "commandID",
+        "avalanche",
+        { useWindowEthereum: true },
+        undefined
+      );
       expect(result.success).toBeTruthy();
       expect(result.signCommandTx).toBeDefined();
       expect(result.infoLogs?.length).toEqual(2);

@@ -347,18 +347,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     };
   }
 
-  private async callWithSelfSigning<T>(
-    useSelfSigning: boolean,
-    selfSigningAction: () => Promise<T>,
-    relayerAction: () => Promise<T>
-  ): Promise<T> {
-    if (useSelfSigning) {
-      return selfSigningAction();
-    }
-
-    return relayerAction();
-  }
-
   private normalizeTxResponse<T>(tx: T): T {
     if (
       tx &&
@@ -488,20 +476,14 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
             "findEventAndConfirmIfNeeded(): self-signing requires a cosmos wallet signer",
         };
       }
-      const selfSigningOptions = cosmosSignerDetails
-        ? { cosmosWalletDetails: cosmosSignerDetails }
-        : undefined;
+      const selfSigningOptions: RecoverySelfSigningOptions | undefined =
+        useSelfSigning && cosmosSignerDetails
+          ? { cosmosWalletDetails: cosmosSignerDetails }
+          : undefined;
 
-      const confirmTx = await this.callWithSelfSigning(
-        useSelfSigning,
-        () => {
-          if (!selfSigningOptions) {
-            throw new Error("findEventAndConfirmIfNeeded(): missing cosmos signer details");
-          }
-          return this.confirmGatewayTx(txHash, srcChain, selfSigningOptions);
-        },
-        () => this.confirmGatewayTx(txHash, srcChain)
-      ).catch(() => undefined);
+      const confirmTx = await this.confirmGatewayTx(txHash, srcChain, selfSigningOptions).catch(
+        () => undefined
+      );
       if (!confirmTx) {
         return {
           success: false,
@@ -550,9 +532,6 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     destChainId: string,
     options?: RecoverySelfSigningOptions
   ): Promise<SignTxSDKResponse> {
-    const { cosmosWalletDetails, shouldSelfSign } = this.resolveSelfSigningOptions(options);
-    const cosmosSignerDetails = this.getCosmosSignerDetails(cosmosWalletDetails);
-
     let signTxLog = "";
     try {
       const batchData = await retry(() => this.fetchBatchData(destChainId, commandId), 10, 3000);
@@ -564,28 +543,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           infoLogs: [signTxLog],
         };
       } else {
-        if (shouldSelfSign && !cosmosSignerDetails) {
-          return {
-            success: false,
-            errorMessage:
-              "findBatchAndSignIfNeeded(): self-signing requires a cosmos wallet signer",
-            infoLogs: [signTxLog],
-          };
-        }
-        const selfSigningOptions = cosmosSignerDetails
-          ? { cosmosWalletDetails: cosmosSignerDetails }
-          : undefined;
-
-        const signCommandTx = await this.callWithSelfSigning(
-          shouldSelfSign,
-          () => {
-            if (!selfSigningOptions) {
-              throw new Error("findBatchAndSignIfNeeded(): missing cosmos signer details");
-            }
-            return this.signCommands(destChainId, selfSigningOptions);
-          },
-          () => this.signCommands(destChainId)
-        );
+        const signCommandTx = await this.signCommands(destChainId, options);
         signTxLog = `signing: signed batch for commandId (${commandId}) in tx: ${signCommandTx.transactionHash}`;
         if (this.debugMode) console.debug(signTxLog);
         return {
@@ -797,9 +755,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         error: "Recovery self-signing requires a cosmos wallet signer",
       };
     }
-    const selfSigningOptions = cosmosSignerDetails
-      ? { cosmosWalletDetails: cosmosSignerDetails }
-      : undefined;
+    const selfSigningOptions: RecoverySelfSigningOptions | undefined =
+      useSelfSigning && cosmosSignerDetails
+        ? { cosmosWalletDetails: cosmosSignerDetails }
+        : undefined;
     const gmpTx = await this.fetchGMPTransaction(txHash);
 
     // Fetch all necessary data to send the route message tx
@@ -807,15 +766,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const messageId = gmpTx.call.id;
 
     // Send the route message tx
-    const routeMessageTx = await this.callWithSelfSigning(
-      useSelfSigning,
-      () => {
-        if (!selfSigningOptions) {
-          throw new Error("recoverCosmosToCosmosTx(): missing cosmos signer details");
-        }
-        return this.routeMessageRequest(messageId, payload, -1, selfSigningOptions);
-      },
-      () => this.routeMessageRequest(messageId, payload, -1)
+    const routeMessageTx = await this.routeMessageRequest(
+      messageId,
+      payload,
+      -1,
+      selfSigningOptions
     ).catch(() => undefined);
 
     // If the `success` flag is false, return the error response
@@ -849,9 +804,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         error: "Recovery self-signing requires a cosmos wallet signer",
       };
     }
-    const selfSigningOptions = cosmosSignerDetails
-      ? { cosmosWalletDetails: cosmosSignerDetails }
-      : undefined;
+    const selfSigningOptions: RecoverySelfSigningOptions | undefined =
+      useSelfSigning && cosmosSignerDetails
+        ? { cosmosWalletDetails: cosmosSignerDetails }
+        : undefined;
     // Check if the tx is confirmed on the source chain
     const isConfirmed = await this.doesTxMeetConfirmHt(
       srcChain,
@@ -867,16 +823,9 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     // ConfirmGatewayTx and check if it is successfully executed
-    const confirmTx = await this.callWithSelfSigning(
-      useSelfSigning,
-      () => {
-        if (!selfSigningOptions) {
-          throw new Error("recoverEvmToCosmosTx(): missing cosmos signer details");
-        }
-        return this.confirmGatewayTx(txHash, srcChain, selfSigningOptions);
-      },
-      () => this.confirmGatewayTx(txHash, srcChain)
-    ).catch(() => undefined);
+    const confirmTx = await this.confirmGatewayTx(txHash, srcChain, selfSigningOptions).catch(
+      () => undefined
+    );
 
     if (!confirmTx) {
       return {
@@ -892,15 +841,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const eventIndex = txEventIndex ?? (await this.getEventIndex(srcChain as EvmChain, txHash));
 
     // Send the route message tx
-    const routeMessageTx = await this.callWithSelfSigning(
-      useSelfSigning,
-      () => {
-        if (!selfSigningOptions) {
-          throw new Error("recoverEvmToCosmosTx(): missing cosmos signer details");
-        }
-        return this.routeMessageRequest(txHash, payload, eventIndex, selfSigningOptions);
-      },
-      () => this.routeMessageRequest(txHash, payload, eventIndex)
+    const routeMessageTx = await this.routeMessageRequest(
+      txHash,
+      payload,
+      eventIndex,
+      selfSigningOptions
     ).catch(() => undefined);
 
     // If the `success` flag is false, return the error response
@@ -937,9 +882,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
         error: "Recovery self-signing requires a cosmos wallet signer",
       };
     }
-    const selfSigningOptions = cosmosSignerDetails
-      ? { cosmosWalletDetails: cosmosSignerDetails }
-      : undefined;
+    const selfSigningOptions: RecoverySelfSigningOptions | undefined =
+      useSelfSigning && cosmosSignerDetails
+        ? { cosmosWalletDetails: cosmosSignerDetails }
+        : undefined;
     const txDetails = await this.fetchGMPTransaction(txHash);
     const {
       messageId: msgIdFromAxelarscan,
@@ -951,15 +897,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const messageId: string = msgIdParam ?? msgIdFromAxelarscan;
 
     // Send RouteMessageTx
-    const routeMessageTx = await this.callWithSelfSigning(
-      useSelfSigning,
-      () => {
-        if (!selfSigningOptions) {
-          throw new Error("recoverCosmosToEvmTx(): missing cosmos signer details");
-        }
-        return this.routeMessageRequest(messageId, payload, -1, selfSigningOptions);
-      },
-      () => this.routeMessageRequest(messageId, payload, -1)
+    const routeMessageTx = await this.routeMessageRequest(
+      messageId,
+      payload,
+      -1,
+      selfSigningOptions
     ).catch(() => undefined);
 
     if (!routeMessageTx) {
@@ -970,20 +912,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     // Dispatch a SignCommand transaction and an Approve transaction to the Gateway contract.
-    const response = await this.callWithSelfSigning(
-      useSelfSigning,
-      () => {
-        if (!selfSigningOptions) {
-          throw new Error("recoverCosmosToEvmTx(): missing cosmos signer details");
-        }
-        return this.signAndApproveGateway(
-          commandId,
-          destinationChain,
-          evmWalletDetails,
-          selfSigningOptions
-        );
-      },
-      () => this.signAndApproveGateway(commandId, destinationChain, evmWalletDetails)
+    const response = await this.signAndApproveGateway(
+      commandId,
+      destinationChain,
+      evmWalletDetails,
+      selfSigningOptions
     );
 
     // If the response.success is false, we will return the error response
@@ -1020,9 +953,10 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       if (useSelfSigning && !cosmosSignerDetails) {
         throw new Error("Recovery self-signing requires a cosmos wallet signer");
       }
-      const selfSigningOptions = cosmosSignerDetails
-        ? { cosmosWalletDetails: cosmosSignerDetails }
-        : undefined;
+      const selfSigningOptions: RecoverySelfSigningOptions | undefined =
+        useSelfSigning && cosmosSignerDetails
+          ? { cosmosWalletDetails: cosmosSignerDetails }
+          : undefined;
 
       // ConfirmGatewayTx and check if it is successfully executed
       const confirmTxRequest = await this.findEventAndConfirmIfNeeded(
@@ -1055,20 +989,11 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       }
 
       // Find the batch and sign it
-      const response = await this.callWithSelfSigning(
-        useSelfSigning,
-        () => {
-          if (!selfSigningOptions) {
-            throw new Error("recoverEvmToEvmTx(): missing cosmos signer details");
-          }
-          return this.signAndApproveGateway(
-            commandId,
-            destChain,
-            evmWalletDetails,
-            selfSigningOptions
-          );
-        },
-        () => this.signAndApproveGateway(commandId, destChain, evmWalletDetails)
+      const response = await this.signAndApproveGateway(
+        commandId,
+        destChain,
+        evmWalletDetails,
+        selfSigningOptions
       );
 
       // If the response.success is false, we will return the error response
@@ -1105,24 +1030,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     options?: RecoverySelfSigningOptions
   ): Promise<GMPRecoveryError | GMPRecoverySuccess> {
     try {
-      const { cosmosWalletDetails, shouldSelfSign } = this.resolveSelfSigningOptions(options);
-      const cosmosSignerDetails = this.getCosmosSignerDetails(cosmosWalletDetails);
-      if (shouldSelfSign && !cosmosSignerDetails) {
-        throw new Error("Recovery self-signing requires a cosmos wallet signer");
-      }
-      const selfSigningOptions = cosmosSignerDetails
-        ? { cosmosWalletDetails: cosmosSignerDetails }
-        : undefined;
-      const signTxRequest = await this.callWithSelfSigning(
-        shouldSelfSign,
-        () => {
-          if (!selfSigningOptions) {
-            throw new Error("signAndApproveGateway(): missing cosmos signer details");
-          }
-          return this.findBatchAndSignIfNeeded(commandId, destChain, selfSigningOptions);
-        },
-        () => this.findBatchAndSignIfNeeded(commandId, destChain)
-      );
+      const { shouldSelfSign } = this.resolveSelfSigningOptions(options);
+      const signTxRequest = await this.findBatchAndSignIfNeeded(commandId, destChain, options);
 
       if (!signTxRequest?.success) {
         return {
