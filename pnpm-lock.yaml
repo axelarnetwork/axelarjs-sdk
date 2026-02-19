@@ -15,8 +15,8 @@ importers:
         specifier: ^6.3.0
         version: 6.4.0
       '@axelar-network/axelarjs-types':
-        specifier: ^1.3.0-alpha.1
-        version: 1.3.0-alpha.1
+        specifier: ^1.3.0
+        version: 1.3.0
       '@cosmjs/json-rpc':
         specifier: ^0.38.1
         version: 0.38.1
@@ -207,8 +207,8 @@ packages:
     resolution: {integrity: sha512-sb+8gLNF/xMztN2m05mm8Rh1hpG298DPOqEtOZsQz0LTbhzFe/yKoIgOuO++0G9w5o4u/skTQA1SOSpMWC0M/w==}
     engines: {node: '>=14.13.1'}
 
-  '@axelar-network/axelarjs-types@1.3.0-alpha.1':
-    resolution: {integrity: sha512-1V606cIXiWYZxHL46L5ONYSpXKk7S7bB2P4qPAVMfn73UJTSLXmYYoxfNW2r4Jt//twMcRuApEKhJpHoE/2PDQ==}
+  '@axelar-network/axelarjs-types@1.3.0':
+    resolution: {integrity: sha512-lNn9eHZVy1yyZ2hno5Gjo7yw5PvdtSCwKKUwurQOpVx1mMvmto0wojqJ1bOrODQ3fKFmHkWmYK8tm+br1YS87Q==}
 
   '@babel/code-frame@7.28.6':
     resolution: {integrity: sha512-JYgintcMjRiCvS8mMECzaEn+m3PfoQiyqukOMCCVQtoJGYJw8j/8LBJEiqkHLkfwCcs74E3pbAUFNg7d9VNJ+Q==}
@@ -3671,7 +3671,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@axelar-network/axelarjs-types@1.3.0-alpha.1':
+  '@axelar-network/axelarjs-types@1.3.0':
     dependencies:
       long: 4.0.0
       protobufjs: 6.11.4

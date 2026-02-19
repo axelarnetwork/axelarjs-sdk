@@ -1,21 +1,40 @@
 import { TransactionRequest } from "@ethersproject/providers";
 import fetch from "cross-fetch";
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { loadChains } from "../../chains";
 import { EnvironmentConfigs, getConfigs } from "../../constants";
 import { retry, throwIfInvalidChainIds } from "../../utils";
 import { AxelarQueryClient, AxelarQueryClientType } from "../AxelarQueryClient";
-import { AxelarRecoveryAPIConfig, Environment, EvmWalletDetails } from "../types";
+import {
+  AxelarTxResponse,
+  AxelarRecoveryAPIConfig,
+  CosmosBasedWalletDetails,
+  Environment,
+  EvmWalletDetails,
+} from "../types";
 import { EvmChain } from "../../constants/EvmChain";
 import EVMClient from "./client/EVMClient";
 import { broadcastCosmosTxBytes } from "./client/helpers/cosmos";
 import rpcInfo from "./constants/chain";
 import { mapIntoAxelarscanResponseType } from "./helpers/mappers";
 import { ChainInfo } from "src/chains/types";
+import { AxelarSigningClient } from "../AxelarSigningClient";
+import { STANDARD_FEE } from "../AxelarSigningClient/const";
+import { DirectSecp256k1HdWallet, EncodeObject } from "@cosmjs/proto-signing";
+import { DeliverTxResponse } from "@cosmjs/stargate";
 import {
   BatchedCommandsRequest,
   GatewayAddressRequest,
 } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
+import {
+  ConfirmGatewayTxRequest,
+  SignCommandsRequest,
+  protobufPackage as EvmProtobufPackage,
+} from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/tx";
+import {
+  RouteMessageRequest,
+  protobufPackage as AxelarnetProtobufPackage,
+} from "@axelar-network/axelarjs-types/axelar/axelarnet/v1beta1/tx";
 
 export enum GMPStatus {
   SRC_GATEWAY_CALLED = "source_gateway_called",
@@ -61,6 +80,17 @@ export interface GMPError {
   txHash: string;
   chain: string;
   message: string;
+}
+
+export interface RecoverySelfSigningOptions {
+  cosmosWalletDetails: CosmosBasedWalletDetails;
+  evmWalletDetails?: EvmWalletDetails;
+}
+
+interface ResolvedSelfSigningOptions {
+  cosmosWalletDetails?: CosmosBasedWalletDetails;
+  evmWalletDetails?: EvmWalletDetails;
+  shouldSelfSign: boolean;
 }
 
 export interface ExecuteParams {
@@ -395,13 +425,193 @@ export class AxelarRecoveryApi {
     return chainInfo;
   }
 
-  public async confirmGatewayTx(txHash: string, chainName: string) {
+  protected getCosmosSignerDetails(
+    cosmosWalletDetails?: CosmosBasedWalletDetails
+  ): CosmosBasedWalletDetails | undefined {
+    if (cosmosWalletDetails?.offlineSigner || cosmosWalletDetails?.mnemonic) {
+      return cosmosWalletDetails;
+    }
+
+    return undefined;
+  }
+
+  protected resolveSelfSigningOptions(
+    optionsOrCosmosWalletDetails?: CosmosBasedWalletDetails | RecoverySelfSigningOptions,
+    useSelfSigning = false
+  ): ResolvedSelfSigningOptions {
+    if (!optionsOrCosmosWalletDetails || typeof optionsOrCosmosWalletDetails !== "object") {
+      return {
+        cosmosWalletDetails: undefined,
+        evmWalletDetails: undefined,
+        shouldSelfSign: useSelfSigning,
+      };
+    }
+
+    if (
+      "offlineSigner" in optionsOrCosmosWalletDetails ||
+      "mnemonic" in optionsOrCosmosWalletDetails
+    ) {
+      return {
+        cosmosWalletDetails: optionsOrCosmosWalletDetails as CosmosBasedWalletDetails,
+        evmWalletDetails: undefined,
+        shouldSelfSign: useSelfSigning,
+      };
+    }
+
+    const options = optionsOrCosmosWalletDetails as RecoverySelfSigningOptions;
+    const cosmosSignerDetails = this.getCosmosSignerDetails(options.cosmosWalletDetails);
+    const shouldSelfSign = Boolean(cosmosSignerDetails) || useSelfSigning;
+
+    if (!cosmosSignerDetails && useSelfSigning) {
+      console.warn("[recovery self-sign options ignored]", {
+        reason: "cosmos signing material missing",
+      });
+    }
+
+    return {
+      cosmosWalletDetails: cosmosSignerDetails,
+      evmWalletDetails: options.evmWalletDetails,
+      shouldSelfSign,
+    };
+  }
+
+  private async getCosmosSenderAddress(cosmosWalletDetails?: CosmosBasedWalletDetails) {
+    const cosmosSignerDetails = this.getCosmosSignerDetails(cosmosWalletDetails);
+    if (!cosmosSignerDetails) {
+      return undefined;
+    }
+
+    if (cosmosSignerDetails.offlineSigner) {
+      const [account] = await cosmosSignerDetails.offlineSigner.getAccounts();
+      return account?.address;
+    }
+
+    if (cosmosSignerDetails.mnemonic) {
+      const wallet = await DirectSecp256k1HdWallet.fromMnemonic(cosmosSignerDetails.mnemonic, {
+        prefix: "axelar",
+      });
+      const [account] = await wallet.getAccounts();
+      return account?.address;
+    }
+
+    return undefined;
+  }
+
+  private async signRecoveryMessagesWithCosmosWallet(
+    messages: readonly EncodeObject[],
+    cosmosWalletDetails: CosmosBasedWalletDetails
+  ): Promise<DeliverTxResponse> {
+    const signingClient = await AxelarSigningClient.initOrGetAxelarSigningClient({
+      environment: this.environment,
+      axelarRpcUrl: this.axelarRpcUrl,
+      cosmosBasedWalletDetails: cosmosWalletDetails,
+      options: {},
+    });
+
+    try {
+      return await signingClient.signThenBroadcast(messages, STANDARD_FEE);
+    } finally {
+      await signingClient.disconnect();
+    }
+  }
+
+  private async trySelfSignAndBroadcast(
+    actionType: string,
+    context: Record<string, unknown>,
+    buildMessages: () => Promise<readonly EncodeObject[]>,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    shouldSelfSign = false
+  ): Promise<DeliverTxResponse | undefined> {
+    if (!shouldSelfSign) {
+      return;
+    }
+
+    const cosmosSignerDetails = this.getCosmosSignerDetails(cosmosWalletDetails);
+    if (!cosmosSignerDetails) {
+      throw new Error(`Recovery self-signing requires a cosmos wallet signer for ${actionType}`);
+    }
+
+    try {
+      const messages = await buildMessages();
+      return await this.signRecoveryMessagesWithCosmosWallet(messages, cosmosSignerDetails);
+    } catch (error) {
+      console.error("[recovery self-sign failed]", {
+        action_type: actionType,
+        use_self_signing: true,
+        ...context,
+        error,
+      });
+      throw error;
+    }
+  }
+
+  private toAxelarTxResponse(txResponse: DeliverTxResponse): AxelarTxResponse {
+    return {
+      ...txResponse,
+      rawLog: (txResponse as { rawLog?: unknown }).rawLog || "[]",
+    } as AxelarTxResponse;
+  }
+
+  public async confirmGatewayTx(
+    txHash: string,
+    chainName: string,
+    options?: RecoverySelfSigningOptions
+  ): Promise<AxelarTxResponse>;
+  public async confirmGatewayTx(
+    txHash: string,
+    chainName: string,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning?: boolean
+  ): Promise<AxelarTxResponse>;
+  public async confirmGatewayTx(
+    txHash: string,
+    chainName: string,
+    optionsOrCosmosWalletDetails?: CosmosBasedWalletDetails | RecoverySelfSigningOptions,
+    legacyUseSelfSigning = false
+  ): Promise<AxelarTxResponse> {
+    const { cosmosWalletDetails, shouldSelfSign } = this.resolveSelfSigningOptions(
+      optionsOrCosmosWalletDetails,
+      legacyUseSelfSigning
+    );
     const { module, chainIdentifier } = await this.getChainInfo(chainName);
+    const chain = chainIdentifier[this.environment];
+
+    const selfSignedTx = await this.trySelfSignAndBroadcast(
+      "confirm_gateway_tx",
+      {
+        tx_hash: txHash,
+        source_chain: chainName,
+        chain_identifier: chain,
+      },
+      async () => {
+        const sender = await this.getCosmosSenderAddress(cosmosWalletDetails);
+        if (!sender) {
+          throw new Error("cosmos signer is not connected");
+        }
+
+        return [
+          {
+            typeUrl: `/${EvmProtobufPackage}.ConfirmGatewayTxRequest`,
+            value: ConfirmGatewayTxRequest.fromPartial({
+              sender,
+              chain,
+              txId: Buffer.from(utils.arrayify(txHash)),
+            }),
+          },
+        ];
+      },
+      cosmosWalletDetails,
+      shouldSelfSign
+    );
+
+    if (selfSignedTx) {
+      return this.toAxelarTxResponse(selfSignedTx);
+    }
 
     const txBytes = await this.execRecoveryUrlFetch("/confirm_gateway_tx", {
       txHash,
       module,
-      chain: chainIdentifier[this.environment],
+      chain,
     });
 
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
@@ -428,20 +638,125 @@ export class AxelarRecoveryApi {
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
-  public async routeMessageRequest(txHash: string, payload: string, logIndex?: number) {
+  public async routeMessageRequest(
+    txHash: string,
+    payload: string,
+    logIndex?: number,
+    options?: RecoverySelfSigningOptions
+  ): Promise<AxelarTxResponse>;
+  public async routeMessageRequest(
+    txHash: string,
+    payload: string,
+    logIndex?: number,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning?: boolean
+  ): Promise<AxelarTxResponse>;
+  public async routeMessageRequest(
+    txHash: string,
+    payload: string,
+    logIndex?: number,
+    optionsOrCosmosWalletDetails?: CosmosBasedWalletDetails | RecoverySelfSigningOptions,
+    legacyUseSelfSigning = false
+  ): Promise<AxelarTxResponse> {
+    const { cosmosWalletDetails, shouldSelfSign } = this.resolveSelfSigningOptions(
+      optionsOrCosmosWalletDetails,
+      legacyUseSelfSigning
+    );
+    const id = logIndex === -1 ? `${txHash}` : `${txHash}-${logIndex}`;
+
+    const selfSignedTx = await this.trySelfSignAndBroadcast(
+      "route_message",
+      {
+        tx_hash: txHash,
+        log_index: logIndex,
+        id,
+      },
+      async () => {
+        const sender = await this.getCosmosSenderAddress(cosmosWalletDetails);
+        if (!sender) {
+          throw new Error("cosmos signer is not connected");
+        }
+
+        return [
+          {
+            typeUrl: `/${AxelarnetProtobufPackage}.RouteMessageRequest`,
+            value: RouteMessageRequest.fromPartial({
+              sender,
+              id,
+              payload: Buffer.from(utils.arrayify(payload)),
+            }),
+          },
+        ];
+      },
+      cosmosWalletDetails,
+      shouldSelfSign
+    );
+
+    if (selfSignedTx) {
+      return this.toAxelarTxResponse(selfSignedTx);
+    }
+
     const txBytes = await this.execRecoveryUrlFetch("/route_message", {
       payload,
-      id: logIndex === -1 ? `${txHash}` : `${txHash}-${logIndex}`,
+      id,
     });
 
     return broadcastCosmosTxBytes(txBytes, this.axelarRpcUrl);
   }
 
-  public async signCommands(chainName: string) {
+  public async signCommands(
+    chainName: string,
+    options?: RecoverySelfSigningOptions
+  ): Promise<AxelarTxResponse>;
+  public async signCommands(
+    chainName: string,
+    cosmosWalletDetails?: CosmosBasedWalletDetails,
+    useSelfSigning?: boolean
+  ): Promise<AxelarTxResponse>;
+  public async signCommands(
+    chainName: string,
+    optionsOrCosmosWalletDetails?: CosmosBasedWalletDetails | RecoverySelfSigningOptions,
+    legacyUseSelfSigning = false
+  ): Promise<AxelarTxResponse> {
+    const { cosmosWalletDetails, shouldSelfSign } = this.resolveSelfSigningOptions(
+      optionsOrCosmosWalletDetails,
+      legacyUseSelfSigning
+    );
     const { module, chainIdentifier } = await this.getChainInfo(chainName);
+    const chain = chainIdentifier[this.environment];
+
+    const selfSignedTx = await this.trySelfSignAndBroadcast(
+      "sign_commands",
+      {
+        destination_chain: chainName,
+        chain_identifier: chain,
+      },
+      async () => {
+        const sender = await this.getCosmosSenderAddress(cosmosWalletDetails);
+        if (!sender) {
+          throw new Error("cosmos signer is not connected");
+        }
+
+        return [
+          {
+            typeUrl: `/${EvmProtobufPackage}.SignCommandsRequest`,
+            value: SignCommandsRequest.fromPartial({
+              sender,
+              chain,
+            }),
+          },
+        ];
+      },
+      cosmosWalletDetails,
+      shouldSelfSign
+    );
+
+    if (selfSignedTx) {
+      return this.toAxelarTxResponse(selfSignedTx);
+    }
 
     const txBytes = await this.execRecoveryUrlFetch("/sign_commands", {
-      chain: chainIdentifier[this.environment],
+      chain,
       module,
     });
 
@@ -502,7 +817,7 @@ export class AxelarRecoveryApi {
   public async broadcastEvmTx(
     chain: string,
     data: string,
-    evmWalletDetails = { useWindowEthereum: true }
+    evmWalletDetails: EvmWalletDetails = { useWindowEthereum: true }
   ) {
     await throwIfInvalidChainIds([chain], this.environment);
     const gatewayInfo = await this.queryGatewayAddress({ chain });
