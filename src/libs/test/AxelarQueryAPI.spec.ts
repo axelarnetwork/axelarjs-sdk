@@ -5,7 +5,7 @@ import {
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { CHAINS } from "../../chains";
-import { AxelarQueryAPI, DetailedFeeResponse } from "../AxelarQueryAPI";
+import { AxelarQueryAPI, AxelarQueryAPIFeeResponse, DetailedFeeResponse } from "../AxelarQueryAPI";
 import { Environment, FeeToken } from "../types";
 import { EvmChain } from "../../constants/EvmChain";
 import { GasToken } from "../../constants/GasToken";
