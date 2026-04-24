@@ -29,7 +29,17 @@ async function getL1Fee(srcChain: string, destChain: string) {
 describe("getL1Fee", () => {
   it("query l1 fee for l2 chains should work", async () => {
     const srcChain = "ethereum";
-    const destChainsThatShouldIncludeL1Fees = ["optimism", "blast", "fraxtal", "base", "scroll"];
+    // Includes Mantle post-Arsia: getL1FeeForL2 now returns getL1Fee(data) × tokenRatio()
+    // in MNT wei, matching the destination's native charge. Zero only for Arbitrum,
+    // whose L1 component is bundled into gasUsed by its RPC estimator.
+    const destChainsThatShouldIncludeL1Fees = [
+      "optimism",
+      "blast",
+      "fraxtal",
+      "base",
+      "scroll",
+      "mantle",
+    ];
 
     const l1FeeQueries = destChainsThatShouldIncludeL1Fees.map((destChain) =>
       getL1Fee(srcChain, destChain)
@@ -40,7 +50,7 @@ describe("getL1Fee", () => {
     expect(fees.length).toBe(destChainsThatShouldIncludeL1Fees.length);
     expect(fees.every((fee) => fee.gt(0))).toBe(true);
 
-    const destChainsThatShouldNotIncludeL1Fees = ["mantle", "arbitrum"];
+    const destChainsThatShouldNotIncludeL1Fees = ["arbitrum"];
 
     const ZeroL1FeeQueries = destChainsThatShouldNotIncludeL1Fees.map((destChain) =>
       getL1Fee(srcChain, destChain)
