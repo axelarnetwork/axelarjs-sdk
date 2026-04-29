@@ -5,8 +5,8 @@ import {
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { CHAINS } from "../../chains";
-import { AxelarQueryAPI, DetailedFeeResponse } from "../AxelarQueryAPI";
-import { Environment } from "../types";
+import { AxelarQueryAPI, AxelarQueryAPIFeeResponse, DetailedFeeResponse } from "../AxelarQueryAPI";
+import { Environment, FeeToken } from "../types";
 import { EvmChain } from "../../constants/EvmChain";
 import { GasToken } from "../../constants/GasToken";
 import { activeChainsStub, getFeeStub } from "./stubs";
@@ -116,6 +116,168 @@ describe("AxelarQueryAPI", () => {
         l2Type: "op",
       });
       expect(gasAmount.lt(parseEther("0.005"))).toBeTruthy();
+    });
+  });
+
+  describe("calculateIsthmusOperatorFeeForDestL2", () => {
+    const mantleApi = new AxelarQueryAPI({ environment: Environment.MAINNET });
+
+    // Use matching USD prices so the price-ratio conversion lands on exactly 1.0,
+    // keeping the expected values precise and independent of price-rounding.
+    const destToken: FeeToken = {
+      gas_price: "0.0000001",
+      decimals: 18,
+      name: "Mantle",
+      symbol: "MNT",
+      token_price: { usd: 1 },
+      operator_fee_scalar: "100000000",
+      operator_fee_constant: "0",
+    };
+
+    const sourceToken: FeeToken = {
+      gas_price: "0",
+      decimals: 18,
+      name: "Test",
+      symbol: "TEST",
+      token_price: { usd: 1 },
+    };
+
+    test("computes operator fee via the OP Stack Isthmus formula", async () => {
+      // operatorFeeNativeWei = gasLimit × scalar × 100 + constant
+      //                     = 200000 × 1e8 × 100 + 0
+      //                     = 2e15
+      const [fee] = await mantleApi.calculateIsthmusOperatorFeeForDestL2(
+        destToken,
+        sourceToken,
+        200000,
+        1.0
+      );
+      expect(fee.toString()).toBe("2000000000000000");
+    });
+
+    test("applies gas multiplier", async () => {
+      // 2e15 × 1.1 = 2.2e15
+      const [, feeWithMultiplier] = await mantleApi.calculateIsthmusOperatorFeeForDestL2(
+        destToken,
+        sourceToken,
+        200000,
+        1.1
+      );
+      expect(feeWithMultiplier.toString()).toBe("2200000000000000");
+    });
+
+    test("returns [0, 0] when scalar and constant are both absent", async () => {
+      const nonIsthmus: FeeToken = {
+        gas_price: "0.0000001",
+        decimals: 18,
+        name: "Other",
+        symbol: "X",
+        token_price: { usd: 1 },
+      };
+      const [fee, feeWithMultiplier] = await mantleApi.calculateIsthmusOperatorFeeForDestL2(
+        nonIsthmus,
+        sourceToken,
+        200000,
+        1.0
+      );
+      expect(fee.eq(0)).toBe(true);
+      expect(feeWithMultiplier.eq(0)).toBe(true);
+    });
+
+    test("includes operatorFeeConstant when scalar is 0", async () => {
+      const constantOnly: FeeToken = {
+        ...destToken,
+        operator_fee_scalar: "0",
+        operator_fee_constant: "1000000000000000", // 1e15
+      };
+      const [fee] = await mantleApi.calculateIsthmusOperatorFeeForDestL2(
+        constantOnly,
+        sourceToken,
+        200000,
+        1.0
+      );
+      // 200000 × 0 × 100 + 1e15 = 1e15
+      expect(fee.toString()).toBe("1000000000000000");
+    });
+
+    test("over-estimates at very small dest-to-source USD ratios (documented rounding)", async () => {
+      // Mantle-like dest ($0.5) → expensive source ($3000). Ratio = 0.000166..., which
+      // the Math.ceil(ratio × 1000) / 1000 rounding coerces up to 0.001. Net effect is
+      // an intentional over-quote of ~6× at extreme price gaps. Test documents the
+      // behavior so it can't silently change.
+      const smallDestToken: FeeToken = {
+        gas_price: "0.0000001",
+        decimals: 18,
+        name: "Mantle",
+        symbol: "MNT",
+        token_price: { usd: 0.5 },
+        operator_fee_scalar: "100000000",
+        operator_fee_constant: "0",
+      };
+      const expensiveSourceToken: FeeToken = {
+        gas_price: "0",
+        decimals: 18,
+        name: "Source",
+        symbol: "ETH",
+        token_price: { usd: 3000 },
+      };
+      const [fee] = await mantleApi.calculateIsthmusOperatorFeeForDestL2(
+        smallDestToken,
+        expensiveSourceToken,
+        200000,
+        1.0
+      );
+      // operatorFeeNativeWei = 200000 × 1e8 × 100 + 0 = 2e15
+      // Rounded ratio = Math.ceil(0.000166... × 1000) / 1000 = 1/1000
+      // Final = 2e15 × 1 / 1000 = 2e12
+      expect(fee.toString()).toBe("2000000000000");
+    });
+  });
+
+  describe("estimateGasFee operator fee dispatch", () => {
+    const mainnetApi = new AxelarQueryAPI({ environment: Environment.MAINNET });
+
+    // GMPParams has required fields (destinationContractAddress, sourceContractAddress,
+    // tokenSymbol) but the getNativeGasBaseFee call treats them as optional. Pass empty
+    // strings to satisfy the type without affecting the quote path.
+    const detailed = {
+      showDetailedFees: true,
+      destinationContractAddress: "",
+      sourceContractAddress: "",
+      tokenSymbol: "",
+    };
+
+    test("populates operatorExecutionFee when destination has Isthmus fields (Mantle today)", async () => {
+      const response = (await mainnetApi.estimateGasFee(
+        EvmChain.ETHEREUM,
+        EvmChain.MANTLE,
+        500000,
+        undefined,
+        undefined,
+        undefined,
+        "0x",
+        detailed
+      )) as AxelarQueryAPIFeeResponse;
+
+      expect(response.operatorExecutionFee).toBeDefined();
+      expect(BigNumber.from(response.operatorExecutionFee as string).gt(0)).toBe(true);
+      expect(response.operatorExecutionFeeWithMultiplier).toBeDefined();
+    });
+
+    test("omits operatorExecutionFee on destinations without Isthmus fields (Optimism today)", async () => {
+      const response = (await mainnetApi.estimateGasFee(
+        EvmChain.ETHEREUM,
+        EvmChain.OPTIMISM,
+        500000,
+        undefined,
+        undefined,
+        undefined,
+        "0x",
+        detailed
+      )) as AxelarQueryAPIFeeResponse;
+
+      expect(response.operatorExecutionFee).toBeUndefined();
+      expect(response.operatorExecutionFeeWithMultiplier).toBeUndefined();
     });
   });
 
@@ -422,6 +584,10 @@ describe("AxelarQueryAPI", () => {
 
       mainnetResponses.forEach((response) => {
         expect(response).toBeDefined();
+        // Every destination in mainnetL2Chains is an L2 with a non-zero L1 (and, for
+        // Mantle, operator) fee component. Stricter than toBeDefined to guard against
+        // regressions where the fee collapses to the base/execution components only.
+        expect(BigNumber.from(response as string).gt(0)).toBe(true);
       });
     });
 
