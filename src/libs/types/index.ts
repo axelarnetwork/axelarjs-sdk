@@ -125,7 +125,9 @@ export interface AxelarSigningClientConfig extends AxelarQueryClientConfig {
   options: SigningStargateClientOptions;
 }
 
-export type AxelarRecoveryAPIConfig = AxelarQueryAPIConfig;
+export type AxelarRecoveryAPIConfig = AxelarQueryAPIConfig & {
+  senderAddress?: string;
+};
 
 export type AxelarTransferAPIConfig = {
   environment: Environment;

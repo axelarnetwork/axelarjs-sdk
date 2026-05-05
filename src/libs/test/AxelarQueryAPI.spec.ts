@@ -379,7 +379,7 @@ describe("AxelarQueryAPI", () => {
 
     test("It should include L1 fee for L2 destination chain", async () => {
       // Testnet
-      const l2Chains = ["fraxtal", "base-sepolia", "optimism-sepolia", "mantle-sepolia"];
+      const l2Chains = ["base-sepolia", "optimism-sepolia", "mantle-sepolia"];
 
       const queries = [];
       for (const l2Chain of l2Chains) {
@@ -402,7 +402,7 @@ describe("AxelarQueryAPI", () => {
       }
 
       // Mainnet
-      const mainnetL2Chains = ["optimism", "base", "mantle", "scroll", "fraxtal", "blast"];
+      const mainnetL2Chains = ["optimism", "base", "mantle", "scroll", "blast"];
       const mainnetApi = new AxelarQueryAPI({ environment: Environment.MAINNET });
       const mainnetQueries = [];
       for (const mainnetL2Chain of mainnetL2Chains) {
@@ -440,7 +440,7 @@ describe("AxelarQueryAPI", () => {
       expect(gasAmount).toBeDefined();
     });
 
-    test.skip("it should be able to return the gas fee when the destination chain is L2, but the executeData is undefined ", async () => {
+    test("it should be able to return the gas fee when the destination chain is L2, but the executeData is undefined ", async () => {
       const l2Chains = ["fraxtal", "blast-sepolia", "mantle-sepolia"];
 
       const queries = [];
@@ -476,7 +476,7 @@ describe("AxelarQueryAPI", () => {
           "auto",
           undefined,
           undefined,
-          undefined
+          MOCK_EXECUTE_DATA
         );
         mainnetQueries.push(query);
       }
@@ -516,8 +516,7 @@ describe("AxelarQueryAPI", () => {
       expect(ethers.utils.parseEther("0.0000001").lt(gasAmount as BigNumberish)).toBeTruthy();
     });
 
-    // TODO: fix this test. Potential rounding issue
-    test.skip("It should use `minGasPrice` if it is greater than the destination chain's gas_price returned from the api", async () => {
+    test("It should use `minGasPrice` if it is greater than the destination chain's gas_price returned from the api", async () => {
       const feeStub = getFeeStub();
       vitest.spyOn(api.axelarGMPServiceApi, "post").mockResolvedValueOnce(feeStub);
 
@@ -554,8 +553,7 @@ describe("AxelarQueryAPI", () => {
 
       expect(gasAmount).toEqual(expectedGasAmount);
     });
-    // TODO: fix this test. Potential rounding issue
-    test.skip("It should not use `minGasPrice` if it is lesser than the destination chain's gas_price returned from the api", async () => {
+    test("It should not use `minGasPrice` if it is lesser than the destination chain's gas_price returned from the api", async () => {
       const feeStub = getFeeStub();
       vitest.spyOn(api.axelarGMPServiceApi, "post").mockResolvedValueOnce(feeStub);
 

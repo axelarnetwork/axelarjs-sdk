@@ -27,6 +27,7 @@ export class AxelarDepositRecoveryAPI extends AxelarRecoveryApi {
 
     const txBytes = await this.execRecoveryUrlFetch("/confirm_deposit_tx", {
       ...params,
+      senderAddress: params.senderAddress || this.config.senderAddress,
       sourceChain: chain.chainIdentifier[this.environment],
       module: chain.module,
     });

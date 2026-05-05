@@ -20,6 +20,9 @@ export function hex(value: string) {
 export function convertRpcUrltoWssUrl(rpcUrl: string) {
   const url = new URL(rpcUrl);
   url.protocol = "wss:";
-  url.port = ""; // Remove port
+  // XRPL testnet HTTP is typically 51234 and WSS is 51233.
+  if (url.port === "51234") {
+    url.port = "51233";
+  }
   return url.toString();
 }

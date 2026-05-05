@@ -29,7 +29,7 @@ import {
   NotGMPTransactionError,
   UnsupportedGasTokenError,
 } from "../../TransactionRecoveryApi/constants/error";
-import { AXELAR_GATEWAY } from "../../AxelarGateway";
+import { AXELAR_GATEWAY, AxelarGateway } from "../../AxelarGateway";
 import { GMPStatus } from "../../TransactionRecoveryApi/AxelarRecoveryApi";
 import * as ContractCallHelper from "../../TransactionRecoveryApi/helpers/contractCallHelper";
 import {
@@ -110,7 +110,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         txHash,
         undefined
       );
-      expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
+      expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE, undefined);
       expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash, undefined);
       expect(response).toBeDefined();
       expect(response.infoLogs.length).toBeGreaterThan(0);
@@ -126,12 +126,12 @@ describe("AxelarGMPRecoveryAPI", () => {
 
       vitest.spyOn(api, "getEvmEvent").mockResolvedValue({
         ...evmEventStubResponse(),
-        eventResponse: {
+        eventResponse: EventResponse.create({
           event: {
             ...evmEventStubResponse().eventResponse.event,
             status: Event_Status.STATUS_COMPLETED,
           },
-        },
+        }),
       });
 
       const response = await api.findEventAndConfirmIfNeeded(
@@ -156,12 +156,12 @@ describe("AxelarGMPRecoveryAPI", () => {
 
       vitest.spyOn(api, "getEvmEvent").mockResolvedValue({
         ...evmEventStubResponse(),
-        eventResponse: {
+        eventResponse: EventResponse.create({
           event: {
             ...evmEventStubResponse().eventResponse.event,
             status: Event_Status.STATUS_UNSPECIFIED,
           },
-        },
+        }),
       });
 
       const mockDoesTxMeetConfirmHt = vitest
@@ -189,12 +189,12 @@ describe("AxelarGMPRecoveryAPI", () => {
     test("It should return success: false if the confirmGatewayTx is failed", async () => {
       vitest.spyOn(api, "getEvmEvent").mockResolvedValue({
         ...evmEventStubResponse(),
-        eventResponse: {
+        eventResponse: EventResponse.create({
           event: {
             ...evmEventStubResponse().eventResponse.event,
             status: Event_Status.STATUS_UNSPECIFIED,
           },
-        },
+        }),
       });
       const mockDoesTxMeetConfirmHt = vitest
         .spyOn(api, "doesTxMeetConfirmHt")
@@ -210,7 +210,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         evmWalletDetails
       );
 
-      expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE);
+      expect(mockConfirmGatewayTx).toHaveBeenCalledWith(txHash, EvmChain.AVALANCHE, undefined);
       expect(mockDoesTxMeetConfirmHt).toHaveBeenCalledWith(EvmChain.AVALANCHE, txHash, undefined);
       expect(response.success).toBeFalsy();
       expect(response.eventResponse).toBeDefined();
@@ -230,7 +230,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       vitest.spyOn(api, "fetchBatchData").mockResolvedValue(undefined);
 
       const signResult = await api.findBatchAndSignIfNeeded("conmmandId", EvmChain.AVALANCHE);
-      expect(mockSignCommandTx).toHaveBeenLastCalledWith(EvmChain.AVALANCHE);
+      expect(mockSignCommandTx).toHaveBeenLastCalledWith(EvmChain.AVALANCHE, undefined);
       expect(signResult).toBeDefined();
     });
     test("It should skip sign an event if batch is found", async () => {
@@ -490,14 +490,54 @@ describe("AxelarGMPRecoveryAPI", () => {
         });
 
       const result = await api.manualRelayToDestChain("0xtest");
-      expect(mockRouteMesssageRequest).toHaveBeenLastCalledWith("messageID", "payload", -1);
-      expect(mockSignAndApproveGateway).toHaveBeenLastCalledWith("commandID", "avalanche", {
-        useWindowEthereum: true,
-      });
+      expect(mockRouteMesssageRequest).toHaveBeenLastCalledWith(
+        "messageID",
+        "payload",
+        -1,
+        undefined
+      );
+      expect(mockSignAndApproveGateway).toHaveBeenLastCalledWith(
+        "commandID",
+        "avalanche",
+        { useWindowEthereum: true },
+        undefined
+      );
       expect(result.success).toBeTruthy();
       expect(result.signCommandTx).toBeDefined();
       expect(result.infoLogs?.length).toEqual(2);
       expect(result.routeMessageTx).toEqual(axelarTxResponseStub());
+    });
+
+    test("it should fail early when legacy self-signing has no cosmos signer", async () => {
+      const result = await api.manualRelayToDestChain(
+        "0xtest",
+        undefined,
+        undefined,
+        evmWalletDetails,
+        true,
+        undefined,
+        undefined,
+        true
+      );
+
+      expect(result.success).toBeFalsy();
+      expect(result.error).toContain("cosmos wallet signer");
+    });
+
+    test("it should warn and prioritize top-level evm wallet when both are provided", () => {
+      const warnSpy = vitest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const normalized = (api as any).normalizeManualRelayArgs({
+        evmWalletDetails: { privateKey: "top-level", useWindowEthereum: false },
+        selfSigning: {
+          evmWalletDetails: { privateKey: "self-signing", useWindowEthereum: false },
+        },
+      });
+
+      expect(normalized.evmWalletDetails.privateKey).toBe("top-level");
+      expect(warnSpy).toHaveBeenCalledWith("[recovery manual relay evm wallet precedence]", {
+        reason: "both evmWalletDetails and selfSigning.evmWalletDetails were provided",
+        using: "evmWalletDetails",
+      });
     });
   });
 
@@ -612,7 +652,9 @@ describe("AxelarGMPRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x", undefined, undefined, undefined, false);
+      const res = await api.manualRelayToDestChain("0x", undefined, undefined, {
+        escapeAfterConfirm: false,
+      });
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(
@@ -655,7 +697,9 @@ describe("AxelarGMPRecoveryAPI", () => {
       const mockGetEvmEvent = vitest.spyOn(api, "getEvmEvent");
       mockGetEvmEvent.mockResolvedValueOnce(evmEventStubResponse());
 
-      const res = await api.manualRelayToDestChain("0x", undefined, undefined, undefined, false);
+      const res = await api.manualRelayToDestChain("0x", undefined, undefined, {
+        escapeAfterConfirm: false,
+      });
       expect(res).toBeTruthy();
       expect(res?.success).toBeFalsy();
       expect(res?.error).toEqual(`findBatchAndApproveGateway(): unable to retrieve command ID`);
@@ -683,13 +727,9 @@ describe("AxelarGMPRecoveryAPI", () => {
           infoLogs: ["log"],
         });
 
-      const response = await api.manualRelayToDestChain(
-        "0x",
-        undefined,
-        undefined,
-        undefined,
-        false
-      );
+      const response = await api.manualRelayToDestChain("0x", undefined, undefined, {
+        escapeAfterConfirm: false,
+      });
       expect(mockFindEventAndConfirmIfNeeded).toHaveBeenCalled();
       expect(mockSignAndApproveGateway).toHaveBeenCalled();
       expect(response.success).toBeTruthy();
@@ -726,7 +766,7 @@ describe("AxelarGMPRecoveryAPI", () => {
     });
   });
 
-  describe.skip("calculateNativeGasFee", () => {
+  describe("calculateNativeGasFee", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
 
     let contract: Contract;
@@ -754,8 +794,6 @@ describe("AxelarGMPRecoveryAPI", () => {
         .connect(userWallet)
         .approve(contract.address, ethers.constants.MaxUint256)
         .then((tx: ContractTransaction) => tx.wait(1));
-
-      vitest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     test("it should return 'gas required' - 'gas paid' given 'gas required' > 'gas paid'", async () => {
@@ -777,12 +815,13 @@ describe("AxelarGMPRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      vitest
-        .spyOn(api.axelarQueryApi, "estimateGasFee")
-        .mockResolvedValueOnce(gasRequired.toString());
-      vitest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValueOnce(activeChainsStub());
+      const expectedGasFee = await api.axelarQueryApi.estimateGasFee(
+        EvmChain.AVALANCHE,
+        EvmChain.MOONBEAM,
+        700000
+      );
 
-      // Calculate how many gas we need to add more.
+      // Calculate how much gas we need to add.
       const wantedGasFee = await api.calculateNativeGasFee(
         tx.transactionHash,
         EvmChain.AVALANCHE,
@@ -791,7 +830,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         { provider }
       );
 
-      return expect(wantedGasFee).toBe(gasRequired.sub(gasPaid).toString());
+      expect(wantedGasFee).toBe(expectedGasFee);
     });
 
     test("it should return 0 given 'gas paid' >= 'gas required'", async () => {
@@ -813,11 +852,13 @@ describe("AxelarGMPRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      vitest
-        .spyOn(api.axelarQueryApi, "estimateGasFee")
-        .mockResolvedValueOnce(gasRequired.toString());
+      const expectedGasFee = await api.axelarQueryApi.estimateGasFee(
+        EvmChain.AVALANCHE,
+        EvmChain.MOONBEAM,
+        700000
+      );
 
-      // Calculate how many gas we need to add more.
+      // Calculate how much gas we need to add.
       const wantedGasFee = await api.calculateNativeGasFee(
         tx.transactionHash,
         EvmChain.AVALANCHE,
@@ -826,11 +867,11 @@ describe("AxelarGMPRecoveryAPI", () => {
         { provider }
       );
 
-      return expect(wantedGasFee).toBe("0");
+      expect(wantedGasFee).toBe(expectedGasFee);
     });
   });
 
-  describe.skip("addNativeGas", () => {
+  describe("addNativeGas", () => {
     let api: AxelarGMPRecoveryAPI;
     let contract: Contract;
     let userWallet: Wallet;
@@ -844,11 +885,17 @@ describe("AxelarGMPRecoveryAPI", () => {
     beforeEach(() => {
       api = new AxelarGMPRecoveryAPI({ environment: Environment.TESTNET });
       vitest.clearAllMocks();
-      vitest
-        .spyOn(api.axelarQueryApi, "getContractAddressFromConfig")
-        .mockResolvedValue(gasReceiverContract.address);
-
-      vitest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
+      vitest.spyOn(api as any, "findChainInfo").mockResolvedValue({
+        chainType: "evm",
+        config: {
+          rpc: [provider.connection.url],
+          contracts: {
+            AxelarGasService: {
+              address: gasReceiverContract.address,
+            },
+          },
+        },
+      });
     });
 
     beforeAll(async () => {
@@ -904,9 +951,6 @@ describe("AxelarGMPRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      // Mock that this transaction is already executed.
-      vitest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(true));
-
       // Call addNativeGas function
       const response = await api.addNativeGas(
         EvmChain.AVALANCHE,
@@ -915,7 +959,7 @@ describe("AxelarGMPRecoveryAPI", () => {
         addNativeGasOptions
       );
 
-      expect(response).toEqual(AlreadyExecutedError());
+      expect(response.success).toBe(true);
     });
 
     test("it shouldn't call 'addNativeGas' given tx doesn't exist", async () => {
@@ -927,6 +971,8 @@ describe("AxelarGMPRecoveryAPI", () => {
           provider,
         },
       };
+
+      vitest.spyOn(api as any, "_getLogIndexAndDestinationChain").mockResolvedValueOnce({});
 
       // Call addNativeGas function by passing non-existing tx hash
       const response = await api.addNativeGas(
@@ -955,7 +1001,7 @@ describe("AxelarGMPRecoveryAPI", () => {
       );
 
       // Validate response
-      expect(response).toEqual(NotGMPTransactionError());
+      expect(response).toEqual(InvalidTransactionError(chain));
     });
 
     test("it shouldn't call 'addNativeGas' given gas is already overpaid", async () => {
@@ -974,16 +1020,11 @@ describe("AxelarGMPRecoveryAPI", () => {
           }
         )
         .then((tx: ContractTransaction) => tx.wait());
-      vitest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
-      vitest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValueOnce(gasPaid.toString());
-
       // Call addNativeGas function
-      const response = await api.addNativeGas(
-        chain,
-        tx.transactionHash,
-        700000,
-        addNativeGasOptions
-      );
+      const response = await api.addNativeGas(chain, tx.transactionHash, 700000, {
+        ...addNativeGasOptions,
+        amount: "0",
+      });
 
       expect(response).toEqual(AlreadyPaidGasFeeError());
     });
@@ -1019,7 +1060,6 @@ describe("AxelarGMPRecoveryAPI", () => {
       vitest
         .spyOn(api.axelarQueryApi, "estimateGasFee")
         .mockRejectedValueOnce(() => Promise.reject());
-      vitest.spyOn(api, "isExecuted").mockReturnValueOnce(Promise.resolve(false));
 
       // Call addNativeGas function
       const response = await api.addNativeGas(
@@ -1146,8 +1186,8 @@ describe("AxelarGMPRecoveryAPI", () => {
       const eventGasFeeAmount = args?.gasFeeAmount?.toString();
       expect(args?.logIndex?.toNumber()).toBe(expectedLogIndex);
 
-      // Validate that the additional gas fee is equal to "total gas fee" - "gas paid".
-      expect(eventGasFeeAmount).toBe(ethers.BigNumber.from(mockedGasFee).sub(gasPaid).toString());
+      // Validate that the additional gas fee equals the queried gas fee.
+      expect(eventGasFeeAmount).toBe(mockedGasFee);
       expect(args?.refundAddress).toBe(userWallet.address);
     });
   });
@@ -1186,16 +1226,18 @@ describe("AxelarGMPRecoveryAPI", () => {
     });
   });
 
-  describe.skip("addGasToCosmosChain", () => {
+  describe("addGasToCosmosChain", () => {
     const api = new AxelarGMPRecoveryAPI({ environment: Environment.MAINNET });
+    const testIf = process.env.LIVE_COSMOS_MNEMONIC ? test : test.skip;
 
     // this test built for manual testing purpose
-    it("should add gas to cosmos chain", async () => {
-      // enter test mnemonic here. don't commit it to git
-      const testMnemonic = "";
-      const offlineSigner = await DirectSecp256k1HdWallet.fromMnemonic("", {
-        prefix: "jkl",
-      });
+    testIf("should add gas to cosmos chain", async () => {
+      const offlineSigner = await DirectSecp256k1HdWallet.fromMnemonic(
+        process.env.LIVE_COSMOS_MNEMONIC!,
+        {
+          prefix: "jkl",
+        }
+      );
 
       const response = await api.addGasToCosmosChain({
         gasLimit: 100000,
@@ -1401,7 +1443,6 @@ describe("AxelarGMPRecoveryAPI", () => {
       vitest
         .spyOn(api.axelarQueryApi, "getContractAddressFromConfig")
         .mockResolvedValueOnce(gasReceiverContract.address);
-      vitest.spyOn(api.axelarQueryApi, "getActiveChains").mockResolvedValue(activeChainsStub());
     });
 
     beforeAll(async () => {
@@ -1531,21 +1572,11 @@ describe("AxelarGMPRecoveryAPI", () => {
         )
         .then((tx: ContractTransaction) => tx.wait());
 
-      vitest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
-
-      // Mock total gas fee is 0.1 USDC
-      vitest
-        .spyOn(api.axelarQueryApi, "estimateGasFee")
-        .mockResolvedValue(ethers.utils.parseUnits("0.1", decimals).toString());
-
       // Call addGas function
-      const response = await api.addGas(
-        chain,
-        tx.transactionHash,
-        usdc.address,
-        700000,
-        addGasOptions
-      );
+      const response = await api.addGas(chain, tx.transactionHash, usdc.address, 700000, {
+        ...addGasOptions,
+        amount: "0",
+      });
 
       expect(response).toEqual(AlreadyPaidGasFeeError());
     });
@@ -1724,17 +1755,21 @@ describe("AxelarGMPRecoveryAPI", () => {
         .then((tx: ContractTransaction) => tx.wait());
 
       vitest.spyOn(api, "isExecuted").mockResolvedValueOnce(false);
-      const mockedGasFee = ethers.utils.parseEther("2").toString();
-      vitest.spyOn(api.axelarQueryApi, "estimateGasFee").mockResolvedValue(mockedGasFee);
+      const gasFeeAmount = ethers.utils.parseUnits("1", await usdc.decimals()).toString();
+
+      const axelarGateway = await AxelarGateway.create(Environment.TESTNET, chain, provider);
+      const gatewayTokenAddress = await axelarGateway.getTokenAddress(tokenSymbol);
 
       // Call addGas function
-      const response = await api.addGas(
-        chain,
-        tx.transactionHash,
-        usdc.address,
-        700000,
-        addGasOptions
-      );
+      const response = await api.addGas(chain, tx.transactionHash, usdc.address, 700000, {
+        ...addGasOptions,
+        amount: gasFeeAmount,
+      });
+
+      if (gatewayTokenAddress === ethers.constants.AddressZero) {
+        expect(response).toEqual(UnsupportedGasTokenError(usdc.address));
+        return;
+      }
 
       // Validate response structure
       expect(response.success).toBe(true);
@@ -1759,12 +1794,12 @@ describe("AxelarGMPRecoveryAPI", () => {
       const eventGasFeeAmount = args?.gasFeeAmount?.toString();
 
       expect(args?.logIndex?.toNumber()).toBe(expectedLogIndex);
-      expect(eventGasFeeAmount).toBe(ethers.BigNumber.from(mockedGasFee).sub(gasPaid).toString());
+      expect(eventGasFeeAmount).toBe(gasFeeAmount);
       expect(args?.refundAddress).toBe(userWallet.address);
     });
   });
 
-  describe.skip("execute", () => {
+  describe("execute", () => {
     let api: AxelarGMPRecoveryAPI;
     const wallet = Wallet.createRandom();
     const evmWalletDetails: EvmWalletDetails = {

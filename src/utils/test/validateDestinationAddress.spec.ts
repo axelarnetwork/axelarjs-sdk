@@ -42,7 +42,7 @@ vitest.mock("../../chains", () => ({
   },
 }));
 
-describe.skip("validateDestinationAddress() - evm chain", () => {
+describe("validateDestinationAddress() - evm chain", () => {
   beforeEach(() => {
     vitest.clearAllMocks();
     vitest.spyOn(mock, "validateDestinationAddressByChainSymbol");
@@ -54,8 +54,14 @@ describe.skip("validateDestinationAddress() - evm chain", () => {
     const environment = Environment.TESTNET;
 
     describe("when validateDestinationAddress is called", () => {
+      let validationPromise: Promise<boolean>;
+
       beforeEach(() => {
-        mock.validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment);
+        validationPromise = mock.validateDestinationAddressByChainSymbol(
+          chainSymbol,
+          destinationAddress,
+          environment
+        ) as Promise<boolean>;
       });
 
       test("then it should be called", () => {
@@ -66,8 +72,8 @@ describe.skip("validateDestinationAddress() - evm chain", () => {
         );
       });
 
-      test("then it should return true", () => {
-        expect(mock.validateDestinationAddressByChainSymbol).toHaveReturnedWith(true);
+      test("then it should return true", async () => {
+        await expect(validationPromise).resolves.toBe(true);
       });
     });
   });
@@ -78,8 +84,14 @@ describe.skip("validateDestinationAddress() - evm chain", () => {
     const environment = Environment.TESTNET;
 
     describe("when validateDestinationAddress is called", () => {
+      let validationPromise: Promise<boolean>;
+
       beforeEach(() => {
-        mock.validateDestinationAddressByChainSymbol(chainSymbol, destinationAddress, environment);
+        validationPromise = mock.validateDestinationAddressByChainSymbol(
+          chainSymbol,
+          destinationAddress,
+          environment
+        ) as Promise<boolean>;
       });
 
       test("then it should be called", () => {
@@ -90,8 +102,8 @@ describe.skip("validateDestinationAddress() - evm chain", () => {
         );
       });
 
-      test("then it should return false", () => {
-        expect(mock.validateDestinationAddressByChainSymbol).toHaveReturnedWith(false);
+      test("then it should return false", async () => {
+        await expect(validationPromise).resolves.toBe(false);
       });
     });
   });
