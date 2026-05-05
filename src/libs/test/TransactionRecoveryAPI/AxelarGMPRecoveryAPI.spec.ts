@@ -50,8 +50,7 @@ import { Horizon } from "@stellar/stellar-sdk";
 import { SUI_TYPE_ARG } from "@mysten/sui/utils";
 import { Transaction } from "@mysten/sui/transactions";
 import * as chains from "../../../chains";
-import { STANDARD_FEE } from "../../AxelarSigningClient";
-import { coin, DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
+import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import {
   PublicKey as SolanaPublicKey,
   Keypair as SolanaKeypair,
@@ -1371,17 +1370,6 @@ describe("AxelarGMPRecoveryAPI", () => {
       SolanaTransaction.prototype.add = solanaAddInstructionCall;
 
       try {
-        // Mock the GMP api to get the message id
-        vitest.spyOn(api, "queryTransactionStatus").mockResolvedValueOnce({
-          status: "called",
-          callTx: {
-            chain: "solana-1234",
-            returnValues: {
-              destinationChain: "osmosis-7",
-            },
-          },
-        });
-
         // Mock the importS3Config to return a specific configuration
         vitest.spyOn(chains, "importS3Config").mockResolvedValue({
           chains: {

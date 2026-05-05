@@ -57,7 +57,6 @@ import {
   anchorInstructionDiscriminator,
   encodeU64LE,
   encodeStringBorsh,
-  encodeU32LE,
 } from "./helpers";
 import { retry, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
@@ -1140,16 +1139,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaTransaction> {
     const { messageId, gasFeeAmount, sender, refundAddress } = params;
 
-    const { callTx, status } = await this.queryTransactionStatus(messageId);
-
-    /**first check if transaction is already executed */
-    if (GMPErrorMap[status]) {
-      throw new Error(`GMP query error: ${GMPErrorMap[status]}`);
-    }
-    const srcChain: string = callTx.chain;
-
     const chains = await importS3Config(this.environment);
-    const solanaKey = Object.keys(chains.chains).find((chainName) => chainName == srcChain);
+    const solanaKey = Object.keys(chains.chains).find((chainName) => chainName.includes("solana"));
 
     if (!solanaKey) throw new Error("Cannot find Solana chain config");
 
@@ -1228,23 +1219,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       throw new Error(`Invalid gasFeeAmount: must be non-negative, got ${gasFeeAmount}`);
     }
 
-    // Decode Solana transaction hash from base58
-    let txHashBytes: Uint8Array;
+    // Validate the txHash portion of the messageId is a 64-byte base58 Solana signature
     try {
-      // Decode base58 Solana transaction signature to bytes
       const decoded = bs58.decode(txHash);
-
       if (decoded.length !== 64) {
         throw new Error(
           `Solana transaction signature must be 64 bytes when decoded, got ${decoded.length} bytes`
         );
       }
-
-      txHashBytes = decoded;
     } catch (error) {
-      // Preserve specific error messages (like length validation) but catch base58 decode errors
       if (error instanceof Error && error.message.includes("64 bytes")) {
-        throw error; // Re-throw length validation errors with original message
+        throw error;
       }
       throw new Error(
         `Failed to decode Solana transaction signature: ${txHash}. ${
