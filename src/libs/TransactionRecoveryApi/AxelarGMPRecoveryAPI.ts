@@ -1250,7 +1250,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       encodeU64LE(gasFeeAmountBigInt),
       // refund_address
       refundAddressPublicKey.toBuffer(),
-    ]);
+    ] as unknown as Uint8Array[]);
 
     // Create the transaction instruction
     const instruction = new TransactionInstruction({

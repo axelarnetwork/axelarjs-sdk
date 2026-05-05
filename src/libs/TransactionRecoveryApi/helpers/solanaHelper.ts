@@ -64,5 +64,5 @@ export function encodeU64LE(value: bigint | number | string): Buffer {
 
 export function encodeStringBorsh(value: string): Buffer {
   const bytes = Buffer.from(value, "utf8");
-  return Buffer.concat([encodeU32LE(bytes.length), bytes]);
+  return Buffer.concat([encodeU32LE(bytes.length), bytes] as unknown as Uint8Array[]);
 }
