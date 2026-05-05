@@ -54,6 +54,8 @@ export interface AxelarQueryAPIFeeResponse {
   executionFeeWithMultiplier: string;
   l1ExecutionFeeWithMultiplier: string;
   l1ExecutionFee: string;
+  operatorExecutionFee?: string;
+  operatorExecutionFeeWithMultiplier?: string;
   gasMultiplier: number;
   gasLimit: BigNumberish;
   minGasPrice: string;
@@ -398,6 +400,8 @@ export class AxelarQueryAPI {
           symbol: destination_native_token.symbol,
           l1_gas_oracle_address: destination_native_token.l1_gas_oracle_address,
           l1_gas_price_in_units: destination_native_token.l1_gas_price_in_units,
+          operator_fee_scalar: destination_native_token.operator_fee_scalar,
+          operator_fee_constant: destination_native_token.operator_fee_constant,
         },
         l2_type,
         ethereumToken: ethereum_token as BaseFeeResponse["ethereumToken"],
@@ -422,6 +426,13 @@ export class AxelarQueryAPI {
     return getL1FeeForL2(provider, l1FeeParams);
   }
 
+  /**
+   * Calculate the L1 execution fee for a destination L2, converted to source-token wei.
+   *
+   * @param ethereumToken Deprecated: retained for backward compatibility only. The
+   *   conversion now uses `destToken.token_price.usd` directly, so this parameter
+   *   is no longer read. Will be removed in a future major version.
+   */
   public async calculateL1FeeForDestL2(
     destChainId: EvmChain | string,
     destToken: FeeToken,
@@ -442,7 +453,9 @@ export class AxelarQueryAPI {
         );
       }
 
-      // Calculate the L1 execution fee. This value is in ETH wei.
+      // Calculate the L1 execution fee. The value is denominated in the destination
+      // chain's native token wei (see getL1FeeForL2): ETH wei for ETH-native OP Stack
+      // chains (optimism, base, blast, fraxtal, scroll), MNT wei for Mantle post-Arsia.
       l1ExecutionFee = await this.estimateL1GasFee(destChainId, {
         executeData: executeData || DEFAULT_L1_EXECUTE_DATA,
         l1GasPrice: destToken.l1_gas_price_in_units,
@@ -451,13 +464,19 @@ export class AxelarQueryAPI {
         l2Type,
       });
 
-      // Convert the L1 execution fee to the source token
+      // Convert the L1 execution fee to the source token using the destination
+      // native token's USD price. For ETH-native chains destToken and ethereumToken
+      // carry the same native asset; any basis-point drift between the two USD
+      // prices from gmp-api falls inside the existing Math.ceil(ratio × 1000)/1000
+      // rounding tolerance. For Mantle this uses MNT/USD, which is what we want.
+      // `ethereumToken` is kept in the signature for backward compatibility (external
+      // callers may pass it) but is no longer read here.
       const srcTokenPrice = Number(sourceToken.token_price.usd);
-      const ethTokenPrice = Number(ethereumToken.token_price.usd);
-      const ethToSrcTokenPriceRatio = ethTokenPrice / srcTokenPrice;
+      const destTokenPrice = Number(destToken.token_price.usd);
+      const destToSrcTokenPriceRatio = destTokenPrice / srcTokenPrice;
 
       let actualL1ExecutionFee = l1ExecutionFee
-        .mul(Math.ceil(ethToSrcTokenPriceRatio * 1000))
+        .mul(Math.ceil(destToSrcTokenPriceRatio * 1000))
         .div(1000);
 
       if (sourceToken.decimals !== destToken.decimals) {
@@ -475,6 +494,74 @@ export class AxelarQueryAPI {
     }
 
     return [l1ExecutionFee, l1ExecutionFeeWithMultiplier];
+  }
+
+  /**
+   * Calculate the OP Stack Isthmus operator fee for a destination L2, converted
+   * to source-token wei.
+   *
+   * Intended to be called only when the destination applies the Isthmus formula.
+   * That's signaled by the presence of `operator_fee_scalar` / `operator_fee_constant`
+   * in the gmp-api `getFees` response; the caller is expected to check for those
+   * before invoking this helper.
+   *
+   * Formula (OP Stack Isthmus spec):
+   *   operatorFee = gasUsed × operatorFeeScalar × 100 + operatorFeeConstant  (destination-native wei)
+   *
+   * Defensive: if the destination's scalar and constant are both zero/absent,
+   * returns `[0, 0]` rather than throwing.
+   *
+   * @param destToken Destination-chain native token. Expected to include
+   *   operator_fee_scalar and operator_fee_constant from the gmp-api `getFees` response.
+   * @param sourceToken Source-chain token (used for USD-price conversion).
+   * @param gasLimit L2 gas estimate for the execute step — the same value passed
+   *   to estimateGasFee.
+   * @param actualGasMultiplier Gas multiplier to apply for a padded estimate.
+   * @returns `[operatorFee, operatorFeeWithMultiplier]` in source-token wei.
+   */
+  public async calculateIsthmusOperatorFeeForDestL2(
+    destToken: FeeToken,
+    sourceToken: FeeToken,
+    gasLimit: BigNumberish,
+    actualGasMultiplier: number
+  ): Promise<[BigNumber, BigNumber]> {
+    let operatorFee = BigNumber.from(0);
+    let operatorFeeWithMultiplier = BigNumber.from(0);
+
+    // Coerce falsy-or-missing fields to "0" before BigNumber.from (`||` rather
+    // than `??` because BigNumber.from("") throws and a stray empty string would
+    // otherwise slip past a nullish check). Both-zero short-circuits to [0, 0]
+    // without doing further work.
+    const scalar = BigNumber.from(destToken.operator_fee_scalar || "0");
+    const constant = BigNumber.from(destToken.operator_fee_constant || "0");
+
+    if (!scalar.isZero() || !constant.isZero()) {
+      // operatorFee = gasUsed × scalar × 100 + constant   (destination-native wei)
+      const operatorFeeNativeWei = BigNumber.from(gasLimit).mul(scalar).mul(100).add(constant);
+
+      // Convert to source token using destination native's USD price (same pattern
+      // as calculateL1FeeForDestL2).
+      const srcTokenPrice = Number(sourceToken.token_price.usd);
+      const destTokenPrice = Number(destToken.token_price.usd);
+      const destToSrcTokenPriceRatio = destTokenPrice / srcTokenPrice;
+
+      let actualOperatorFee = operatorFeeNativeWei
+        .mul(Math.ceil(destToSrcTokenPriceRatio * 1000))
+        .div(1000);
+
+      if (sourceToken.decimals !== destToken.decimals) {
+        actualOperatorFee = BigNumberUtils.convertTokenAmount(
+          actualOperatorFee,
+          destToken.decimals,
+          sourceToken.decimals
+        );
+      }
+
+      operatorFee = BigNumber.from(actualOperatorFee.toString());
+      operatorFeeWithMultiplier = operatorFee.mul(actualGasMultiplier * 10000).div(10000);
+    }
+
+    return [operatorFee, operatorFeeWithMultiplier];
   }
 
   /**
@@ -566,6 +653,33 @@ export class AxelarQueryAPI {
       l2_type
     );
 
+    let total = l1ExecutionFeeWithMultiplier.add(executionFeeWithMultiplier).add(baseFee);
+
+    // OP Stack Isthmus operator fee: computed whenever gmp-api signals the destination
+    // chain has activated it, by emitting operator_fee_scalar / operator_fee_constant
+    // in the getFees response. Today that's gated upstream in gmp-api's getGasPrice.js
+    // to Mantle / mantle-sepolia only (see that file for the hardcoded chain list);
+    // other OP Stack chains join this branch once gmp-api's allowlist is widened.
+    // Pre-compute so the total and the detailed response can fold it in without
+    // later mutation.
+    let isthmusOperatorFeeFields:
+      | { operatorExecutionFee: string; operatorExecutionFeeWithMultiplier: string }
+      | undefined;
+    if (destToken.operator_fee_scalar || destToken.operator_fee_constant) {
+      const [operatorFee, operatorFeeWithMultiplier] =
+        await this.calculateIsthmusOperatorFeeForDestL2(
+          destToken,
+          sourceToken,
+          gasLimit,
+          actualGasMultiplier
+        );
+      total = total.add(operatorFeeWithMultiplier);
+      isthmusOperatorFeeFields = {
+        operatorExecutionFee: operatorFee.toString(),
+        operatorExecutionFeeWithMultiplier: operatorFeeWithMultiplier.toString(),
+      };
+    }
+
     return gmpParams?.showDetailedFees
       ? {
           baseFee,
@@ -574,13 +688,14 @@ export class AxelarQueryAPI {
           executionFeeWithMultiplier: executionFeeWithMultiplier.toString(),
           l1ExecutionFeeWithMultiplier: l1ExecutionFeeWithMultiplier.toString(),
           l1ExecutionFee: l1ExecutionFee.toString(),
+          ...isthmusOperatorFeeFields,
           gasLimit,
           gasMultiplier: actualGasMultiplier,
           minGasPrice: minGasPrice === "0" ? "NA" : minGasPrice,
           apiResponse,
           isExpressSupported: expressSupported,
         }
-      : l1ExecutionFeeWithMultiplier.add(executionFeeWithMultiplier).add(baseFee).toString();
+      : total.toString();
   }
 
   /**

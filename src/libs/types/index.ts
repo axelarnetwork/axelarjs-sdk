@@ -71,6 +71,8 @@ export type FeeToken = {
   name: string;
   l1_gas_oracle_address?: string;
   l1_gas_price_in_units?: TokenUnit;
+  operator_fee_scalar?: string;
+  operator_fee_constant?: string;
   symbol: string;
   token_price: {
     usd: number;
