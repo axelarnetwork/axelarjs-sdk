@@ -57,6 +57,7 @@ import {
   anchorInstructionDiscriminator,
   encodeU64LE,
   encodeStringBorsh,
+  concatU8,
 } from "./helpers";
 import { retry, throwIfInvalidChainIds } from "../../utils";
 import { EventResponse } from "@axelar-network/axelarjs-types/axelar/evm/v1beta1/query";
@@ -1186,20 +1187,16 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     }
 
     const [topLevelLogIndexStr, innerLogIndexStr] = logIndexParts;
-    const topLevelLogIndex = parseInt(topLevelLogIndexStr);
-    const innerLogIndex = parseInt(innerLogIndexStr);
 
-    // Validate topLevelLogIndex
-    if (!Number.isInteger(topLevelLogIndex) || topLevelLogIndex < 0) {
+    // Reject any non-digit characters — parseInt would silently accept "3abc"
+    if (!/^\d+$/.test(topLevelLogIndexStr)) {
       throw new Error(
-        `Invalid topLevelLogIndex in messageId: must be a non-negative integer, got ${topLevelLogIndex}`
+        `Invalid topLevelLogIndex in messageId: must be a non-negative integer, got "${topLevelLogIndexStr}"`
       );
     }
-
-    // Validate innerLogIndex
-    if (!Number.isInteger(innerLogIndex) || innerLogIndex < 0) {
+    if (!/^\d+$/.test(innerLogIndexStr)) {
       throw new Error(
-        `Invalid innerLogIndex in messageId: must be a non-negative integer, got ${innerLogIndex}`
+        `Invalid innerLogIndex in messageId: must be a non-negative integer, got "${innerLogIndexStr}"`
       );
     }
 
@@ -1241,7 +1238,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
     const instructionId = await anchorInstructionDiscriminator("add_gas");
 
     // Manual Borsh-like serialization to match Rust enum structure
-    const data = Buffer.concat([
+    const data = concatU8([
       // instruction id
       instructionId,
       // message_id
@@ -1250,7 +1247,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       encodeU64LE(gasFeeAmountBigInt),
       // refund_address
       refundAddressPublicKey.toBuffer(),
-    ] as unknown as Uint8Array[]);
+    ]);
 
     // Create the transaction instruction
     const instruction = new TransactionInstruction({
