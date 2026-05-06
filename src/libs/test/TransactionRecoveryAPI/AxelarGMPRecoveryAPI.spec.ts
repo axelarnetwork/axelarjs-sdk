@@ -1413,7 +1413,7 @@ describe("AxelarGMPRecoveryAPI", () => {
     });
   });
 
-  describe.skip("addGas", () => {
+  describe("addGas", () => {
     let api: AxelarGMPRecoveryAPI;
     let contract: Contract;
     let userWallet: Wallet;
