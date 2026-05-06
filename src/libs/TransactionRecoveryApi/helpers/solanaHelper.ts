@@ -64,5 +64,12 @@ export function encodeU64LE(value: bigint | number | string): Buffer {
 
 export function encodeStringBorsh(value: string): Buffer {
   const bytes = Buffer.from(value, "utf8");
-  return Buffer.concat([encodeU32LE(bytes.length), bytes] as unknown as Uint8Array[]);
+  return concatU8([encodeU32LE(bytes.length), bytes]);
+}
+
+// Buffer.concat's typing is finicky across @types/node versions: a Buffer<ArrayBufferLike>[]
+// is not always accepted as Uint8Array<ArrayBufferLike>[] due to Symbol.dispose differences.
+// Centralize the cast here so call sites stay clean.
+export function concatU8(parts: ReadonlyArray<Buffer>): Buffer {
+  return Buffer.concat(parts as unknown as Uint8Array[]);
 }
