@@ -1212,8 +1212,8 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
     }
 
-    if (gasFeeAmountBigInt < BigInt(0)) {
-      throw new Error(`Invalid gasFeeAmount: must be non-negative, got ${gasFeeAmount}`);
+    if (gasFeeAmountBigInt <= BigInt(0)) {
+      throw new Error(`Invalid gasFeeAmount: must be positive, got ${gasFeeAmount}`);
     }
 
     // Validate the txHash portion of the messageId is a 64-byte base58 Solana signature
