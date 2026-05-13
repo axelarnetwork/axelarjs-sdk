@@ -1156,8 +1156,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     // Resolve programId + treasury (configPda):
     //   - If the caller supplied both, use them directly and skip the S3 lookup.
-    //   - Otherwise, look up the program ID from the chain config and derive the
-    //     treasury PDA locally from the program's seed.
+    //   - If the caller supplied exactly one, fail loudly — they're tightly
+    //     coupled (the treasury is a PDA of the program) and a partial override
+    //     is almost certainly a misconfiguration.
+    //   - Otherwise, look up the program ID from the chain config and derive
+    //     the treasury PDA locally from the program's seed.
+    if ((programId && !configPda) || (!programId && configPda)) {
+      throw new Error(
+        "addGasToSolanaChain: programId and configPda must be supplied together — " +
+          `got programId=${programId ?? "undefined"}, configPda=${configPda ?? "undefined"}`
+      );
+    }
     let gasServiceProgramIdPublicKey: PublicKey;
     let treasuryPda: PublicKey;
     if (programId && configPda) {
