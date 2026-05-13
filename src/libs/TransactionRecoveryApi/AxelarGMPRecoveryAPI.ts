@@ -198,6 +198,16 @@ export type AddGasSolanaParams = {
   gasFeeAmount: string; // Amount of SOL to add as gas (in lamports, will be converted to u64)
   sender: string; // Sender's Solana wallet address (base58 string) - must be signer
   refundAddress: string; // Refund address (base58 string) - goes in instruction data
+  /**
+   * @deprecated Optional. If both `programId` and `configPda` are supplied the SDK uses
+   * them directly and skips looking the gas-service program up from the S3 chain config.
+   */
+  programId?: string;
+  /**
+   * @deprecated Optional. See `programId` — both must be supplied together to override
+   * the S3 lookup.
+   */
+  configPda?: string;
 };
 
 export type SolanaInstruction = {
@@ -1138,28 +1148,36 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
   }
 
   public async addGasToSolanaChain(params: AddGasSolanaParams): Promise<SolanaTransaction> {
-    const { messageId, gasFeeAmount, sender, refundAddress } = params;
+    const { messageId, gasFeeAmount, sender, refundAddress, programId, configPda } = params;
 
-    const chains = await importS3Config(this.environment);
-    const solanaKey = Object.keys(chains.chains).find((chainName) => chainName.includes("solana"));
-
-    if (!solanaKey) throw new Error("Cannot find Solana chain config");
-
-    const solanaConfig = chains.chains[solanaKey];
-    const gasServiceProgramId = solanaConfig.config.contracts.AxelarGasService.address;
-
-    // Validate all Solana addresses
+    // Validate the always-present addresses up front
     validateSolanaAddress(sender, "sender address");
-    const gasServiceProgramIdPublicKey = validateSolanaAddress(gasServiceProgramId, "program ID");
     const refundAddressPublicKey = validateSolanaAddress(refundAddress, "refund address");
 
-    // get the treasury pda
-    const treasuryPda = PublicKey.findProgramAddressSync(
-      [Buffer.from("gas-service")],
-      gasServiceProgramIdPublicKey
-    )[0];
+    // Resolve programId + treasury (configPda):
+    //   - If the caller supplied both, use them directly and skip the S3 lookup.
+    //   - Otherwise, look up the program ID from the chain config and derive the
+    //     treasury PDA locally from the program's seed.
+    let gasServiceProgramIdPublicKey: PublicKey;
+    let treasuryPda: PublicKey;
+    if (programId && configPda) {
+      gasServiceProgramIdPublicKey = validateSolanaAddress(programId, "program ID");
+      treasuryPda = validateSolanaAddress(configPda, "config PDA");
+    } else {
+      const chains = await importS3Config(this.environment);
+      const solanaKey = Object.keys(chains.chains).find((chainName) =>
+        chainName.includes("solana")
+      );
+      if (!solanaKey) throw new Error("Cannot find Solana chain config");
+      const resolvedProgramId = chains.chains[solanaKey].config.contracts.AxelarGasService.address;
+      gasServiceProgramIdPublicKey = validateSolanaAddress(resolvedProgramId, "program ID");
+      treasuryPda = PublicKey.findProgramAddressSync(
+        [Buffer.from("gas-service")],
+        gasServiceProgramIdPublicKey
+      )[0];
+    }
 
-    // get the event authority pda
+    // Event authority PDA is always derived from the program ID
     const gasServiceEventAuthority = PublicKey.findProgramAddressSync(
       [Buffer.from("__event_authority")],
       gasServiceProgramIdPublicKey
@@ -1278,7 +1296,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
           isWritable: false,
         },
       ],
-      programId: new PublicKey(gasServiceProgramId),
+      programId: gasServiceProgramIdPublicKey,
       data: data,
     });
 
