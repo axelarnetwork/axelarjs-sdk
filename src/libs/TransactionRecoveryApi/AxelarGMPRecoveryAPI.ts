@@ -1206,15 +1206,17 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
 
     const [topLevelLogIndexStr, innerLogIndexStr] = logIndexParts;
 
-    // Reject any non-digit characters — parseInt would silently accept "3abc"
-    if (!/^\d+$/.test(topLevelLogIndexStr)) {
+    // The relayer parses these indices as u8, and Solana's 1232-byte tx size
+    // cap rules out anything larger in practice — enforce u8 here for parity.
+    // Digits-only first, since parseInt/Number would silently accept "3abc".
+    if (!/^\d+$/.test(topLevelLogIndexStr) || Number(topLevelLogIndexStr) > 255) {
       throw new Error(
-        `Invalid topLevelLogIndex in messageId: must be a non-negative integer, got "${topLevelLogIndexStr}"`
+        `Invalid topLevelLogIndex in messageId: must be an integer in [0, 255], got "${topLevelLogIndexStr}"`
       );
     }
-    if (!/^\d+$/.test(innerLogIndexStr)) {
+    if (!/^\d+$/.test(innerLogIndexStr) || Number(innerLogIndexStr) > 255) {
       throw new Error(
-        `Invalid innerLogIndex in messageId: must be a non-negative integer, got "${innerLogIndexStr}"`
+        `Invalid innerLogIndex in messageId: must be an integer in [0, 255], got "${innerLogIndexStr}"`
       );
     }
 
