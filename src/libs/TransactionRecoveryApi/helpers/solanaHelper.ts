@@ -34,12 +34,6 @@ export function anchorInstructionDiscriminator(methodName: string): Buffer {
   return Buffer.from(digest.slice(0, 8)); // first 8 bytes = discriminator
 }
 
-// Borsh encoding helpers
-export function encodeVariantU8(index: number): Buffer {
-  if (index < 0 || index > 255) throw new Error("variant index out of range");
-  return Buffer.from([index]);
-}
-
 export function encodeU32LE(value: number): Buffer {
   if (!Number.isInteger(value) || value < 0) {
     throw new Error("encodeU32LE expects a non-negative integer");
