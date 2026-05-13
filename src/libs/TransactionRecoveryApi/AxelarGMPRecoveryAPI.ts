@@ -1253,7 +1253,7 @@ export class AxelarGMPRecoveryAPI extends AxelarRecoveryApi {
       );
     }
 
-    const instructionId = await anchorInstructionDiscriminator("add_gas");
+    const instructionId = anchorInstructionDiscriminator("add_gas");
 
     // Manual Borsh-like serialization to match Rust enum structure
     const data = concatU8([

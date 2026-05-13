@@ -1,5 +1,5 @@
-import { Sha256 } from "@aws-crypto/sha256-js";
 import { PublicKey } from "@solana/web3.js";
+import { arrayify, sha256, toUtf8Bytes } from "ethers/lib/utils";
 
 /**
  * Helper function to validate Solana addresses using PublicKey
@@ -27,15 +27,10 @@ export function validateSolanaAddress(address: string, fieldName: string): Publi
  *   let discriminator = &sha256(preimage.as_bytes())[0..8];
  *
  * @param methodName Anchor instruction name
- * @returns Promise<Buffer> exactly 8 bytes
+ * @returns exactly 8 bytes
  */
-export async function anchorInstructionDiscriminator(methodName: string): Promise<Buffer> {
-  const preimage = `global:${methodName}`;
-  const encoder = new TextEncoder();
-  const sha = new Sha256();
-  sha.update(encoder.encode(preimage));
-
-  const digest = await sha.digest(); // returns Uint8Array (32 bytes)
+export function anchorInstructionDiscriminator(methodName: string): Buffer {
+  const digest = arrayify(sha256(toUtf8Bytes(`global:${methodName}`))); // 32 bytes
   return Buffer.from(digest.slice(0, 8)); // first 8 bytes = discriminator
 }
 
